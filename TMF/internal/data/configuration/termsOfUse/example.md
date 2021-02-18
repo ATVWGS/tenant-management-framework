@@ -1,0 +1,5 @@
+# Example termsOfUse.json
+
+```json
+
+```
