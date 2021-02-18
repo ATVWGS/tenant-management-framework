@@ -6,4 +6,5 @@
     'New-TMFConfiguration.OutPath.CreatingDirectory' = 'Creating configuration directory {0}'
     'New-TMFConfiguration.OutPath.CreatingStructure' = 'Copying template structure {0}'
     'New-TMFConfiguration.AutoActivate' = 'Activating configuration {0}'
+    'Activate-TMFConfiguration.PathDoesNotExist' = 'Can not find configuration {0}'
 }
