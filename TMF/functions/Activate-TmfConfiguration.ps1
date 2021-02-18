@@ -1,4 +1,4 @@
-﻿function Load-TMFConfiguration
+﻿function Activate-TmfConfiguration
 {
 	[CmdletBinding()]
 	Param (
