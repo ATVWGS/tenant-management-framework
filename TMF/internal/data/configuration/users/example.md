@@ -9,6 +9,7 @@
   "passwordProfile" : {
     "forceChangePasswordNextSignIn": true,
     "password": "xWwvJ]6NMw+bWH-d"
-  }
+  },
+  "present": true
 }
 ```

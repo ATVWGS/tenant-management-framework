@@ -8,7 +8,8 @@
         "isHidden":false,
         "catalog":"662d99e7-6ceb-4c21-9cb4-9b0bbfdefccc",
         "isRoleScopesVisible":false,
-    }
+    },
+    "present": true
 ]
 ```
 

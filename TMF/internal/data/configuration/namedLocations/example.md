@@ -16,7 +16,8 @@ https://docs.microsoft.com/de-de/graph/api/resources/ipnamedlocation?view=graph-
             "@odata.type": "#microsoft.graph.iPv6CidrRange",
             "cidrAddress": "2001:0:9d38:90d6:0:0:0:0/63"
         }
-    ]
+    ],
+    "present": true
 }
 ```
 
@@ -30,7 +31,8 @@ https://docs.microsoft.com/de-de/graph/api/resources/countrynamedlocation?view=g
         "US",
         "GB"
     ],
-    "includeUnknownCountriesAndRegions": true
+    "includeUnknownCountriesAndRegions": true,
+    "present": true
 }
 ```
 

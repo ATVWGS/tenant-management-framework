@@ -10,7 +10,8 @@
     "mailEnabled": false,
     "mailNickname": "someGroupForMembers",
     "members": ["max.mustermann@volkswagen.de"],
-    "owners": ["group.owner@volkswagen.de"]
+    "owners": ["group.owner@volkswagen.de"],
+    "present": true
 }
 ```
 
@@ -24,7 +25,8 @@
     "mailEnabled": false,
     "mailNickname": "someDynamicGroup",
     "dynamicMembershipRule" : "(user.userPrincipalName -match \".*@volkswagen.de$\"",
-    "owners": ["group.owner@volkswagen.de"]
+    "owners": ["group.owner@volkswagen.de"],
+    "present": true
 }
 ```
 
@@ -39,7 +41,8 @@
     "visibility": "Public",
     "mailNickname": "someDynamicGroup",
     "members": ["max.mustermann@volkswagen.de"],
-    "owners": ["group.owner@volkswagen.de"]
+    "owners": ["group.owner@volkswagen.de"],
+    "present": true
 }
 ```
 
@@ -54,7 +57,8 @@
     "visibility": "HiddenMembership",
     "mailNickname": "someDynamicGroup",
     "members": ["max.mustermann@volkswagen.de"],
-    "owners": ["group.owner@volkswagen.de"]
+    "owners": ["group.owner@volkswagen.de"],
+    "present": true
 }
 ```
 
