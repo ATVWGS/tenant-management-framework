@@ -38,7 +38,7 @@
 	# FormatsToProcess = @('xml\TMF.Format.ps1xml')
 	
 	# Functions to export from this module
-	FunctionsToExport = @('New-TmfConfiguration', 'Get-TmfConfiguration', 'Activate-TmfConfiguration')
+	FunctionsToExport = @('New-TmfConfiguration', 'Get-TmfConfiguration', 'Activate-TmfConfiguration', 'Deactivate-TmfConfiguration')
 	
 	# Cmdlets to export from this module
 	CmdletsToExport = ''

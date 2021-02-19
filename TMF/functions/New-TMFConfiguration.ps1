@@ -54,7 +54,7 @@
 	{
 		if (Test-PSFFunctionInterrupt) { return }
 
-		Write-PSFMessage -Level Host -String "New-TMFConfiguration.OutPath.CreatingStructure" -Tag "Creating" -NoNewLine
+		Write-PSFMessage -Level Host -String "New-TMFConfiguration.OutPath.CreatingStructure" -StringValues $OutPath -Tag "Creating" -NoNewLine
 		Copy-Item -Path "$script:moduleRoot\internal\data\configuration\*" -Destination $OutPath -Recurse -Force
 		Write-PSFHostColor -String ' [<c="green">✔</c>]'
 
