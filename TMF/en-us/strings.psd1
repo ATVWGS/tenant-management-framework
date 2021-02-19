@@ -7,4 +7,5 @@
     'New-TMFConfiguration.OutPath.CreatingStructure' = 'Copying template structure {0}'
     'New-TMFConfiguration.AutoActivate' = 'Activating configuration {0}'
     'Activate-TMFConfiguration.PathDoesNotExist' = 'Can not find configuration {0}'
+    'Activate-TMFConfiguration.AlreadyActivated' = 'Configuration {0} ({1}) is already activated! Use -Force to overwrite.'
 }

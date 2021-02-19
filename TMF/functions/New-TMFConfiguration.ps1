@@ -70,10 +70,7 @@
 	end
 	{
 		if (!$DoNotAutoActivate) {
-			Write-PSFMessage -Level Host -String "New-TMFConfiguration.AutoActivate" -StringValues $configurationFilePath -NoNewLine			
-			Add-Member -InputObject $configuration -MemberType NoteProperty -Name "Path" -Value $OutPath
-			$script:activatedConfigurations += $configuration			
-			Write-PSFHostColor -String ' [<c="green">✔</c>]' 
+			Activate-TmfConfiguration -Path $OutPath -Force
 		}		
 		Write-PSFMessage -Level Host -Message "Creation has finished! Have fun!" -NoNewLine
 		Write-PSFHostColor -String ' [<c="green">✔</c>]'
