@@ -3,25 +3,25 @@
 	RootModule = 'TMF.psm1'
 	
 	# Version number of this module.
-	ModuleVersion = '1.0.0'
+	ModuleVersion = '0.0.1'
 	
 	# ID used to uniquely identify this module
 	GUID = 'f1f44bfb-f67c-4595-a18f-ae4565ac0728'
 	
 	# Author of this module
-	Author = 'AV01UM7'
+	Author = 'Johannes Seitle'
 	
 	# Company or vendor of this module
-	CompanyName = 'MyCompany'
+	CompanyName = 'Volkswagen Group Services GmbH'
 	
 	# Copyright statement for this module
-	Copyright = 'Copyright (c) 2021 AV01UM7'
+	Copyright = 'Copyright (c) 2021 Volkswagen Group Services GmbH'
 	
 	# Description of the functionality provided by this module
 	Description = 'Helper module to manage Azure Tenants as code.'
 	
 	# Minimum version of the Windows PowerShell engine required by this module
-	PowerShellVersion = '5.0'
+	PowerShellVersion = '5.1'
 	
 	# Modules that must be imported into the global environment prior to importing this module
 	# RequiredModules = @(@{ ModuleName='PSFramework'; ModuleVersion='1.5.171' })
