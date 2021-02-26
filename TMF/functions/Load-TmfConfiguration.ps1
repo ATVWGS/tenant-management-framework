@@ -30,9 +30,12 @@
 					$dummy = Get-Content $_.FullName | ConvertFrom-Json -ErrorAction Stop
 					return ($dummy | Add-Member -NotePropertyMembers @{sourceConfig = $configuration.Name} -PassThru)
 				}				
-
-				$components
-				$script:desiredConfiguration[$componentDirectory.Name] = "<empty>"
+				if (!$script:desiredConfiguration[$componentDirectory.Name]) {
+					$script:desiredConfiguration[$componentDirectory.Name] = $components
+				}
+				else {
+					$script:desiredConfiguration[$componentDirectory.Name] += $components | where {$_.displayName -notin $script:desiredConfiguration[$componentDirectory.Name].displayName}
+				}
 			}
 		}
 	}
