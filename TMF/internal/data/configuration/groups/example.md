@@ -1,4 +1,5 @@
 # Example groups.json
+Additional properties will be added in the future.
 
 ### A security group with static membership
 ```json
