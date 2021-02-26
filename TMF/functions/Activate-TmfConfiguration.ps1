@@ -49,22 +49,22 @@
 
 		foreach ($configuration in $configurationsToActivate) {
 			if ($Force -and $configuration.alreadyActivated) {
-				Write-PSFMessage -Level Host -String "Activate-TMFConfiguration.RemovingAlreadyLoaded" -StringValues $configuration.Name, $configuration.directoryPath -Tag "Activation" -NoNewLine
+				Write-PSFMessage -Level Host -String "Activate-TMFConfiguration.RemovingAlreadyLoaded" -StringValues $configuration.Name, $configuration.directoryPath -NoNewLine
 				$script:activatedConfigurations = @($script:activatedConfigurations | Where-Object {$_.Name -ne $configuration.Name})
-				Write-PSFHostColor -String ' [<c="green">✔</c>]'
+				Write-PSFHostColor -String ' [<c="green">DONE</c>]'
 			}
 			elseif (!$Force -and $configuration.alreadyActivated) {
 				continue
 			}
 
-			Write-PSFMessage -Level Host -String "Activate-TMFConfiguration.Activating" -StringValues $configuration.Name, $configuration.filePath -Tag "Activation" -NoNewLine			
+			Write-PSFMessage -Level Host -String "Activate-TMFConfiguration.Activating" -StringValues $configuration.Name, $configuration.filePath -NoNewLine			
 			$script:activatedConfigurations += $configuration | select Name, @{Name = "Path"; Expression = {$_.directoryPath}}, Description, Author, Weight, Prerequisite
-			Write-PSFHostColor -String ' [<c="green">✔</c>]'
+			Write-PSFHostColor -String ' [<c="green">DONE</c>]'
 		}
 
-		Write-PSFMessage -Level Host -String "Activate-TMFConfiguration.Sort" -Tag "Activation" -NoNewLine
+		Write-PSFMessage -Level Host -String "Activate-TMFConfiguration.Sort" -NoNewLine
 		$script:activatedConfigurations = @($script:activatedConfigurations | Sort-Object Weight)
-		Write-PSFHostColor -String ' [<c="green">✔</c>]'
+		Write-PSFHostColor -String ' [<c="green">DONE</c>]'
 	}
 	end
 	{

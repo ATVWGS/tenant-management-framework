@@ -15,4 +15,7 @@
 
     'Deactivate-TMFConfiguration.NotActivated' = 'Configuration {0} is not activated.'
     'Deactivate-TMFConfiguration.Deactivating' = 'Deactivating {0}. This configuration will not be considered when applying Tenant configuration.'
+    'Deactivate-TMFConfiguration.DeactivatingAll' = 'Deactivating all configurations. No configuration will be considered when applying Tenant configuration.'
+
+    'Load-TmfConfiguration.NotSupportedComponent' = 'Component {0} from configuration {1} is currently not supported and will be ignored.'
 }

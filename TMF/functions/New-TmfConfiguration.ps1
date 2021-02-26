@@ -41,9 +41,9 @@
 			return
 		}
 		elseif ($Force -and !(Test-Path $OutPath)) {
-			Write-PSFMessage -Level Host -String "New-TMFConfiguration.OutPath.CreatingDirectory" -StringValues $OutPath -Tag "Preperation" -NoNewLine
+			Write-PSFMessage -Level Host -String "New-TMFConfiguration.OutPath.CreatingDirectory" -StringValues $OutPath -NoNewLine
 			New-Item -Path $OutPath -ItemType Directory | Out-Null
-			Write-PSFHostColor -String ' [<c="green">✔</c>]'
+			Write-PSFHostColor -String ' [<c="green">DONE</c>]'
 		}
 		elseif (!$Force -and (Test-Path $configurationFilePath)) {
 			Stop-PSFFunction -String "New-TMFConfiguration.OutPath.AlreadyExists" -StringValues $configurationFilePath
@@ -54,9 +54,9 @@
 	{
 		if (Test-PSFFunctionInterrupt) { return }
 
-		Write-PSFMessage -Level Host -String "New-TMFConfiguration.OutPath.CreatingStructure" -StringValues $OutPath -Tag "Creating" -NoNewLine
+		Write-PSFMessage -Level Host -String "New-TMFConfiguration.OutPath.CreatingStructure" -StringValues $OutPath -NoNewLine
 		Copy-Item -Path "$script:moduleRoot\internal\data\configuration\*" -Destination $OutPath -Recurse -Force
-		Write-PSFHostColor -String ' [<c="green">✔</c>]'
+		Write-PSFHostColor -String ' [<c="green">DONE</c>]'
 
 		$configuration = [PSCustomObject] @{
 			"Name" = $Name
@@ -73,6 +73,6 @@
 			Activate-TmfConfiguration -Path $OutPath -Force
 		}		
 		Write-PSFMessage -Level Host -Message "Creation has finished! Have fun!" -NoNewLine
-		Write-PSFHostColor -String ' [<c="green">✔</c>]'
+		Write-PSFHostColor -String ' [<c="green">DONE</c>]'
 	}
 }

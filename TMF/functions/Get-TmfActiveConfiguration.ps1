@@ -1,4 +1,4 @@
-﻿function Get-TmfConfiguration
+﻿function Get-TmfActiveConfiguration
 {
 	[CmdletBinding()]
 	Param (

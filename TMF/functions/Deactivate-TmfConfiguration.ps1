@@ -6,11 +6,18 @@
 		[string] $Name,
 
 		[Parameter(Mandatory = $true, ParameterSetName = "Path")]
-		[string] $Path
+		[string] $Path,
+
+		[Parameter(ParameterSetName = "All")]
+		[switch] $All
 	)
 	
 	begin
-	{		
+	{
+		if ($All) {
+			return
+		}
+
 		if ($PSCmdlet.ParameterSetName -eq "Path") {
 			if ($Path -notmatch ".*configuration.json$") {
 				$configurationFilePath = "{0}\configuration.json" -f $Path	
@@ -34,9 +41,16 @@
 	{
 		if (Test-PSFFunctionInterrupt) { return }
 
-		Write-PSFMessage -Level Host -String "Deactivate-TMFConfiguration.Deactivating" -StringValues $Name -Tag "Deactivation" -NoNewLine
-		$script:activatedConfigurations = @($script:activatedConfigurations | Where-Object {$_.Name -ne $Name})
-		Write-PSFHostColor -String ' [<c="green">✔</c>]'
+		if ($All) {
+			Write-PSFMessage -Level Host -String "Deactivate-TMFConfiguration.DeactivatingAll" -NoNewLine
+			$script:activatedConfigurations = @()
+			Write-PSFHostColor -String ' [<c="green">DONE</c>]'
+		}
+		else {
+			Write-PSFMessage -Level Host -String "Deactivate-TMFConfiguration.Deactivating" -StringValues $Name -NoNewLine
+			$script:activatedConfigurations = @($script:activatedConfigurations | Where-Object {$_.Name -ne $Name})
+			Write-PSFHostColor -String ' [<c="green">DONE</c>]'
+		}		
 	}
 	end
 	{
