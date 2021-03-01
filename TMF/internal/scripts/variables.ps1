@@ -1,12 +1,8 @@
 # All required runtime variables.
 
-$script:supportedComponents = @(
-    "groups",
-    "namedLocations",
-    "termsOfUse",
-    "users",
-    "conditionalAccess"
-)
+$script:supportedComponents = @{
+    "groups" = (Get-Command Register-TmfGroup)
+}
 Set-Variable -Name supportedComponents -Option ReadOnly
 
 $script:activatedConfigurations = @() # Overview of all activated configurations
