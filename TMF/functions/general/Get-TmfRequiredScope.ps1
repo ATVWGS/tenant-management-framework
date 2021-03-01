@@ -4,18 +4,34 @@
 		.SYNOPSIS
 			Returns required Microsoft Graph permission scopes.
 	#>
-	[CmdletBinding()]
+	[CmdletBinding(DefaultParameterSetName = 'All')]
 	Param (
-	
+		[Parameter(Mandatory = $true, ParameterSetName = "SpecifiedComponents")]
+		[switch] $Groups,
+		[switch] $Users,
+		[Parameter(ParameterSetName = "All")]
+		[bool] $All = $true
 	)
 	
 	begin
-	{
-		
+	{		
+		[string[]] $scopes = @()		
 	}
 	process
-	{
-		return @("Group.ReadWrite.All")
+	{		
+		if ($Groups) {
+			$scopes += "Group.ReadWrite.All"
+		}
+		if ($Users) {
+			$scopes += "User.ReadWrite.All"
+		}
+
+
+		if ($All) {
+			$scopes = @("Group.ReadWrite.All", "User.ReadWrite.All")
+		}
+
+		return $scopes
 	}
 	end
 	{
