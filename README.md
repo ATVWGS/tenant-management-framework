@@ -10,11 +10,12 @@ https://github.com/microsoftgraph/msgraph-sdk-powershell
 Please make sure you are connected to the correct Tenant before invoking configurations! 
 
 The required scopes depend on what components (resources) you want to configure.
-| Component (Resource) | Required scopes             |
-|----------------------|-----------------------------|
-| Groups               | Group.ReadWrite.All         |
+| Component (Resource) | Required scopes                                 |
+|----------------------|-------------------------------------------------|
+| Groups               | Group.ReadWrite.All, GroupMember.ReadWrite.All  |
+| Users                | User.ReadWrite.All                              |
 
 You can use *Get-TmfRequiredScope* to get the required scopes.
 ```powershell
-Connect-MgGraph -Scopes (Get-TmfRequiredScope)
+Connect-MgGraph -Scopes (Get-TmfRequiredScope -All)
 ```

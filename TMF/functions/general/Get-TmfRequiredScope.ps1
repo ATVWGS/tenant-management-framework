@@ -6,11 +6,12 @@
 	#>
 	[CmdletBinding(DefaultParameterSetName = 'All')]
 	Param (
-		[Parameter(Mandatory = $true, ParameterSetName = "SpecifiedComponents")]
+		[Parameter(ParameterSetName = "SpecifiedComponents")]
 		[switch] $Groups,
+		[Parameter(ParameterSetName = "SpecifiedComponents")]
 		[switch] $Users,
 		[Parameter(ParameterSetName = "All")]
-		[bool] $All = $true
+		[switch] $All
 	)
 	
 	begin
@@ -19,16 +20,11 @@
 	}
 	process
 	{		
-		if ($Groups) {
-			$scopes += "Group.ReadWrite.All"
+		if ($Groups -or $All) {
+			$scopes += "Group.ReadWrite.All", "GroupMember.ReadWrite.All"
 		}
-		if ($Users) {
+		if ($Users -or $All) {
 			$scopes += "User.ReadWrite.All"
-		}
-
-
-		if ($All) {
-			$scopes = @("Group.ReadWrite.All", "User.ReadWrite.All")
 		}
 
 		return $scopes
