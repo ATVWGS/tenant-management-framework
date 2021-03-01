@@ -13,3 +13,8 @@ The required scopes depend on what components (resources) you want to configure.
 | Component (Resource) | Required scopes             |
 |----------------------|-----------------------------|
 | Groups               | Group.ReadWrite.All         |
+
+You can use *Get-TmfRequiredScope* to get the required scopes.
+```powershell
+Connect-MgGraph -Scopes (Get-TmfRequiredScope)
+```
