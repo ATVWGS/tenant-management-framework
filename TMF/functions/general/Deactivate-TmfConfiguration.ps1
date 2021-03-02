@@ -44,6 +44,7 @@
 		if ($All) {
 			Write-PSFMessage -Level Host -String "Deactivate-TMFConfiguration.DeactivatingAll" -NoNewLine
 			$script:activatedConfigurations = @()
+			$script:desiredConfiguration = @{}
 			Write-PSFHostColor -String ' [<c="green">DONE</c>]'
 		}
 		else {

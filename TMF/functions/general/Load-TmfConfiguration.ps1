@@ -22,11 +22,11 @@
 			$componentDirectories = Get-ChildItem $configuration.Path -Directory
 			foreach ($componentDirectory in $componentDirectories) {				
 				if ($componentDirectory.Name -notin $script:supportedComponents.Keys) {
-					Write-PSFMessage -Level Warning -String "Load-TmfConfiguration.NotSupportedComponent" -StringValues $componentDirectory.Name, $configuration.Name
+					Write-PSFMessage -Level Verbose -String "Load-TmfConfiguration.NotSupportedComponent" -StringValues $componentDirectory.Name, $configuration.Name
 					continue
 				}
 
-				Write-Host "Adding $($componentDirectory.Name) from $($configuration.Name)"
+				Write-PSFMessage -Level Host -String "Load-TmfConfiguration.LoadingComponent" -StringValues $componentDirectory.Name, $configuration.Name -NoNewLine
 				Get-ChildItem -Path $componentDirectory.FullName -File -Filter "*.json" | foreach {
 					$content = Get-Content $_.FullName | ConvertFrom-Json
 					if ($content.count -gt 0) {
@@ -36,6 +36,7 @@
 						}
 					}					 
 				}
+				Write-PSFHostColor -String ' [<c="green">DONE</c>]'
 			}
 		}
 	}

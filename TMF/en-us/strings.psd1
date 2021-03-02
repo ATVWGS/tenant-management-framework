@@ -1,6 +1,7 @@
 # This is where the strings go, that are written by
 # Write-PSFMessage, Stop-PSFFunction or the PSFramework validation scriptblocks
-@{
+@{   
+
     'TMF.ConfigurationFileNotFound' = 'Can not find configuration file {0}.'
     'TMF.RegisterComponent.AlreadyLoaded' = 'A {0} with name "{1}" from source configuration {2} has already been loaded. Ignoring {0}.'
 
@@ -19,4 +20,7 @@
     'Deactivate-TMFConfiguration.DeactivatingAll' = 'Deactivating all configurations. No configuration will be considered when applying Tenant configuration.'
 
     'Load-TmfConfiguration.NotSupportedComponent' = 'Component {0} from configuration {1} is currently not supported and will be ignored.'
+    'Load-TmfConfiguration.LoadingComponent' = 'Adding {0} from {1}'
+
+    'Test-GraphConnection.Failed' = 'You are not connected to any Microsoft Tenant! Use Connect-MgGraph before testing or invoking settings.'
 }
