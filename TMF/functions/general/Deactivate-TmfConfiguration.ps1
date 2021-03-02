@@ -49,7 +49,11 @@
 		}
 		else {
 			Write-PSFMessage -Level Host -String "Deactivate-TMFConfiguration.Deactivating" -StringValues $Name -NoNewLine
-			$script:activatedConfigurations = @($script:activatedConfigurations | Where-Object {$_.Name -ne $Name})
+			$configUpdate = $script:desiredConfiguration.GetEnumerator() | Where-Object {$_.Value.sourceConfig -eq $Name} 
+			$configUpdate | foreach {
+				$script:desiredConfiguration[$_.Key] = $script:desiredConfiguration[$_.Key] | Where-Object {$_.sourceConfig -ne $Name}
+			}
+			$script:activatedConfigurations = @($script:activatedConfigurations | Where-Object {$_.Name -ne $Name})			
 			Write-PSFHostColor -String ' [<c="green">DONE</c>]'
 		}		
 	}

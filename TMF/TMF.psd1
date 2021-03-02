@@ -39,6 +39,7 @@
 	
 	# Functions to export from this module
 	FunctionsToExport = @(
+		'Beautify-TmfTestResult'
 		'New-TmfConfiguration',
 		'Get-TmfRequiredScope',
 		'Get-TmfActiveConfiguration',
@@ -47,7 +48,8 @@
 		'Deactivate-TmfConfiguration',
 		'Load-TmfConfiguration',
 		'Register-TmfGroup',
-		'Test-TmfGroup'
+		'Test-TmfGroup',
+		'Invoke-TmfGroup'
 	)
 	
 	# Cmdlets to export from this module

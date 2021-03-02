@@ -11,7 +11,8 @@ function New-TestResult
 		[object[]] $Changes,        
 		$DesiredConfiguration,
 		$GraphResource,
-        [string] $Tenant
+        [string] $Tenant,
+        [string] $TenantId
 	)
 	
 	process
@@ -22,6 +23,7 @@ function New-TestResult
 			ResourceName = $ResourceName
 			Changes = $Changes
 			Tenant = $Tenant
+            TenantId = $TenantId
 			DesiredConfiguration = $DesiredConfiguration
 			GraphResource = $GraphResource
 		}

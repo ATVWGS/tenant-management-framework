@@ -1,12 +1,7 @@
 ﻿function Test-TmfGroup
 {
 	[CmdletBinding()]
-	Param (
-		[Parameter(ParameterSetName = "Beautify")]
-		[switch] $Beautify,
-		[Parameter(ParameterSetName = "Beautify")]
-		[switch] $DoNotShowPropertyChanges
-	)
+	Param (	)
 	
 	begin
 	{
@@ -20,7 +15,8 @@
 		foreach ($definition in $script:desiredConfiguration["groups"]) {
 
 			$result = @{
-				Tenant = "{0} (Id: {1})" -f $tenant.displayName, $tenant.Id
+				Tenant = $tenant.displayName
+				TenantId = $tenant.Id
 				ResourceType = 'Group'
 				ResourceName = (Resolve-String -Text $definition.displayName)
 				DesiredConfiguration = $definition
@@ -72,19 +68,8 @@
 					$result = New-TestResult @result -ActionType "NoActionRequired"
 				}
 			}
-			if ($Beautify) {
-				Write-PSFMessage -Level Host -String "TMF.TestResult.BeautifySimple" -StringValues $tenant.displayName, $result.ResourceName, $result.ResourceType, $result.ActionType, (Get-ActionColor -Action $result.ActionType)
-				if (!$DoNotShowPropertyChanges) {
-					if ($result.ActionType -eq "Update") {
-						foreach ($change in $result.Changes) {
-							foreach ($action in $change.Actions.Keys) {
-								Write-PSFMessage -Level Host -String "TMF.TestResult.BeautifyPropertyChange" -StringValues $tenant.displayName, $result.ResourceName, $result.ResourceType, $change.Property, $action, ($change.Actions.$action -join ", ")
-							}
-						}
-					}
-				}				
-			}
-			else { $result }
+			
+			$result
 		}
 	}
 }
