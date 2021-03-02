@@ -43,7 +43,11 @@
 							"owners" {
 								$change.Actions = (Compare-UserList -ReferenceList (Get-MgGroupOwner -GroupId $resource.Id).Id -DifferenceList $definition.owners)
 							}
-							"groupTypes" {}
+							"groupTypes" {
+								if (Compare-Object -ReferenceObject $resource.groupTypes -DifferenceObject $definition.groupTypes) {
+									$change.Actions = @{"Set" = $definition.groupTypes}
+								}
+							}
 							default {
 								if ($definition.$property -ne $resource.$property) {
 									$change.Actions = @{"Set" = $definition.$property}
