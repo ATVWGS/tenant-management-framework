@@ -21,16 +21,18 @@ function Register-TmfGroup
 		if (!$script:desiredConfiguration["groups"]) {
 			$script:desiredConfiguration["groups"] = @()
 		}
-		if ($script:desiredConfiguration["groups"].displayName -contains $displayName) {
+		if ($script:desiredConfiguration["groups"].displayName -contains $displayName) {			
 			$alreadyLoaded = $script:desiredConfiguration["groups"] | ? {$_.displayName -eq $displayName}
-			Stop-PSFFunction -String "TMF.RegisterComponent.AlreadyLoaded" -StringValues "group", $displayName, $alreadyLoaded.sourceConfig
+			if ($alreadyLoaded.sourceConfig -ne $sourceConfig) {
+				Stop-PSFFunction -String "TMF.RegisterComponent.AlreadyLoaded" -StringValues "group", $displayName, $alreadyLoaded.sourceConfig
+			}
 		}
 	}
 	process
 	{
 		if (Test-PSFFunctionInterrupt) { return }
 
-		$script:desiredConfiguration["groups"] += [PSCustomObject] @{
+		$object = [PSCustomObject] @{
 			displayName = $displayName
 			description = $description
 			groupTypes = $groupTypes
@@ -42,5 +44,13 @@ function Register-TmfGroup
 			present = $present
 			sourceConfig = $sourceConfig
 		}
+		Add-Member -InputObject $object -MemberType ScriptMethod -Name Properties -Value { ($this | Get-Member -MemberType NoteProperty).Name }
+
+		if ($alreadyLoaded) {
+			$script:desiredConfiguration["groups"][$script:desiredConfiguration["groups"].IndexOf($alreadyLoaded)] = $object
+		}
+		else {
+			$script:desiredConfiguration["groups"] += $object
+		}		
 	}
 }

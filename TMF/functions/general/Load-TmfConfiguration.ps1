@@ -9,7 +9,6 @@
 	#>
 	[CmdletBinding()]
 	Param (
-
 	)
 	
 	begin
@@ -26,7 +25,7 @@
 					continue
 				}
 
-				Write-PSFMessage -Level Host -String "Load-TmfConfiguration.LoadingComponent" -StringValues $componentDirectory.Name, $configuration.Name -NoNewLine
+				Write-PSFMessage -Level Host -String "Load-TmfConfiguration.LoadingComponent" -StringValues $componentDirectory.Name, $configuration.Name
 				Get-ChildItem -Path $componentDirectory.FullName -File -Filter "*.json" | foreach {
 					$content = Get-Content $_.FullName | ConvertFrom-Json
 					if ($content.count -gt 0) {
@@ -36,7 +35,6 @@
 						}
 					}					 
 				}
-				Write-PSFHostColor -String ' [<c="green">DONE</c>]'
 			}
 		}
 	}

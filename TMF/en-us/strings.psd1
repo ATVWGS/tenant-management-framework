@@ -4,6 +4,7 @@
 
     'TMF.ConfigurationFileNotFound' = 'Can not find configuration file {0}.'
     'TMF.RegisterComponent.AlreadyLoaded' = 'A {0} with name "{1}" from source configuration {2} has already been loaded. Ignoring {0}.'
+    'TMF.TestResult.BeautifySimple' = '[Tenant: <c="gray">{0}</c>][Resource: <c="gray">{1}</c> (Type: {2})] Required Action [<c="{4}">{3}</c>]'
 
     'New-TMFConfiguration.OutPath.PathDoesNotExist' = 'The path {0} does not exist. You can use -Force to create the configuration anyway!'
     'New-TMFConfiguration.OutPath.AlreadyExists' = 'There is already a Tenant configuration in the target directory ({0}). You can use -Force to create the configuration anyway!'
@@ -20,7 +21,7 @@
     'Deactivate-TMFConfiguration.DeactivatingAll' = 'Deactivating all configurations. No configuration will be considered when applying Tenant configuration.'
 
     'Load-TmfConfiguration.NotSupportedComponent' = 'Component {0} from configuration {1} is currently not supported and will be ignored.'
-    'Load-TmfConfiguration.LoadingComponent' = 'Adding {0} from {1}'
+    'Load-TmfConfiguration.LoadingComponent' = 'Loading {0} from {1}'
 
     'Test-GraphConnection.Failed' = 'You are not connected to any Microsoft Tenant! Use Connect-MgGraph before testing or invoking settings.'
 }

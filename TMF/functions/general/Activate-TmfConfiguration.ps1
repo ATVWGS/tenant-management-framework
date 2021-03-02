@@ -3,12 +3,17 @@
 	<#
 		.PARAMETER ConfigurationPaths
 			One or more paths to Tenant Management Framework configuration directories can be provided.
+		.PARAMETER Force
+			Overwrite already loaded configurations.
+		.PARAMETER DoNotLoad
+			Do not load resource definitions after activating.
 	
 	#>
 	[CmdletBinding()]
 	Param (
 		[string[]] $ConfigurationPaths,
-		[switch] $Force
+		[switch] $Force,
+		[switch] $DoNotLoad
 	)
 	
 	begin
@@ -68,6 +73,8 @@
 	}
 	end
 	{
-	
+		if (!$DoNotLoad) {
+			Load-TmfConfiguration
+		}
 	}
 }
