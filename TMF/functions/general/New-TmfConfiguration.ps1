@@ -69,8 +69,10 @@
 	}
 	end
 	{
+		if (Test-PSFFunctionInterrupt) { return }
+
 		if (!$DoNotAutoActivate) {
-			Activate-TmfConfiguration -Path $OutPath -Force
+			Activate-TmfConfiguration -ConfigurationPaths $OutPath -Force
 		}		
 		Write-PSFMessage -Level Host -Message "Creation has finished! Have fun!" -NoNewLine
 		Write-PSFHostColor -String ' [<c="green">DONE</c>]'

@@ -15,13 +15,19 @@
 		Test-GraphConnection -Cmdlet $PSCmdlet		
 	}
 	process
-	{		
-		$DifferenceList = $DifferenceList | foreach { Resolve-User -UserReference $_ -Cmdlet $Cmdlet } | select -ExpandProperty Id		
+	{
+		
+		$DifferenceList = @($DifferenceList | foreach { Resolve-User -UserReference $_ -Cmdlet $Cmdlet } | select -ExpandProperty Id)
 		$compare = Compare-Object -ReferenceObject $ReferenceList -DifferenceObject $DifferenceList
 		if (!$compare) { return }
-		return @{
-			"Add" = ($compare | ? {$_.SideIndicator -eq "=>"}).InputObject
-			"Remove" = ($compare | ? {$_.SideIndicator -eq "<="}).InputObject
+
+		$result = @{}
+		if ($compare.SideIndicator -contains "=>") {
+			$result["Add"] = ($compare | ? {$_.SideIndicator -eq "=>"}).InputObject
 		}
+		if ($compare.SideIndicator -contains "<=") {
+			$result["Remove"] = ($compare | ? {$_.SideIndicator -eq "<="}).InputObject
+		}
+		return $result
 	}
 }

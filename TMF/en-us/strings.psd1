@@ -13,6 +13,8 @@
 
     'TMF.Invoke.ActionTypeUnknown' = 'Action type (<c="yellow">{0}</c>) is unknown!'
     'TMF.Invoke.ActionFailed' = '[Tenant: <c="gray">{0}</c>][{1} Resource: <c="gray">{2}</c>] Action ({3}) failed! Stopping actions.'
+    'TMF.Invoke.SendingRequestWithBody' = '[{0} {1}] Sending request with body {2}'
+    'TMF.Invoke.SendingRequest' = '[{0} {1}] Sending request'
     'TMF.Invoke.ActionCompleted' = '[Tenant: <c="gray">{0}</c>][{1} Resource: <c="gray">{2}</c>] <c="green">Completed</c>.'
 
     'New-TMFConfiguration.OutPath.PathDoesNotExist' = 'The path {0} does not exist. You can use -Force to create the configuration anyway!'

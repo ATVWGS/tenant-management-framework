@@ -11,7 +11,7 @@ function Register-TmfGroup
 		[Parameter(Mandatory = $true)]
 		[string] $mailNickname = $displayName.Replace(" ",""),
 		[Parameter(Mandatory = $true, ParameterSetName = "DynamicMembership")]
-		[string] $membershipRule,
+		[string] $membershipRule,		
 		[Parameter(ParameterSetName = "Default")]
 		[string[]] $members,
 		[string[]] $owners,
@@ -61,14 +61,15 @@ function Register-TmfGroup
 			sourceConfig = $sourceConfig
 		}
 
-		if ($members) {
-			Add-Member -InputObject $object -MemberType NoteProperty -Name members -Value $members
+		if ($PSBoundParameters.ContainsKey('members')) {
+			Add-Member -InputObject $object -MemberType NoteProperty -Name members -Value @($members)
 		}
 		elseif ($membershipRule) {
 			Add-Member -InputObject $object -MemberType NoteProperty -Name membershipRule -Value $membershipRule
 		}
-		if ($owners) {
-			Add-Member -InputObject $object -MemberType NoteProperty -Name owners -Value $owners
+
+		if ($PSBoundParameters.ContainsKey('owners')) {
+			Add-Member -InputObject $object -MemberType NoteProperty -Name owners -Value @($owners)
 		}
 		
 		Add-Member -InputObject $object -MemberType ScriptMethod -Name Properties -Value { ($this | Get-Member -MemberType NoteProperty).Name }
