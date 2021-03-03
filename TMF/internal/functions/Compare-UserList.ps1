@@ -2,26 +2,23 @@
 {
 	[CmdletBinding()]
 	Param (
+		[string] $Target = "<undefined>",
 		[array] $ReferenceList,
-		[array] $DifferenceList 
+		[array] $DifferenceList,
+		[Parameter(Mandatory = $true)]
+		[System.Management.Automation.PSCmdlet]
+		$Cmdlet
 	)
 	
 	begin
 	{
-		Test-GraphConnection -Cmdlet $PSCmdlet
+		Test-GraphConnection -Cmdlet $PSCmdlet		
 	}
 	process
 	{		
-		$DifferenceList = $DifferenceList | foreach {
-			if ($_ -match $guidRegex) {
-				Get-MgUser -UserId $_
-			}
-			else {
-				Get-MgUser -Filter "userPrincipalName eq '$_'"
-			}
-		} | select -ExpandProperty Id
-		
+		$DifferenceList = $DifferenceList | foreach { Resolve-User -UserReference $_ -Cmdlet $Cmdlet } | select -ExpandProperty Id		
 		$compare = Compare-Object -ReferenceObject $ReferenceList -DifferenceObject $DifferenceList
+		if (!$compare) { return }
 		return @{
 			"Add" = ($compare | ? {$_.SideIndicator -eq "=>"}).InputObject
 			"Remove" = ($compare | ? {$_.SideIndicator -eq "<="}).InputObject

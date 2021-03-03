@@ -5,8 +5,15 @@
     'TMF.ConfigurationFileNotFound' = 'Can not find configuration file {0}.'
     'TMF.RegisterComponent.AlreadyLoaded' = 'A {0} with name "{1}" from source configuration {2} has already been loaded. Ignoring {0}.'
     'TMF.TestResult.BeautifySimple' = '[Tenant: <c="gray">{0}</c>][{2} Resource: <c="gray">{1}</c>] Required Action (<c="{4}">{3}</c>)'
-    'TMF.TestResult.BeautifyPropertyChange' = '[<c="gray">{1}</c>][Property: <c="green">(</c><c="gray">{3}</c><c="green">)</c>] Action: (<c="yellow">{4}</c>) Value: (<c="gray">{5}</c>)'
+    'TMF.TestResult.BeautifyPropertyChange' = '[<c="gray">{1}</c>][Property: <c="green">(</c><c="gray">{3}</c><c="green">)</c>] Action: (<c="yellow">{4}</c>) Value: (<c="gray">{5}</c>)'    
     'TMF.NoDefinitions' = 'No <c="gray">{0}</c> definitions are loaded. There is nothing to do.'
+    'TMF.CannotResolveResource' = 'Cannot resolve {0} resource'
+
+    'TMF.Register.PropertySetNotPossible' = 'The provided property set for "{0}" (Type: {1}) is not applicable.'
+
+    'TMF.Invoke.ActionTypeUnknown' = 'Action type (<c="yellow">{0}</c>) is unknown!'
+    'TMF.Invoke.ActionFailed' = '[Tenant: <c="gray">{0}</c>][{1} Resource: <c="gray">{2}</c>] Action ({3}) failed! Stopping actions.'
+    'TMF.Invoke.ActionCompleted' = '[Tenant: <c="gray">{0}</c>][{1} Resource: <c="gray">{2}</c>] <c="green">Completed</c>.'
 
     'New-TMFConfiguration.OutPath.PathDoesNotExist' = 'The path {0} does not exist. You can use -Force to create the configuration anyway!'
     'New-TMFConfiguration.OutPath.AlreadyExists' = 'There is already a Tenant configuration in the target directory ({0}). You can use -Force to create the configuration anyway!'
@@ -22,8 +29,7 @@
     'Deactivate-TMFConfiguration.Deactivating' = 'Deactivating {0}. This configuration will not be considered when applying Tenant configuration.'
     'Deactivate-TMFConfiguration.DeactivatingAll' = 'Deactivating all configurations. No configuration will be considered when applying Tenant configuration.'
 
-    'Load-TmfConfiguration.NotSupportedComponent' = 'Component {0} from configuration {1} is currently not supported and will be ignored.'
-    'Load-TmfConfiguration.LoadingComponent' = 'Loading {0} from {1}'
+    'Load-TmfConfiguration.NotSupportedComponent' = 'Component {0} from configuration {1} is currently not supported and will be ignored.'    
 
     'Test-GraphConnection.Failed' = 'You are not connected to any Microsoft Tenant! Use Connect-MgGraph before testing or invoking settings.'
 }

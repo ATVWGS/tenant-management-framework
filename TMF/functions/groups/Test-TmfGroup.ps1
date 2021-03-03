@@ -6,8 +6,7 @@
 	begin
 	{
 		Test-GraphConnection -Cmdlet $PSCmdlet
-		$tenant = Get-MgOrganization -Property displayName, Id
-		[regex] $guidRegex = '(?im)^[{(]?[0-9A-F]{8}[-]?(?:[0-9A-F]{4}[-]?){3}[0-9A-F]{12}[)}]?$'
+		$tenant = Get-MgOrganization -Property displayName, Id		
 	}
 	process
 	{
@@ -25,6 +24,7 @@
 			$resource = Get-MgGroup -Filter "displayName eq '$($definition.displayName)'"
 
 			if ($resource) {
+				$result["GraphResource"] = $resource
 				if ($definition.present) {
 					$changes = @()
 					foreach ($property in ($definition.Properties() | ? {$_ -notin "displayName", "present", "sourceConfig"})) {
@@ -34,10 +34,10 @@
 						}
 						switch ($property) {
 							"members" {
-								$change.Actions = (Compare-UserList -ReferenceList (Get-MgGroupMember -GroupId $resource.Id).Id -DifferenceList $definition.members)
+								$change.Actions = (Compare-UserList -Target $definition.displayName -ReferenceList (Get-MgGroupMember -GroupId $resource.Id).Id -DifferenceList $definition.members -Cmdlet $PSCmdlet)
 							}
 							"owners" {
-								$change.Actions = (Compare-UserList -ReferenceList (Get-MgGroupOwner -GroupId $resource.Id).Id -DifferenceList $definition.owners)
+								$change.Actions = (Compare-UserList -Target $definition.displayName -ReferenceList (Get-MgGroupOwner -GroupId $resource.Id).Id -DifferenceList $definition.owners -Cmdlet $PSCmdlet)
 							}
 							"groupTypes" {
 								if (Compare-Object -ReferenceObject $resource.groupTypes -DifferenceObject $definition.groupTypes) {

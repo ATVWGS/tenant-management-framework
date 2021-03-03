@@ -9,6 +9,7 @@
 	#>
 	[CmdletBinding()]
 	Param (
+		[switch] $ReturnDesiredConfiguration
 	)
 	
 	begin
@@ -24,14 +25,13 @@
 					Write-PSFMessage -Level Verbose -String "Load-TmfConfiguration.NotSupportedComponent" -StringValues $componentDirectory.Name, $configuration.Name
 					continue
 				}
-
-				Write-PSFMessage -Level Host -String "Load-TmfConfiguration.LoadingComponent" -StringValues $componentDirectory.Name, $configuration.Name
+				
 				Get-ChildItem -Path $componentDirectory.FullName -File -Filter "*.json" | foreach {
 					$content = Get-Content $_.FullName | ConvertFrom-Json
 					if ($content.count -gt 0) {
 						$content | foreach {
 							$component = $_ | Add-Member -NotePropertyMembers @{sourceConfig = $configuration.Name} -PassThru | ConvertTo-PSFHashtable -Include $($script:supportedComponents[$componentDirectory.Name].Parameters.Keys)
-							& $script:supportedComponents[$componentDirectory.Name] @component
+							& $script:supportedComponents[$componentDirectory.Name] @component -Cmdlet $PSCmdlet
 						}
 					}					 
 				}
@@ -40,6 +40,8 @@
 	}
 	end
 	{
-	
+		if ($ReturnDesiredConfiguration) {
+			Get-TmfDesiredConfiguration
+		}		
 	}
 }

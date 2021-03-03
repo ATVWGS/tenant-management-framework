@@ -1,19 +1,25 @@
 function Register-TmfGroup
 {
-	[CmdletBinding()]
+	[CmdletBinding(DefaultParameterSetName = 'Default')]
 	Param (
 		[Parameter(Mandatory = $true)]
 		[string] $displayName,
-		[string] $description,
-		[string[]] $groupTypes,		
+		[string] $description = "Group has been created with Tenant Management Framework",
+		[string[]] $groupTypes = @(),
 		[bool] $securityEnabled = $true,
 		[bool] $mailEnabled = $false,
 		[Parameter(Mandatory = $true)]
-		[string] $mailNickname,
+		[string] $mailNickname = $displayName.Replace(" ",""),
+		[Parameter(Mandatory = $true, ParameterSetName = "DynamicMembership")]
+		[string] $membershipRule,
+		[Parameter(ParameterSetName = "Default")]
 		[string[]] $members,
-		[string[]] $owners,		
+		[string[]] $owners,
 		[bool] $present = $true,
-		[string] $sourceConfig = "<Custom>"
+		[string] $sourceConfig = "<Custom>",
+
+		[System.Management.Automation.PSCmdlet]
+		$Cmdlet = $PSCmdlet
 	)
 	
 	begin
@@ -32,18 +38,36 @@ function Register-TmfGroup
 	{
 		if (Test-PSFFunctionInterrupt) { return }
 
+		if ($groupTypes -contains "DynamicMembership" -and -not $membershipRule) {
+			Write-PSFMessage -Level Error -String 'TMF.Register.PropertySetNotPossible' -StringValues $displayName, "Group" -FunctionName $Cmdlet.CommandRuntime
+			$exception = New-Object System.Data.DataException("If you want to define dynamic group, you need to provide a membershipRule in your configuration.")
+			$errorID = 'DynamicMembershipRuleMissing'
+			$category = [System.Management.Automation.ErrorCategory]::NotSpecified
+			$recordObject = New-Object System.Management.Automation.ErrorRecord($exception, $errorID, $category, $Cmdlet)
+			$cmdlet.ThrowTerminatingError($recordObject)
+		}
+
 		$object = [PSCustomObject] @{
 			displayName = $displayName
 			description = $description
 			groupTypes = $groupTypes
 			securityEnabled = $securityEnabled
 			mailEnabled = $mailEnabled
-			mailNickname = $mailNickname
-			members = $members
-			owners = $owners
+			mailNickname = $mailNickname						
 			present = $present
 			sourceConfig = $sourceConfig
 		}
+
+		if ($members) {
+			Add-Member -InputObject $object -MemberType NoteProperty -Name members -Value $members
+		}
+		elseif ($membershipRule) {
+			Add-Member -InputObject $object -MemberType NoteProperty -Name membershipRule -Value $membershipRule
+		}
+		if ($owners) {
+			Add-Member -InputObject $object -MemberType NoteProperty -Name owners -Value $owners
+		}
+		
 		Add-Member -InputObject $object -MemberType ScriptMethod -Name Properties -Value { ($this | Get-Member -MemberType NoteProperty).Name }
 
 		if ($alreadyLoaded) {

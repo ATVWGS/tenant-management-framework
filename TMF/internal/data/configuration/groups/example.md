@@ -25,7 +25,7 @@ Additional properties will be added in the future.
     "securityEnabled": true,
     "mailEnabled": false,
     "mailNickname": "someDynamicGroup",
-    "dynamicMembershipRule" : "(user.userPrincipalName -match \".*@volkswagen.de$\"",
+    "membershipRule" : "(user.userPrincipalName -match \".*@volkswagen.de$\"",
     "owners": ["group.owner@volkswagen.de"],
     "present": true
 }
