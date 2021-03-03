@@ -39,6 +39,15 @@
 							"owners" {
 								$change.Actions = (Compare-UserList -Target $definition.displayName -ReferenceList (Get-MgGroupOwner -GroupId $resource.Id).Id -DifferenceList $definition.owners -Cmdlet $PSCmdlet)
 							}
+							"membershipRule" {
+								if ($definition.$property -ne $resource.$property) {
+									$change.Actions = @{"Set" = $definition.$property}
+								}
+								$changes += [PSCustomObject] @{
+									Property = "membershipRuleProcessingState"										
+									Actions = @{"Set" = "On"}
+								}
+							}
 							"groupTypes" {
 								if (Compare-Object -ReferenceObject $resource.groupTypes -DifferenceObject $definition.groupTypes) {
 									$change.Actions = @{"Set" = $definition.groupTypes}

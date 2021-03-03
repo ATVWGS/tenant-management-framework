@@ -38,9 +38,12 @@ function Register-TmfGroup
 	{
 		if (Test-PSFFunctionInterrupt) { return }
 
-		if ($groupTypes -contains "DynamicMembership" -and -not $membershipRule) {
+		if (
+			($groupTypes -contains "DynamicMembership" -and -not $membershipRule) -or
+			($groupTypes -notcontains "DynamicMembership" -and $membershipRule)
+		) {
 			Write-PSFMessage -Level Error -String 'TMF.Register.PropertySetNotPossible' -StringValues $displayName, "Group" -FunctionName $Cmdlet.CommandRuntime
-			$exception = New-Object System.Data.DataException("If you want to define dynamic group, you need to provide a membershipRule in your configuration.")
+			$exception = New-Object System.Data.DataException("If you want to define dynamic group, you need to provide a membershipRule and add the group type DynamicMembership in your configuration.")
 			$errorID = 'DynamicMembershipRuleMissing'
 			$category = [System.Management.Automation.ErrorCategory]::NotSpecified
 			$recordObject = New-Object System.Management.Automation.ErrorRecord($exception, $errorID, $category, $Cmdlet)

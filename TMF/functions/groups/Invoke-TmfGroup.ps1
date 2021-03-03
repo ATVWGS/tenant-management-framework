@@ -103,9 +103,9 @@
 										switch ($action) {
 											"Set" { $requestBody[$change.Property] = $change.Actions[$action] }
 										}
-									}
+									}									
 								}
-							}						
+							}							
 						}
 						Write-Host ($requestBody | ConvertTo-Json)
 						Invoke-MgGraphRequest -Method PATCH -Uri ("$script:graphBaseUrl/groups/{0}" -f $result.GraphResource.Id) -Body ($requestBody | ConvertTo-Json -ErrorAction Stop)
