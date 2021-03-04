@@ -24,31 +24,31 @@ function Register-TmfGroup
 	
 	begin
 	{
-		if (!$script:desiredConfiguration["groups"]) {
-			$script:desiredConfiguration["groups"] = @()
-		}
-		if ($script:desiredConfiguration["groups"].displayName -contains $displayName) {			
-			$alreadyLoaded = $script:desiredConfiguration["groups"] | ? {$_.displayName -eq $displayName}
+		$componentName = "groups"
+
+		if ($script:desiredConfiguration[$componentName].displayName -contains $displayName) {			
+			$alreadyLoaded = $script:desiredConfiguration[$componentName] | ? {$_.displayName -eq $displayName}
 			if ($alreadyLoaded.sourceConfig -ne $sourceConfig) {
 				Stop-PSFFunction -String "TMF.RegisterComponent.AlreadyLoaded" -StringValues "group", $displayName, $alreadyLoaded.sourceConfig
+				return
 			}
 		}
-	}
-	process
-	{
-		if (Test-PSFFunctionInterrupt) { return }
 
 		if (
-			($groupTypes -contains "DynamicMembership" -and -not $membershipRule) -or
-			($groupTypes -notcontains "DynamicMembership" -and $membershipRule)
+			($groupTypes -contains "DynamicMembership" -and -not $PSBoundParameters.ContainsKey('membershipRule')) -or
+			($groupTypes -notcontains "DynamicMembership" -and $PSBoundParameters.ContainsKey('membershipRule'))
 		) {
 			Write-PSFMessage -Level Error -String 'TMF.Register.PropertySetNotPossible' -StringValues $displayName, "Group" -FunctionName $Cmdlet.CommandRuntime
-			$exception = New-Object System.Data.DataException("If you want to define dynamic group, you need to provide a membershipRule and add the group type DynamicMembership in your configuration.")
-			$errorID = 'DynamicMembershipRuleMissing'
+			$exception = New-Object System.Data.DataException("If you want to define a dynamic group, you need to provide a membershipRule and add the group type DynamicMembership in your configuration.")
+			$errorID = 'PropertySetNotPossible'
 			$category = [System.Management.Automation.ErrorCategory]::NotSpecified
 			$recordObject = New-Object System.Management.Automation.ErrorRecord($exception, $errorID, $category, $Cmdlet)
 			$cmdlet.ThrowTerminatingError($recordObject)
 		}
+	}
+	process
+	{
+		if (Test-PSFFunctionInterrupt) { return }		
 
 		$object = [PSCustomObject] @{
 			displayName = $displayName
@@ -75,10 +75,10 @@ function Register-TmfGroup
 		Add-Member -InputObject $object -MemberType ScriptMethod -Name Properties -Value { ($this | Get-Member -MemberType NoteProperty).Name }
 
 		if ($alreadyLoaded) {
-			$script:desiredConfiguration["groups"][$script:desiredConfiguration["groups"].IndexOf($alreadyLoaded)] = $object
+			$script:desiredConfiguration[$componentName][$script:desiredConfiguration[$componentName].IndexOf($alreadyLoaded)] = $object
 		}
 		else {
-			$script:desiredConfiguration["groups"] += $object
+			$script:desiredConfiguration[$componentName] += $object
 		}		
 	}
 }

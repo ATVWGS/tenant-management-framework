@@ -14,8 +14,9 @@
 		if (!$DoNotShowPropertyChanges) {
 			if ($TestResult.ActionType -eq "Update") {
 				foreach ($change in $TestResult.Changes) {
-					foreach ($action in $change.Actions.Keys) {
-						Write-PSFMessage -Level Host -FunctionName $FunctionName -String "TMF.TestResult.BeautifyPropertyChange" -StringValues $TestResult.Tenant, $TestResult.ResourceName, $TestResult.ResourceType, $change.Property, $action, ($change.Actions.$action -join ", ")
+					foreach ($action in $change.Actions.Keys) {						
+						$value = $change.Actions[$action] | ConvertTo-Json -Compress -Depth 8
+						Write-PSFMessage -Level Host -FunctionName $FunctionName -String "TMF.TestResult.BeautifyPropertyChange" -StringValues $TestResult.Tenant, $TestResult.ResourceName, $TestResult.ResourceType, $change.Property, $action, $value
 					}
 				}
 			}

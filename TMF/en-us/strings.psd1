@@ -5,11 +5,13 @@
     'TMF.ConfigurationFileNotFound' = 'Can not find configuration file {0}.'
     'TMF.RegisterComponent.AlreadyLoaded' = 'A {0} with name "{1}" from source configuration {2} has already been loaded. Ignoring {0}.'
     'TMF.TestResult.BeautifySimple' = '[Tenant: <c="gray">{0}</c>][{2} Resource: <c="gray">{1}</c>] Required Action (<c="{4}">{3}</c>)'
-    'TMF.TestResult.BeautifyPropertyChange' = '[<c="gray">{1}</c>][Property: <c="green">(</c><c="gray">{3}</c><c="green">)</c>] Action: (<c="yellow">{4}</c>) Value: (<c="gray">{5}</c>)'    
+    'TMF.TestResult.BeautifyPropertyChange' = ' > [<c="gray">{1}</c>][Property: <c="green">(</c><c="gray">{3}</c><c="green">)</c>] Action: (<c="yellow">{4}</c>) Value: (<c="gray">{5}</c>)'    
     'TMF.NoDefinitions' = 'No <c="gray">{0}</c> definitions are loaded. There is nothing to do.'
-    'TMF.CannotResolveResource' = 'Cannot resolve {0} resource'
+    'TMF.CannotResolveResource' = 'Cannot resolve {0} resource'    
 
     'TMF.Register.PropertySetNotPossible' = 'The provided property set for "{0}" (Type: {1}) is not applicable.'
+
+    'TMF.Test.MultipleResourcesError' = 'There are multiple {0} with displayName {1} already created. Please clean your Tenant.'
 
     'TMF.Invoke.ActionTypeUnknown' = 'Action type (<c="yellow">{0}</c>) is unknown!'
     'TMF.Invoke.ActionFailed' = '[Tenant: <c="gray">{0}</c>][{1} Resource: <c="gray">{2}</c>] Action ({3}) failed! Stopping actions.'

@@ -10,6 +10,8 @@
 		[switch] $Groups,
 		[Parameter(ParameterSetName = "SpecifiedComponents")]
 		[switch] $Users,
+		[Parameter(ParameterSetName = "SpecifiedComponents")]
+		[switch] $NamedLocations,
 		[Parameter(ParameterSetName = "All")]
 		[switch] $All
 	)
@@ -26,11 +28,10 @@
 		if ($Users -or $All) {
 			$scopes += "User.ReadWrite.All"
 		}
+		if ($NamedLocations -or $All) {
+			$scopes += "Policy.ReadWrite.ConditionalAccess"
+		} 
 
-		return $scopes
-	}
-	end
-	{
-	
+		return ($scopes | Sort-Object -Unique)
 	}
 }

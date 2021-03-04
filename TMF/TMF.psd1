@@ -49,7 +49,10 @@
 		'Load-TmfConfiguration',
 		'Register-TmfGroup',
 		'Test-TmfGroup',
-		'Invoke-TmfGroup'
+		'Invoke-TmfGroup',
+		'Register-TmfNamedLocation',
+		'Test-TmfNamedLocation',
+		'Invoke-TmfNamedLocation'
 	)
 	
 	# Cmdlets to export from this module

@@ -1,4 +1,4 @@
-﻿function Test-TmfGroup
+﻿function Test-TmfNamedLocation
 {
 	[CmdletBinding()]
 	Param (
@@ -9,7 +9,7 @@
 	begin
 	{
 		Test-GraphConnection -Cmdlet $Cmdlet
-		$componentName = "groups"
+		$componentName = "namedLocations"
 		$tenant = Get-MgOrganization -Property displayName, Id		
 	}
 	process
@@ -20,13 +20,12 @@
 			$result = @{
 				Tenant = $tenant.displayName
 				TenantId = $tenant.Id
-				ResourceType = 'Group'
+				ResourceType = 'NamedLocation'
 				ResourceName = (Resolve-String -Text $definition.displayName)
 				DesiredConfiguration = $definition
 			}
 
-			$resource = (Invoke-MgGraphRequest -Method GET -Uri ("$script:graphBaseUrl/groups/?`$filter=displayName eq '{0}'" -f $definition.displayName)).Value
-
+			$resource = (Invoke-MgGraphRequest -Method GET -Uri ("$script:graphBaseUrl/identity/conditionalAccess/namedLocations/?`$filter=displayName eq '{0}'" -f $definition.displayName)).Value
 			switch ($resource.Count) {
 				0 {
 					if ($definition.present) {					
@@ -46,24 +45,14 @@
 								Actions = $null
 							}
 							switch ($property) {
-								"members" {
-									$change.Actions = (Compare-UserList -Target $definition.displayName -ReferenceList (Get-MgGroupMember -GroupId $resource.Id).Id -DifferenceList $definition.members -Cmdlet $PSCmdlet)
+								"ipRanges" {
+									if (Compare-Object -ReferenceObject $resource.ipRanges.cidrAddress -DifferenceObject $definition.ipRanges.cidrAddress) {
+										$change.Actions = @{"Set" = $definition.ipRanges}
+									}
 								}
-								"owners" {
-									$change.Actions = (Compare-UserList -Target $definition.displayName -ReferenceList (Get-MgGroupOwner -GroupId $resource.Id).Id -DifferenceList $definition.owners -Cmdlet $PSCmdlet)
-								}
-								"membershipRule" {
-									if ($definition.$property -ne $resource.$property) {
-										$change.Actions = @{"Set" = $definition.$property}
-										$changes += [PSCustomObject] @{
-											Property = "membershipRuleProcessingState"										
-											Actions = @{"Set" = "On"}
-										}
-									}								
-								}
-								"groupTypes" {
-									if (Compare-Object -ReferenceObject $resource.groupTypes -DifferenceObject $definition.groupTypes) {
-										$change.Actions = @{"Set" = $definition.groupTypes}
+								"countriesAndRegions" {
+									if (Compare-Object -ReferenceObject $resource.countriesAndRegions -DifferenceObject $definition.countriesAndRegions) {
+										$change.Actions = @{"Set" = $definition.countriesAndRegions}
 									}
 								}
 								default {

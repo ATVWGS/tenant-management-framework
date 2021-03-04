@@ -7,6 +7,7 @@ $script:graphBaseUrl = "https://graph.microsoft.com/{0}" -f $graphVersionRequire
 
 $script:supportedComponents = @{
     "groups" = (Get-Command Register-TmfGroup)
+    "namedLocations" = (Get-Command Register-TmfNamedLocation)
 }
 Set-Variable -Name supportedComponents -Option ReadOnly
 

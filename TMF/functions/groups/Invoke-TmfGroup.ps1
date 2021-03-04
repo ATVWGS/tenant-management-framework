@@ -6,7 +6,8 @@
 	
 	begin
 	{
-		if (!$script:desiredConfiguration["groups"]) {
+		$componentName = "groups"
+		if (!$script:desiredConfiguration[$componentName]) {
 			Stop-PSFFunction -String "TMF.NoDefinitions" -StringValues "Group"
 			return
 		}
@@ -15,7 +16,7 @@
 	process
 	{
 		if (Test-PSFFunctionInterrupt) { return }
-		$testResults = Test-TmfGroup
+		$testResults = Test-TmfGroup -Cmdlet $PSCmdlet
 
 		foreach ($result in $testResults) {
 			Beautify-TmfTestResult -TestResult $result -FunctionName $MyInvocation.MyCommand
@@ -53,11 +54,11 @@
 					}
 				}
 				"Delete" {
-					$requestUrl = "$script:graphBaseUrl/groups"
+					$requestUrl = "$script:graphBaseUrl/groups/{0}" -f $result.GraphResource.Id
 					$requestMethod = "DELETE"
 					try {
 						Write-PSFMessage -Level Verbose -String "TMF.Invoke.SendingRequest" -StringValues $requestMethod, $requestUrl
-						Invoke-MgGraphRequest -Method $requestMethod -Uri ("$script:graphBaseUrl/groups/{0}" -f $result.GraphResource.Id)
+						Invoke-MgGraphRequest -Method $requestMethod -Uri $requestUrl
 					}
 					catch {
 						Write-PSFMessage -Level Error -String "TMF.Invoke.ActionFailed" -StringValues $result.Tenant, $result.ResourceType, $result.ResourceName, $result.ActionType
