@@ -47,6 +47,7 @@
 		'Activate-TmfConfiguration',
 		'Deactivate-TmfConfiguration',
 		'Load-TmfConfiguration',
+		'Register-TmfStringMapping',
 		'Register-TmfGroup',
 		'Test-TmfGroup',
 		'Invoke-TmfGroup',

@@ -16,6 +16,11 @@
 	{
 		$results = @()
 		foreach ($definition in $script:desiredConfiguration[$componentName]) {
+			foreach ($property in $definition.Properties()) {
+				if ($definition.$property.GetType().Name -eq "String") {
+					$definition.$property = Resolve-String -Text $definition.$property
+				}
+			}
 
 			$result = @{
 				Tenant = $tenant.displayName
@@ -23,8 +28,7 @@
 				ResourceType = 'Group'
 				ResourceName = (Resolve-String -Text $definition.displayName)
 				DesiredConfiguration = $definition
-			}
-
+			}			
 			$resource = (Invoke-MgGraphRequest -Method GET -Uri ("$script:graphBaseUrl/groups/?`$filter=displayName eq '{0}'" -f $definition.displayName)).Value
 
 			switch ($resource.Count) {

@@ -16,6 +16,11 @@
 	{
 		$results = @()
 		foreach ($definition in $script:desiredConfiguration[$componentName]) {
+			foreach ($property in $definition.Properties()) {
+				if ($definition.$property.GetType().Name -eq "String") {
+					$definition.$property = Resolve-String -Text $definition.$property
+				}
+			}
 
 			$result = @{
 				Tenant = $tenant.displayName

@@ -29,13 +29,12 @@
 	begin
 	{
 		$componentName = "namedLocations"
+		if (!$script:desiredConfiguration[$componentName]) {
+			$script:desiredConfiguration[$componentName] = @()
+		}
 
 		if ($script:desiredConfiguration[$componentName].displayName -contains $displayName) {			
 			$alreadyLoaded = $script:desiredConfiguration[$componentName] | ? {$_.displayName -eq $displayName}
-			if ($alreadyLoaded.sourceConfig -ne $sourceConfig) {
-				Stop-PSFFunction -String "TMF.RegisterComponent.AlreadyLoaded" -StringValues "named location", $displayName, $alreadyLoaded.sourceConfig
-				return
-			}
 		}
 
 		try {

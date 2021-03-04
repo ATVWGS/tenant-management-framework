@@ -12,6 +12,8 @@
 		[switch] $Users,
 		[Parameter(ParameterSetName = "SpecifiedComponents")]
 		[switch] $NamedLocations,
+		[Parameter(ParameterSetName = "SpecifiedComponents")]
+		[switch] $Agreements,
 		[Parameter(ParameterSetName = "All")]
 		[switch] $All
 	)
@@ -31,7 +33,10 @@
 		if ($NamedLocations -or $All) {
 			$scopes += "Policy.ReadWrite.ConditionalAccess"
 		} 
-
+		if ($Agreements -or $All) {
+			$scopes += "Agreement.ReadWrite.All"
+		} 
+		
 		return ($scopes | Sort-Object -Unique)
 	}
 }

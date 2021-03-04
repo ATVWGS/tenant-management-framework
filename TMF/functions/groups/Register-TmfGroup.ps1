@@ -25,13 +25,12 @@ function Register-TmfGroup
 	begin
 	{
 		$componentName = "groups"
+		if (!$script:desiredConfiguration[$componentName]) {
+			$script:desiredConfiguration[$componentName] = @()
+		}
 
 		if ($script:desiredConfiguration[$componentName].displayName -contains $displayName) {			
 			$alreadyLoaded = $script:desiredConfiguration[$componentName] | ? {$_.displayName -eq $displayName}
-			if ($alreadyLoaded.sourceConfig -ne $sourceConfig) {
-				Stop-PSFFunction -String "TMF.RegisterComponent.AlreadyLoaded" -StringValues "group", $displayName, $alreadyLoaded.sourceConfig
-				return
-			}
 		}
 
 		if (
@@ -51,7 +50,7 @@ function Register-TmfGroup
 		if (Test-PSFFunctionInterrupt) { return }		
 
 		$object = [PSCustomObject] @{
-			displayName = $displayName
+			displayName = Resolve-String -Text $displayName
 			description = $description
 			groupTypes = $groupTypes
 			securityEnabled = $securityEnabled
