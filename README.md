@@ -26,7 +26,7 @@ Connect-MgGraph -Scopes (Get-TmfRequiredScope -All)
 
 ### String mapping
 
-You can create mappings between strings and the values they should be replaced with. Place the mappings in the *stringMappings.json* file in the *stringMappings* folder of your configuration.
+You can create mappings between strings and the values they should be replaced with. Place the mappings in the *stringMappings.json* file in the *stringMappings* folder of your configuration. Currently not all resource properties are considered. All string properties on the first level are replaced.
 
 | Property    | Description                                                                                |
 |-------------|--------------------------------------------------------------------------------------------|

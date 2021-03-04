@@ -60,15 +60,10 @@ function Register-TmfGroup
 			sourceConfig = $sourceConfig
 		}
 
-		if ($PSBoundParameters.ContainsKey('members')) {
-			Add-Member -InputObject $object -MemberType NoteProperty -Name members -Value @($members)
-		}
-		elseif ($membershipRule) {
-			Add-Member -InputObject $object -MemberType NoteProperty -Name membershipRule -Value $membershipRule
-		}
-
-		if ($PSBoundParameters.ContainsKey('owners')) {
-			Add-Member -InputObject $object -MemberType NoteProperty -Name owners -Value @($owners)
+		"owners", "members", "membershipRule" | foreach {
+			if ($PSBoundParameters.ContainsKey($_)) {			
+				Add-Member -InputObject $object -MemberType NoteProperty -Name $_ -Value $PSBoundParameters[$_]
+			}
 		}
 		
 		Add-Member -InputObject $object -MemberType ScriptMethod -Name Properties -Value { ($this | Get-Member -MemberType NoteProperty).Name }

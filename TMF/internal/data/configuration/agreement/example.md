@@ -1,5 +1,0 @@
-# Example termsOfUse.json
-
-```json
-
-```

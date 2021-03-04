@@ -53,7 +53,10 @@
 		'Invoke-TmfGroup',
 		'Register-TmfNamedLocation',
 		'Test-TmfNamedLocation',
-		'Invoke-TmfNamedLocation'
+		'Invoke-TmfNamedLocation',
+		'Register-TmfAgreement',
+		'Test-TmfAgreement',
+		'Invoke-TmfAgreement'
 	)
 	
 	# Cmdlets to export from this module

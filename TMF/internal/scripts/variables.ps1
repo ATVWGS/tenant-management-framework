@@ -9,6 +9,7 @@ $script:supportedComponents = @{
     "stringMappings" = (Get-Command Register-TmfStringMapping)
     "groups" = (Get-Command Register-TmfGroup)
     "namedLocations" = (Get-Command Register-TmfNamedLocation)
+    "agreements" = (Get-Command Register-TmfAgreement)
 } # All currently supported components.
 Set-Variable -Name supportedComponents -Option ReadOnly
 
