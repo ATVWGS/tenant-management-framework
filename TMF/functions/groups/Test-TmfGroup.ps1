@@ -46,16 +46,18 @@
 						$changes = @()
 						foreach ($property in ($definition.Properties() | ? {$_ -notin "displayName", "present", "sourceConfig"})) {
 							$change = [PSCustomObject] @{
-								Property = $property										
+								Property = $property
 								Actions = $null
 							}
 							switch ($property) {
 								"members" {
 									$resourceMembers = (Invoke-MgGraphRequest -Method GET -Uri ("$script:graphBaseUrl/groups/{0}/members" -f $resource.Id)).Value.Id
+									if (-Not $resourceMembers) {$resourceMembers = @()}
 									$change.Actions = (Compare-UserList -ReferenceList $resourceMembers -DifferenceList $definition.members -Cmdlet $PSCmdlet)
 								}
-								"owners" {
-									$resourceOwners = (Invoke-MgGraphRequest -Method GET -Uri ("$script:graphBaseUrl/groups/{0}/members" -f $resource.Id)).Value.Id
+								"owners" {									
+									$resourceOwners = (Invoke-MgGraphRequest -Method GET -Uri ("$script:graphBaseUrl/groups/{0}/owners" -f $resource.Id)).Value.Id
+									if (-Not $resourceOwners) {$resourceOwners = @()}
 									$change.Actions = (Compare-UserList -ReferenceList $resourceOwners -DifferenceList $definition.owners -Cmdlet $PSCmdlet)
 								}
 								"membershipRule" {
