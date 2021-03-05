@@ -26,7 +26,7 @@ Connect-MgGraph -Scopes (Get-TmfRequiredScope -All)
 
 ### String mapping
 
-You can create mappings between strings and the values they should be replaced with. Place the mappings in the *stringMappings.json* file in the *stringMappings* folder of your configuration. Currently not all resource properties are considered. All string properties on the first level are replaced.
+You can create mappings between strings and the values they should be replaced with. Place the mappings in the *stringMappings.json* file in the *stringMappings* folder of your configuration.
 
 | Property    | Description                                                                                |
 |-------------|--------------------------------------------------------------------------------------------|
@@ -39,6 +39,14 @@ You can create mappings between strings and the values they should be replaced w
     "replace": "group.manager@volkswagen.de"
 }
 ```
+
+Currently not all resource properties are considered. All string properties on the first level are replaced.
+| Resource       | Supported properties                                                                       |
+|----------------|--------------------------------------------------------------------------------------------|
+| agreements     | displayName, userReacceptRequiredFrequency                                                 |
+| groups         | description, mailNickname, members, owners                                                 |
+| namedLocations | displayName                                                                                |
+
 
 To use the string mapping in a configuration file, you need to mention it by the name you provided in curly braces. Example: *{{ GroupManagerName }}*
 
