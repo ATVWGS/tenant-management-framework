@@ -13,8 +13,9 @@
 	)
 	
 	begin
-	{
+	{	
 		$configurationsToLoad = Get-TmfActiveConfiguration
+		$script:desiredConfiguration = @{}
 	}
 	process
 	{
@@ -26,7 +27,9 @@
 					continue
 				}
 				
-				$script:desiredConfiguration[$componentDirectory.Name] = @()
+				if (-Not $script:desiredConfiguration.ContainsKey($componentDirectory.Name)) {
+					$script:desiredConfiguration[$componentDirectory.Name] = @()
+				}				
 				Get-ChildItem -Path $componentDirectory.FullName -File -Filter "*.json" | foreach {
 					$content = Get-Content $_.FullName | ConvertFrom-Json
 					if ($content.count -gt 0) {
