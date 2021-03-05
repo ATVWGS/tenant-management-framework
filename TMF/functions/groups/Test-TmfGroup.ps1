@@ -70,9 +70,16 @@
 									}								
 								}
 								"groupTypes" {
-									if (Compare-Object -ReferenceObject $resource.groupTypes -DifferenceObject $definition.groupTypes) {
-										$change.Actions = @{"Set" = $definition.groupTypes}
+									if ($resource.groupTypes) {
+										if (Compare-Object -ReferenceObject $resource.groupTypes -DifferenceObject $definition.groupTypes) {
+											$change.Actions = @{"Set" = $definition.groupTypes}
+										}
 									}
+									else {
+										if ($definition.groupTypes.count -gt 0) {
+											$change.Actions = @{"Set" = $definition.groupTypes}
+										}
+									}									
 								}
 								default {
 									if ($definition.$property -ne $resource.$property) {
