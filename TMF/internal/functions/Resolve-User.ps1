@@ -22,10 +22,11 @@
 				$user = Get-MgUser -Filter "userPrincipalName eq '$UserReference'"
 			}
 			else {
-				throw "User reference $UserReference is no valid GUID or valid userPrincipalName"
+				$user = Get-MgUser -Filter "displayName eq '$UserReference'"
 			}
 			
-			if (!$user) {throw "Cannot find user $UserReference"}				
+			if (!$user) { throw "Cannot find user $UserReference" }
+			if ($user.count -gt 1) { throw "Got multiple users for $UserReference" }
 			return $user
 		}
 		catch {
