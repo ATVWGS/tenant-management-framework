@@ -34,10 +34,14 @@
 					}
 					try {
 						if ($result.DesiredConfiguration.Properties() -contains "members") {
-							$requestBody["members@odata.bind"] = @($result.DesiredConfiguration.members | foreach {"$script:graphBaseUrl/users/{0}" -f (Resolve-User -UserReference $_ -Cmdlet $PSCmdlet).Id})
+							if ($result.DesiredConfiguration.members.count -gt 0) {
+								$requestBody["members@odata.bind"] = @($result.DesiredConfiguration.members | foreach {"$script:graphBaseUrl/users/{0}" -f (Resolve-User -UserReference $_ -Cmdlet $PSCmdlet).Id})
+							}
 						}
 						if ($result.DesiredConfiguration.Properties() -contains "owners") {
-							$requestBody["owners@odata.bind"] = @($result.DesiredConfiguration.owners | foreach {"$script:graphBaseUrl/users/{0}" -f (Resolve-User -UserReference $_ -Cmdlet $PSCmdlet).Id})
+							if ($result.DesiredConfiguration.owners.count -gt 0) {
+								$requestBody["owners@odata.bind"] = @($result.DesiredConfiguration.owners | foreach {"$script:graphBaseUrl/users/{0}" -f (Resolve-User -UserReference $_ -Cmdlet $PSCmdlet).Id})
+							}							
 						}
 						if ($result.DesiredConfiguration.Properties() -contains "membershipRule") {
 							$requestBody["membershipRule"] = $result.DesiredConfiguration.membershipRule

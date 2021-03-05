@@ -2,24 +2,25 @@
 {
 	[CmdletBinding()]
 	Param (
-		[string] $Target = "<undefined>",
-		[array] $ReferenceList,
-		[array] $DifferenceList,
-		[Parameter(Mandatory = $true)]
+		[string[]] $ReferenceList,
+		[string[]] $DifferenceList,
 		[System.Management.Automation.PSCmdlet]
-		$Cmdlet
+		$Cmdlet = $PSCmdlet
 	)
 	
 	begin
 	{
-		Test-GraphConnection -Cmdlet $PSCmdlet		
+		#Test-GraphConnection -Cmdlet $PSCmdlet
 	}
 	process
 	{
-		
+		if ($DifferenceList.count -eq 0 -and $ReferenceList.Count -eq 0) {
+			return
+		}
+
 		$DifferenceList = @($DifferenceList | foreach { Resolve-User -UserReference $_ -Cmdlet $Cmdlet } | select -ExpandProperty Id)
 		$compare = Compare-Object -ReferenceObject $ReferenceList -DifferenceObject $DifferenceList
-		if (!$compare) { return }
+		if (-Not $compare) { return }
 
 		$result = @{}
 		if ($compare.SideIndicator -contains "=>") {

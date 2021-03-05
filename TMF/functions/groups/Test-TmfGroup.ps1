@@ -51,10 +51,12 @@
 							}
 							switch ($property) {
 								"members" {
-									$change.Actions = (Compare-UserList -Target $definition.displayName -ReferenceList (Get-MgGroupMember -GroupId $resource.Id).Id -DifferenceList $definition.members -Cmdlet $PSCmdlet)
+									$resourceMembers = (Invoke-MgGraphRequest -Method GET -Uri ("$script:graphBaseUrl/groups/{0}/members" -f $resource.Id)).Value.Id
+									$change.Actions = (Compare-UserList -ReferenceList $resourceMembers -DifferenceList $definition.members -Cmdlet $PSCmdlet)
 								}
 								"owners" {
-									$change.Actions = (Compare-UserList -Target $definition.displayName -ReferenceList (Get-MgGroupOwner -GroupId $resource.Id).Id -DifferenceList $definition.owners -Cmdlet $PSCmdlet)
+									$resourceOwners = (Invoke-MgGraphRequest -Method GET -Uri ("$script:graphBaseUrl/groups/{0}/members" -f $resource.Id)).Value.Id
+									$change.Actions = (Compare-UserList -ReferenceList $resourceOwners -DifferenceList $definition.owners -Cmdlet $PSCmdlet)
 								}
 								"membershipRule" {
 									if ($definition.$property -ne $resource.$property) {
