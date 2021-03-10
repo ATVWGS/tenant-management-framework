@@ -63,3 +63,7 @@ To use the string mapping in a configuration file, you need to mention it by the
     "present": true
 }
 ```
+
+# To do
+- Required attributes to example.md for each supported component
+- Attributes which are not possible to update to example.md for each supported component
