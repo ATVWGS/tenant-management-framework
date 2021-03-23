@@ -15,14 +15,16 @@
 		[string[]] $excludeApplications,
 		[string[]] $includeLocations,
 		[string[]] $excludeLocations,
+		[ValidateSet("android", "iOS", "windows", "windowsPhone", "macOS", "all")]
 		[string[]] $includePlatforms,
+		[ValidateSet("android", "iOS", "windows", "windowsPhone", "macOS", "all")]
 		[string[]] $excludePlatforms,
 		
 		[ValidateSet("all", "browser", "mobileAppsAndDesktopClients", "exchangeActiveSync", "easSupported", "other")]
 		[string[]] $clientAppTypes,
-		[ValidateSet("low", "medium", "high", "hidden", "none", "unknownFutureValue")]
+		[ValidateSet("low", "medium", "high", "hidden", "none")]
 		[string[]] $userRiskLevels,
-		[ValidateSet("low", "medium", "high", "hidden", "none", "unknownFutureValue")]
+		[ValidateSet("low", "medium", "high", "hidden", "none")]
 		[string[]] $signInRiskLevels,
 
 		# Grant Controls

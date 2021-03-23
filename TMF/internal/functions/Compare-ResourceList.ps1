@@ -1,4 +1,4 @@
-﻿function Compare-UserList
+﻿function Compare-ResourceList
 {
 	[CmdletBinding()]
 	Param (
@@ -18,8 +18,7 @@
 		if ($DifferenceList.count -eq 0 -and $ReferenceList.Count -eq 0) {
 			return
 		}
-
-		$DifferenceList = @($DifferenceList | foreach { Resolve-User -UserReference $_ -Cmdlet $Cmdlet } | select -ExpandProperty Id)
+		
 		$compare = Compare-Object -ReferenceObject $ReferenceList -DifferenceObject $DifferenceList
 		if (-Not $compare) { return }
 

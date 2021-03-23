@@ -30,7 +30,7 @@
 				DesiredConfiguration = $definition
 			}
 
-			$resource = (Invoke-MgGraphRequest -Method GET -Uri ("$script:graphBaseUrl/agreements/?`$filter=displayName eq '{0}'" -f $definition.displayName)).Value
+			$resource = (Invoke-MgGraphRequest -Method GET -Uri ("$script:graphBaseUrl/identityGovernance/termsOfUse/agreements/?`$filter=displayName eq '{0}'" -f $definition.displayName)).Value
 			switch ($resource.Count) {
 				0 {
 					if ($definition.present) {					

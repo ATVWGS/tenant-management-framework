@@ -39,7 +39,7 @@
 			$scopes += "Agreement.ReadWrite.All"
 		}
 		if ($ConditionalAccessPolicies -or $All) {
-			$scopes += "Policy.ReadWrite.ConditionalAccess", "Policy.Read.All"
+			$scopes += "Policy.ReadWrite.ConditionalAccess", "Policy.Read.All", "RoleManagement.Read.Directory", "Application.Read.All", "Agreement.Read.All"
 		}
 		
 		return ($scopes | Sort-Object -Unique)
