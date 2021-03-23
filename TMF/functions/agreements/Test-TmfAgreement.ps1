@@ -9,13 +9,13 @@
 	begin
 	{
 		Test-GraphConnection -Cmdlet $Cmdlet
-		$componentName = "agreements"
+		$resourceName = "agreements"
 		$tenant = Get-MgOrganization -Property displayName, Id		
 	}
 	process
 	{
 		$results = @()
-		foreach ($definition in $script:desiredConfiguration[$componentName]) {
+		foreach ($definition in $script:desiredConfiguration[$resourceName]) {
 			foreach ($property in $definition.Properties()) {
 				if ($definition.$property.GetType().Name -eq "String") {
 					$definition.$property = Resolve-String -Text $definition.$property
@@ -77,7 +77,7 @@
 					}
 				}
 				default {
-					Write-PSFMessage -Level Warning -String 'TMF.Test.MultipleResourcesError' -StringValues $componentName, $definition.displayName -Tag 'failed'
+					Write-PSFMessage -Level Warning -String 'TMF.Test.MultipleResourcesError' -StringValues $resourceName, $definition.displayName -Tag 'failed'
 					$exception = New-Object System.Data.DataException("Query returned multiple results. Cannot decide which resource to test.")
 					$errorID = 'MultipleResourcesError'
 					$category = [System.Management.Automation.ErrorCategory]::NotSpecified

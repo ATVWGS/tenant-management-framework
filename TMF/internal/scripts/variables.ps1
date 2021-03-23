@@ -4,6 +4,7 @@ $script:graphBaseUrl = "https://graph.microsoft.com/{0}" -f $graphVersionRequire
 
 [regex] $script:guidRegex = '(?im)^[{(]?[0-9A-F]{8}[-]?(?:[0-9A-F]{4}[-]?){3}[0-9A-F]{12}[)}]?$'
 [regex] $script:upnRegex = '^([A-Za-z\d\.]*)@([A-Za-z\d\.-]*)$'
+[regex] $script:mailNicknameRegex = '^([A-Za-z\d\.]*)@([A-Za-z\d\.-]*)$'
 
 $script:supportedResources = @{
     "stringMappings" = @{
@@ -27,6 +28,12 @@ $script:supportedResources = @{
         "testFunction" = (Get-Command Test-TmfAgreement)
         "invokeFunction" = (Get-Command Invoke-TmfAgreement)
         "weight" = 10
+    }
+    "conditionalAccessPolicies" = @{
+        "registerFunction" = (Get-Command Register-TmfConditionalAccessPolicy)
+        "testFunction" = (Get-Command Test-TmfConditionalAccessPolicy)
+        "invokeFunction" = (Get-Command Invoke-TmfConditionalAccessPolicy)
+        "weight" = 20
     }
 } # All currently supported components.
 Set-Variable -Name supportedResources -Option ReadOnly

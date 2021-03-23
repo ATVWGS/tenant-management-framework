@@ -6,8 +6,8 @@
 	
 	begin
 	{
-		$componentName = "groups"
-		if (!$script:desiredConfiguration[$componentName]) {
+		$resourceName = "groups"
+		if (!$script:desiredConfiguration[$resourceName]) {
 			Stop-PSFFunction -String "TMF.NoDefinitions" -StringValues "Group"
 			return
 		}

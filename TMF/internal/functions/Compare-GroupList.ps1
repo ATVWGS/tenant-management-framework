@@ -1,4 +1,4 @@
-﻿function Compare-UserList
+﻿function Compare-GroupList
 {
 	[CmdletBinding()]
 	Param (
@@ -19,7 +19,7 @@
 			return
 		}
 
-		$DifferenceList = @($DifferenceList | foreach { Resolve-User -UserReference $_ -Cmdlet $Cmdlet } | select -ExpandProperty Id)
+		$DifferenceList = @($DifferenceList | foreach { (Resolve-Group -GroupReference $_ -Cmdlet $Cmdlet)["id"] })
 		$compare = Compare-Object -ReferenceObject $ReferenceList -DifferenceObject $DifferenceList
 		if (-Not $compare) { return }
 

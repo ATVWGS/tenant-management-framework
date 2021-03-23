@@ -1,4 +1,4 @@
-﻿function Invoke-TmfNamedLocation
+﻿function Invoke-TmfConditionalAccessPolicy
 {
 	[CmdletBinding()]
 	Param ( )
@@ -6,7 +6,7 @@
 	
 	begin
 	{
-		$resourceName = "namedLocations"
+		$resourceName = "agreements"
 		if (!$script:desiredConfiguration[$resourceName]) {
 			Stop-PSFFunction -String "TMF.NoDefinitions" -StringValues "Group"
 			return
@@ -16,26 +16,37 @@
 	process
 	{
 		if (Test-PSFFunctionInterrupt) { return }
-		$testResults = Test-TmfNamedLocation -Cmdlet $PSCmdlet
+		$testResults = Test-TmfAgreement -Cmdlet $PSCmdlet
 
 		foreach ($result in $testResults) {
 			Beautify-TmfTestResult -TestResult $result -FunctionName $MyInvocation.MyCommand
 			switch ($result.ActionType) {
 				"Create" {
-					$requestUrl = "$script:graphBaseUrl/identity/conditionalAccess/namedLocations"
+					$requestUrl = "$script:graphBaseUrl/agreements"
 					$requestMethod = "POST"
-					$requestBody = @{
-						"@odata.type" = $result.DesiredConfiguration."@odata.type"
+					$requestBody = @{						
 						"displayName" = $result.DesiredConfiguration.displayName
 					}
 					try {
-						"ipRanges", "countriesAndRegions", "isTrusted", "includeUnknownCountriesAndRegions" | foreach {
+						"isViewingBeforeAcceptanceRequired", "isPerDeviceAcceptanceRequired", "userReacceptRequiredFrequency", "termsExpiration", "files" | foreach {
 							if ($result.DesiredConfiguration.Properties() -contains "$_") {
-								$requestBody[$_] = $result.DesiredConfiguration.$_
+								switch ($_) {
+									"files" {										
+										$configPath = (Get-TmfActiveConfiguration | ? {$_.Name -eq $result.DesiredConfiguration.sourceConfig}).Path
+										$requestBody["files"] = @($result.DesiredConfiguration.files | foreach {
+											$file = $_ | select fileName, language, isDefault
+											$filePath = "{0}/agreements/{1}" -f $configPath, $_.filePath
+											$data = [Convert]::ToBase64String([System.IO.File]::ReadAllBytes($filePath))
+											Add-Member -InputObject $file -MemberType NoteProperty -Name "fileData" -Value @{ data = $data }
+											return $file
+										})
+									}
+									default { $requestBody[$_] = $result.DesiredConfiguration.$_ }
+								}								
 							}
 						}
 						
-						$requestBody = $requestBody | ConvertTo-Json -ErrorAction Stop
+						$requestBody = $requestBody | ConvertTo-Json -ErrorAction Stop -Depth 8
 						Write-PSFMessage -Level Verbose -String "TMF.Invoke.SendingRequestWithBody" -StringValues $requestMethod, $requestUrl, $requestBody
 						Invoke-MgGraphRequest -Method $requestMethod -Uri $requestUrl -Body $requestBody | Out-Null
 					}
@@ -45,11 +56,11 @@
 					}
 				}
 				"Delete" {
-					$requestUrl = "$script:graphBaseUrl/identity/conditionalAccess/namedLocations/{0}" -f $result.GraphResource.Id
+					$requestUrl = "$script:graphBaseUrl/agreements/{0}" -f $result.GraphResource.Id
 					$requestMethod = "DELETE"
 					try {
 						Write-PSFMessage -Level Verbose -String "TMF.Invoke.SendingRequest" -StringValues $requestMethod, $requestUrl
-						Invoke-MgGraphRequest -Method $requestMethod -Uri $requestUrl
+						#Invoke-MgGraphRequest -Method $requestMethod -Uri $requestUrl
 					}
 					catch {
 						Write-PSFMessage -Level Error -String "TMF.Invoke.ActionFailed" -StringValues $result.Tenant, $result.ResourceType, $result.ResourceName, $result.ActionType
@@ -57,7 +68,7 @@
 					}
 				}
 				"Update" {					
-					$requestUrl = "$script:graphBaseUrl/identity/conditionalAccess/namedLocations/{0}" -f $result.GraphResource.Id
+					$requestUrl = "$script:graphBaseUrl/agreements/{0}" -f $result.GraphResource.Id
 					$requestMethod = "PATCH"
 					$requestBody = @{}
 					try {
@@ -76,7 +87,7 @@
 						if ($requestBody.Keys -gt 0) {
 							$requestBody = $requestBody | ConvertTo-Json -ErrorAction Stop
 							Write-PSFMessage -Level Verbose -String "TMF.Invoke.SendingRequestWithBody" -StringValues $requestMethod, $requestUrl, $requestBody
-							Invoke-MgGraphRequest -Method $requestMethod -Uri $requestUrl -Body $requestBody
+							#Invoke-MgGraphRequest -Method $requestMethod -Uri $requestUrl -Body $requestBody
 						}
 					}
 					catch {

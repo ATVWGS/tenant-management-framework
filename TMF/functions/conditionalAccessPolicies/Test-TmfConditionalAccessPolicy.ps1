@@ -1,4 +1,4 @@
-﻿function Test-TmfNamedLocation
+﻿function Test-TmfConditionalAccessPolicy
 {
 	[CmdletBinding()]
 	Param (
@@ -9,7 +9,7 @@
 	begin
 	{
 		Test-GraphConnection -Cmdlet $Cmdlet
-		$resourceName = "namedLocations"
+		$resourceName = "conditionalAccessPolicies"
 		$tenant = Get-MgOrganization -Property displayName, Id		
 	}
 	process
@@ -25,12 +25,12 @@
 			$result = @{
 				Tenant = $tenant.displayName
 				TenantId = $tenant.Id
-				ResourceType = 'NamedLocation'
+				ResourceType = 'ConditionalAccessPolicy'
 				ResourceName = (Resolve-String -Text $definition.displayName)
 				DesiredConfiguration = $definition
 			}
 
-			$resource = (Invoke-MgGraphRequest -Method GET -Uri ("$script:graphBaseUrl/identity/conditionalAccess/namedLocations/?`$filter=displayName eq '{0}'" -f $definition.displayName)).Value
+			$resource = (Invoke-MgGraphRequest -Method GET -Uri ("$script:graphBaseUrl/identity/conditionalAccess/policies?`$filter=displayName eq '{0}'" -f $definition.displayName)).Value
 			switch ($resource.Count) {
 				0 {
 					if ($definition.present) {					
@@ -50,16 +50,32 @@
 								Actions = $null
 							}
 							switch ($property) {
-								"ipRanges" {
-									if (Compare-Object -ReferenceObject $resource.ipRanges.cidrAddress -DifferenceObject $definition.ipRanges.cidrAddress) {
-										$change.Actions = @{"Set" = $definition.ipRanges}
-									}
+								"includeUsers" {									
+									$change.Actions = (Compare-UserList -ReferenceList $resource.conditions.users.includeUsers -DifferenceList $definition.includeUsers -Cmdlet $PSCmdlet -ReturnSetAction)
 								}
-								"countriesAndRegions" {
-									if (Compare-Object -ReferenceObject $resource.countriesAndRegions -DifferenceObject $definition.countriesAndRegions) {
-										$change.Actions = @{"Set" = $definition.countriesAndRegions}
-									}
+								"excludeUsers" {
+									$change.Actions = (Compare-UserList -ReferenceList $resource.conditions.users.excludeUsers -DifferenceList $definition.excludeUsers -Cmdlet $PSCmdlet -ReturnSetAction)
 								}
+								"includeGroups" {
+									$change.Actions = (Compare-GroupList -ReferenceList $resource.conditions.users.includeGroups -DifferenceList $definition.includeGroups -Cmdlet $PSCmdlet -ReturnSetAction)
+								}
+								"excludeGroups" {
+									$change.Actions = (Compare-GroupList -ReferenceList $resource.conditions.users.excludeGroups -DifferenceList $definition.excludeGroups -Cmdlet $PSCmdlet -ReturnSetAction)
+								}
+								"includeRoles" {}
+								"includeApplications" {}
+								"excludeApplications" {}
+								"includeLocations" {}
+								"excludeLocations" {}
+								"includePlatforms" {}
+								"excludePlatforms" {}
+								"clientAppTypes" {}
+								"userRiskLevels" {}
+								"signInRiskLevels" {}
+								"buildInControls" {}
+								"customAuthenticationFactors" {}
+								"operator" {}
+								"termsOfUse" {}
 								default {
 									if ($definition.$property -ne $resource.$property) {
 										$change.Actions = @{"Set" = $definition.$property}

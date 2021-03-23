@@ -10,6 +10,7 @@
     'TMF.CannotResolveResource' = 'Cannot resolve {0} resource'    
 
     'TMF.Register.PropertySetNotPossible' = 'The provided property set for "{0}" (Type: {1}) is not applicable.'
+    'TMF.Register.PropertyWrongType' = 'The provided property set for "{0}" (Type: {1}) is not applicable. The child property {2} has the wrong type. Must be {3} and is {4}.'
 
     'TMF.Test.MultipleResourcesError' = 'There are multiple {0} with displayName {1} already created. Please clean your Tenant.'
 

@@ -4,7 +4,6 @@
 	Param (
 		[Parameter(Mandatory = $true)]
 		[string] $UserReference,
-		[Parameter(Mandatory = $true)]
 		[System.Management.Automation.PSCmdlet]
 		$Cmdlet = $PSCmdlet
 	)
@@ -20,6 +19,9 @@
 			}
 			elseif ($UserReference -match $script:upnRegex) {
 				$user = Get-MgUser -Filter "userPrincipalName eq '$UserReference'"
+			}
+			elseif ($UserReference -in @("None", "All", "GuestsOrExternalUsers")) {
+				$user = $UserReference
 			}
 			else {
 				$user = Get-MgUser -Filter "displayName eq '$UserReference'"
