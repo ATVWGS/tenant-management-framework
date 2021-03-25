@@ -16,13 +16,13 @@
 	
 	begin
 	{		
-		$componentName = "stringMappings"
-		if (!$script:desiredConfiguration[$componentName]) {
-			$script:desiredConfiguration[$componentName] = @()
+		$resourceName = "stringMappings"
+		if (!$script:desiredConfiguration[$resourceName]) {
+			$script:desiredConfiguration[$resourceName] = @()
 		}
 
-		if ($script:desiredConfiguration[$componentName].name -contains $name) {			
-			$alreadyLoaded = $script:desiredConfiguration[$componentName] | ? {$_.name -eq $name}
+		if ($script:desiredConfiguration[$resourceName].name -contains $name) {			
+			$alreadyLoaded = $script:desiredConfiguration[$resourceName] | ? {$_.name -eq $name}
 		}
 	}
 	process
@@ -36,10 +36,10 @@
 		}
 
 		if ($alreadyLoaded) {
-			$script:desiredConfiguration[$componentName][$script:desiredConfiguration[$componentName].IndexOf($alreadyLoaded)] = $object
+			$script:desiredConfiguration[$resourceName][$script:desiredConfiguration[$resourceName].IndexOf($alreadyLoaded)] = $object
 		}
 		else {
-			$script:desiredConfiguration[$componentName] += $object
+			$script:desiredConfiguration[$resourceName] += $object
 		}		
 	}
 }

@@ -24,13 +24,13 @@ function Register-TmfGroup
 	
 	begin
 	{
-		$componentName = "groups"
-		if (!$script:desiredConfiguration[$componentName]) {
-			$script:desiredConfiguration[$componentName] = @()
+		$resourceName = "groups"
+		if (!$script:desiredConfiguration[$resourceName]) {
+			$script:desiredConfiguration[$resourceName] = @()
 		}
 
-		if ($script:desiredConfiguration[$componentName].displayName -contains $displayName) {			
-			$alreadyLoaded = $script:desiredConfiguration[$componentName] | ? {$_.displayName -eq $displayName}
+		if ($script:desiredConfiguration[$resourceName].displayName -contains $displayName) {			
+			$alreadyLoaded = $script:desiredConfiguration[$resourceName] | ? {$_.displayName -eq $displayName}
 		}
 
 		if (
@@ -69,10 +69,10 @@ function Register-TmfGroup
 		Add-Member -InputObject $object -MemberType ScriptMethod -Name Properties -Value { ($this | Get-Member -MemberType NoteProperty).Name }
 
 		if ($alreadyLoaded) {
-			$script:desiredConfiguration[$componentName][$script:desiredConfiguration[$componentName].IndexOf($alreadyLoaded)] = $object
+			$script:desiredConfiguration[$resourceName][$script:desiredConfiguration[$resourceName].IndexOf($alreadyLoaded)] = $object
 		}
 		else {
-			$script:desiredConfiguration[$componentName] += $object
+			$script:desiredConfiguration[$resourceName] += $object
 		}		
 	}
 }

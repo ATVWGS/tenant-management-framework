@@ -6,8 +6,8 @@
 	
 	begin
 	{
-		$componentName = "groups"
-		if (!$script:desiredConfiguration[$componentName]) {
+		$resourceName = "groups"
+		if (!$script:desiredConfiguration[$resourceName]) {
 			Stop-PSFFunction -String "TMF.NoDefinitions" -StringValues "Group"
 			return
 		}
@@ -35,12 +35,12 @@
 					try {
 						if ($result.DesiredConfiguration.Properties() -contains "members") {
 							if ($result.DesiredConfiguration.members.count -gt 0) {
-								$requestBody["members@odata.bind"] = @($result.DesiredConfiguration.members | foreach {"$script:graphBaseUrl/users/{0}" -f (Resolve-User -UserReference $_ -Cmdlet $PSCmdlet).Id})
+								$requestBody["members@odata.bind"] = @($result.DesiredConfiguration.members | foreach {"$script:graphBaseUrl/users/{0}" -f (Resolve-User -InputReference $_ -Cmdlet $PSCmdlet).Id})
 							}
 						}
 						if ($result.DesiredConfiguration.Properties() -contains "owners") {
 							if ($result.DesiredConfiguration.owners.count -gt 0) {
-								$requestBody["owners@odata.bind"] = @($result.DesiredConfiguration.owners | foreach {"$script:graphBaseUrl/users/{0}" -f (Resolve-User -UserReference $_ -Cmdlet $PSCmdlet).Id})
+								$requestBody["owners@odata.bind"] = @($result.DesiredConfiguration.owners | foreach {"$script:graphBaseUrl/users/{0}" -f (Resolve-User -InputReference $_ -Cmdlet $PSCmdlet).Id})
 							}							
 						}
 						if ($result.DesiredConfiguration.Properties() -contains "membershipRule") {
