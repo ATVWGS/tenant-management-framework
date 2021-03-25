@@ -64,39 +64,34 @@
 							$propertyTargetResourceType = $conditionPropertyMatch.Groups[2].Value
 
 							if ($propertyTargetResourceType -in @("Users", "Groups", "Roles")) {
-								if (!$resource.conditions.users) { $referenceList = @() } else { $referenceList = $resource.conditions.users }
-								$change.Actions = Compare-ResourceList -ReferenceList $referenceList `
+								$change.Actions = Compare-ResourceList -ReferenceList $resource.conditions.users.$property `
 														-DifferenceList $($definition.$property | foreach {& $resolveFunctionMapping[$propertyTargetResourceType] -InputReference $_ -Cmdlet $Cmdlet}) `
 														-Cmdlet $PSCmdlet -ReturnSetAction
 							}
 							elseif ($propertyTargetResourceType -in $resolveFunctionMapping.Keys) {
-								if (!$resource.conditions.$($propertyTargetResourceType.toLower()).$property) { $referenceList = @() } else { $referenceList = $resource.conditions.$($propertyTargetResourceType.toLower()).$property }									
 								if ($resolveFunctionMapping[$propertyTargetResourceType] -eq "DirectCompare") {									
-									if (Compare-Object -ReferenceObject $referenceList -DifferenceObject $definition.$property) {
+									if (Compare-Object -ReferenceObject $resource.conditions.$($propertyTargetResourceType.toLower()).$property -DifferenceObject $definition.$property) {
 										$change.Actions = @{"Set" = $definition.$property}
 									}
 								}
 								else {
-									$change.Actions = Compare-ResourceList -ReferenceList $referenceList `
+									$change.Actions = Compare-ResourceList -ReferenceList $resource.conditions.$($propertyTargetResourceType.toLower()).$property `
 														-DifferenceList $($definition.$property | foreach {& $resolveFunctionMapping[$propertyTargetResourceType] -InputReference $_ -Cmdlet $Cmdlet}) `
 														-Cmdlet $PSCmdlet -ReturnSetAction
 								}								
 							}
 							elseif ($property -in @("clientAppTypes", "userRiskLevels", "signInRiskLevels")) {
-								if (!$resource.conditions.$property) { $referenceList = @() } else { $referenceList = $resource.conditions.$property }
-								if (Compare-Object -ReferenceObject $referenceList -DifferenceObject $definition.$property) {
+								if (Compare-Object -ReferenceObject $resource.conditions.$property -DifferenceObject $definition.$property) {
 									$change.Actions = @{"Set" = $definition.$property}
 								}
 							}
-							elseif ($property -in @("buildInControls", "customAuthenticationFactors")) {
-								if (!$resource.grantControls.$property) { $referenceList = @() } else { $referenceList = $resource.grantControls.$property }
-								if (Compare-Object -ReferenceObject $referenceList -DifferenceObject $definition.$property) {
+							elseif ($property -in @("builtInControls", "customAuthenticationFactors", "operator")) {
+								if (Compare-Object -ReferenceObject $resource.grantControls.$property -DifferenceObject $definition.$property) {
 									$change.Actions = @{"Set" = $definition.$property}
 								}
 							}
 							elseif ($property -eq "termsOfUse") {
-								if (!$resource.grantControls.$property) { $termsOfUse = @() } else { $termsOfUse = $resource.grantControls.$property }
-								$change.Actions = Compare-ResourceList -ReferenceList $termsOfUse `
+								$change.Actions = Compare-ResourceList -ReferenceList $resource.grantControls.$property `
 									-DifferenceList $($definition.$property | foreach {Resolve-Agreement -InputReference $_ -Cmdlet $Cmdlet}) `
 									-Cmdlet $PSCmdlet -ReturnSetAction
 							}

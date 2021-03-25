@@ -6,43 +6,66 @@
 	
 	begin
 	{
-		$resourceName = "agreements"
+		$resourceName = "conditionalAccessPolicies"
 		if (!$script:desiredConfiguration[$resourceName]) {
-			Stop-PSFFunction -String "TMF.NoDefinitions" -StringValues "Group"
+			Stop-PSFFunction -String "TMF.NoDefinitions" -StringValues "ConditionalAccessPolicy"
 			return
 		}
 		Test-GraphConnection -Cmdlet $PSCmdlet
+
+		$resolveFunctionMapping = @{
+			"Users" = (Get-Command Resolve-User)
+			"Groups" = (Get-Command Resolve-Group)
+			"Applications" = (Get-Command Resolve-Application)
+			"Roles" = (Get-Command Resolve-DirectoryRole)
+			"Locations" = (Get-Command Resolve-NamedLocation)
+			"Platforms" = "DirectCompare"
+		}
+		$conditionPropertyRegex = [regex]"^(include|exclude)($($resolveFunctionMapping.Keys -join "|"))$"
 	}
 	process
 	{
 		if (Test-PSFFunctionInterrupt) { return }
-		$testResults = Test-TmfAgreement -Cmdlet $PSCmdlet
+		$testResults = Test-TmfConditionalAccessPolicy -Cmdlet $PSCmdlet
 
 		foreach ($result in $testResults) {
 			Beautify-TmfTestResult -TestResult $result -FunctionName $MyInvocation.MyCommand
 			switch ($result.ActionType) {
 				"Create" {
-					$requestUrl = "$script:graphBaseUrl/agreements"
+					$requestUrl = "$script:graphBaseUrl/identity/conditionalAccess/policies"
 					$requestMethod = "POST"
 					$requestBody = @{						
 						"displayName" = $result.DesiredConfiguration.displayName
+						"state" = $result.DesiredConfiguration.state
+						"conditions" = @{}
 					}
 					try {
-						"isViewingBeforeAcceptanceRequired", "isPerDeviceAcceptanceRequired", "userReacceptRequiredFrequency", "termsExpiration", "files" | foreach {
-							if ($result.DesiredConfiguration.Properties() -contains "$_") {
-								switch ($_) {
-									"files" {										
-										$configPath = (Get-TmfActiveConfiguration | ? {$_.Name -eq $result.DesiredConfiguration.sourceConfig}).Path
-										$requestBody["files"] = @($result.DesiredConfiguration.files | foreach {
-											$file = $_ | select fileName, language, isDefault
-											$filePath = "{0}/agreements/{1}" -f $configPath, $_.filePath
-											$data = [Convert]::ToBase64String([System.IO.File]::ReadAllBytes($filePath))
-											Add-Member -InputObject $file -MemberType NoteProperty -Name "fileData" -Value @{ data = $data }
-											return $file
-										})
-									}
-									default { $requestBody[$_] = $result.DesiredConfiguration.$_ }
+						
+						foreach ($property in ($result.DesiredConfiguration.Properties() | Where-Object {$_ -notin @("displayName", "state", "present", "sourceConfig")})) {
+							$conditionPropertyMatch = $conditionPropertyRegex.Match($property)
+							if ($conditionPropertyMatch.Success) {
+								# Condition properties								
+								if ($conditionPropertyMatch.Groups[2].Value -in @("Users", "Groups", "Roles")) {
+									$conditionChildProperty = "users"	
+								}
+								else {
+									$conditionChildProperty = $conditionPropertyMatch.Groups[2].Value.ToLower()
+								}
+								
+								if (-Not $requestBody["conditions"][$conditionChildProperty]) { $requestBody["conditions"][$conditionChildProperty] = @{} }
+								if ($resolveFunctionMapping[$conditionPropertyMatch.Groups[2].Value] -eq "DirectCompare") {
+									$requestBody["conditions"][$conditionChildProperty][$property] = @($result.DesiredConfiguration.$property)
+								}
+								else {
+									$requestBody["conditions"][$conditionChildProperty][$property] = @($result.DesiredConfiguration.$property | foreach { & $resolveFunctionMapping[$conditionPropertyMatch.Groups[2].Value] -InputReference $_})								
 								}								
+							}
+							elseif ($property -in @("clientAppTypes", "signInRiskLevels", "userRiskLevels")) {
+								$requestBody["conditions"][$property] = $result.DesiredConfiguration.$property
+							}
+							elseif ($property -in @("operator", "builtInControls", "customAuthenticationFactors", "termsOfUse")) {
+								if (-Not $requestBody["grantControls"]) { $requestBody["grantControls"] = @{} }
+								$requestBody["grantControls"][$property] = $result.DesiredConfiguration.$property
 							}
 						}
 						
@@ -56,11 +79,11 @@
 					}
 				}
 				"Delete" {
-					$requestUrl = "$script:graphBaseUrl/agreements/{0}" -f $result.GraphResource.Id
+					$requestUrl = "$script:graphBaseUrl/identity/conditionalAccess/policies/{0}" -f $result.GraphResource.Id
 					$requestMethod = "DELETE"
 					try {
 						Write-PSFMessage -Level Verbose -String "TMF.Invoke.SendingRequest" -StringValues $requestMethod, $requestUrl
-						#Invoke-MgGraphRequest -Method $requestMethod -Uri $requestUrl
+						Invoke-MgGraphRequest -Method $requestMethod -Uri $requestUrl
 					}
 					catch {
 						Write-PSFMessage -Level Error -String "TMF.Invoke.ActionFailed" -StringValues $result.Tenant, $result.ResourceType, $result.ResourceName, $result.ActionType
@@ -68,26 +91,48 @@
 					}
 				}
 				"Update" {					
-					$requestUrl = "$script:graphBaseUrl/agreements/{0}" -f $result.GraphResource.Id
+					$requestUrl = "$script:graphBaseUrl/identity/conditionalAccess/policies/{0}" -f $result.GraphResource.Id
 					$requestMethod = "PATCH"
 					$requestBody = @{}
 					try {
-						foreach ($change in $result.Changes) {						
-							switch ($change.Property) {								
-								default {
-									foreach ($action in $change.Actions.Keys) {
-										switch ($action) {
-											"Set" { $requestBody[$change.Property] = $change.Actions[$action] }
+						foreach ($change in $result.Changes) {
+							$conditionPropertyMatch = $conditionPropertyRegex.Match($change.property)
+							foreach ($action in $change.Actions.Keys) {
+								switch ($action) {
+									"Set" {
+										if ($conditionPropertyMatch.Success) {
+											if (-Not $requestBody["conditions"]) { $requestBody["conditions"] = @{} }
+											# Condition properties								
+											if ($conditionPropertyMatch.Groups[2].Value -in @("Users", "Groups", "Roles")) {
+												$conditionChildProperty = "users"	
+											}
+											else {
+												$conditionChildProperty = $conditionPropertyMatch.Groups[2].Value.ToLower()
+											}
+											
+											if (-Not $requestBody["conditions"][$conditionChildProperty]) { $requestBody["conditions"][$conditionChildProperty] = @{} }
+											$requestBody["conditions"][$conditionChildProperty][$change.property] = @($change.Actions[$action])
+										}
+										elseif ($change.property -in @("clientAppTypes", "signInRiskLevels", "userRiskLevels")) {
+											if (-Not $requestBody["conditions"]) { $requestBody["conditions"] = @{} }
+											$requestBody["conditions"][$change.property] = $change.Actions[$action]
+										}
+										elseif ($change.property -in @("operator", "builtInControls", "customAuthenticationFactors", "termsOfUse")) {
+											if (-Not $requestBody["grantControls"]) { $requestBody["grantControls"] = @{} }
+											$requestBody["grantControls"][$change.property] = $change.Actions[$action]
+										}
+										else {
+											$requestBody[$change.property] = $change.Actions[$action]
 										}
 									}									
 								}
-							}							
+							}
 						}
 
 						if ($requestBody.Keys -gt 0) {
-							$requestBody = $requestBody | ConvertTo-Json -ErrorAction Stop
+							$requestBody = $requestBody | ConvertTo-Json -ErrorAction Stop -Depth 8
 							Write-PSFMessage -Level Verbose -String "TMF.Invoke.SendingRequestWithBody" -StringValues $requestMethod, $requestUrl, $requestBody
-							#Invoke-MgGraphRequest -Method $requestMethod -Uri $requestUrl -Body $requestBody
+							Invoke-MgGraphRequest -Method $requestMethod -Uri $requestUrl -Body $requestBody
 						}
 					}
 					catch {

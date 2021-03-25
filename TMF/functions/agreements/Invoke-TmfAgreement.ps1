@@ -8,7 +8,7 @@
 	{
 		$resourceName = "agreements"
 		if (!$script:desiredConfiguration[$resourceName]) {
-			Stop-PSFFunction -String "TMF.NoDefinitions" -StringValues "Group"
+			Stop-PSFFunction -String "TMF.NoDefinitions" -StringValues "Aggreement"
 			return
 		}
 		Test-GraphConnection -Cmdlet $PSCmdlet

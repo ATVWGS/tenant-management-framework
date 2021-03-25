@@ -15,9 +15,12 @@
 	}
 	process
 	{
+		if (-Not $DifferenceList) {$DifferenceList = @()}
+		if (-Not $ReferenceList) {$ReferenceList = @()}
+
 		if ($DifferenceList.count -eq 0 -and $ReferenceList.Count -eq 0) {
 			return
-		}
+		}		
 		
 		$compare = Compare-Object -ReferenceObject $ReferenceList -DifferenceObject $DifferenceList
 		if (-Not $compare) { return }
@@ -30,7 +33,7 @@
 			$result["Remove"] = ($compare | ? {$_.SideIndicator -eq "<="}).InputObject
 		}
 		if ($ReturnSetAction) {
-			$result["Set"] = $DifferenceList
+			$result["Set"] = @($DifferenceList)
 		}
 		return $result
 	}

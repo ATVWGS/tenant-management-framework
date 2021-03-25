@@ -8,7 +8,7 @@
 	{
 		$resourceName = "namedLocations"
 		if (!$script:desiredConfiguration[$resourceName]) {
-			Stop-PSFFunction -String "TMF.NoDefinitions" -StringValues "Group"
+			Stop-PSFFunction -String "TMF.NoDefinitions" -StringValues "Named Location"
 			return
 		}
 		Test-GraphConnection -Cmdlet $PSCmdlet
