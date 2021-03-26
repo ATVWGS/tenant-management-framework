@@ -47,6 +47,8 @@
 		'Activate-TmfConfiguration',
 		'Deactivate-TmfConfiguration',
 		'Load-TmfConfiguration',
+		'Test-TmfTenant',
+		'Invoke-TmfTenant',
 		'Register-TmfStringMapping',
 		'Register-TmfGroup',
 		'Test-TmfGroup',
@@ -57,9 +59,9 @@
 		'Register-TmfAgreement',
 		'Test-TmfAgreement',
 		'Invoke-TmfAgreement',
-		'Invoke-TmfAccessPackage',
-		'Register-TmfAccessPackage',
-		'Test-TmfAccessPackage'
+		'Register-TmfConditionalAccessPolicy',
+		'Test-TmfConditionalAccessPolicy',
+		'Invoke-TmfConditionalAccessPolicy'
 	)
 	
 	# Cmdlets to export from this module

@@ -3,31 +3,33 @@
 	[CmdletBinding()]
 	Param (
 		[Parameter(Mandatory = $true)]
-		[string] $UserReference,
-		[Parameter(Mandatory = $true)]
+		[string] $InputReference,
 		[System.Management.Automation.PSCmdlet]
 		$Cmdlet = $PSCmdlet
 	)
 	
 	begin {
-		$UserReference = Resolve-String -Text $UserReference
+		$InputReference = Resolve-String -Text $InputReference
 	}
 	process
 	{			
 		try {
-			if ($UserReference -match $script:guidRegex) {
-				$user = Get-MgUser -UserId $UserReference
+			if ($InputReference -match $script:guidRegex) {
+				$user = Get-MgUser -UserId $InputReference
 			}
-			elseif ($UserReference -match $script:upnRegex) {
-				$user = Get-MgUser -Filter "userPrincipalName eq '$UserReference'"
+			elseif ($InputReference -match $script:upnRegex) {
+				$user = Get-MgUser -Filter "userPrincipalName eq '$InputReference'"
+			}
+			elseif ($InputReference -in @("None", "All", "GuestsOrExternalUsers")) {
+				return $InputReference
 			}
 			else {
-				$user = Get-MgUser -Filter "displayName eq '$UserReference'"
+				$user = Get-MgUser -Filter "displayName eq '$InputReference'"
 			}
 			
-			if (!$user) { throw "Cannot find user $UserReference" }
-			if ($user.count -gt 1) { throw "Got multiple users for $UserReference" }
-			return $user
+			if (!$user) { throw "Cannot find user $InputReference" }
+			if ($user.count -gt 1) { throw "Got multiple users for $InputReference" }
+			return $user.Id
 		}
 		catch {
 			Write-PSFMessage -Level Warning -String 'TMF.CannotResolveResource' -StringValues "User" -Tag 'failed' -ErrorRecord $_

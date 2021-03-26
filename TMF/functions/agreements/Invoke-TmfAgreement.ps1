@@ -1,28 +1,31 @@
 ﻿function Invoke-TmfAgreement
 {
 	[CmdletBinding()]
-	Param ( )
+	Param (
+		[System.Management.Automation.PSCmdlet]
+		$Cmdlet = $PSCmdlet
+	)
 		
 	
 	begin
 	{
-		$componentName = "agreements"
-		if (!$script:desiredConfiguration[$componentName]) {
-			Stop-PSFFunction -String "TMF.NoDefinitions" -StringValues "Group"
+		$resourceName = "agreements"
+		if (!$script:desiredConfiguration[$resourceName]) {
+			Stop-PSFFunction -String "TMF.NoDefinitions" -StringValues "Aggreement"
 			return
 		}
-		Test-GraphConnection -Cmdlet $PSCmdlet
+		Test-GraphConnection -Cmdlet $Cmdlet
 	}
 	process
 	{
 		if (Test-PSFFunctionInterrupt) { return }
-		$testResults = Test-TmfAgreement -Cmdlet $PSCmdlet
+		$testResults = Test-TmfAgreement -Cmdlet $Cmdlet
 
 		foreach ($result in $testResults) {
 			Beautify-TmfTestResult -TestResult $result -FunctionName $MyInvocation.MyCommand
 			switch ($result.ActionType) {
 				"Create" {
-					$requestUrl = "$script:graphBaseUrl/agreements"
+					$requestUrl = "$script:graphBaseUrl/identityGovernance/termsOfUse/agreements"
 					$requestMethod = "POST"
 					$requestBody = @{						
 						"displayName" = $result.DesiredConfiguration.displayName
@@ -56,11 +59,11 @@
 					}
 				}
 				"Delete" {
-					$requestUrl = "$script:graphBaseUrl/agreements/{0}" -f $result.GraphResource.Id
+					$requestUrl = "$script:graphBaseUrl/identityGovernance/termsOfUse/agreements/{0}" -f $result.GraphResource.Id
 					$requestMethod = "DELETE"
 					try {
 						Write-PSFMessage -Level Verbose -String "TMF.Invoke.SendingRequest" -StringValues $requestMethod, $requestUrl
-						#Invoke-MgGraphRequest -Method $requestMethod -Uri $requestUrl
+						Invoke-MgGraphRequest -Method $requestMethod -Uri $requestUrl
 					}
 					catch {
 						Write-PSFMessage -Level Error -String "TMF.Invoke.ActionFailed" -StringValues $result.Tenant, $result.ResourceType, $result.ResourceName, $result.ActionType
@@ -68,7 +71,7 @@
 					}
 				}
 				"Update" {					
-					$requestUrl = "$script:graphBaseUrl/agreements/{0}" -f $result.GraphResource.Id
+					$requestUrl = "$script:graphBaseUrl/identityGovernance/termsOfUse/agreements/{0}" -f $result.GraphResource.Id
 					$requestMethod = "PATCH"
 					$requestBody = @{}
 					try {
@@ -87,7 +90,7 @@
 						if ($requestBody.Keys -gt 0) {
 							$requestBody = $requestBody | ConvertTo-Json -ErrorAction Stop
 							Write-PSFMessage -Level Verbose -String "TMF.Invoke.SendingRequestWithBody" -StringValues $requestMethod, $requestUrl, $requestBody
-							#Invoke-MgGraphRequest -Method $requestMethod -Uri $requestUrl -Body $requestBody
+							Invoke-MgGraphRequest -Method $requestMethod -Uri $requestUrl -Body $requestBody
 						}
 					}
 					catch {

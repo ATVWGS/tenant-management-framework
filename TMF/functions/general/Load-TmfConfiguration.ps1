@@ -20,22 +20,23 @@
 	process
 	{
 		foreach ($configuration in $configurationsToLoad) {
-			$componentDirectories = Get-ChildItem $configuration.Path -Directory
-			foreach ($componentDirectory in $componentDirectories) {				
-				if ($componentDirectory.Name -notin $script:supportedComponents.Keys) {
-					Write-PSFMessage -Level Verbose -String "Load-TmfConfiguration.NotSupportedComponent" -StringValues $componentDirectory.Name, $configuration.Name
+			$resourceDirectories = Get-ChildItem $configuration.Path -Directory
+			foreach ($resourceDirectory in $resourceDirectories) {				
+				if ($resourceDirectory.Name -notin $script:supportedResources.Keys) {
+					Write-PSFMessage -Level Verbose -String "Load-TmfConfiguration.NotSupportedComponent" -StringValues $resourceDirectory.Name, $configuration.Name
 					continue
 				}
 				
-				if (-Not $script:desiredConfiguration.ContainsKey($componentDirectory.Name)) {
-					$script:desiredConfiguration[$componentDirectory.Name] = @()
+				if (-Not $script:desiredConfiguration.ContainsKey($resourceDirectory.Name)) {
+					$script:desiredConfiguration[$resourceDirectory.Name] = @()
 				}				
-				Get-ChildItem -Path $componentDirectory.FullName -File -Filter "*.json" | foreach {
+				Get-ChildItem -Path $resourceDirectory.FullName -File -Filter "*.json" | foreach {
 					$content = Get-Content $_.FullName | ConvertFrom-Json
 					if ($content.count -gt 0) {
 						$content | foreach {
-							$component = $_ | Add-Member -NotePropertyMembers @{sourceConfig = $configuration.Name} -PassThru | ConvertTo-PSFHashtable -Include $($script:supportedComponents[$componentDirectory.Name].Parameters.Keys)
-							& $script:supportedComponents[$componentDirectory.Name] @component -Cmdlet $PSCmdlet
+							$resource = $_ | Add-Member -NotePropertyMembers @{sourceConfig = $configuration.Name} -PassThru | ConvertTo-PSFHashtable -Include $($script:supportedResources[$resourceDirectory.Name]["registerFunction"].Parameters.Keys)
+							# Calls the Register-Tmf(.*) function
+							& $script:supportedResources[$resourceDirectory.Name]["registerFunction"] @resource -Cmdlet $PSCmdlet
 						}
 					}					 
 				}
