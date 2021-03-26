@@ -2,9 +2,8 @@
 {
 	[CmdletBinding()]
 	Param (
-		[Parameter(Mandatory = $true)]
 		[System.Management.Automation.PSCmdlet]
-		$Cmdlet
+		$Cmdlet = $PSCmdlet
 	)	
 	
 	process

@@ -1,7 +1,10 @@
 ﻿function Invoke-TmfGroup
 {
 	[CmdletBinding()]
-	Param ( )
+	Param (
+		[System.Management.Automation.PSCmdlet]
+		$Cmdlet = $PSCmdlet
+	)
 		
 	
 	begin
@@ -11,12 +14,12 @@
 			Stop-PSFFunction -String "TMF.NoDefinitions" -StringValues "Group"
 			return
 		}
-		Test-GraphConnection -Cmdlet $PSCmdlet
+		Test-GraphConnection -Cmdlet $Cmdlet
 	}
 	process
 	{
 		if (Test-PSFFunctionInterrupt) { return }
-		$testResults = Test-TmfGroup -Cmdlet $PSCmdlet
+		$testResults = Test-TmfGroup -Cmdlet $Cmdlet
 
 		foreach ($result in $testResults) {
 			Beautify-TmfTestResult -TestResult $result -FunctionName $MyInvocation.MyCommand
@@ -35,12 +38,12 @@
 					try {
 						if ($result.DesiredConfiguration.Properties() -contains "members") {
 							if ($result.DesiredConfiguration.members.count -gt 0) {
-								$requestBody["members@odata.bind"] = @($result.DesiredConfiguration.members | foreach {"$script:graphBaseUrl/users/{0}" -f (Resolve-User -InputReference $_ -Cmdlet $PSCmdlet).Id})
+								$requestBody["members@odata.bind"] = @($result.DesiredConfiguration.members | foreach {"$script:graphBaseUrl/users/{0}" -f (Resolve-User -InputReference $_ -Cmdlet $Cmdlet)})
 							}
 						}
 						if ($result.DesiredConfiguration.Properties() -contains "owners") {
 							if ($result.DesiredConfiguration.owners.count -gt 0) {
-								$requestBody["owners@odata.bind"] = @($result.DesiredConfiguration.owners | foreach {"$script:graphBaseUrl/users/{0}" -f (Resolve-User -InputReference $_ -Cmdlet $PSCmdlet).Id})
+								$requestBody["owners@odata.bind"] = @($result.DesiredConfiguration.owners | foreach {"$script:graphBaseUrl/users/{0}" -f (Resolve-User -InputReference $_ -Cmdlet $Cmdlet)})
 							}							
 						}
 						if ($result.DesiredConfiguration.Properties() -contains "membershipRule") {

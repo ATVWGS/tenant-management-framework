@@ -4,7 +4,7 @@
 	Param (
 		[Parameter(Mandatory = $true, ValueFromPipeline = $true)]
 		[object] $TestResult,
-		[string] $FunctionName = "Tenant Management Framework",
+		[string] $FunctionName = "TMF",
 		[switch] $DoNotShowPropertyChanges
 	)
 	

@@ -1,7 +1,10 @@
 ﻿function Invoke-TmfAgreement
 {
 	[CmdletBinding()]
-	Param ( )
+	Param (
+		[System.Management.Automation.PSCmdlet]
+		$Cmdlet = $PSCmdlet
+	)
 		
 	
 	begin
@@ -11,12 +14,12 @@
 			Stop-PSFFunction -String "TMF.NoDefinitions" -StringValues "Aggreement"
 			return
 		}
-		Test-GraphConnection -Cmdlet $PSCmdlet
+		Test-GraphConnection -Cmdlet $Cmdlet
 	}
 	process
 	{
 		if (Test-PSFFunctionInterrupt) { return }
-		$testResults = Test-TmfAgreement -Cmdlet $PSCmdlet
+		$testResults = Test-TmfAgreement -Cmdlet $Cmdlet
 
 		foreach ($result in $testResults) {
 			Beautify-TmfTestResult -TestResult $result -FunctionName $MyInvocation.MyCommand

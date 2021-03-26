@@ -1,7 +1,10 @@
 ﻿function Invoke-TmfNamedLocation
 {
 	[CmdletBinding()]
-	Param ( )
+	Param (
+		[System.Management.Automation.PSCmdlet]
+		$Cmdlet = $PSCmdlet
+	)
 		
 	
 	begin
@@ -11,12 +14,12 @@
 			Stop-PSFFunction -String "TMF.NoDefinitions" -StringValues "Named Location"
 			return
 		}
-		Test-GraphConnection -Cmdlet $PSCmdlet
+		Test-GraphConnection -Cmdlet $Cmdlet
 	}
 	process
 	{
 		if (Test-PSFFunctionInterrupt) { return }
-		$testResults = Test-TmfNamedLocation -Cmdlet $PSCmdlet
+		$testResults = Test-TmfNamedLocation -Cmdlet $Cmdlet
 
 		foreach ($result in $testResults) {
 			Beautify-TmfTestResult -TestResult $result -FunctionName $MyInvocation.MyCommand

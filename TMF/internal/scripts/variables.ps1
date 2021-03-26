@@ -33,11 +33,10 @@ $script:supportedResources = @{
         "registerFunction" = (Get-Command Register-TmfConditionalAccessPolicy)
         "testFunction" = (Get-Command Test-TmfConditionalAccessPolicy)
         "invokeFunction" = (Get-Command Invoke-TmfConditionalAccessPolicy)
-        "weight" = 20
+        "weight" = 50
     }
 } # All currently supported components.
 Set-Variable -Name supportedResources -Option ReadOnly
 
 $script:activatedConfigurations = @() # Overview of all activated configurations.
-
 $script:desiredConfiguration = @{} # The desired configuration.
