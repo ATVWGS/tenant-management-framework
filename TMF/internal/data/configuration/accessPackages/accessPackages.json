@@ -1,1 +1,77 @@
-[]
+[{
+    "accessPackage":{
+        "displayName": "Access Package",
+        "catalogId": "Role Assignment",
+        "isHidden": false,
+        "isRoleScopesVisible": false
+    },
+    "catalog": {
+        "displayName": "Role Assignment",
+        "description": "Description",
+        "isExternallyVisible": true
+    },
+    "policy": {
+        "displayName": "Policy Name",
+        "description": "Description",
+        "canExtend": false,
+        "durationInDays": 7,
+        "accessReviewSettings": { 
+            "isEnabled": true,
+            "recurrenceType": "monthly",
+            "reviewerType": "Reviewers",
+            "durationInDays": 14,
+        "reviewers": [
+            {
+                "@odata.type": "#microsoft.graph.groupMembers",
+                "isBackup": true,
+                "id": "b2409980-78d3-4214-b6d3-93bf3ff868f3"
+            }
+        ]
+    },
+        "requestorSettings":{
+            "scopeType": "",
+            "acceptRequests": true,
+            "allowedRequestors":[
+                {
+                "@odata.type": "",
+                "isBackup": true,
+                "id": 123
+                },
+                {
+                "@odata.type": "",
+                "isBackup": true,
+                "id": 123
+                }
+            ]
+
+        },
+        "requestApprovalSettings":{
+            "isApprovalRequired": true,
+            "isApprovalRequiredForExtension": true,
+            "isRequestorJustificationRequired": true,
+            "approvalMode": "SingleStage",
+            "approvalStages": {
+                "approvalStageTimeOutInDays":  14,
+                "isApproverJustificationRequired": false,
+                "isEscalationEnabled": false,
+                "escalationTimeInMinutes": 0,
+                "primaryApprovers": [
+                    {
+                    "@odata.type": "",
+                    "isBackup": true,
+                    "id": ""
+                    }
+                ],
+                "escalationApprovers":[
+                    {
+                        "@odata.type": "",
+                        "isBackup": true,
+                        "id": ""
+                    }
+                ]
+                }
+        },
+        "questions": {}
+    }
+}
+]

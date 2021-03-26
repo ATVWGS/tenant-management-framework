@@ -56,7 +56,10 @@
 		'Invoke-TmfNamedLocation',
 		'Register-TmfAgreement',
 		'Test-TmfAgreement',
-		'Invoke-TmfAgreement'
+		'Invoke-TmfAgreement',
+		'Invoke-TmfAccessPackage',
+		'Register-TmfAccessPackage',
+		'Test-TmfAccessPackage'
 	)
 	
 	# Cmdlets to export from this module

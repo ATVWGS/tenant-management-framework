@@ -35,7 +35,10 @@
 		} 
 		if ($Agreements -or $All) {
 			$scopes += "Agreement.ReadWrite.All"
-		} 
+		}
+		if ($AccessPackages -or $All) {
+			$scopes += "EntitlementManagement.ReadWrite.All"
+		}
 		
 		return ($scopes | Sort-Object -Unique)
 	}
