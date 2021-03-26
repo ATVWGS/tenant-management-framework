@@ -1,8 +1,10 @@
 ﻿function Invoke-TmfConditionalAccessPolicy
 {
 	[CmdletBinding()]
-	Param ( )
-		
+	Param (
+		[System.Management.Automation.PSCmdlet]
+		$Cmdlet = $PSCmdlet
+	)
 	
 	begin
 	{
@@ -11,7 +13,7 @@
 			Stop-PSFFunction -String "TMF.NoDefinitions" -StringValues "ConditionalAccessPolicy"
 			return
 		}
-		Test-GraphConnection -Cmdlet $PSCmdlet
+		Test-GraphConnection -Cmdlet $Cmdlet
 
 		$resolveFunctionMapping = @{
 			"Users" = (Get-Command Resolve-User)
@@ -26,7 +28,7 @@
 	process
 	{
 		if (Test-PSFFunctionInterrupt) { return }
-		$testResults = Test-TmfConditionalAccessPolicy -Cmdlet $PSCmdlet
+		$testResults = Test-TmfConditionalAccessPolicy -Cmdlet $Cmdlet
 
 		foreach ($result in $testResults) {
 			Beautify-TmfTestResult -TestResult $result -FunctionName $MyInvocation.MyCommand

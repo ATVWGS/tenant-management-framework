@@ -4,12 +4,14 @@
 
     'TMF.ConfigurationFileNotFound' = 'Can not find configuration file {0}.'
     'TMF.RegisterComponent.AlreadyLoaded' = 'A {0} with name "{1}" from source configuration {2} has already been loaded. Ignoring {0}.'
-    'TMF.TenantInformation' = 'Currently connected to <c="gray">{0}</c> (<c="gray">{1}</c>)'
+    'TMF.TenantInformation' = 'Currently connected to <c="red">{0}</c> (<c="gray">{1}</c>)'
     'TMF.StartingTestForResource' = 'Starting tests for <c="yellow">{0}</c>'
+    'TMF.StartingInvokeForResource' = 'Invoking <c="yellow">{0}</c>'
     'TMF.TestResult.BeautifySimple' = '[Tenant: <c="gray">{0}</c>][{2} Resource: <c="gray">{1}</c>] Required Action (<c="{4}">{3}</c>)'
     'TMF.TestResult.BeautifyPropertyChange' = ' > [<c="gray">{1}</c>][Property: <c="green">(</c><c="gray">{3}</c><c="green">)</c>] Action: (<c="yellow">{4}</c>) Value: (<c="gray">{5}</c>)'    
     'TMF.NoDefinitions' = 'No <c="gray">{0}</c> definitions are loaded. There is nothing to do.'
     'TMF.CannotResolveResource' = 'Cannot resolve {0} resource'
+    'TMF.UserCanceled' = 'User canceled the operation.'
 
     'TMF.Register.PropertySetNotPossible' = 'The provided property set for "{0}" (Type: {1}) is not applicable.'
     'TMF.Register.PropertyWrongType' = 'The provided property set for "{0}" (Type: {1}) is not applicable. The child property {2} has the wrong type. Must be {3} and is {4}.'
