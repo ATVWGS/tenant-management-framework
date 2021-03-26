@@ -4,25 +4,45 @@ function Register-TmfAccessPackage
 	Param (
 		[Parameter(Mandatory = $true)]
 		[string] $displayName,
+		[string] $description = "Access Package has been created with Tenant Management Framework",
+		[bool] $isHidden = $false,
+		[bool] $isRoleScopesVisible = $true,
+
 		[Parameter(Mandatory = $true)]
 		[string] $catalogDisplayName,
+		[string] $catalogDescription = "Catalog has been created with Tenant Management Framework",
+		[bool] $isExternallyVisible = $true,
 
-		
 		[Parameter(Mandatory = $true)]
-		[ValidateSet('countryNamedLocation', 'ipNamedLocation')]
-		[string] $type = "ipNamedLocation",
-		
-		[Parameter(Mandatory = $true, ParameterSetName = "IPRanges")]
-		[object[]] $ipRanges,
-		[Parameter(ParameterSetName = "IPRanges")]
-		[bool] $isTrusted = $false,
-		[Parameter(Mandatory = $true, ParameterSetName = "Country")]
-		[string[]] $countriesAndRegions,
-		[Parameter(ParameterSetName = "Country")]
-		[bool] $includeUnknownCountriesAndRegions = $false,
+		[string] $policyDisplayName,
+		[string] $policyDescription,
+		[bool] $canExtend = $false,
+		[Parameter(Mandatory = $true)]
+		[int] $durationInDays,
+
+		[bool] $accessReviewIsEnabled = $false,
+		[String] $accessReviewRecurrenceType = "monthly", # validation
+		[String] $accessReviewReviewerType = "Reviewer",
+		[int] $accessReviewDurationInDays = 14,
+		[string[]] $accessReviewReviewer,
+
+		[string] $requestorScopeType = "SpecificDirectorySubjects",
+		[bool] $acceptRequests = $false,
+		[string[]] $allowedRequestors,
+
+		[bool] $isApprovalRequired = $true,
+		[bool] $isApprovalRequiredForExtension = $true,
+		[bool] $isRequestorJustificationRequire = $true,
+		[string] $approvalMode = "SingleStage",
+		[int] $approvalStageTimeOutInDays = 14,
+		[bool] $isApproverJustificationRequired = $false,
+		[bool] $isEscalationEnabled = $false,
+		[bool] $escalationTimeInMinutes = "2880",
+		[string[]] $primaryApprovers,
+		[string[]] $escalationApprovers,
+		[string[]] $questions,
 
 		[bool] $present = $true,		
-
 		[string] $sourceConfig = "<Custom>",
 
 		[System.Management.Automation.PSCmdlet]
@@ -64,26 +84,32 @@ function Register-TmfAccessPackage
 			"canExtend"= $canExtend
 			"durationInDays"= $durationInDays
 			"accessReviewSettings"= @{
-				"isEnabled" = $true
-				"recurrenceType" = "monthly"
-				"reviewerType" = "Reviewers"
-				"durationInDays" = 14
-				"reviewers" = $result.DesiredConfiguration.policy.reviewers
+				"isEnabled" = $accessReviewIsEnabled
+				"recurrenceType" = $accessReviewRecurrenceType
+				"reviewerType" = $accessReviewReviewerType
+				"durationInDays" = $accessReviewDurationInDays
+				"reviewers" = $accessReviewReviewer
+				{
+					#
+				}
 			"requestorSettings"= @{
-				"scopeType"= $result.DesiredConfiguration.policy.scopeType
-				"acceptRequests"= $result.DesiredConfiguration.policy.acceptRequests
-				"allowedRequestors"= $result.DesiredConfiguration.policy.requestorSettings.allowedRequestors
+				"scopeType"= $equestorScopeType
+				"acceptRequests"= $equestorAcceptRequests
+				"allowedRequestors"= $allowedRequestors
+				{
+					#
+				}
 			}
 			"requestApprovalSettings"= @{
-				"isApprovalRequired"= $true
-				"isApprovalRequiredForExtension"= $false
-				"isRequestorJustificationRequired"= $true
-				"approvalMode"= "SingleStage"
+				"isApprovalRequired"= $isApprovalRequired
+				"isApprovalRequiredForExtension"= $isApprovalRequiredForExtension
+				"isRequestorJustificationRequired"= $isRequestorJustificationRequired
+				"approvalMode"= $approvalMode
 				"approvalStages"= @{
-						"approvalStageTimeOutInDays"= 14
-						"isApproverJustificationRequired"= $false
-						"isEscalationEnabled"= $false
-						"escalationTimeInMinutes"= 0
+						"approvalStageTimeOutInDays"= $approvalStageTimeOutInDays
+						"isApproverJustificationRequired"= $isApproverJustificationRequired
+						"isEscalationEnabled"= $isEscalationEnabled
+						"escalationTimeInMinutes"= $escalationTimeInMinutes
 						"primaryApprovers"= @([PSCustomObject]@{
 								"@odata.type"= $result.DesiredConfiguration.policy.primaryApprovers.odataType
 								"isBackup"= $true
@@ -101,6 +127,15 @@ function Register-TmfAccessPackage
 			"questions"= $questions
 			}
 		}
+		}
+
+		@(
+			"accessReviewReviewer", "allowedRequestors", "primaryApprovers", "escalationApprovers",
+			"questions"
+		) | foreach {
+			if ($PSBoundParameters.ContainsKey($_)) {			
+				Add-Member -InputObject $object -MemberType NoteProperty -Name $_ -Value $PSBoundParameters[$_]
+			}
 		}
 	
 		Add-Member -InputObject $object -MemberType ScriptMethod -Name Properties -Value { ($this | Get-Member -MemberType NoteProperty).Name }
