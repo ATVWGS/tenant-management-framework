@@ -3,6 +3,38 @@
 	<#
 		.SYNOPSIS
 			Returns required Microsoft Graph permission scopes.
+
+		.DESCRIPTION
+			Depending on the resources you want to configure, different Microsoft Graph
+			permission scopes are required. This command returns the required scopes.
+
+		.PARAMETER All
+			Return all scopes that TMF requires.
+
+		.PARAMETER Groups
+			Return all scopes required for managing group-resources.
+
+		.PARAMETER Users
+			Return all scopes required for managing user-resources.
+		
+		.PARAMETER NamedLocations
+			Return all scopes required for managing namedLocation-resources.
+		
+		.PARAMETER Agreements
+			Return all scopes required for managing agreement-resources.
+		
+		.PARAMETER ConditionalAccessPolicies
+			Return all scopes required for managing conditionalAccessPolicy-resources.
+		
+		.EXAMPLE
+			PS> Connect-MgGraph -Scopes (Get-TMFRequiredScope -Groups)
+
+			Requests access to Microsoft Graph with all required scopes for changes to group-resources.
+		
+		.EXAMPLE
+			PS> Connect-MgGraph -Scopes (Get-TMFRequiredScope -All)
+
+			Requests access to Microsoft Graph with access to all resources the TMF can handle.
 	#>
 	[CmdletBinding(DefaultParameterSetName = 'All')]
 	Param (

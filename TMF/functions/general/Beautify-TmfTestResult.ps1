@@ -3,12 +3,16 @@
 	<#
 		.SYNOPSIS
 			Beautifies the returned output of the Test-TmfRESOURCE functions.
+
 		.PARAMETER TestResult
 			The input test result object.
+
 		.PARAMETER FunctionName
 			Name of the function which returned the output.
+
 		.PARAMETER DoNotShowPropertyChanges
 			Do not print property changes from the test result object.
+
 		.EXAMPLE
 			PS> Test-TmfGroup | Beautify-TmfTestResult
 	#>

@@ -2,7 +2,7 @@
 {
 	<#
 		.SYNOPSIS
-			Return currently activated configurations.
+			Returns currently activated configurations.
 	#>
 	[CmdletBinding()]
 	Param (
