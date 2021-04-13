@@ -1,5 +1,36 @@
 ﻿function Deactivate-TmfConfiguration
 {
+	<#
+		.SYNOPSIS
+			Deactivate already TMF configuration.
+
+		.DESCRIPTION
+			Deactivate configurations you don't want to apply to your tenant. Only activated configuration will be considered when testing or invoking configurations.
+
+		.PARAMETER Name
+			Provide the name of the TMF configuration to deactivate.
+
+		.PARAMETER Path
+			Provide a path to the TMF configuration to deactivate.
+
+		.PARAMETER All
+			Deactivate all configurations currently activated.
+
+		.EXAMPLE
+			PS> Deactivate-TmfConfiguration -Path "C:\Temp\SomeConfiguration"
+			
+			Deactivates the configuration in path C:\Temp\SomeConfiguration.
+		
+		.EXAMPLE
+			PS> Deactivate-TmfConfiguration -Name "SomeConfiguration"
+			
+			Deactivates the configuration with name "SomeConfiguration".
+		
+		.EXAMPLE
+			PS> Deactivate-TmfConfiguration -All
+			
+			Deactivates all configurations.
+	#>
 	[CmdletBinding(DefaultParameterSetName = 'Name')]
 	Param (
 		[Parameter(Mandatory = $true, ParameterSetName = "Name")]

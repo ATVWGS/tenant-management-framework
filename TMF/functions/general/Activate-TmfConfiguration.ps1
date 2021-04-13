@@ -1,13 +1,26 @@
 ﻿function Activate-TmfConfiguration
 {
 	<#
+		.SYNOPSIS
+			Activates already created TMF configurations.
+
+		.DESCRIPTION
+			Activate configurations you want to apply to your tenant. An activated configuration will be considered when testing or invoking configurations.
+
 		.PARAMETER ConfigurationPaths
 			One or more paths to Tenant Management Framework configuration directories can be provided.
+
 		.PARAMETER Force
 			Overwrite already loaded configurations.
+
 		.PARAMETER DoNotLoad
 			Do not load resource definitions after activating.
-	
+
+		.EXAMPLE
+			PS> Activate-TmfConfiguration -ConfigurationPaths "C:\Temp\SomeConfiguration"
+			
+			Activates the configuration in path C:\Temp\SomeConfiguration.
+
 	#>
 	[CmdletBinding()]
 	Param (
