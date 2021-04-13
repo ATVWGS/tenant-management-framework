@@ -49,7 +49,7 @@
 			}
 
 			$contentDummy = Get-Content $configuration.filePath | ConvertFrom-Json -ErrorAction Stop
-			$contentDummy | Get-Member -MemberType NoteProperty | foreach {
+			$contentDummy | Get-Member -MemberType NoteProperty | ForEach-Object {
 				Add-Member -InputObject $configuration -MemberType NoteProperty -Name $_.Name -Value $contentDummy.$($_.Name)
 			}
 			$configuration.alreadyActivated = $script:activatedConfigurations.Name -contains $configuration.Name
@@ -76,7 +76,7 @@
 			}
 
 			Write-PSFMessage -Level Host -String "Activate-TMFConfiguration.Activating" -StringValues $configuration.Name, $configuration.filePath -NoNewLine			
-			$script:activatedConfigurations += $configuration | select Name, @{Name = "Path"; Expression = {$_.directoryPath}}, Description, Author, Weight, Prerequisite
+			$script:activatedConfigurations += $configuration | Select-Object Name, @{Name = "Path"; Expression = {$_.directoryPath}}, Description, Author, Weight, Prerequisite
 			Write-PSFHostColor -String ' [<c="green">DONE</c>]'
 		}
 
