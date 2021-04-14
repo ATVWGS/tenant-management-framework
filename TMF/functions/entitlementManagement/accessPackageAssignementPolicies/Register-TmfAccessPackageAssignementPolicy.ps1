@@ -1,21 +1,13 @@
-function Register-TmfAccessPackage
+function Register-TmfAccessPackageAssignementPolicy
 {
-	[CmdletBinding(DefaultParameterSetName = 'IPRanges')]
+	[CmdletBinding()]
 	Param (
 		[Parameter(Mandatory = $true)]
 		[string] $displayName,
 		[string] $description = "Access Package has been created with Tenant Management Framework",
-		[bool] $isHidden = $false,
-		[bool] $isRoleScopesVisible = $true,
-
 		[Parameter(Mandatory = $true)]
-		[string] $catalogDisplayName,
-		[string] $catalogDescription = "Catalog has been created with Tenant Management Framework",
-		[bool] $isExternallyVisible = $true,
+		[string] $accessPackage,
 
-		[Parameter(Mandatory = $true)]
-		[string] $policyDisplayName,
-		[string] $policyDescription,
 		[bool] $canExtend = $false,
 		[Parameter(Mandatory = $true)]
 		[int] $durationInDays,
@@ -26,6 +18,7 @@ function Register-TmfAccessPackage
 		[int] $accessReviewDurationInDays = 14,
 		[string[]] $accessReviewer,
 
+		[ValidateSet("NoSubjects", "SpecificDirectorySubjects", "SpecificConnectedOrganizationSubjects", "AllConfiguredConnectedOrganizationSubjects", "AllExistingConnectedOrganizationSubjects", "AllExistingDirectoryMemberUsers", "AllExistingDirectorySubjects", "AllExternalSubjects")]
 		[string] $requestorScopeType = "SpecificDirectorySubjects",
 		[bool] $acceptRequests = $false,
 		[string[]] $allowedRequestors,
@@ -51,7 +44,7 @@ function Register-TmfAccessPackage
 	
 	begin
 	{
-		$resourceName = "accessPackages"
+		$resourceName = "accessPackageAssignementPolicies"
 		if (!$script:desiredConfiguration[$resourceName]) {
 			$script:desiredConfiguration[$resourceName] = @()
 		}
@@ -65,48 +58,42 @@ function Register-TmfAccessPackage
 	{
 		if (Test-PSFFunctionInterrupt) { return }				
 
-		$object = [PSCustomObject]@{
-		
-		displayName = $displayName
-		description = $description
-		isHidden = $isHidden
-		isRoleScopesVisible = $isRoleScopesVisible
-		
-		catalogDisplayName = $catalogDisplayName
-        catalogDescription = $catalogDescription
-        isExternallyVisible = $isExternallyVisible
-		
-		policyDisplayName = $policyDisplayName
-		policyDescription = $policyDescription
-		canExtend = $canExtend
-		durationInDays = $durationInDays
-		accessRevieIsEnabled = $accwessRevieIsEnabled
-		accessReviewRecurrenceType = $accessReviewRecurrenceType
-		
-		accessReviewReviewerType = $accessReviewReviewerType
-		accessReviewDurationInDays = $accessReviewDurationInDays
+		$object = [PSCustomObject]@{		
+			displayName = $displayName
+			description = $description
+			accessPackage = $accessPackage
+			isHidden = $isHidden
+			isRoleScopesVisible = $isRoleScopesVisible
+			
+			catalogDisplayName = $catalogDisplayName
+			catalogDescription = $catalogDescription
+			isExternallyVisible = $isExternallyVisible
+			
+			policyDisplayName = $policyDisplayName
+			policyDescription = $policyDescription
+			canExtend = $canExtend
+			durationInDays = $durationInDays
+			accessRevieIsEnabled = $accwessRevieIsEnabled
+			accessReviewRecurrenceType = $accessReviewRecurrenceType
+			
+			accessReviewReviewerType = $accessReviewReviewerType
+			accessReviewDurationInDays = $accessReviewDurationInDays
 
+			requestorScopeType = $requestorScopeType
+			requestorAcceptRequests = $requestorAcceptRequests
 
-		requestorScopeType = $requestorScopeType
-		requestorAcceptRequests = $requestorAcceptRequests
-
-
-		isApprovalRequired = $isApprovalRequired
-		isApprovalRequiredForExtension = $isApprovalRequiredForExtension
-		isRequestorJustificationRequired = $isRequestorJustificationRequired
-		approvalMode = $approvalMode
-		approvalStageTimeOutInDays = $approvalStageTimeOutInDays
-		isApproverJustificationRequired = $isApproverJustificationRequired
-		isEscalationEnabled = $isEscalationEnabled
-		escalationTimeInMinutes = $escalationTimeInMinutes
-
-
-
+			isApprovalRequired = $isApprovalRequired
+			isApprovalRequiredForExtension = $isApprovalRequiredForExtension
+			isRequestorJustificationRequired = $isRequestorJustificationRequired
+			approvalMode = $approvalMode
+			approvalStageTimeOutInDays = $approvalStageTimeOutInDays
+			isApproverJustificationRequired = $isApproverJustificationRequired
+			isEscalationEnabled = $isEscalationEnabled
+			escalationTimeInMinutes = $escalationTimeInMinutes
 		}
 
 		@(
-			"accessReviewer", "allowedRequestors", "primaryApprovers", "escalationApprovers",
-			"questions"
+			"accessReviewer", "allowedRequestors", "primaryApprovers", "escalationApprovers", "questions"
 		) | foreach {
 			if ($PSBoundParameters.ContainsKey($_)) {			
 				Add-Member -InputObject $object -MemberType NoteProperty -Name $_ -Value $PSBoundParameters[$_]
@@ -121,7 +108,5 @@ function Register-TmfAccessPackage
 		else {
 			$script:desiredConfiguration[$resourceName] += $object
 		}
-		
-		write-host $script:desiredConfiguration[$resourceName]
 	}
 }

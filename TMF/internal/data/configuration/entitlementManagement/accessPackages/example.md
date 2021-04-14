@@ -29,14 +29,61 @@
 
 ```json
 {
+    "displayName" : "Access Package",
+    "description" : "description",
+    "isHidden" : true,
+    "isRoleScopesVisible" : true,
+    "catalog": "General",
+    
+    "accessPackageResources" : [
+        {
+            "displayName": "Some group",
+            "originSystem": "AadGroup",
+            "resourceRole": "Member"
+        }
+    ],
+    "assignementPolicies" : [
+        {
+            "displayName" : "policyDisplayName",
+            "description" : "policyDescription",
+            "canExtend" : false,
+            "durationInDays" : 14,
+            
+            "accessRevieIsEnabled" : true,
+            "accessReviewRecurrenceType" : "monthly",
+            "accessReviewReviewerType" : "Reviewer",
+            "accessReviewDurationInDays" : 14,
+            "accessReviewer" : ["Some group"],
+            
+            "requestorScopeType" : "SpecificDirectorySubjects",
+            "requestorAcceptRequests" : false,
+            "allowedRequestors" : ["Some group"],
+            
+            "isApprovalRequired" : true,
+            "isApprovalRequiredForExtension" : true,
+            "isRequestorJustificationRequired" : true,
+            "approvalMode" : "SingleStage",
+            "approvalStageTimeOutInDays" : 14,
+            "isApproverJustificationRequired" : false,
+            "isEscalationEnabled" : true,
+            "escalationTimeInMinutes" : 2880,
+            "primaryApprovers" : ["Some group"],
+            "escalationApprovers" : ["Some group"],
+            "questions" : [""]
+        }
+    ]    
+}
+```
+
+
+
+```json
+{
     "displayName" : "Test",
     "description" : "description",
     "isHidden" : true,
     "isRoleScopesVisible" : true,
     
-    "catalogDisplayName" : "Catalog",
-    "catalogDescription" : "catalogDescription",
-    "isExternallyVisible" : true,
     
     "policyDisplayName" : "policyDisplayName",
     "policyDescription" : "policyDescription",
