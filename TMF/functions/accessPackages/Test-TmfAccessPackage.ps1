@@ -9,13 +9,19 @@ function Test-TmfAccessPackage
 	begin
 	{
 		Test-GraphConnection -Cmdlet $Cmdlet
-		$componentName = "accessPackages"
-		$tenant = Get-MgOrganization -Property displayName, Id		
+		$resourceName = "accessPackages"
+		$tenant = Get-MgOrganization -Property displayName, Id
+		
+		$resolveFunctionMapping = @{
+			"Users" = (Get-Command Resolve-User)
+			"Groups" = (Get-Command Resolve-Group)
+			
+		}
 	}
 	process
 	{
 		$results = @()
-		foreach ($definition in $script:desiredConfiguration[$componentName]) {
+		foreach ($definition in $script:desiredConfiguration[$resourceName]) {
 			foreach ($property in $definition.Properties()) {
 				if ($definition.$property.GetType().Name -eq "String") {
 					$definition.$property = Resolve-String -Text $definition.$property
@@ -30,7 +36,7 @@ function Test-TmfAccessPackage
 				DesiredConfiguration = $definition
 			}
 
-			$resource = (Invoke-MgGraphRequest -Method GET -Uri ("$script:graphBaseUrl/identity/conditionalAccess/namedLocations/?`$filter=displayName eq '{0}'" -f $definition.displayName)).Value
+			$resource = (Invoke-MgGraphRequest -Method GET -Uri ("$script:graphBaseUrl/identityGovernanace/entitlementManagement/accessPackages?`$filter=displayName eq '{0}'" -f $definition.displayName)).Value
 			switch (0) {
 				0 {
 					if ($definition.present) {					
@@ -49,6 +55,7 @@ function Test-TmfAccessPackage
 								Property = $property										
 								Actions = $null
 							}
+
 							switch ($property) {
 								"ipRanges" {
 									if (Compare-Object -ReferenceObject $resource.ipRanges.cidrAddress -DifferenceObject $definition.ipRanges.cidrAddress) {
@@ -77,7 +84,7 @@ function Test-TmfAccessPackage
 					}
 				}
 				default {
-					Write-PSFMessage -Level Warning -String 'TMF.Test.MultipleResourcesError' -StringValues $componentName, $definition.displayName -Tag 'failed'
+					Write-PSFMessage -Level Warning -String 'TMF.Test.MultipleResourcesError' -StringValues $resourceName, $definition.displayName -Tag 'failed'
 					$exception = New-Object System.Data.DataException("Query returned multiple results. Cannot decide which resource to test.")
 					$errorID = 'MultipleResourcesError'
 					$category = [System.Management.Automation.ErrorCategory]::NotSpecified

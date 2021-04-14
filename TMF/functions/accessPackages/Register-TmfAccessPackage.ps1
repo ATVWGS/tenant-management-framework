@@ -1,6 +1,6 @@
 function Register-TmfAccessPackage
 {
-	[CmdletBinding(DefaultParameterSetName = 'Default')]
+	[CmdletBinding(DefaultParameterSetName = 'IPRanges')]
 	Param (
 		[Parameter(Mandatory = $true)]
 		[string] $displayName,
@@ -24,7 +24,7 @@ function Register-TmfAccessPackage
 		[String] $accessReviewRecurrenceType = "monthly", # validation
 		[String] $accessReviewReviewerType = "Reviewer",
 		[int] $accessReviewDurationInDays = 14,
-		[string[]] $accessReviewReviewer,
+		[string[]] $accessReviewer,
 
 		[string] $requestorScopeType = "SpecificDirectorySubjects",
 		[bool] $acceptRequests = $false,
@@ -37,7 +37,7 @@ function Register-TmfAccessPackage
 		[int] $approvalStageTimeOutInDays = 14,
 		[bool] $isApproverJustificationRequired = $false,
 		[bool] $isEscalationEnabled = $false,
-		[bool] $escalationTimeInMinutes = "2880",
+		[int] $escalationTimeInMinutes = 2880,
 		[string[]] $primaryApprovers,
 		[string[]] $escalationApprovers,
 		[string[]] $questions,
@@ -51,13 +51,13 @@ function Register-TmfAccessPackage
 	
 	begin
 	{
-		$componentName = "accessPackages"
-		if (!$script:desiredConfiguration[$componentName]) {
-			$script:desiredConfiguration[$componentName] = @()
+		$resourceName = "accessPackages"
+		if (!$script:desiredConfiguration[$resourceName]) {
+			$script:desiredConfiguration[$resourceName] = @()
 		}
 
-		if ($script:desiredConfiguration[$componentName].displayName -contains $displayName) {			
-			$alreadyLoaded = $script:desiredConfiguration[$componentName] | ? {$_.displayName -eq $displayName}
+		if ($script:desiredConfiguration[$resourceName].displayName -contains $displayName) {			
+			$alreadyLoaded = $script:desiredConfiguration[$resourceName] | ? {$_.displayName -eq $displayName}
 		}
 
 	}
@@ -66,71 +66,46 @@ function Register-TmfAccessPackage
 		if (Test-PSFFunctionInterrupt) { return }				
 
 		$object = [PSCustomObject]@{
-		"accessPackage"=[PSCustomObject]@{
-			"catalogId" = Resolve-AccessPackageCatalog -AccesPackageCatalogReference $catalogDisplayName
-			"displayName" = $displayName
-			"description" = $description
-			"isHidden" = $isHidden
-			"isRoleScopesVisible" = $isRoleScopesVisible
-		}
-		"catalog"= [PSCustomObject]@{
-			"displayName" = $catalogDisplayName
-            "description" = $catalogDescription
-            "isExternallyVisible" = $isExternallyVisible
-		}
-		"policy" =[PSCustomObject]@{
-			"displayName" = $policyDisplayName
-			"description"= $policyDescription
-			"canExtend"= $canExtend
-			"durationInDays"= $durationInDays
-			"accessReviewSettings"= @{
-				"isEnabled" = $accessReviewIsEnabled
-				"recurrenceType" = $accessReviewRecurrenceType
-				"reviewerType" = $accessReviewReviewerType
-				"durationInDays" = $accessReviewDurationInDays
-				"reviewers" = $accessReviewReviewer
-				{
-					#
-				}
-			"requestorSettings"= @{
-				"scopeType"= $equestorScopeType
-				"acceptRequests"= $equestorAcceptRequests
-				"allowedRequestors"= $allowedRequestors
-				{
-					#
-				}
-			}
-			"requestApprovalSettings"= @{
-				"isApprovalRequired"= $isApprovalRequired
-				"isApprovalRequiredForExtension"= $isApprovalRequiredForExtension
-				"isRequestorJustificationRequired"= $isRequestorJustificationRequired
-				"approvalMode"= $approvalMode
-				"approvalStages"= @{
-						"approvalStageTimeOutInDays"= $approvalStageTimeOutInDays
-						"isApproverJustificationRequired"= $isApproverJustificationRequired
-						"isEscalationEnabled"= $isEscalationEnabled
-						"escalationTimeInMinutes"= $escalationTimeInMinutes
-						"primaryApprovers"= @([PSCustomObject]@{
-								"@odata.type"= $result.DesiredConfiguration.policy.primaryApprovers.odataType
-								"isBackup"= $true
-								"id"= $result.DesiredConfiguration.policy.primaryApprovers
-								#Resolve-Group -GroupReference $result.DesiredConfiguration.requestorSettings.allowedRequestors
-						})
-						"escalationApprovers"= @([PSCustomObject]@{
-							"@odata.type"= $result.DesiredConfiguration.policy.primaryApprovers.odataType
-							"isBackup"= $true
-							"id"= $result.DesiredConfiguration.policy.primaryApprovers
-							#Resolve-Group -GroupReference $result.DesiredConfiguration.requestorSettings.allowedRequestors
-						})
-					}
-				}
-			"questions"= $questions
-			}
-		}
+		
+		displayName = $displayName
+		description = $description
+		isHidden = $isHidden
+		isRoleScopesVisible = $isRoleScopesVisible
+		
+		catalogDisplayName = $catalogDisplayName
+        catalogDescription = $catalogDescription
+        isExternallyVisible = $isExternallyVisible
+		
+		policyDisplayName = $policyDisplayName
+		policyDescription = $policyDescription
+		canExtend = $canExtend
+		durationInDays = $durationInDays
+		accessRevieIsEnabled = $accwessRevieIsEnabled
+		accessReviewRecurrenceType = $accessReviewRecurrenceType
+		
+		accessReviewReviewerType = $accessReviewReviewerType
+		accessReviewDurationInDays = $accessReviewDurationInDays
+
+
+		requestorScopeType = $requestorScopeType
+		requestorAcceptRequests = $requestorAcceptRequests
+
+
+		isApprovalRequired = $isApprovalRequired
+		isApprovalRequiredForExtension = $isApprovalRequiredForExtension
+		isRequestorJustificationRequired = $isRequestorJustificationRequired
+		approvalMode = $approvalMode
+		approvalStageTimeOutInDays = $approvalStageTimeOutInDays
+		isApproverJustificationRequired = $isApproverJustificationRequired
+		isEscalationEnabled = $isEscalationEnabled
+		escalationTimeInMinutes = $escalationTimeInMinutes
+
+
+
 		}
 
 		@(
-			"accessReviewReviewer", "allowedRequestors", "primaryApprovers", "escalationApprovers",
+			"accessReviewer", "allowedRequestors", "primaryApprovers", "escalationApprovers",
 			"questions"
 		) | foreach {
 			if ($PSBoundParameters.ContainsKey($_)) {			
@@ -141,10 +116,12 @@ function Register-TmfAccessPackage
 		Add-Member -InputObject $object -MemberType ScriptMethod -Name Properties -Value { ($this | Get-Member -MemberType NoteProperty).Name }
 
 		if ($alreadyLoaded) {
-			$script:desiredConfiguration[$componentName][$script:desiredConfiguration[$componentName].IndexOf($alreadyLoaded)] = $object
+			$script:desiredConfiguration[$resourceName][$script:desiredConfiguration[$resourceName].IndexOf($alreadyLoaded)] = $object
 		}
 		else {
-			$script:desiredConfiguration[$componentName] += $object
-		}		
+			$script:desiredConfiguration[$resourceName] += $object
+		}
+		
+		write-host $script:desiredConfiguration[$resourceName]
 	}
 }

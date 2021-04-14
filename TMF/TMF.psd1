@@ -61,7 +61,10 @@
 		'Invoke-TmfAgreement',
 		'Register-TmfConditionalAccessPolicy',
 		'Test-TmfConditionalAccessPolicy',
-		'Invoke-TmfConditionalAccessPolicy'
+		'Invoke-TmfConditionalAccessPolicy',
+		'Register-TmfAccessPackage',
+		'Test-TmfAccessPackage',
+		'Invoke-TmfAccessPackage'
 	)
 	
 	# Cmdlets to export from this module
