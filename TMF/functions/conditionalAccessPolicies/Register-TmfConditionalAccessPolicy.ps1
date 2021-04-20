@@ -40,7 +40,6 @@
 		[string] $state,
 
 		[bool] $present = $true,
-
 		[string] $sourceConfig = "<Custom>",
 
 		[System.Management.Automation.PSCmdlet]

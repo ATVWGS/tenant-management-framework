@@ -58,6 +58,7 @@ function Test-TmfAccessPackage
 							switch ($property) {
 								"catalog" { <# Currently not possible to update! #> }
 								"isRoleScopesVisible" { <# Currently not possible to update! #> }
+								"accessPackageResourceRoleScopes" { <# TODO #> }
 								default {
 									if ($definition.$property -ne $resource.$property) {
 										$change.Actions = @{"Set" = $definition.$property}

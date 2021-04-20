@@ -9,7 +9,6 @@
 	
 	begin
 	{
-		write-host $script:desiredConfiguration
 		$resourceName = "groups"
 		if (!$script:desiredConfiguration[$resourceName]) {
 			Stop-PSFFunction -String "TMF.NoDefinitions" -StringValues "Group"

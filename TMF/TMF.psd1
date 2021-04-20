@@ -71,7 +71,9 @@
 		'Register-TmfAccessPackageAssignementPolicy',
 		'Test-TmfAccessPackageAssignementPolicy',
 		'Invoke-TmfAccessPackageAssignementPolicy',
-		'Register-TmfAccessPackageResource'
+		'Register-TmfAccessPackageResource',
+		'Test-TmfAccessPackageResource',
+		'Invoke-TmfAccessPackageResource'
 	)
 	
 	# Cmdlets to export from this module

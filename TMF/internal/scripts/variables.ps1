@@ -41,16 +41,21 @@ $script:supportedResources = @{
         "invokeFunction" = (Get-Command Invoke-TmfAccessPackageCatalog)
         "weight" = 54
     }
+    "accessPackageResources" = @{
+        "testFunction" = (Get-Command Test-TmfAccessPackageResource)
+        "invokeFunction" = (Get-Command Invoke-TmfAccessPackageResource)
+        "weight" = 55
+    }
     "accessPackages" = @{
         "registerFunction" = (Get-Command Register-TmfAccessPackage)
         "testFunction" = (Get-Command Test-TmfAccessPackage)
-        "invokeFunction" = (Get-Command Invoke-TmfAccessPackages)
-        "weight" = 55
+        "invokeFunction" = (Get-Command Invoke-TmfAccessPackage)
+        "weight" = 56
     }
     "accessPackageAssignementPolicies" = @{     
         "testFunction" = (Get-Command Test-TmfAccessPackageAssignementPolicy)
         "invokeFunction" = (Get-Command Invoke-TmfAccessPackageAssignementPolicy)
-        "weight" = 56
+        "weight" = 57
     }
 } # All currently supported components.
 Set-Variable -Name supportedResources -Option ReadOnly

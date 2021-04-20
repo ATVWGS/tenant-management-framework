@@ -41,6 +41,7 @@ function Register-TmfAccessPackage
 			description = $description
 			isHidden = $isHidden
 			isRoleScopesVisible = $isRoleScopesVisible
+			accessPackageResourceRoleScopes = @()
 			catalog = $catalog
 			present = $present
 			sourceConfig = $sourceConfig
@@ -53,8 +54,9 @@ function Register-TmfAccessPackage
 		}
 
 		foreach ($accessPackageResource in $accessPackageResources) {
-			$resource = $accessPackageResource | Add-Member -NotePropertyMembers @{sourceConfig = $sourceConfig} -PassThru | ConvertTo-PSFHashtable -Include $((Get-Command Register-TmfAccessPackageResource).Parameters.Keys)
-			Register-TmfAccessPackageResource @resource -Cmdlet $PSCmdlet
+			$resource = $accessPackageResource | Add-Member -NotePropertyMembers @{sourceConfig = $sourceConfig; displayName = ("{0} - {1}" -f $catalog, $accessPackageResource.resourceIdentifier)} -PassThru | ConvertTo-PSFHashtable -Include $((Get-Command Register-TmfAccessPackageResource).Parameters.Keys)
+			$object.accessPackageResourceRoleScopes += $resource
+			Register-TmfAccessPackageResource @resource -Cmdlet $PSCmdlet			
 		}
 
 		if ($alreadyLoaded) {

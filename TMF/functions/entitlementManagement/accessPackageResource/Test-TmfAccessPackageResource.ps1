@@ -1,4 +1,4 @@
-function Test-TmfAccessPackage
+function Test-TmfAccessPackageResource
 {
 	[CmdletBinding()]
 	Param (
@@ -9,14 +9,8 @@ function Test-TmfAccessPackage
 	begin
 	{
 		Test-GraphConnection -Cmdlet $Cmdlet
-		$resourceName = "accessPackages"
+		$resourceName = "accessPackageResources"
 		$tenant = Get-MgOrganization -Property displayName, Id
-		
-		$resolveFunctionMapping = @{
-			"Users" = (Get-Command Resolve-User)
-			"Groups" = (Get-Command Resolve-Group)
-			
-		}
 	}
 	process
 	{
@@ -31,13 +25,20 @@ function Test-TmfAccessPackage
 			$result = @{
 				Tenant = $tenant.displayName
 				TenantId = $tenant.Id
-				ResourceType = 'NamedLocation'
+				ResourceType = 'AccessPackageResource'
 				ResourceName = (Resolve-String -Text $definition.displayName)
 				DesiredConfiguration = $definition
 			}
 
-			$resource = (Invoke-MgGraphRequest -Method GET -Uri ("$script:graphBaseUrl/identityGovernanace/entitlementManagement/accessPackages?`$filter=displayName eq '{0}'" -f $definition.displayName)).Value
-			switch (0) {
+			Add-Member -InputObject $definition -MemberType NoteProperty -Name "catalogId" -Value (Resolve-AccessPackageCatalog -InputReference $definition.catalog -Cmdlet $Cmdlet)
+			# Resolve originId (eg. get the ObjectId of a group resource)
+			switch ($result.DesiredConfiguration.resourceType) {
+				"AadGroup" {
+					Add-Member -InputObject $definition -MemberType NoteProperty -Name "originId" -Value (Resolve-Group -InputReference $definition.resourceIdentifier)
+				}
+			}
+			$resource = (Invoke-MgGraphRequest -Method GET -Uri ("$script:graphBaseUrl/identityGovernance/entitlementManagement/accessPackageCatalogs/{0}/accessPackageResources?`$filter=originId eq '{1}'" -f $definition.catalogId, $definition.originId)).Value
+			switch ($resource.count) {
 				0 {
 					if ($definition.present) {					
 						$result = New-TestResult @result -ActionType "Create"
@@ -48,40 +49,7 @@ function Test-TmfAccessPackage
 				}
 				1 {
 					$result["GraphResource"] = $resource
-					if ($definition.present) {
-						$changes = @()
-						foreach ($property in ($definition.Properties() | ? {$_ -notin "displayName", "present", "sourceConfig"})) {
-							$change = [PSCustomObject] @{
-								Property = $property										
-								Actions = $null
-							}
-
-							switch ($property) {
-								"ipRanges" {
-									if (Compare-Object -ReferenceObject $resource.ipRanges.cidrAddress -DifferenceObject $definition.ipRanges.cidrAddress) {
-										$change.Actions = @{"Set" = $definition.ipRanges}
-									}
-								}
-								"countriesAndRegions" {
-									if (Compare-Object -ReferenceObject $resource.countriesAndRegions -DifferenceObject $definition.countriesAndRegions) {
-										$change.Actions = @{"Set" = $definition.countriesAndRegions}
-									}
-								}
-								default {
-									if ($definition.$property -ne $resource.$property) {
-										$change.Actions = @{"Set" = $definition.$property}
-									}
-								}
-							}
-							if ($change.Actions) {$changes += $change}
-						}
-	
-						if ($changes.count -gt 0) { $result = New-TestResult @result -Changes $changes -ActionType "Update"}
-						else { $result = New-TestResult @result -ActionType "NoActionRequired" }
-					}
-					else {
-						$result = New-TestResult @result -ActionType "Delete"
-					}
+					$result = New-TestResult @result -ActionType "NoActionRequired"
 				}
 				default {
 					Write-PSFMessage -Level Warning -String 'TMF.Test.MultipleResourcesError' -StringValues $resourceName, $definition.displayName -Tag 'failed'
