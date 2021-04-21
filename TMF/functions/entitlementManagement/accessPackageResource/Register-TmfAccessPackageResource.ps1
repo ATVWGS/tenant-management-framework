@@ -20,7 +20,8 @@ function Register-TmfAccessPackageResource
 		[string] $sourceConfig = "<Custom>",
 
 		[System.Management.Automation.PSCmdlet]
-		$Cmdlet = $PSCmdlet
+		$Cmdlet = $PSCmdlet,
+		[switch] $PassThru
 	)
 	
 	begin
@@ -44,16 +45,26 @@ function Register-TmfAccessPackageResource
 			description = $description
 			resourceIdentifier = $resourceIdentifier
 			resourceType = $resourceType
+			resourceRole = $resourceRole
 			originSystem = $originSystem
 			catalog = $catalog
 			present = $present
 		}
-
-		@("resourceRole") | foreach {
+		
+		Add-Member -InputObject $object -MemberType NoteProperty -Name "catalogId" -Value (Resolve-AccessPackageCatalog -InputReference $catalog -Cmdlet $Cmdlet) -Force		
+		switch ($resourceType) { # Resolve originId (eg. get the ObjectId of a group resource)
+			"AadGroup" {
+				 $originId = Resolve-Group -InputReference $resourceIdentifier
+			}
+		}
+		Add-Member -InputObject $object -MemberType NoteProperty -Name "originId" -Value $originId
+		Add-Member -InputObject $object -MemberType NoteProperty -Name "roleOriginId" -Value ("{0}_{1}" -f $resourceRole, $originId) -Force		
+		<# NOT REQUIRED ATM
+		@() | foreach {
 			if ($PSBoundParameters.ContainsKey($_)) {			
 				Add-Member -InputObject $object -MemberType NoteProperty -Name $_ -Value $PSBoundParameters[$_]
 			}
-		}
+		} #>
 	
 		Add-Member -InputObject $object -MemberType ScriptMethod -Name Properties -Value { ($this | Get-Member -MemberType NoteProperty).Name }
 
@@ -63,5 +74,11 @@ function Register-TmfAccessPackageResource
 		else {
 			$script:desiredConfiguration[$resourceName] += $object
 		}
+	}
+	end 
+	{
+		if ($PassThru) {
+			$object
+		}		
 	}
 }

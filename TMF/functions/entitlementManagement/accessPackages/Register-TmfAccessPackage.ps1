@@ -30,7 +30,6 @@ function Register-TmfAccessPackage
 		if ($script:desiredConfiguration[$resourceName].displayName -contains $displayName) {			
 			$alreadyLoaded = $script:desiredConfiguration[$resourceName] | ? {$_.displayName -eq $displayName}
 		}
-
 	}
 	process
 	{
@@ -49,14 +48,13 @@ function Register-TmfAccessPackage
 		Add-Member -InputObject $object -MemberType ScriptMethod -Name Properties -Value { ($this | Get-Member -MemberType NoteProperty).Name }
 
 		foreach ($policy in $assignementPolicies) {
-			$resource = $policy | Add-Member -NotePropertyMembers @{sourceConfig = $sourceConfig; accessPackage = $displayName} -PassThru | ConvertTo-PSFHashtable -Include $((Get-Command Register-TmfAccessPackageAssignementPolicy).Parameters.Keys)			
+			$resource = $policy | Add-Member -NotePropertyMembers @{sourceConfig = $sourceConfig; accessPackage = $displayName; catalog = $catalog} -PassThru | ConvertTo-PSFHashtable -Include $((Get-Command Register-TmfAccessPackageAssignementPolicy).Parameters.Keys)			
 			Register-TmfAccessPackageAssignementPolicy @resource -Cmdlet $PSCmdlet
 		}
 
 		foreach ($accessPackageResource in $accessPackageResources) {
-			$resource = $accessPackageResource | Add-Member -NotePropertyMembers @{sourceConfig = $sourceConfig; displayName = ("{0} - {1}" -f $catalog, $accessPackageResource.resourceIdentifier)} -PassThru | ConvertTo-PSFHashtable -Include $((Get-Command Register-TmfAccessPackageResource).Parameters.Keys)
-			$object.accessPackageResourceRoleScopes += $resource
-			Register-TmfAccessPackageResource @resource -Cmdlet $PSCmdlet			
+			$resource = $accessPackageResource | Add-Member -NotePropertyMembers @{sourceConfig = $sourceConfig; catalog = $catalog; displayName = ("{0} - {1}" -f $catalog, $accessPackageResource.resourceIdentifier)} -PassThru | ConvertTo-PSFHashtable -Include $((Get-Command Register-TmfAccessPackageResource).Parameters.Keys)
+			$object.accessPackageResourceRoleScopes += Register-TmfAccessPackageResource @resource -Cmdlet $PSCmdlet -PassThru
 		}
 
 		if ($alreadyLoaded) {

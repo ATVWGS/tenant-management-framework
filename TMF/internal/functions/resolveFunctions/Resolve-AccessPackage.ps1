@@ -3,28 +3,27 @@ function Resolve-AccessPackage
 	[CmdletBinding()]
 	Param (
 		[Parameter(Mandatory = $true)]
-		[string] $AccessPackageReference,
-		[Parameter(Mandatory = $true)]
+		[string] $InputReference,
 		[System.Management.Automation.PSCmdlet]
 		$Cmdlet = $PSCmdlet
 	)
 	
 	begin {
-		$AccessPackageReference = Resolve-String -Text $AccessPackageReference
+		$InputReference = Resolve-String -Text $InputReference
 	}
 	process
 	{			
 		try {
-			if ($AccessPackageReference -match $script:guidRegex) {
-				$accessPackage = Get-MgEntitlementManagementAccessPackage -AccessPackageId $AccessPackageReference
+			if ($InputReference -match $script:guidRegex) {
+				$catalog = (Invoke-MgGraphRequest -Method GET -Uri ("$script:graphBaseUrl/identityGovernance/entitlementManagement/accessPackages/{0}" -f $InputReference)).Value
 			}
 			else {
-				$accessPackage = Get-MgEntitlementManagementAccessPackage -Filter "displayName eq '$AccessPackageReference'"
+				$catalog = (Invoke-MgGraphRequest -Method GET -Uri ("$script:graphBaseUrl/identityGovernance/entitlementManagement/accessPackages/?`$filter=displayName eq '{0}'" -f $InputReference)).Value
 			}
-			
-			if (!$accessPackage) { throw "Cannot find user $AccessPackageReference" }
-			if ($accessPackage.count -gt 1) { throw "Got multiple Access Package Catalogs for $AccessPackageReference" }
-			return $accessPackage
+
+			if (!$catalog){ throw "Cannot find accessPackage $InputReference" }
+			if ($catalog.count -gt 1) { throw "Got multiple accessPackages for $InputReference" }
+			return $catalog.Id
 		}
 		catch {
 			Write-PSFMessage -Level Warning -String 'TMF.CannotResolveResource' -StringValues "AccessPackage" -Tag 'failed' -ErrorRecord $_

@@ -35,7 +35,7 @@ function Test-TmfAccessPackage
 				DesiredConfiguration = $definition
 			}
 
-			$resource = (Invoke-MgGraphRequest -Method GET -Uri ("$script:graphBaseUrl/identityGovernance/entitlementManagement/accessPackages?`$filter=displayName eq '{0}'" -f $definition.displayName)).Value
+			$resource = (Invoke-MgGraphRequest -Method GET -Uri ("$script:graphBaseUrl/identityGovernance/entitlementManagement/accessPackages?`$filter=displayName eq '{0}'&`$expand=accessPackageResourceRoleScopes(`$expand=accessPackageResourceRole,accessPackageResourceScope)" -f $definition.displayName)).Value
 			switch ($resource.Count) {
 				0 {
 					if ($definition.present) {					
@@ -58,7 +58,21 @@ function Test-TmfAccessPackage
 							switch ($property) {
 								"catalog" { <# Currently not possible to update! #> }
 								"isRoleScopesVisible" { <# Currently not possible to update! #> }
-								"accessPackageResourceRoleScopes" { <# TODO #> }
+								"accessPackageResourceRoleScopes" {
+									$existingRoleScopes = @()
+									if ($resource.accessPackageResourceRoleScopes.accessPackageResourceRole.originId) { $existingRoleScopes = $resource.accessPackageResourceRoleScopes.accessPackageResourceRole.originId }
+									$compare = Compare-Object -ReferenceObject  $existingRoleScopes -DifferenceObject @($definition.accessPackageResourceRoleScopes.roleOriginId)
+
+									if ($compare) {
+										$change.Actions = @{}
+										if ($compare.SideIndicator -contains "=>" -and -not $ReturnSetAction) {
+											$change.Actions["Add"] = ($compare | ? {$_.SideIndicator -eq "=>"}).InputObject
+										}
+										if ($compare.SideIndicator -contains "<=" -and -not $ReturnSetAction) {
+											$change.Actions["Remove"] = ($compare | ? {$_.SideIndicator -eq "<="}).InputObject
+										}
+									}									
+								}
 								default {
 									if ($definition.$property -ne $resource.$property) {
 										$change.Actions = @{"Set" = $definition.$property}

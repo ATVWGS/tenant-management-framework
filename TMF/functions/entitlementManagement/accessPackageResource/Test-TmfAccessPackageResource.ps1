@@ -30,13 +30,6 @@ function Test-TmfAccessPackageResource
 				DesiredConfiguration = $definition
 			}
 
-			Add-Member -InputObject $definition -MemberType NoteProperty -Name "catalogId" -Value (Resolve-AccessPackageCatalog -InputReference $definition.catalog -Cmdlet $Cmdlet) -Force
-			# Resolve originId (eg. get the ObjectId of a group resource)
-			switch ($result.DesiredConfiguration.resourceType) {
-				"AadGroup" {
-					Add-Member -InputObject $definition -MemberType NoteProperty -Name "originId" -Value (Resolve-Group -InputReference $definition.resourceIdentifier) -Force
-				}
-			}
 			$resource = (Invoke-MgGraphRequest -Method GET -Uri ("$script:graphBaseUrl/identityGovernance/entitlementManagement/accessPackageCatalogs/{0}/accessPackageResources?`$filter=originId eq '{1}'" -f $definition.catalogId, $definition.originId)).Value
 			switch ($resource.count) {
 				0 {
