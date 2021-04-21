@@ -121,7 +121,7 @@ function Invoke-TmfAccessPackage
 													}
 												} | ConvertTo-Json -ErrorAction Stop
 												Write-PSFMessage -Level Verbose -String "TMF.Invoke.SendingRequestWithBody" -StringValues $method, $url, $body
-												Invoke-MgGraphRequest -Method $method -Uri $url -Body $body
+												Invoke-MgGraphRequest -Method $method -Uri $url -Body $body | Out-Null
 											}
 										}
 										"Remove" {
@@ -137,7 +137,7 @@ function Invoke-TmfAccessPackage
 													"accessPackageResourceScope" = $roleScope["accessPackageResourceScope"]
 												} | ConvertTo-Json -ErrorAction Stop
 												Write-PSFMessage -Level Verbose -String "TMF.Invoke.SendingRequestWithBody" -StringValues $method, $url, $body
-												Invoke-MgGraphRequest -Method $method -Uri $url -Body $body
+												Invoke-MgGraphRequest -Method $method -Uri $url -Body $body | Out-Null
 												#>
 											}
 										}
