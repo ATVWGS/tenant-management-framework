@@ -64,6 +64,7 @@ $script:validateFunctionMapping = @{
     "accessReviewSettings" = (Get-Command Validate-AssignmentReviewSettings)
     "requestApprovalSettings" = (Get-Command Validate-RequestApprovalSettings)
     "approvalStages" = (Get-Command Validate-ApprovalStage)
+    "requestorSettings" = (Get-Command Validate-RequestorSettings)
 }
 
 $script:activatedConfigurations = @() # Overview of all activated configurations.

@@ -29,22 +29,27 @@
                 "reviewDurationInDays" : 14,
                 "accessReviewer" : ["johannes.seitle@tmacdev.onmicrosoft.com"]
             },
-            
-            "requestorScopeType" : "SpecificDirectorySubjects",
-            "requestorAcceptRequests" : false,
-            "allowedRequestors" : ["Some group"],
-            
-            "isApprovalRequired" : true,
-            "isApprovalRequiredForExtension" : true,
-            "isRequestorJustificationRequired" : true,
-            "approvalMode" : "SingleStage",
-            "approvalStageTimeOutInDays" : 14,
-            "isApproverJustificationRequired" : false,
-            "isEscalationEnabled" : true,
-            "escalationTimeInMinutes" : 2880,
-            "primaryApprovers" : ["Some group"],
-            "escalationApprovers" : ["Some group"],
-            "questions" : [""]
+            "requestApprovalSettings" : {
+                "isApprovalRequired": true,
+                "isApprovalRequiredForExtension": false,
+                "isRequestorJustificationRequired": true,
+                "approvalMode": "Serial",
+                "approvalStages": [
+                    {
+                        "approvalStageTimeOutInDays": 14,
+                        "isApproverJustificationRequired": true,
+                        "isEscalationEnabled": true,
+                        "escalationTimeInMinutes": 11520,
+                        "primaryApprovers": [],
+                        "escalationApprovers": []
+                    }
+                ]
+            },
+            "requestorSettings" : {
+                "scopeType": "SpecificDirectorySubjects",
+                "acceptRequests": true,
+                "allowedRequestors": ["johannes.seitle@tmacdev.onmicrosoft.com"]
+            }
         }
     ]    
 }

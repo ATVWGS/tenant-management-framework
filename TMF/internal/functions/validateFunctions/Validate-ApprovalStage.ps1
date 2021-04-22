@@ -1,11 +1,13 @@
-﻿function Validate-RequestorSettings
+﻿function Validate-ApprovalStage
 {
 	[CmdletBinding(DefaultParameterSetName = 'IPRanges')]
 	Param (
-		[ValidateSet("NoSubjects", "SpecificDirectorySubjects", "SpecificConnectedOrganizationSubjects", "AllConfiguredConnectedOrganizationSubjects", "AllExistingConnectedOrganizationSubjects", "AllExistingDirectoryMemberUsers", "AllExistingDirectorySubjects", "AllExternalSubjects")]
-		[string] $scopeType,
-		[bool] $acceptRequests,
-		[string[]] $allowedRequestors,
+		[int] $approvalStageTimeOutInDays = 14,
+		[bool] $isApproverJustificationRequired,
+		[bool] $isEscalationEnabled,
+		[int] $escalationTimeInMinutes,
+		[string[]] $primaryApprovers,
+		[string[]] $escalationApprovers,
 		[System.Management.Automation.PSCmdlet]
 		$Cmdlet = $PSCmdlet
 	)
