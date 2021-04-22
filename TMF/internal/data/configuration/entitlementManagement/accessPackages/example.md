@@ -20,8 +20,7 @@
             "displayName" : "policyDisplayName",
             "description" : "policyDescription",
             "canExtend" : false,
-            "durationInDays" : 14,
-            
+            "durationInDays" : 14,            
             "accessReviewSettings" : {
                 "isEnabled" : true,
                 "recurrenceType" : "monthly",

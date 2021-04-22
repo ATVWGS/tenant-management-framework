@@ -40,6 +40,7 @@ function Register-TmfAccessPackageAssignementPolicy
 
 		$object = [PSCustomObject]@{		
 			displayName = $displayName
+			accessPackage = $accessPackage
 			description = $description
 			present = $present
 			sourceConfig = $sourceConfig
@@ -58,6 +59,7 @@ function Register-TmfAccessPackageAssignementPolicy
 			}			
 		}
 
+		Add-Member -InputObject $object -MemberType ScriptMethod -Name accessPackageId -Value { Resolve-AccessPackage -InputReference $this.accessPackage -Cmdlet $Cmdlet }
 		Add-Member -InputObject $object -MemberType ScriptMethod -Name Properties -Value { ($this | Get-Member -MemberType NoteProperty).Name }
 
 		if ($alreadyLoaded) {
