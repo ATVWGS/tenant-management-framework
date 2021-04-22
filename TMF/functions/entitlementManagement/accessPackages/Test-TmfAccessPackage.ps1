@@ -61,7 +61,7 @@ function Test-TmfAccessPackage
 								"accessPackageResourceRoleScopes" {
 									$existingRoleScopes = @()
 									if ($resource.accessPackageResourceRoleScopes.accessPackageResourceRole.originId) { $existingRoleScopes = $resource.accessPackageResourceRoleScopes.accessPackageResourceRole.originId }
-									$compare = Compare-Object -ReferenceObject  $existingRoleScopes -DifferenceObject @($definition.accessPackageResourceRoleScopes.roleOriginId)
+									$compare = Compare-Object -ReferenceObject  $existingRoleScopes -DifferenceObject @($definition.accessPackageResourceRoleScopes.roleOriginId())
 
 									if ($compare) {
 										$change.Actions = @{}

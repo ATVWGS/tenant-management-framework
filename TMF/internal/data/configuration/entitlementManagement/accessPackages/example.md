@@ -8,13 +8,13 @@
     "isRoleScopesVisible" : true,
     "catalog": "General",
     
-    "accessPackageResources" : [
-        {
-            "resourceIdentifier": "Some group",
-            "originSystem": "AadGroup",
-            "present": true
-        }
-    ],
+    "accessReviewSettings" : {
+        "isEnabled" : true,
+        "recurrenceType" : "monthly",
+        "reviewerType" : "Reviewers",
+        "durationInDays" : 14,
+        "reviewers" : ["johannes.seitle@tmacdev.onmicrosoft.com"]
+    },
     "assignementPolicies" : [
         {
             "displayName" : "policyDisplayName",
@@ -22,11 +22,13 @@
             "canExtend" : false,
             "durationInDays" : 14,
             
-            "accessRevieIsEnabled" : true,
-            "accessReviewRecurrenceType" : "monthly",
-            "accessReviewReviewerType" : "Reviewer",
-            "accessReviewDurationInDays" : 14,
-            "accessReviewer" : ["Some group"],
+            "accessReviewSettings" : {
+                "isEnabled" : true,
+                "recurrenceType" : "monthly",
+                "reviewerType" : "Reviewer",
+                "reviewDurationInDays" : 14,
+                "accessReviewer" : ["johannes.seitle@tmacdev.onmicrosoft.com"]
+            },
             
             "requestorScopeType" : "SpecificDirectorySubjects",
             "requestorAcceptRequests" : false,

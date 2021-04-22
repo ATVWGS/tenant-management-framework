@@ -49,16 +49,8 @@ function Register-TmfAccessPackageResource
 			originSystem = $originSystem
 			catalog = $catalog
 			present = $present
-		}
+		}		
 		
-		Add-Member -InputObject $object -MemberType NoteProperty -Name "catalogId" -Value (Resolve-AccessPackageCatalog -InputReference $catalog -Cmdlet $Cmdlet) -Force		
-		switch ($resourceType) { # Resolve originId (eg. get the ObjectId of a group resource)
-			"AadGroup" {
-				 $originId = Resolve-Group -InputReference $resourceIdentifier
-			}
-		}
-		Add-Member -InputObject $object -MemberType NoteProperty -Name "originId" -Value $originId
-		Add-Member -InputObject $object -MemberType NoteProperty -Name "roleOriginId" -Value ("{0}_{1}" -f $resourceRole, $originId) -Force		
 		<# NOT REQUIRED ATM
 		@() | foreach {
 			if ($PSBoundParameters.ContainsKey($_)) {			
@@ -66,6 +58,18 @@ function Register-TmfAccessPackageResource
 			}
 		} #>
 	
+		Add-Member -InputObject $object -MemberType ScriptMethod -Name "catalogId" -Value {
+			Resolve-AccessPackageCatalog -InputReference $this.catalog
+		}
+		Add-Member -InputObject $object -MemberType ScriptMethod -Name "originId" -Value {
+			switch ($this.resourceType) { # Resolve originId (eg. get the ObjectId of a group resource)
+				"AadGroup" {
+					 $originId = Resolve-Group -InputReference $this.resourceIdentifier
+				}
+			}
+			$originId
+		}
+		Add-Member -InputObject $object -MemberType ScriptMethod -Name "roleOriginId" -Value { "{0}_{1}" -f $this.resourceRole, $this.originId() }
 		Add-Member -InputObject $object -MemberType ScriptMethod -Name Properties -Value { ($this | Get-Member -MemberType NoteProperty).Name }
 
 		if ($alreadyLoaded) {

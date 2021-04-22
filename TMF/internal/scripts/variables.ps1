@@ -60,5 +60,11 @@ $script:supportedResources = @{
 } # All currently supported components.
 Set-Variable -Name supportedResources -Option ReadOnly
 
+$script:validateFunctionMapping = @{
+    "accessReviewSettings" = (Get-Command Validate-AssignmentReviewSettings)
+    "requestApprovalSettings" = (Get-Command Validate-RequestApprovalSettings)
+    "approvalStages" = (Get-Command Validate-ApprovalStage)
+}
+
 $script:activatedConfigurations = @() # Overview of all activated configurations.
 $script:desiredConfiguration = @{} # The desired configuration.

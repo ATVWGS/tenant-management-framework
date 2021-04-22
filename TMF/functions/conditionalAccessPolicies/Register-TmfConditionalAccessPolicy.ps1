@@ -1,6 +1,6 @@
 ﻿function Register-TmfConditionalAccessPolicy
 {
-	[CmdletBinding(DefaultParameterSetName = 'IPRanges')]
+	[CmdletBinding()]
 	Param (
 		[Parameter(Mandatory = $true)]
 		[string] $displayName,

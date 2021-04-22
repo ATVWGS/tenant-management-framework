@@ -12,29 +12,10 @@ function Register-TmfAccessPackageAssignementPolicy
 		[Parameter(Mandatory = $true)]
 		[int] $durationInDays,
 
-		[bool] $accessReviewIsEnabled = $false,
-		[String] $accessReviewRecurrenceType = "monthly", # validation
-		[String] $accessReviewReviewerType = "Reviewer",
-		[int] $accessReviewDurationInDays = 14,
-		[string[]] $accessReviewer,
-
-		[ValidateSet("NoSubjects", "SpecificDirectorySubjects", "SpecificConnectedOrganizationSubjects", "AllConfiguredConnectedOrganizationSubjects", "AllExistingConnectedOrganizationSubjects", "AllExistingDirectoryMemberUsers", "AllExistingDirectorySubjects", "AllExternalSubjects")]
-		[string] $requestorScopeType = "SpecificDirectorySubjects",
-		[bool] $acceptRequests = $false,
-		[string[]] $allowedRequestors,
-
-		[bool] $isApprovalRequired = $true,
-		[bool] $isApprovalRequiredForExtension = $true,
-		[bool] $isRequestorJustificationRequire = $true,
-		[string] $approvalMode = "SingleStage",
-		[int] $approvalStageTimeOutInDays = 14,
-		[bool] $isApproverJustificationRequired = $false,
-		[bool] $isEscalationEnabled = $false,
-		[int] $escalationTimeInMinutes = 2880,
-		[string[]] $primaryApprovers,
-		[string[]] $escalationApprovers,
-		[string[]] $questions,
-
+		[object] $accessReviewSettings,
+		[object] $requestApprovalSettings,
+		[object] $requestorSettings,
+		
 		[bool] $present = $true,		
 		[string] $sourceConfig = "<Custom>",
 
@@ -52,7 +33,6 @@ function Register-TmfAccessPackageAssignementPolicy
 		if ($script:desiredConfiguration[$resourceName].displayName -contains $displayName) {			
 			$alreadyLoaded = $script:desiredConfiguration[$resourceName] | ? {$_.displayName -eq $displayName}
 		}
-
 	}
 	process
 	{
@@ -61,45 +41,23 @@ function Register-TmfAccessPackageAssignementPolicy
 		$object = [PSCustomObject]@{		
 			displayName = $displayName
 			description = $description
-			accessPackage = $accessPackage
-			isHidden = $isHidden
-			isRoleScopesVisible = $isRoleScopesVisible
-			
-			catalogDisplayName = $catalogDisplayName
-			catalogDescription = $catalogDescription
-			isExternallyVisible = $isExternallyVisible
-			
-			policyDisplayName = $policyDisplayName
-			policyDescription = $policyDescription
-			canExtend = $canExtend
-			durationInDays = $durationInDays
-			accessRevieIsEnabled = $accwessRevieIsEnabled
-			accessReviewRecurrenceType = $accessReviewRecurrenceType
-			
-			accessReviewReviewerType = $accessReviewReviewerType
-			accessReviewDurationInDays = $accessReviewDurationInDays
-
-			requestorScopeType = $requestorScopeType
-			requestorAcceptRequests = $requestorAcceptRequests
-
-			isApprovalRequired = $isApprovalRequired
-			isApprovalRequiredForExtension = $isApprovalRequiredForExtension
-			isRequestorJustificationRequired = $isRequestorJustificationRequired
-			approvalMode = $approvalMode
-			approvalStageTimeOutInDays = $approvalStageTimeOutInDays
-			isApproverJustificationRequired = $isApproverJustificationRequired
-			isEscalationEnabled = $isEscalationEnabled
-			escalationTimeInMinutes = $escalationTimeInMinutes
+			present = $present
+			sourceConfig = $sourceConfig
 		}
 
-		@(
-			"accessReviewer", "allowedRequestors", "primaryApprovers", "escalationApprovers", "questions"
-		) | foreach {
-			if ($PSBoundParameters.ContainsKey($_)) {			
-				Add-Member -InputObject $object -MemberType NoteProperty -Name $_ -Value $PSBoundParameters[$_]
-			}
+		"accessReviewSettings", "requestApprovalSettings", "requestorSettings" | ForEach-Object {
+			if ($PSBoundParameters.ContainsKey($_)) {
+				if ($script:validateFunctionMapping.ContainsKey($_)) {
+					$validated = $PSBoundParameters[$_] | ConvertTo-PSFHashtable -Include $($script:validateFunctionMapping[$_].Parameters.Keys)
+					$validated = & $script:validateFunctionMapping[$_] @validated -Cmdlet $Cmdlet
+				}
+				else {
+					$validated = $PSBoundParameters[$_]
+				}
+				Add-Member -InputObject $object -MemberType NoteProperty -Name $_ -Value $validated
+			}			
 		}
-	
+
 		Add-Member -InputObject $object -MemberType ScriptMethod -Name Properties -Value { ($this | Get-Member -MemberType NoteProperty).Name }
 
 		if ($alreadyLoaded) {
