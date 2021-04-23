@@ -9,7 +9,7 @@
 		[string] $reviewerType,
 		[datetime] $startDateTime,
 		[int] $durationInDays,
-		[string[]] $reviewers,
+		[object[]] $reviewers,
 		[System.Management.Automation.PSCmdlet]
 		$Cmdlet = $PSCmdlet
 	)

@@ -18,7 +18,7 @@ function Invoke-TmfAccessPackageAssignementPolicy
 	process
 	{
 		if (Test-PSFFunctionInterrupt) { return }
-		$testResults = Test-TmfAccessPackage -Cmdlet $Cmdlet
+		$testResults = Test-TmfAccessPackageAssignementPolicy -Cmdlet $Cmdlet
 
 		foreach ($result in $testResults) {
 			Beautify-TmfTestResult -TestResult $result -FunctionName $MyInvocation.MyCommand
@@ -31,6 +31,42 @@ function Invoke-TmfAccessPackageAssignementPolicy
 						"description" = $result.DesiredConfiguration.description
 						"accessPackageId" = $result.DesiredConfiguration.accessPackageId()
 					}
+
+					if ($result.DesiredConfiguration.Properties() -contains "accessReviewSettings") {
+						$accessReviewSettings = $result.DesiredConfiguration.accessReviewSettings
+						if ($accessReviewSettings.reviewers) {
+							$accessReviewSettings.reviewers = @($accessReviewSettings.reviewers | Foreach-Object {
+								$_.prepareBody()
+							})
+						}
+						$requestBody["accessReviewSettings"] = $accessReviewSettings
+					}
+
+					if ($result.DesiredConfiguration.Properties() -contains "requestorSettings") {
+						$requestorSettings = $result.DesiredConfiguration.requestorSettings
+						if ($requestorSettings.allowedRequestors) {
+							$requestorSettings.allowedRequestors = @($requestorSettings.allowedRequestors | Foreach-Object {
+								$_.prepareBody()
+							})
+						}
+						$requestBody["requestorSettings"] = $requestorSettings
+					}
+
+					if ($result.DesiredConfiguration.Properties() -contains "requestApprovalSettings") {
+						$requestApprovalSettings = $result.DesiredConfiguration.requestApprovalSettings
+						$requestApprovalSettings.approvalStages = @($requestApprovalSettings.approvalStages | Foreach-Object {							
+							$stage = $_
+							$stage.primaryApprovers = @($stage.primaryApprovers | Foreach-Object {
+								$_.prepareBody()
+							})
+							$stage.escalationApprovers = @($stage.escalationApprovers | Foreach-Object {
+								$_.prepareBody()
+							})
+							$stage
+						})
+						$requestBody["requestApprovalSettings"] = $requestApprovalSettings
+					}					
+
 					try {
 						$requestBody = $requestBody | ConvertTo-Json -ErrorAction Stop -Depth 8
 						Write-PSFMessage -Level Verbose -String "TMF.Invoke.SendingRequestWithBody" -StringValues $requestMethod, $requestUrl, $requestBody
@@ -42,11 +78,11 @@ function Invoke-TmfAccessPackageAssignementPolicy
 					}
 				}
 				"Delete" {
-					$requestUrl = "$script:graphBaseUrl/identityGovernance/entitlementManagement/accessPackageAssignmentPolicies{0}" -f $result.GraphResource.Id
+					$requestUrl = "$script:graphBaseUrl/identityGovernance/entitlementManagement/accessPackageAssignmentPolicies/{0}" -f $result.GraphResource.Id
 					$requestMethod = "DELETE"
 					try {
 						Write-PSFMessage -Level Verbose -String "TMF.Invoke.SendingRequest" -StringValues $requestMethod, $requestUrl
-						Invoke-MgGraphRequest -Method $requestMethod -Uri $requestUrl
+						#Invoke-MgGraphRequest -Method $requestMethod -Uri $requestUrl
 					}
 					catch {
 						Write-PSFMessage -Level Error -String "TMF.Invoke.ActionFailed" -StringValues $result.Tenant, $result.ResourceType, $result.ResourceName, $result.ActionType
@@ -54,7 +90,7 @@ function Invoke-TmfAccessPackageAssignementPolicy
 					}
 				}
 				"Update" {
-					$requestUrl = "$script:graphBaseUrl/identityGovernance/entitlementManagement/accessPackageAssignmentPolicies{0}" -f $result.GraphResource.Id
+					$requestUrl = "$script:graphBaseUrl/identityGovernance/entitlementManagement/accessPackageAssignmentPolicies/{0}" -f $result.GraphResource.Id
 					$requestMethod = "PATCH"
 					$requestBody = @{}
 					foreach ($change in $result.Changes) {						
@@ -72,7 +108,7 @@ function Invoke-TmfAccessPackageAssignementPolicy
 					if ($requestBody.Keys -gt 0) {
 						$requestBody = $requestBody | ConvertTo-Json -ErrorAction Stop
 						Write-PSFMessage -Level Verbose -String "TMF.Invoke.SendingRequestWithBody" -StringValues $requestMethod, $requestUrl, $requestBody
-						Invoke-MgGraphRequest -Method $requestMethod -Uri $requestUrl -Body $requestBody
+						#Invoke-MgGraphRequest -Method $requestMethod -Uri $requestUrl -Body $requestBody
 					}
 				}
 				"NoActionRequired" { }

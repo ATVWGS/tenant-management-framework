@@ -1,13 +1,13 @@
 ﻿function Validate-ApprovalStage
 {
-	[CmdletBinding(DefaultParameterSetName = 'IPRanges')]
+	[CmdletBinding()]
 	Param (
 		[int] $approvalStageTimeOutInDays = 14,
 		[bool] $isApproverJustificationRequired,
 		[bool] $isEscalationEnabled,
 		[int] $escalationTimeInMinutes,
-		[string[]] $primaryApprovers,
-		[string[]] $escalationApprovers,
+		[object[]] $primaryApprovers,
+		[object[]] $escalationApprovers,
 		[System.Management.Automation.PSCmdlet]
 		$Cmdlet = $PSCmdlet
 	)

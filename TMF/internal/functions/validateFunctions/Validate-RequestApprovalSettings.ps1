@@ -1,6 +1,6 @@
 ﻿function Validate-RequestApprovalSettings
 {
-	[CmdletBinding(DefaultParameterSetName = 'IPRanges')]
+	[CmdletBinding()]
 	Param (
 		[ValidateSet("NoApproval", "SingleStage", "Serial")]
 		[string] $approvalMode,
