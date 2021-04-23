@@ -86,7 +86,7 @@ function Invoke-TmfAccessPackageAssignementPolicy
 					$requestMethod = "DELETE"
 					try {
 						Write-PSFMessage -Level Verbose -String "TMF.Invoke.SendingRequest" -StringValues $requestMethod, $requestUrl
-						#Invoke-MgGraphRequest -Method $requestMethod -Uri $requestUrl
+						Invoke-MgGraphRequest -Method $requestMethod -Uri $requestUrl
 					}
 					catch {
 						Write-PSFMessage -Level Error -String "TMF.Invoke.ActionFailed" -StringValues $result.Tenant, $result.ResourceType, $result.ResourceName, $result.ActionType
@@ -95,24 +95,62 @@ function Invoke-TmfAccessPackageAssignementPolicy
 				}
 				"Update" {
 					$requestUrl = "$script:graphBaseUrl/identityGovernance/entitlementManagement/accessPackageAssignmentPolicies/{0}" -f $result.GraphResource.Id
-					$requestMethod = "PATCH"
-					$requestBody = @{}
-					foreach ($change in $result.Changes) {						
-						switch ($change.Property) {
-							default {
-								foreach ($action in $change.Actions.Keys) {
-									switch ($action) {
-										"Set" { $requestBody[$change.Property] = $change.Actions[$action] }
+					$requestMethod = "PUT"
+					if ($result.Changes.count -gt 0) {
+						$requestBody = @{						
+							"displayName" = $result.DesiredConfiguration.displayName
+							"description" = $result.DesiredConfiguration.description
+							"accessPackageId" = $result.DesiredConfiguration.accessPackageId()
+							"canExtend" = $result.DesiredConfiguration.canExtend
+							"durationInDays" = $result.DesiredConfiguration.durationInDays
+						}
+	
+						if ($result.DesiredConfiguration.Properties() -contains "accessReviewSettings") {
+							$accessReviewSettings = $result.DesiredConfiguration.accessReviewSettings
+							if ($accessReviewSettings.reviewers) {
+								$accessReviewSettings.reviewers = @($accessReviewSettings.reviewers | Foreach-Object {
+									$_.prepareBody()
+								})
+							}
+							$requestBody["accessReviewSettings"] = $accessReviewSettings
+						}
+	
+						if ($result.DesiredConfiguration.Properties() -contains "requestorSettings") {
+							$requestorSettings = $result.DesiredConfiguration.requestorSettings
+							if ($requestorSettings.allowedRequestors) {
+								$requestorSettings.allowedRequestors = @($requestorSettings.allowedRequestors | Foreach-Object {
+									$_.prepareBody()
+								})
+							}
+							$requestBody["requestorSettings"] = $requestorSettings
+						}
+	
+						if ($result.DesiredConfiguration.Properties() -contains "requestApprovalSettings") {
+							$requestApprovalSettings = $result.DesiredConfiguration.requestApprovalSettings
+							$requestApprovalSettings.approvalStages = @($requestApprovalSettings.approvalStages | Foreach-Object {							
+								$stage = $_
+								"primaryApprovers", "escalationApprovers" | Foreach-Object {
+									$key = $_
+									if ($stage[$key]) {
+										$stage[$key] = @($stage[$key] | Foreach-Object {
+											$_.prepareBody()
+										})
 									}
 								}
-							}
-						}							
-					}
-
-					if ($requestBody.Keys -gt 0) {
-						$requestBody = $requestBody | ConvertTo-Json -ErrorAction Stop
-						Write-PSFMessage -Level Verbose -String "TMF.Invoke.SendingRequestWithBody" -StringValues $requestMethod, $requestUrl, $requestBody
-						#Invoke-MgGraphRequest -Method $requestMethod -Uri $requestUrl -Body $requestBody
+								$stage
+							})
+							$requestBody["requestApprovalSettings"] = $requestApprovalSettings
+						}					
+	
+						try {
+							$requestBody = $requestBody | ConvertTo-Json -ErrorAction Stop -Depth 8
+							Write-PSFMessage -Level Verbose -String "TMF.Invoke.SendingRequestWithBody" -StringValues $requestMethod, $requestUrl, $requestBody
+							Invoke-MgGraphRequest -Method $requestMethod -Uri $requestUrl -Body $requestBody | Out-Null
+						}
+						catch {
+							Write-PSFMessage -Level Error -String "TMF.Invoke.ActionFailed" -StringValues $result.Tenant, $result.ResourceType, $result.ResourceName, $result.ActionType
+							throw $_
+						}
 					}
 				}
 				"NoActionRequired" { }

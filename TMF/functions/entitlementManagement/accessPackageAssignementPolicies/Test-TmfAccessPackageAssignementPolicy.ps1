@@ -36,7 +36,7 @@ function Test-TmfAccessPackageAssignementPolicy
 				DesiredConfiguration = $definition
 			}
 
-			$resource = (Invoke-MgGraphRequest -Method GET -Uri ("$script:graphBaseUrl/identityGovernance/entitlementManagement/accessPackageAssignmentPolicies?`$filter=displayName eq '{0}'" -f $definition.displayName)).Value
+			$resource = (Invoke-MgGraphRequest -Method GET -Uri ("$script:graphBaseUrl/identityGovernance/entitlementManagement/accessPackageAssignmentPolicies?`$filter=(displayName eq '{0}') and (accessPackageId eq '{1}')" -f $definition.displayName, $definition.accessPackageId())).Value
 			switch ($resource.Count) {
 				0 {
 					if ($definition.present) {					
@@ -50,13 +50,16 @@ function Test-TmfAccessPackageAssignementPolicy
 					$result["GraphResource"] = $resource
 					if ($definition.present) {
 						$changes = @()
-						foreach ($property in ($definition.Properties() | ? {$_ -notin "displayName", "present", "sourceConfig"})) {
+						foreach ($property in ($definition.Properties() | ? {$_ -notin "displayName", "present", "sourceConfig", "accessPackage"})) {
 							$change = [PSCustomObject] @{
 								Property = $property										
 								Actions = $null
 							}
 
-							switch ($property) {								
+							switch ($property) {
+								"accessReviewSettings" {}
+								"requestApprovalSettings" {}
+								"requestorSettings" {}
 								default {
 									if ($definition.$property -ne $resource.$property) {
 										$change.Actions = @{"Set" = $definition.$property}
