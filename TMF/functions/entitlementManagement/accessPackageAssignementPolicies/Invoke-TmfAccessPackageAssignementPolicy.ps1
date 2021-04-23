@@ -30,6 +30,8 @@ function Invoke-TmfAccessPackageAssignementPolicy
 						"displayName" = $result.DesiredConfiguration.displayName
 						"description" = $result.DesiredConfiguration.description
 						"accessPackageId" = $result.DesiredConfiguration.accessPackageId()
+						"canExtend" = $result.DesiredConfiguration.canExtend
+						"durationInDays" = $result.DesiredConfiguration.durationInDays
 					}
 
 					if ($result.DesiredConfiguration.Properties() -contains "accessReviewSettings") {
@@ -56,12 +58,14 @@ function Invoke-TmfAccessPackageAssignementPolicy
 						$requestApprovalSettings = $result.DesiredConfiguration.requestApprovalSettings
 						$requestApprovalSettings.approvalStages = @($requestApprovalSettings.approvalStages | Foreach-Object {							
 							$stage = $_
-							$stage.primaryApprovers = @($stage.primaryApprovers | Foreach-Object {
-								$_.prepareBody()
-							})
-							$stage.escalationApprovers = @($stage.escalationApprovers | Foreach-Object {
-								$_.prepareBody()
-							})
+							"primaryApprovers", "escalationApprovers" | Foreach-Object {
+								$key = $_
+								if ($stage[$key]) {
+									$stage[$key] = @($stage[$key] | Foreach-Object {
+										$_.prepareBody()
+									})
+								}
+							}
 							$stage
 						})
 						$requestBody["requestApprovalSettings"] = $requestApprovalSettings
@@ -70,7 +74,7 @@ function Invoke-TmfAccessPackageAssignementPolicy
 					try {
 						$requestBody = $requestBody | ConvertTo-Json -ErrorAction Stop -Depth 8
 						Write-PSFMessage -Level Verbose -String "TMF.Invoke.SendingRequestWithBody" -StringValues $requestMethod, $requestUrl, $requestBody
-						Invoke-MgGraphRequest -Method $requestMethod -Uri $requestUrl -Body $requestBody
+						Invoke-MgGraphRequest -Method $requestMethod -Uri $requestUrl -Body $requestBody | Out-Null
 					}
 					catch {
 						Write-PSFMessage -Level Error -String "TMF.Invoke.ActionFailed" -StringValues $result.Tenant, $result.ResourceType, $result.ResourceName, $result.ActionType

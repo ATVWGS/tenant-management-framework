@@ -48,7 +48,7 @@ function Register-TmfAccessPackage
 		Add-Member -InputObject $object -MemberType ScriptMethod -Name Properties -Value { ($this | Get-Member -MemberType NoteProperty).Name }
 
 		foreach ($policy in $assignementPolicies) {
-			$resource = $policy | Add-Member -NotePropertyMembers @{sourceConfig = $sourceConfig; accessPackage = $displayName; catalog = $catalog} -PassThru | ConvertTo-PSFHashtable -Include $((Get-Command Register-TmfAccessPackageAssignementPolicy).Parameters.Keys)			
+			$resource = $policy | Add-Member -NotePropertyMembers @{sourceConfig = $sourceConfig; accessPackage = $displayName; catalog = $catalog; present = $present} -PassThru | ConvertTo-PSFHashtable -Include $((Get-Command Register-TmfAccessPackageAssignementPolicy).Parameters.Keys)			
 			Register-TmfAccessPackageAssignementPolicy @resource -Cmdlet $PSCmdlet
 		}
 

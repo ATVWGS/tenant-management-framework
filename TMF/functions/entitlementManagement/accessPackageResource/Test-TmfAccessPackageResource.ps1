@@ -30,7 +30,7 @@ function Test-TmfAccessPackageResource
 				DesiredConfiguration = $definition
 			}
 
-			$resource = (Invoke-MgGraphRequest -Method GET -Uri ("$script:graphBaseUrl/identityGovernance/entitlementManagement/accessPackageCatalogs/{0}/accessPackageResources?`$filter=originId eq '{1}'" -f $definition.catalogId, $definition.originId)).Value
+			$resource = (Invoke-MgGraphRequest -Method GET -Uri ("$script:graphBaseUrl/identityGovernance/entitlementManagement/accessPackageCatalogs/{0}/accessPackageResources?`$filter=originId eq '{1}'" -f $definition.catalogId(), $definition.originId())).Value
 			switch ($resource.count) {
 				0 {
 					if ($definition.present) {					

@@ -37,7 +37,7 @@ function Test-TmfAccessPackageAssignementPolicy
 			}
 
 			$resource = (Invoke-MgGraphRequest -Method GET -Uri ("$script:graphBaseUrl/identityGovernance/entitlementManagement/accessPackageAssignmentPolicies?`$filter=displayName eq '{0}'" -f $definition.displayName)).Value
-			switch (0) {
+			switch ($resource.Count) {
 				0 {
 					if ($definition.present) {					
 						$result = New-TestResult @result -ActionType "Create"

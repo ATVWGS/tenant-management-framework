@@ -48,18 +48,18 @@ function Invoke-TmfAccessPackage
 					foreach ($roleScope in $result.DesiredConfiguration.accessPackageResourceRoleScopes) {						
 						$requestBody = @{
 							"accessPackageResourceRole" = @{
-								"originId" = $roleScope.roleOriginId
+								"originId" = $roleScope.roleOriginId()
 								"displayName" = $roleScope.resourceRole
 								"originSystem" = $roleScope.originSystem
 								"accessPackageResource" = @{
-									"id" = Resolve-AccessPackageResource -InputReference $roleScope.originId -CatalogId $roleScope.catalogId
+									"id" = Resolve-AccessPackageResource -InputReference $roleScope.originId() -CatalogId $roleScope.catalogId()
 									"resourceType" = $roleScope.resourceType
-									"originId" = $roleScope.originId
+									"originId" = $roleScope.originId()
 									"originSystem" = $roleScope.originSystem
 								}
 							}
 							"accessPackageResourceScope" = @{
-								"originId" = $roleScope.originId
+								"originId" = $roleScope.originId()
 								"originSystem" = $roleScope.originSystem
 							}
 						}
@@ -102,21 +102,21 @@ function Invoke-TmfAccessPackage
 											$method = "POST"
 											$change.Actions[$action] | Foreach-Object {
 												$roleOriginId = $_
-												$roleScope = $result.DesiredConfiguration.accessPackageResourceRoleScopes | ? {$_.roleOriginId -eq $roleOriginId}
+												$roleScope = $result.DesiredConfiguration.accessPackageResourceRoleScopes | ? {$_.roleOriginId() -eq $roleOriginId}
 												$body = @{
 													"accessPackageResourceRole" = @{
-														"originId" = $roleScope.roleOriginId
+														"originId" = $roleScope.roleOriginId()
 														"displayName" = $roleScope.resourceRole
 														"originSystem" = $roleScope.originSystem
 														"accessPackageResource" = @{
-															"id" = Resolve-AccessPackageResource -InputReference $roleScope.originId -CatalogId $roleScope.catalogId
+															"id" = Resolve-AccessPackageResource -InputReference $roleScope.originId() -CatalogId $roleScope.catalogId()
 															"resourceType" = $roleScope.resourceType
-															"originId" = $roleScope.originId
+															"originId" = $roleScope.originId()
 															"originSystem" = $roleScope.originSystem
 														}
 													}
 													"accessPackageResourceScope" = @{
-														"originId" = $roleScope.originId
+														"originId" = $roleScope.originId()
 														"originSystem" = $roleScope.originSystem
 													}
 												} | ConvertTo-Json -ErrorAction Stop

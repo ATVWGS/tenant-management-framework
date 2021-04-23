@@ -4,13 +4,13 @@ function Register-TmfAccessPackageAssignementPolicy
 	Param (
 		[Parameter(Mandatory = $true)]
 		[string] $displayName,
-		[string] $description = "Access Package has been created with Tenant Management Framework",
+		[string] $description = "Access Package Assignement Policy has been created with Tenant Management Framework",
 		[Parameter(Mandatory = $true)]
 		[string] $accessPackage,
 
 		[bool] $canExtend = $false,
 		[Parameter(Mandatory = $true)]
-		[int] $durationInDays,
+		[int] $durationInDays = 7,
 
 		[object] $accessReviewSettings,
 		[object] $requestApprovalSettings,
@@ -42,6 +42,8 @@ function Register-TmfAccessPackageAssignementPolicy
 			displayName = $displayName
 			accessPackage = $accessPackage
 			description = $description
+			canExtend = $canExtend
+			durationInDays = $durationInDays
 			present = $present
 			sourceConfig = $sourceConfig
 		}
