@@ -3,8 +3,8 @@ function Resolve-AccessPackageAssignmentPolicy
 	[CmdletBinding()]
 	Param (
 		[Parameter(Mandatory = $true)]
-		[string] $AccessPackageAssignmentPolicyReference,
-		[Parameter(Mandatory = $true)]
+		[string] $InputReference,
+		[switch] $DontFailIfNotExisting,
 		[System.Management.Automation.PSCmdlet]
 		$Cmdlet = $PSCmdlet
 	)
@@ -22,7 +22,9 @@ function Resolve-AccessPackageAssignmentPolicy
 				$accessPackageAssignmentPolicy = Get-MgEntitlementManagementAccessPackageAssignmentPolicy -Filter "displayName eq '$AccessPackageAssignmentPolicyReference'"
 			}
 			
-			if (!$accessPackageAssignmentPolicy) { throw "Cannot find user $AccessPackageAssignmentPolicyReference" }
+			if (-Not $accessPackageAssignmentPolicy -and -Not $DontFailIfNotExisting) { throw "Cannot find user $AccessPackageAssignmentPolicyReference" } 
+			elseif (-Not $accessPackageAssignmentPolicy -and $DontFailIfNotExisting) { return }
+
 			if ($accessPackageAssignmentPolicy.count -gt 1) { throw "Got multiple Access Package Catalogs for $AccessPackageAssignmentPolicyReference" }
 			return $accessPackageAssignmentPolicy
 		}

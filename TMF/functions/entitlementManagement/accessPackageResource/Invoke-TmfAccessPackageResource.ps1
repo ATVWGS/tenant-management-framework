@@ -33,11 +33,11 @@ function Invoke-TmfAccessPackageResource
 							"description" = $result.DesiredConfiguration.description
 							"resourceType" = $result.DesiredConfiguration.resourceType
 							"originSystem" = $result.DesiredConfiguration.originSystem
-							"originId" = $result.DesiredConfiguration.originId
+							"originId" = $result.DesiredConfiguration.originId()
 						}						
 						"justification" = "Resource is required for an Access Package managed by the Tenant Managment Framework"						
 						"requestType" = "AdminAdd"
-						"catalogId" = $result.DesiredConfiguration.catalogId
+						"catalogId" = $result.DesiredConfiguration.catalogId()
 					}
 					try {
 						$requestBody = $requestBody | ConvertTo-Json -ErrorAction Stop -Depth 8
@@ -59,11 +59,11 @@ function Invoke-TmfAccessPackageResource
 							"description" = $result.DesiredConfiguration.description
 							"resourceType" = $result.DesiredConfiguration.resourceType
 							"originSystem" = $result.DesiredConfiguration.originSystem
-							"originId" = $result.DesiredConfiguration.originId
+							"originId" = $result.DesiredConfiguration.originId()
 						}						
 						"justification" = "Resource is not longer required for an Access Package managed by the Tenant Managment Framework"						
 						"requestType" = "AdminRemove"
-						"catalogId" = $result.DesiredConfiguration.catalogId
+						"catalogId" = $result.DesiredConfiguration.catalogId()
 					}
 					try {
 						$requestBody = $requestBody | ConvertTo-Json -ErrorAction Stop -Depth 8

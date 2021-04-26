@@ -4,6 +4,7 @@ function Resolve-AccessPackageCatalog
 	Param (
 		[Parameter(Mandatory = $true)]
 		[string] $InputReference,
+		[switch] $DontFailIfNotExisting,
 		[System.Management.Automation.PSCmdlet]
 		$Cmdlet = $PSCmdlet
 	)
@@ -21,7 +22,9 @@ function Resolve-AccessPackageCatalog
 				$catalog = (Invoke-MgGraphRequest -Method GET -Uri ("$script:graphBaseUrl/identityGovernance/entitlementManagement/accessPackageCatalogs/?`$filter=displayName eq '{0}'" -f $InputReference)).Value
 			}
 
-			if (!$catalog){ throw "Cannot find accessPackageCatalog $InputReference" }
+			if (-Not $catalog -and -Not $DontFailIfNotExisting){ throw "Cannot find accessPackageCatalog $InputReference" } 
+			elseif (-Not $catalog -and $DontFailIfNotExisting) { return }
+
 			if ($catalog.count -gt 1) { throw "Got multiple accessPackageCatalogs for $InputReference" }
 			return $catalog.Id
 		}

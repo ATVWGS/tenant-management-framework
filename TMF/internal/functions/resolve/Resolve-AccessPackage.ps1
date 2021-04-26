@@ -4,6 +4,7 @@ function Resolve-AccessPackage
 	Param (
 		[Parameter(Mandatory = $true)]
 		[string] $InputReference,
+		[switch] $DontFailIfNotExisting,
 		[System.Management.Automation.PSCmdlet]
 		$Cmdlet = $PSCmdlet
 	)
@@ -15,15 +16,17 @@ function Resolve-AccessPackage
 	{			
 		try {
 			if ($InputReference -match $script:guidRegex) {
-				$catalog = (Invoke-MgGraphRequest -Method GET -Uri ("$script:graphBaseUrl/identityGovernance/entitlementManagement/accessPackages/{0}" -f $InputReference)).Value
+				$package = (Invoke-MgGraphRequest -Method GET -Uri ("$script:graphBaseUrl/identityGovernance/entitlementManagement/accessPackages/{0}" -f $InputReference)).Value
 			}
 			else {
-				$catalog = (Invoke-MgGraphRequest -Method GET -Uri ("$script:graphBaseUrl/identityGovernance/entitlementManagement/accessPackages/?`$filter=displayName eq '{0}'" -f $InputReference)).Value
+				$package = (Invoke-MgGraphRequest -Method GET -Uri ("$script:graphBaseUrl/identityGovernance/entitlementManagement/accessPackages/?`$filter=displayName eq '{0}'" -f $InputReference)).Value
 			}
 
-			if (!$catalog){ throw "Cannot find accessPackage $InputReference" }
-			if ($catalog.count -gt 1) { throw "Got multiple accessPackages for $InputReference" }
-			return $catalog.Id
+			if (-Not $package -and -Not $DontFailIfNotExisting){ throw "Cannot find accessPackage $InputReference" }
+			elseif (-Not $package -and $DontFailIfNotExisting) { return }
+
+			if ($package.count -gt 1) { throw "Got multiple accessPackages for $InputReference" }
+			return $package.Id
 		}
 		catch {
 			Write-PSFMessage -Level Warning -String 'TMF.CannotResolveResource' -StringValues "AccessPackage" -Tag 'failed' -ErrorRecord $_

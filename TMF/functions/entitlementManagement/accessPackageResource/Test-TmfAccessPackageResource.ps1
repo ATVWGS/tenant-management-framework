@@ -30,7 +30,16 @@ function Test-TmfAccessPackageResource
 				DesiredConfiguration = $definition
 			}
 
-			$resource = (Invoke-MgGraphRequest -Method GET -Uri ("$script:graphBaseUrl/identityGovernance/entitlementManagement/accessPackageCatalogs/{0}/accessPackageResources?`$filter=originId eq '{1}'" -f $definition.catalogId(), $definition.originId())).Value
+			$catalogId = $definition.catalogId()			
+			if (-Not $catalogId) {
+				Write-PSFMessage -Level Warning -String 'TMF.RelatedResourceDoesNotExist' -StringValues "Access Package Catalog", $catalog, $result.ResourceType, $result.ResourceName
+				New-TestResult @result -ActionType "Create"				
+				continue
+			}
+
+			$originId = $definition.originId()
+
+			$resource = (Invoke-MgGraphRequest -Method GET -Uri ("$script:graphBaseUrl/identityGovernance/entitlementManagement/accessPackageCatalogs/{0}/accessPackageResources?`$filter=originId eq '{1}'" -f $catalogId, $originId)).Value
 			switch ($resource.count) {
 				0 {
 					if ($definition.present) {					

@@ -32,13 +32,15 @@ function Invoke-TmfAccessPackageAssignementPolicy
 				if ($property -in $TestResult.DesiredConfiguration.Properties()) {
 					$requestBody[$property] = $TestResult.DesiredConfiguration.$property.PSObject.Copy()
 					if ($property -eq "requestApprovalSettings") {
-						$requestBody[$property]["approvalStages"] = @($requestBody[$property]["approvalStages"].PSObject.Copy() | Foreach-Object {							
-							$stage = $_
-							"primaryApprovers", "escalationApprovers" | Where-Object { $_ -in $requestBody[$property]["approvalStages"].Keys } | Foreach-Object {								
-								$stage[$_] = @($stage[$_] | Foreach-Object { $_.prepareBody() })
-							}
-							$stage
-						})
+						if ($requestBody[$property]["approvalStages"]) {
+							$requestBody[$property]["approvalStages"] = @($requestBody[$property]["approvalStages"].PSObject.Copy() | Foreach-Object {							
+								$stage = $_
+								"primaryApprovers", "escalationApprovers" | Where-Object { $_ -in $requestBody[$property]["approvalStages"].Keys } | Foreach-Object {								
+									$stage[$_] = @($stage[$_] | Foreach-Object { $_.prepareBody() })
+								}
+								$stage
+							})
+						}
 					}
 					else {
 						switch ($property) {

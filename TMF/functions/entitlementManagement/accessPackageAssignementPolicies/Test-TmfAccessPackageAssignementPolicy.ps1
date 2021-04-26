@@ -30,7 +30,14 @@ function Test-TmfAccessPackageAssignementPolicy
 				DesiredConfiguration = $definition
 			}
 
-			$resource = (Invoke-MgGraphRequest -Method GET -Uri ("$script:graphBaseUrl/identityGovernance/entitlementManagement/accessPackageAssignmentPolicies?`$filter=(displayName eq '{0}') and (accessPackageId eq '{1}')" -f $definition.displayName, $definition.accessPackageId())).Value
+			$accessPackageId = $definition.accessPackageId()
+			if (-Not $accessPackageId) {
+				Write-PSFMessage -Level Host -String 'TMF.RelatedResourceDoesNotExist' -StringValues "Access Package", $accessPackage, $result.ResourceType, $result.ResourceName
+				New-TestResult @result -ActionType "Create"				
+				continue
+			}
+
+			$resource = (Invoke-MgGraphRequest -Method GET -Uri ("$script:graphBaseUrl/identityGovernance/entitlementManagement/accessPackageAssignmentPolicies?`$filter=(displayName eq '{0}') and (accessPackageId eq '{1}')" -f $definition.displayName, $accessPackageId)).Value
 			switch ($resource.Count) {
 				0 {
 					if ($definition.present) {					
