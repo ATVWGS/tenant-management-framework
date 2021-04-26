@@ -11,12 +11,6 @@ function Test-TmfAccessPackageAssignementPolicy
 		Test-GraphConnection -Cmdlet $Cmdlet
 		$resourceName = "accessPackageAssignementPolicies"
 		$tenant = Get-MgOrganization -Property displayName, Id
-		
-		$resolveFunctionMapping = @{
-			"Users" = (Get-Command Resolve-User)
-			"Groups" = (Get-Command Resolve-Group)
-			
-		}
 	}
 	process
 	{
@@ -57,9 +51,31 @@ function Test-TmfAccessPackageAssignementPolicy
 							}
 
 							switch ($property) {
-								"accessReviewSettings" {}
-								"requestApprovalSettings" {}
-								"requestorSettings" {}
+								{$_ -in "accessReviewSettings", "requestApprovalSettings", "requestorSettings"} {
+									$needUpdate = $false
+									foreach ($key in $definition.$property.Keys) {
+										switch ($key) {
+											"approvalStages" {
+												"primaryApprovers", "escalationApprovers" | Where-Object { $_ -in $definition.$property.$key.Keys } | Foreach-Object {								
+													if (Check-UserSetRequiresUpdate -Reference $resource.$property.$key.$_ -Difference $definition.$property.$key.$_ -Cmdlet $Cmdlet) {
+														$needUpdate = $true
+													}
+												}
+											}
+											{$_ -in "reviewers", "allowedRequestors"} {
+												if (Check-UserSetRequiresUpdate -Reference $resource.$property.$key -Difference $definition.$property.$key -Cmdlet $Cmdlet) {
+													$needUpdate = $true
+												}
+											}
+											default {
+												if ($definition.$property[$key] -ne $resource.$property.$key) {
+													$needUpdate = $true
+												}
+											}
+										}
+									}
+									if ($needUpdate) { $change.Actions = @{"Set" = $definition.$property} }
+								}
 								default {
 									if ($definition.$property -ne $resource.$property) {
 										$change.Actions = @{"Set" = $definition.$property}

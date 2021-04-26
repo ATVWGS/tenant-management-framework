@@ -14,6 +14,47 @@ function Invoke-TmfAccessPackageAssignementPolicy
 			return
 		}
 		Test-GraphConnection -Cmdlet $Cmdlet
+
+		function Build-RequestBody {
+			Param (
+				$TestResult				
+			)
+
+			$requestBody = @{						
+				"displayName" = $TestResult.DesiredConfiguration.displayName
+				"description" = $TestResult.DesiredConfiguration.description
+				"accessPackageId" = $TestResult.DesiredConfiguration.accessPackageId()
+				"canExtend" = $TestResult.DesiredConfiguration.canExtend
+				"durationInDays" = $TestResult.DesiredConfiguration.durationInDays
+			}
+
+			foreach ($property in @("accessReviewSettings", "requestorSettings", "requestApprovalSettings")) {
+				if ($property -in $TestResult.DesiredConfiguration.Properties()) {
+					$requestBody[$property] = $TestResult.DesiredConfiguration.$property.PSObject.Copy()
+					if ($property -eq "requestApprovalSettings") {
+						$requestBody[$property]["approvalStages"] = @($requestBody[$property]["approvalStages"] | Foreach-Object {							
+							$stage = $_
+							"primaryApprovers", "escalationApprovers" | Where-Object { $_ -in $requestBody[$property]["approvalStages"].Keys } | Foreach-Object {								
+								$stage[$_] = @($stage[$_] | Foreach-Object { $_.prepareBody() })
+							}
+							$stage
+						})
+					}
+					else {
+						switch ($property) {
+							"accessReviewSettings" { $userSetProperty = "reviewers" }
+							"requestorSettings" { $userSetProperty = "allowedRequestors" }
+						}
+
+						if ($requestBody[$property].Keys -contains $userSetProperty) {
+							$requestBody[$property][$userSetProperty] = @($requestBody[$property][$userSetProperty] | Foreach-Object { $_.prepareBody()	})
+						}
+					}
+				}				
+			}
+
+			return $requestBody
+		}
 	}
 	process
 	{
@@ -26,50 +67,7 @@ function Invoke-TmfAccessPackageAssignementPolicy
 				"Create" {
 					$requestUrl = "$script:graphBaseUrl/identityGovernance/entitlementManagement/accessPackageAssignmentPolicies"
 					$requestMethod = "POST"
-					$requestBody = @{						
-						"displayName" = $result.DesiredConfiguration.displayName
-						"description" = $result.DesiredConfiguration.description
-						"accessPackageId" = $result.DesiredConfiguration.accessPackageId()
-						"canExtend" = $result.DesiredConfiguration.canExtend
-						"durationInDays" = $result.DesiredConfiguration.durationInDays
-					}
-
-					if ($result.DesiredConfiguration.Properties() -contains "accessReviewSettings") {
-						$accessReviewSettings = $result.DesiredConfiguration.accessReviewSettings
-						if ($accessReviewSettings.reviewers) {
-							$accessReviewSettings.reviewers = @($accessReviewSettings.reviewers | Foreach-Object {
-								$_.prepareBody()
-							})
-						}
-						$requestBody["accessReviewSettings"] = $accessReviewSettings
-					}
-
-					if ($result.DesiredConfiguration.Properties() -contains "requestorSettings") {
-						$requestorSettings = $result.DesiredConfiguration.requestorSettings
-						if ($requestorSettings.allowedRequestors) {
-							$requestorSettings.allowedRequestors = @($requestorSettings.allowedRequestors | Foreach-Object {
-								$_.prepareBody()
-							})
-						}
-						$requestBody["requestorSettings"] = $requestorSettings
-					}
-
-					if ($result.DesiredConfiguration.Properties() -contains "requestApprovalSettings") {
-						$requestApprovalSettings = $result.DesiredConfiguration.requestApprovalSettings
-						$requestApprovalSettings.approvalStages = @($requestApprovalSettings.approvalStages | Foreach-Object {							
-							$stage = $_
-							"primaryApprovers", "escalationApprovers" | Foreach-Object {
-								$key = $_
-								if ($stage[$key]) {
-									$stage[$key] = @($stage[$key] | Foreach-Object {
-										$_.prepareBody()
-									})
-								}
-							}
-							$stage
-						})
-						$requestBody["requestApprovalSettings"] = $requestApprovalSettings
-					}					
+					$requestBody = Build-RequestBody -TestResult $result					
 
 					try {
 						$requestBody = $requestBody | ConvertTo-Json -ErrorAction Stop -Depth 8
@@ -97,50 +95,7 @@ function Invoke-TmfAccessPackageAssignementPolicy
 					$requestUrl = "$script:graphBaseUrl/identityGovernance/entitlementManagement/accessPackageAssignmentPolicies/{0}" -f $result.GraphResource.Id
 					$requestMethod = "PUT"
 					if ($result.Changes.count -gt 0) {
-						$requestBody = @{						
-							"displayName" = $result.DesiredConfiguration.displayName
-							"description" = $result.DesiredConfiguration.description
-							"accessPackageId" = $result.DesiredConfiguration.accessPackageId()
-							"canExtend" = $result.DesiredConfiguration.canExtend
-							"durationInDays" = $result.DesiredConfiguration.durationInDays
-						}
-	
-						if ($result.DesiredConfiguration.Properties() -contains "accessReviewSettings") {
-							$accessReviewSettings = $result.DesiredConfiguration.accessReviewSettings
-							if ($accessReviewSettings.reviewers) {
-								$accessReviewSettings.reviewers = @($accessReviewSettings.reviewers | Foreach-Object {
-									$_.prepareBody()
-								})
-							}
-							$requestBody["accessReviewSettings"] = $accessReviewSettings
-						}
-	
-						if ($result.DesiredConfiguration.Properties() -contains "requestorSettings") {
-							$requestorSettings = $result.DesiredConfiguration.requestorSettings
-							if ($requestorSettings.allowedRequestors) {
-								$requestorSettings.allowedRequestors = @($requestorSettings.allowedRequestors | Foreach-Object {
-									$_.prepareBody()
-								})
-							}
-							$requestBody["requestorSettings"] = $requestorSettings
-						}
-	
-						if ($result.DesiredConfiguration.Properties() -contains "requestApprovalSettings") {
-							$requestApprovalSettings = $result.DesiredConfiguration.requestApprovalSettings
-							$requestApprovalSettings.approvalStages = @($requestApprovalSettings.approvalStages | Foreach-Object {							
-								$stage = $_
-								"primaryApprovers", "escalationApprovers" | Foreach-Object {
-									$key = $_
-									if ($stage[$key]) {
-										$stage[$key] = @($stage[$key] | Foreach-Object {
-											$_.prepareBody()
-										})
-									}
-								}
-								$stage
-							})
-							$requestBody["requestApprovalSettings"] = $requestApprovalSettings
-						}					
+						$requestBody = Build-RequestBody -TestResult $result
 	
 						try {
 							$requestBody = $requestBody | ConvertTo-Json -ErrorAction Stop -Depth 8

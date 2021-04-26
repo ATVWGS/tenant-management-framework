@@ -53,7 +53,7 @@ function Register-TmfAccessPackage
 		}
 
 		foreach ($accessPackageResource in $accessPackageResources) {
-			$resource = $accessPackageResource | Add-Member -NotePropertyMembers @{sourceConfig = $sourceConfig; catalog = $catalog; displayName = ("{0} - {1}" -f $catalog, $accessPackageResource.resourceIdentifier)} -PassThru | ConvertTo-PSFHashtable -Include $((Get-Command Register-TmfAccessPackageResource).Parameters.Keys)
+			$resource = $accessPackageResource | Add-Member -NotePropertyMembers @{sourceConfig = $sourceConfig; catalog = $catalog; displayName = ("{0} - {1}" -f $catalog, $accessPackageResource.resourceIdentifier)} -PassThru -Force | ConvertTo-PSFHashtable -Include $((Get-Command Register-TmfAccessPackageResource).Parameters.Keys)
 			$object.accessPackageResourceRoleScopes += Register-TmfAccessPackageResource @resource -Cmdlet $PSCmdlet -PassThru
 		}
 

@@ -1,13 +1,15 @@
-﻿function Validate-RequestApprovalSettings
+﻿function Validate-AssignmentReviewSettings
 {
 	[CmdletBinding()]
 	Param (
-		[ValidateSet("NoApproval", "SingleStage", "Serial")]
-		[string] $approvalMode,
-		[bool] $isApprovalRequired,
-		[bool] $isApprovalRequiredForExtension,
-		[bool] $isRequestorJustificationRequired,		
-		[object[]] $approvalStages,
+		[bool] $isEnabled,
+		[ValidateSet("monthly", "quarterly")]
+		[string] $recurrenceType,
+		[ValidateSet("Self", "Reviewers")]
+		[string] $reviewerType,
+		[datetime] $startDateTime,
+		[int] $durationInDays,
+		[object[]] $reviewers,
 		[System.Management.Automation.PSCmdlet]
 		$Cmdlet = $PSCmdlet
 	)
@@ -21,7 +23,7 @@
 		$hashtable = @{}
 		foreach ($property in ($PSBoundParameters.GetEnumerator() | Where-Object {$_.Key -ne "Cmdlet"})) {
 			if ($script:validateFunctionMapping.ContainsKey($property.Key)) {
-				if ($property.Value.GetType().BaseType -eq "System.Array") {
+				if ($property.Value.GetType().Name -eq "Object[]") {
 					$validated = @()
 					foreach ($value in $property.Value) {
 						$dummy = $value | ConvertTo-PSFHashtable -Include $($script:validateFunctionMapping[$property.Key].Parameters.Keys)

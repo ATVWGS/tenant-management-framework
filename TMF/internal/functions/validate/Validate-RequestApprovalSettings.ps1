@@ -1,11 +1,13 @@
-﻿function Validate-RequestorSettings
+﻿function Validate-RequestApprovalSettings
 {
 	[CmdletBinding()]
 	Param (
-		[ValidateSet("NoSubjects", "SpecificDirectorySubjects", "SpecificConnectedOrganizationSubjects", "AllConfiguredConnectedOrganizationSubjects", "AllExistingConnectedOrganizationSubjects", "AllExistingDirectoryMemberUsers", "AllExistingDirectorySubjects", "AllExternalSubjects")]
-		[string] $scopeType,
-		[bool] $acceptRequests,
-		[object[]] $allowedRequestors,
+		[ValidateSet("NoApproval", "SingleStage", "Serial")]
+		[string] $approvalMode,
+		[bool] $isApprovalRequired,
+		[bool] $isApprovalRequiredForExtension,
+		[bool] $isRequestorJustificationRequired,		
+		[object[]] $approvalStages,
 		[System.Management.Automation.PSCmdlet]
 		$Cmdlet = $PSCmdlet
 	)
@@ -19,7 +21,7 @@
 		$hashtable = @{}
 		foreach ($property in ($PSBoundParameters.GetEnumerator() | Where-Object {$_.Key -ne "Cmdlet"})) {
 			if ($script:validateFunctionMapping.ContainsKey($property.Key)) {
-				if ($property.Value.GetType().BaseType -eq "System.Array") {
+				if ($property.Value.GetType().Name -eq "Object[]") {
 					$validated = @()
 					foreach ($value in $property.Value) {
 						$dummy = $value | ConvertTo-PSFHashtable -Include $($script:validateFunctionMapping[$property.Key].Parameters.Keys)

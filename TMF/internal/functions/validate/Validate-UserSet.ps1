@@ -9,7 +9,7 @@
 	#>
 	[CmdletBinding()]
 	Param (
-		[Parameter(Mandatory = $true, ParameterSetName = "Default")]
+		[Parameter(ParameterSetName = "Default")]
 		[string] $reference,
 		[ValidateSet("singleUser", "groupMembers", "connectedOrganizationMembers", "requestorManager", "internalSponsors", "externalSponsors")]
 		[string] $type = "singleUser",
@@ -31,13 +31,14 @@
 		if (Test-PSFFunctionInterrupt) { return }				
 
 		$userSetObject = [PSCustomObject]@{
-			type = $type								
+			type = $type
 			isBackup = $isBackup			
 		}
 
+		Add-Member -InputObject $userSetObject -MemberType NoteProperty -Name "@odata.type" -Value ("#microsoft.graph.{0}" -f $type)
 		if ($type -in @("singleUser", "groupMembers", "connectedOrganizationMembers")) {
 			Add-Member -InputObject $userSetObject -MemberType NoteProperty -Name reference -Value $reference
-			Add-Member -InputObject $userSetObject -MemberType ScriptMethod -Name id -Value {
+			Add-Member -InputObject $userSetObject -MemberType ScriptMethod -Name getId -Value {
 				switch ($this.type) {
 					"singleUser" {
 						Resolve-User -InputReference $this.reference -Cmdlet $PSCmdlet
@@ -57,13 +58,13 @@
 		}
 
 		Add-Member -InputObject $userSetObject -MemberType ScriptMethod -Name prepareBody -Value {
-			$hashtable = @{
-				"@odata.type" = "#microsoft.graph.{0}" -f $this.type
-				isBackup = $this.isBackup					
+			$hashtable = @{				
+				isBackup = $this.isBackup
+				"@odata.type" = $this."@odata.type"
 			}
-			if ($this.id) {$hashtable["id"] = $this.id()}
+			if ($this.id) {$hashtable["id"] = $this.getId()}
 			if ($this.managerLevel) {$hashtable["managerLevel"] = $this.managerLevel}
-			$hashtable
+			return $hashtable
 		}
 	}
 	end
