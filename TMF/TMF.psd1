@@ -62,6 +62,8 @@
 		'Register-TmfConditionalAccessPolicy',
 		'Test-TmfConditionalAccessPolicy',
 		'Invoke-TmfConditionalAccessPolicy',
+		'Test-TmfEntitlementManagement',
+		'Invoke-TmfEntitlementManagement',
 		'Register-TmfAccessPackageCatalog',
 		'Test-TmfAccessPackageCatalog',
 		'Invoke-TmfAccessPackageCatalog',

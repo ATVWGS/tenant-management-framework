@@ -30,8 +30,8 @@ function Register-TmfAccessPackageAssignementPolicy
 			$script:desiredConfiguration[$resourceName] = @()
 		}
 
-		if ($script:desiredConfiguration[$resourceName].displayName -contains $displayName) {			
-			$alreadyLoaded = $script:desiredConfiguration[$resourceName] | ? {$_.displayName -eq $displayName}
+		if ($script:desiredConfiguration[$resourceName] | Where-Object {$_.displayName -eq $displayName -and $_.accessPackage -eq $accessPackage}) {			
+			$alreadyLoaded = $script:desiredConfiguration[$resourceName] | Where-Object {$_.displayName -eq $displayName -and $_.accessPackage -eq $accessPackage}
 		}
 	}
 	process

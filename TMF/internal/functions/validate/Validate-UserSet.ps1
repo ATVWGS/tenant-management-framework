@@ -62,7 +62,7 @@
 				isBackup = $this.isBackup
 				"@odata.type" = $this."@odata.type"
 			}
-			if ($this.id) {$hashtable["id"] = $this.getId()}
+			if ($this.getId) {$hashtable["id"] = $this.getId()}
 			if ($this.managerLevel) {$hashtable["managerLevel"] = $this.managerLevel}
 			return $hashtable
 		}
