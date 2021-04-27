@@ -64,7 +64,7 @@ function Register-TmfAccessPackageResource
 		Add-Member -InputObject $object -MemberType ScriptMethod -Name "originId" -Value {
 			switch ($this.resourceType) { # Resolve originId (eg. get the ObjectId of a group resource)
 				"AadGroup" {
-					 $originId = Resolve-Group -InputReference $this.resourceIdentifier
+					 $originId = Resolve-Group -InputReference $this.resourceIdentifier -DontFailIfNotExisting
 				}
 				default {
 					$originId = $this.resourceIdentifier
@@ -72,7 +72,7 @@ function Register-TmfAccessPackageResource
 			}
 			$originId
 		}
-		Add-Member -InputObject $object -MemberType ScriptMethod -Name "roleOriginId" -Value { "{0}_{1}" -f $this.resourceRole, $this.originId() }
+		Add-Member -InputObject $object -MemberType ScriptMethod -Name "roleOriginId" -Value { $originId = $this.originId(); if ($originId) { "{0}_{1}" -f $this.resourceRole, $originId }}
 		Add-Member -InputObject $object -MemberType ScriptMethod -Name Properties -Value { ($this | Get-Member -MemberType NoteProperty).Name }
 
 		if ($alreadyLoaded) {

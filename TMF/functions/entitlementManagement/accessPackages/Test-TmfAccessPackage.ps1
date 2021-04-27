@@ -19,7 +19,6 @@ function Test-TmfAccessPackage
 	}
 	process
 	{
-		$results = @()
 		foreach ($definition in $script:desiredConfiguration[$resourceName]) {
 			foreach ($property in $definition.Properties()) {
 				if ($definition.$property.GetType().Name -eq "String") {
@@ -61,7 +60,7 @@ function Test-TmfAccessPackage
 								"accessPackageResourceRoleScopes" {
 									$existingRoleScopes = @()
 									if ($resource.accessPackageResourceRoleScopes.accessPackageResourceRole.originId) { $existingRoleScopes = $resource.accessPackageResourceRoleScopes.accessPackageResourceRole.originId }
-									$compare = Compare-Object -ReferenceObject  $existingRoleScopes -DifferenceObject @($definition.accessPackageResourceRoleScopes.roleOriginId())
+									$roleOriginIds = @($definition.accessPackageResourceRoleScopes.roleOriginId())									
 
 									if ($compare) {
 										$change.Actions = @{}
