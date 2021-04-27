@@ -11,11 +11,6 @@ function Test-TmfAccessPackage
 		Test-GraphConnection -Cmdlet $Cmdlet
 		$resourceName = "accessPackages"
 		$tenant = Get-MgOrganization -Property displayName, Id
-		
-		$resolveFunctionMapping = @{
-			"Users" = (Get-Command Resolve-User)
-			"Groups" = (Get-Command Resolve-Group)			
-		}
 	}
 	process
 	{
@@ -48,7 +43,7 @@ function Test-TmfAccessPackage
 					$result["GraphResource"] = $resource
 					if ($definition.present) {
 						$changes = @()
-						foreach ($property in ($definition.Properties() | ? {$_ -notin "displayName", "present", "sourceConfig"})) {
+						foreach ($property in ($definition.Properties() | Where-Object {$_ -notin "displayName", "present", "sourceConfig"})) {
 							$change = [PSCustomObject] @{
 								Property = $property										
 								Actions = $null
@@ -59,8 +54,9 @@ function Test-TmfAccessPackage
 								"isRoleScopesVisible" { <# Currently not possible to update! #> }
 								"accessPackageResourceRoleScopes" {
 									$existingRoleScopes = @()
-									if ($resource.accessPackageResourceRoleScopes.accessPackageResourceRole.originId) { $existingRoleScopes = $resource.accessPackageResourceRoleScopes.accessPackageResourceRole.originId }
-									$roleOriginIds = @($definition.accessPackageResourceRoleScopes.roleOriginId())									
+									if ($resource.accessPackageResourceRoleScopes.accessPackageResourceRole.originId) { $existingRoleScopes = $resource.accessPackageResourceRoleScopes.accessPackageResourceRole.originId }									
+									$roleOriginIds = @($definition.accessPackageResourceRoleScopes.roleOriginId())
+									$compare = Compare-Object -ReferenceObject  $existingRoleScopes -DifferenceObject $roleOriginIds
 
 									if ($compare) {
 										$change.Actions = @{}

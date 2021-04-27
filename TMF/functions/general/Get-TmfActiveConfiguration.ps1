@@ -1,19 +1,15 @@
 ﻿function Get-TmfActiveConfiguration
 {
+	<#
+		.SYNOPSIS
+			Returns currently activated configurations.
+	#>
 	[CmdletBinding()]
 	Param (
 	)
 	
-	begin
-	{
-		
-	}
 	process
 	{
 		return $script:activatedConfigurations
-	}
-	end
-	{
-	
 	}
 }
