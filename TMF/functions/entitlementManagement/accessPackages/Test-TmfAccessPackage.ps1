@@ -54,8 +54,9 @@ function Test-TmfAccessPackage
 								"isRoleScopesVisible" { <# Currently not possible to update! #> }
 								"accessPackageResourceRoleScopes" {
 									$existingRoleScopes = @()
-									if ($resource.accessPackageResourceRoleScopes.accessPackageResourceRole.originId) { $existingRoleScopes = $resource.accessPackageResourceRoleScopes.accessPackageResourceRole.originId }
+									if ($resource.accessPackageResourceRoleScopes.accessPackageResourceRole.originId) { $existingRoleScopes = $resource.accessPackageResourceRoleScopes.accessPackageResourceRole.originId }									
 									$roleOriginIds = @($definition.accessPackageResourceRoleScopes.roleOriginId())
+									$compare = Compare-Object -ReferenceObject  $existingRoleScopes -DifferenceObject $roleOriginIds
 
 									if ($compare) {
 										$change.Actions = @{}
