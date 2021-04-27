@@ -1,4 +1,4 @@
-﻿function Test-TmfNamedLocation
+function Test-TmfAccessPackageCatalog
 {
 	[CmdletBinding()]
 	Param (
@@ -9,8 +9,8 @@
 	begin
 	{
 		Test-GraphConnection -Cmdlet $Cmdlet
-		$resourceName = "namedLocations"
-		$tenant = Get-MgOrganization -Property displayName, Id		
+		$resourceName = "accessPackageCatalogs"
+		$tenant = Get-MgOrganization -Property displayName, Id
 	}
 	process
 	{
@@ -24,12 +24,12 @@
 			$result = @{
 				Tenant = $tenant.displayName
 				TenantId = $tenant.Id
-				ResourceType = 'NamedLocation'
+				ResourceType = 'AccessPackageCatalog'
 				ResourceName = (Resolve-String -Text $definition.displayName)
 				DesiredConfiguration = $definition
 			}
 
-			$resource = (Invoke-MgGraphRequest -Method GET -Uri ("$script:graphBaseUrl/identity/conditionalAccess/namedLocations/?`$filter=displayName eq '{0}'" -f $definition.displayName)).Value
+			$resource = (Invoke-MgGraphRequest -Method GET -Uri ("$script:graphBaseUrl/identityGovernance/entitlementManagement/accessPackageCatalogs?`$filter=displayName eq '{0}'" -f $definition.displayName)).Value
 			switch ($resource.Count) {
 				0 {
 					if ($definition.present) {					
@@ -48,17 +48,8 @@
 								Property = $property										
 								Actions = $null
 							}
+
 							switch ($property) {
-								"ipRanges" {
-									if (Compare-Object -ReferenceObject $resource.ipRanges.cidrAddress -DifferenceObject $definition.ipRanges.cidrAddress) {
-										$change.Actions = @{"Set" = $definition.ipRanges}
-									}
-								}
-								"countriesAndRegions" {
-									if (Compare-Object -ReferenceObject $resource.countriesAndRegions -DifferenceObject $definition.countriesAndRegions) {
-										$change.Actions = @{"Set" = $definition.countriesAndRegions}
-									}
-								}
 								default {
 									if ($definition.$property -ne $resource.$property) {
 										$change.Actions = @{"Set" = $definition.$property}

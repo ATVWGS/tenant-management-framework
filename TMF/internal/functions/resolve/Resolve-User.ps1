@@ -4,6 +4,7 @@
 	Param (
 		[Parameter(Mandatory = $true)]
 		[string] $InputReference,
+		[switch] $DontFailIfNotExisting,
 		[System.Management.Automation.PSCmdlet]
 		$Cmdlet = $PSCmdlet
 	)
@@ -27,7 +28,9 @@
 				$user = Get-MgUser -Filter "displayName eq '$InputReference'"
 			}
 			
-			if (!$user) { throw "Cannot find user $InputReference" }
+			if (-Not $user -and -Not $DontFailIfNotExisting) { throw "Cannot find user $InputReference" } 
+			elseif (-Not $user -and $DontFailIfNotExisting) { return }
+
 			if ($user.count -gt 1) { throw "Got multiple users for $InputReference" }
 			return $user.Id
 		}

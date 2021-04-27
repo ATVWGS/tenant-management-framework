@@ -4,6 +4,7 @@
 	Param (
 		[Parameter(Mandatory = $true)]
 		[string] $InputReference,
+		[switch] $DontFailIfNotExisting,
 		[System.Management.Automation.PSCmdlet]
 		$Cmdlet = $PSCmdlet
 	)
@@ -24,7 +25,9 @@
 				$location = (Invoke-MgGraphRequest -Method GET -Uri ("$script:graphBaseUrl/identity/conditionalAccess/namedLocations/?`$filter=displayName eq '{0}'" -f $InputReference)).Value
 			}
 
-			if (!$location) { throw "Cannot find namedLocation $InputReference" }
+			if (-Not $location -and -Not $DontFailIfNotExisting) { throw "Cannot find namedLocation $InputReference" } 
+			elseif (-Not $location -and $DontFailIfNotExisting) { return }
+
 			if ($location.count -gt 1) { throw "Got multiple namedLocations for $InputReference" }
 			return $location.Id
 		}

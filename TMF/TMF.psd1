@@ -61,7 +61,21 @@
 		'Invoke-TmfAgreement',
 		'Register-TmfConditionalAccessPolicy',
 		'Test-TmfConditionalAccessPolicy',
-		'Invoke-TmfConditionalAccessPolicy'
+		'Invoke-TmfConditionalAccessPolicy',
+		'Test-TmfEntitlementManagement',
+		'Invoke-TmfEntitlementManagement',
+		'Register-TmfAccessPackageCatalog',
+		'Test-TmfAccessPackageCatalog',
+		'Invoke-TmfAccessPackageCatalog',
+		'Register-TmfAccessPackage',
+		'Test-TmfAccessPackage',
+		'Invoke-TmfAccessPackage',
+		'Register-TmfAccessPackageAssignementPolicy',
+		'Test-TmfAccessPackageAssignementPolicy',
+		'Invoke-TmfAccessPackageAssignementPolicy',
+		'Register-TmfAccessPackageResource',
+		'Test-TmfAccessPackageResource',
+		'Invoke-TmfAccessPackageResource'
 	)
 	
 	# Cmdlets to export from this module

@@ -1,4 +1,4 @@
-﻿function Test-TmfNamedLocation
+function Test-TmfAccessPackageAssignementPolicy
 {
 	[CmdletBinding()]
 	Param (
@@ -9,8 +9,8 @@
 	begin
 	{
 		Test-GraphConnection -Cmdlet $Cmdlet
-		$resourceName = "namedLocations"
-		$tenant = Get-MgOrganization -Property displayName, Id		
+		$resourceName = "accessPackageAssignementPolicies"
+		$tenant = Get-MgOrganization -Property displayName, Id
 	}
 	process
 	{
@@ -24,12 +24,19 @@
 			$result = @{
 				Tenant = $tenant.displayName
 				TenantId = $tenant.Id
-				ResourceType = 'NamedLocation'
+				ResourceType = 'AccessPackageAssignementPolicy'
 				ResourceName = (Resolve-String -Text $definition.displayName)
 				DesiredConfiguration = $definition
 			}
 
-			$resource = (Invoke-MgGraphRequest -Method GET -Uri ("$script:graphBaseUrl/identity/conditionalAccess/namedLocations/?`$filter=displayName eq '{0}'" -f $definition.displayName)).Value
+			$accessPackageId = $definition.accessPackageId()
+			if (-Not $accessPackageId) {
+				Write-PSFMessage -Level Host -String 'TMF.RelatedResourceDoesNotExist' -StringValues "Access Package", $accessPackage, $result.ResourceType, $result.ResourceName
+				New-TestResult @result -ActionType "Create"				
+				continue
+			}
+
+			$resource = (Invoke-MgGraphRequest -Method GET -Uri ("$script:graphBaseUrl/identityGovernance/entitlementManagement/accessPackageAssignmentPolicies?`$filter=(displayName eq '{0}') and (accessPackageId eq '{1}')" -f $definition.displayName, $accessPackageId)).Value
 			switch ($resource.Count) {
 				0 {
 					if ($definition.present) {					
@@ -43,21 +50,37 @@
 					$result["GraphResource"] = $resource
 					if ($definition.present) {
 						$changes = @()
-						foreach ($property in ($definition.Properties() | ? {$_ -notin "displayName", "present", "sourceConfig"})) {
+						foreach ($property in ($definition.Properties() | ? {$_ -notin "displayName", "present", "sourceConfig", "accessPackage"})) {
 							$change = [PSCustomObject] @{
 								Property = $property										
 								Actions = $null
 							}
+
 							switch ($property) {
-								"ipRanges" {
-									if (Compare-Object -ReferenceObject $resource.ipRanges.cidrAddress -DifferenceObject $definition.ipRanges.cidrAddress) {
-										$change.Actions = @{"Set" = $definition.ipRanges}
+								{$_ -in "accessReviewSettings", "requestApprovalSettings", "requestorSettings"} {
+									$needUpdate = $false
+									foreach ($key in $definition.$property.Keys) {
+										switch ($key) {
+											"approvalStages" {
+												"primaryApprovers", "escalationApprovers" | Where-Object { $_ -in $definition.$property.$key.Keys } | Foreach-Object {								
+													if (Check-UserSetRequiresUpdate -Reference $resource.$property.$key.$_ -Difference $definition.$property.$key.$_ -Cmdlet $Cmdlet) {
+														$needUpdate = $true
+													}
+												}
+											}
+											{$_ -in "reviewers", "allowedRequestors"} {
+												if (Check-UserSetRequiresUpdate -Reference $resource.$property.$key -Difference $definition.$property.$key -Cmdlet $Cmdlet) {
+													$needUpdate = $true
+												}
+											}
+											default {
+												if ($definition.$property[$key] -ne $resource.$property.$key) {
+													$needUpdate = $true
+												}
+											}
+										}
 									}
-								}
-								"countriesAndRegions" {
-									if (Compare-Object -ReferenceObject $resource.countriesAndRegions -DifferenceObject $definition.countriesAndRegions) {
-										$change.Actions = @{"Set" = $definition.countriesAndRegions}
-									}
+									if ($needUpdate) { $change.Actions = @{"Set" = $definition.$property} }
 								}
 								default {
 									if ($definition.$property -ne $resource.$property) {

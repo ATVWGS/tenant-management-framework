@@ -48,6 +48,8 @@
 		[switch] $Agreements,
 		[Parameter(ParameterSetName = "SpecifiedComponents")]
 		[switch] $ConditionalAccessPolicies,
+		[Parameter(ParameterSetName = "SpecifiedComponents")]
+		[switch] $EntitlementManagement,
 		[Parameter(ParameterSetName = "All")]
 		[switch] $All
 	)
@@ -73,7 +75,9 @@
 		if ($ConditionalAccessPolicies -or $All) {
 			$scopes += "Policy.ReadWrite.ConditionalAccess", "Policy.Read.All", "RoleManagement.Read.Directory", "Application.Read.All", "Agreement.Read.All"
 		}
-		
+		if ($EntitlementManagement -or $All) {
+			$scopes += "EntitlementManagement.ReadWrite.All"
+		}
 		return ($scopes | Sort-Object -Unique)
 	}
 }
