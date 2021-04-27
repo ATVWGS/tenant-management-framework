@@ -24,7 +24,6 @@
 	}
 	process
 	{
-		$results = @()
 		foreach ($definition in $script:desiredConfiguration[$resourceName]) {
 			foreach ($property in $definition.Properties()) {
 				if ($definition.$property.GetType().Name -eq "String") {
