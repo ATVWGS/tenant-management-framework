@@ -1,19 +1,13 @@
-﻿function Register-TmfAgreement
+function Register-TmfAccessPackageCatalog
 {
 	[CmdletBinding()]
 	Param (
 		[Parameter(Mandatory = $true)]
 		[string] $displayName,
-
-		[bool] $isViewingBeforeAcceptanceRequired = $true,
-		[bool] $isPerDeviceAcceptanceRequired = $false,
-		[string] $userReacceptRequiredFrequency,
-
-		[object] $termsExpiration,
-		[object[]] $files,
+		[string] $description = "Access Package Catalog has been created with Tenant Management Framework",
+		[bool] $isExternallyVisible = $true,
 
 		[bool] $present = $true,
-
 		[string] $sourceConfig = "<Custom>",
 
 		[System.Management.Automation.PSCmdlet]
@@ -22,7 +16,7 @@
 	
 	begin
 	{
-		$resourceName = "agreements"
+		$resourceName = "accessPackageCatalogs"
 		if (!$script:desiredConfiguration[$resourceName]) {
 			$script:desiredConfiguration[$resourceName] = @()
 		}
@@ -30,25 +24,20 @@
 		if ($script:desiredConfiguration[$resourceName].displayName -contains $displayName) {			
 			$alreadyLoaded = $script:desiredConfiguration[$resourceName] | ? {$_.displayName -eq $displayName}
 		}
+
 	}
 	process
 	{
 		if (Test-PSFFunctionInterrupt) { return }				
 
-		$object = [PSCustomObject] @{
+		$object = [PSCustomObject]@{		
 			displayName = $displayName
-			isViewingBeforeAcceptanceRequired = $isViewingBeforeAcceptanceRequired
-			isPerDeviceAcceptanceRequired = $isPerDeviceAcceptanceRequired
+			description = $description
+			isExternallyVisible = $isExternallyVisible
 			present = $present
 			sourceConfig = $sourceConfig
 		}
-		
-		"userReacceptRequiredFrequency", "termsExpiration", "files" | foreach {
-			if ($PSBoundParameters.ContainsKey($_)) {			
-				Add-Member -InputObject $object -MemberType NoteProperty -Name $_ -Value $PSBoundParameters[$_]
-			}
-		}
-
+	
 		Add-Member -InputObject $object -MemberType ScriptMethod -Name Properties -Value { ($this | Get-Member -MemberType NoteProperty).Name }
 
 		if ($alreadyLoaded) {
@@ -56,6 +45,6 @@
 		}
 		else {
 			$script:desiredConfiguration[$resourceName] += $object
-		}		
+		}
 	}
 }

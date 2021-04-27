@@ -35,8 +35,41 @@ $script:supportedResources = @{
         "invokeFunction" = (Get-Command Invoke-TmfConditionalAccessPolicy)
         "weight" = 50
     }
+    "accessPackageCatalogs" = @{
+        "registerFunction" = (Get-Command Register-TmfAccessPackageCatalog)
+        "testFunction" = (Get-Command Test-TmfAccessPackageCatalog)
+        "invokeFunction" = (Get-Command Invoke-TmfAccessPackageCatalog)
+        "weight" = 54
+    }
+    "accessPackageResources" = @{
+        "testFunction" = (Get-Command Test-TmfAccessPackageResource)
+        "invokeFunction" = (Get-Command Invoke-TmfAccessPackageResource)
+        "weight" = 55
+    }
+    "accessPackages" = @{
+        "registerFunction" = (Get-Command Register-TmfAccessPackage)
+        "testFunction" = (Get-Command Test-TmfAccessPackage)
+        "invokeFunction" = (Get-Command Invoke-TmfAccessPackage)
+        "weight" = 56
+    }
+    "accessPackageAssignementPolicies" = @{     
+        "testFunction" = (Get-Command Test-TmfAccessPackageAssignementPolicy)
+        "invokeFunction" = (Get-Command Invoke-TmfAccessPackageAssignementPolicy)
+        "weight" = 57
+    }
 } # All currently supported components.
 Set-Variable -Name supportedResources -Option ReadOnly
+
+$script:validateFunctionMapping = @{
+    "accessReviewSettings" = (Get-Command Validate-AssignmentReviewSettings)
+    "requestApprovalSettings" = (Get-Command Validate-RequestApprovalSettings)
+    "approvalStages" = (Get-Command Validate-ApprovalStage)
+    "requestorSettings" = (Get-Command Validate-RequestorSettings)
+    "allowedRequestors" = (Get-Command Validate-UserSet)
+    "reviewers" = (Get-Command Validate-UserSet)
+    "primaryApprovers" = (Get-Command Validate-UserSet)
+    "escalationApprovers" = (Get-Command Validate-UserSet)
+}
 
 $script:activatedConfigurations = @() # Overview of all activated configurations.
 $script:desiredConfiguration = @{} # The desired configuration.

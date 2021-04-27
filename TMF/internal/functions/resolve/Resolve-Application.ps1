@@ -4,6 +4,7 @@
 	Param (
 		[Parameter(Mandatory = $true)]
 		[string] $InputReference,
+		[switch] $DontFailIfNotExisting,
 		[System.Management.Automation.PSCmdlet]
 		$Cmdlet = $PSCmdlet
 	)
@@ -24,7 +25,9 @@
 				$application = (Invoke-MgGraphRequest -Method GET -Uri ("$script:graphBaseUrl/servicePrincipals/?`$filter=(displayName eq '{0}') and (servicePrincipalType eq 'Application')" -f $InputReference)).Value
 			}
 
-			if (!$application) { throw "Cannot find application $InputReference" }
+			if (-Not $application -and -Not $DontFailIfNotExisting) { throw "Cannot find application $InputReference" } 
+			elseif (-Not $application -and $DontFailIfNotExisting) { return }
+
 			if ($application.count -gt 1) { throw "Got multiple applications for $InputReference" }
 			return $application.Id
 		}

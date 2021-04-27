@@ -1,4 +1,4 @@
-﻿function Test-TmfAgreement
+function Test-TmfAccessPackageResource
 {
 	[CmdletBinding()]
 	Param (
@@ -9,11 +9,12 @@
 	begin
 	{
 		Test-GraphConnection -Cmdlet $Cmdlet
-		$resourceName = "agreements"
-		$tenant = Get-MgOrganization -Property displayName, Id		
+		$resourceName = "accessPackageResources"
+		$tenant = Get-MgOrganization -Property displayName, Id
 	}
 	process
 	{
+		$results = @()
 		foreach ($definition in $script:desiredConfiguration[$resourceName]) {
 			foreach ($property in $definition.Properties()) {
 				if ($definition.$property.GetType().Name -eq "String") {
@@ -24,13 +25,22 @@
 			$result = @{
 				Tenant = $tenant.displayName
 				TenantId = $tenant.Id
-				ResourceType = 'Agreement'
+				ResourceType = 'AccessPackageResource'
 				ResourceName = (Resolve-String -Text $definition.displayName)
 				DesiredConfiguration = $definition
 			}
 
-			$resource = (Invoke-MgGraphRequest -Method GET -Uri ("$script:graphBaseUrl/identityGovernance/termsOfUse/agreements/?`$filter=displayName eq '{0}'" -f $definition.displayName)).Value
-			switch ($resource.Count) {
+			$catalogId = $definition.catalogId()			
+			if (-Not $catalogId) {
+				Write-PSFMessage -Level Warning -String 'TMF.RelatedResourceDoesNotExist' -StringValues "Access Package Catalog", $catalog, $result.ResourceType, $result.ResourceName
+				New-TestResult @result -ActionType "Create"				
+				continue
+			}
+
+			$originId = $definition.originId()
+
+			$resource = (Invoke-MgGraphRequest -Method GET -Uri ("$script:graphBaseUrl/identityGovernance/entitlementManagement/accessPackageCatalogs/{0}/accessPackageResources?`$filter=originId eq '{1}'" -f $catalogId, $originId)).Value
+			switch ($resource.count) {
 				0 {
 					if ($definition.present) {					
 						$result = New-TestResult @result -ActionType "Create"
@@ -41,37 +51,10 @@
 				}
 				1 {
 					$result["GraphResource"] = $resource
-					if ($definition.present) {
-						$changes = @()
-						foreach ($property in ($definition.Properties() | ? {$_ -notin "displayName", "present", "sourceConfig"})) {
-							$change = [PSCustomObject] @{
-								Property = $property										
-								Actions = $null
-							}
-							switch ($property) {
-								"termsExpiration" {
-									<# Currently not supported! if (
-										((Get-Date $definition.termsExpiration.startDateTime) -ne (Get-Date $resource.termsExpiration.startDateTime)) -or
-										$definition.termsExpiration.startDateTime -ne $resource.termsExpiration.startDateTime
-									)
-									{
-										$change.Actions = @{"Set" = $definition.$property}
-									}#>
-								}
-								"files" { <# Currently not supported! #> }
-								default {
-									if ($definition.$property -ne $resource.$property) {
-										$change.Actions = @{"Set" = $definition.$property}
-									}
-								}
-							}
-							if ($change.Actions) {$changes += $change}
-						}
-	
-						if ($changes.count -gt 0) { $result = New-TestResult @result -Changes $changes -ActionType "Update"}
-						else { $result = New-TestResult @result -ActionType "NoActionRequired" }
+					if ($definition.present) {					
+						$result = New-TestResult @result -ActionType "NoActionRequired"
 					}
-					else {
+					else {					
 						$result = New-TestResult @result -ActionType "Delete"
 					}
 				}

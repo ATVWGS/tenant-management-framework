@@ -1,4 +1,4 @@
-﻿function Test-TmfNamedLocation
+function Test-TmfAccessPackage
 {
 	[CmdletBinding()]
 	Param (
@@ -9,8 +9,13 @@
 	begin
 	{
 		Test-GraphConnection -Cmdlet $Cmdlet
-		$resourceName = "namedLocations"
-		$tenant = Get-MgOrganization -Property displayName, Id		
+		$resourceName = "accessPackages"
+		$tenant = Get-MgOrganization -Property displayName, Id
+		
+		$resolveFunctionMapping = @{
+			"Users" = (Get-Command Resolve-User)
+			"Groups" = (Get-Command Resolve-Group)			
+		}
 	}
 	process
 	{
@@ -24,12 +29,12 @@
 			$result = @{
 				Tenant = $tenant.displayName
 				TenantId = $tenant.Id
-				ResourceType = 'NamedLocation'
+				ResourceType = 'AccessPackage'
 				ResourceName = (Resolve-String -Text $definition.displayName)
 				DesiredConfiguration = $definition
 			}
 
-			$resource = (Invoke-MgGraphRequest -Method GET -Uri ("$script:graphBaseUrl/identity/conditionalAccess/namedLocations/?`$filter=displayName eq '{0}'" -f $definition.displayName)).Value
+			$resource = (Invoke-MgGraphRequest -Method GET -Uri ("$script:graphBaseUrl/identityGovernance/entitlementManagement/accessPackages?`$filter=displayName eq '{0}'&`$expand=accessPackageResourceRoleScopes(`$expand=accessPackageResourceRole,accessPackageResourceScope)" -f $definition.displayName)).Value
 			switch ($resource.Count) {
 				0 {
 					if ($definition.present) {					
@@ -48,16 +53,24 @@
 								Property = $property										
 								Actions = $null
 							}
+
 							switch ($property) {
-								"ipRanges" {
-									if (Compare-Object -ReferenceObject $resource.ipRanges.cidrAddress -DifferenceObject $definition.ipRanges.cidrAddress) {
-										$change.Actions = @{"Set" = $definition.ipRanges}
-									}
-								}
-								"countriesAndRegions" {
-									if (Compare-Object -ReferenceObject $resource.countriesAndRegions -DifferenceObject $definition.countriesAndRegions) {
-										$change.Actions = @{"Set" = $definition.countriesAndRegions}
-									}
+								"catalog" { <# Currently not possible to update! #> }
+								"isRoleScopesVisible" { <# Currently not possible to update! #> }
+								"accessPackageResourceRoleScopes" {
+									$existingRoleScopes = @()
+									if ($resource.accessPackageResourceRoleScopes.accessPackageResourceRole.originId) { $existingRoleScopes = $resource.accessPackageResourceRoleScopes.accessPackageResourceRole.originId }
+									$roleOriginIds = @($definition.accessPackageResourceRoleScopes.roleOriginId())									
+
+									if ($compare) {
+										$change.Actions = @{}
+										if ($compare.SideIndicator -contains "=>" -and -not $ReturnSetAction) {
+											$change.Actions["Add"] = ($compare | ? {$_.SideIndicator -eq "=>"}).InputObject
+										}
+										if ($compare.SideIndicator -contains "<=" -and -not $ReturnSetAction) {
+											$change.Actions["Remove"] = ($compare | ? {$_.SideIndicator -eq "<="}).InputObject
+										}
+									}									
 								}
 								default {
 									if ($definition.$property -ne $resource.$property) {
