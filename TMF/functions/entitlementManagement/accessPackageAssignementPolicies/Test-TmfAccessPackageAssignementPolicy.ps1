@@ -50,7 +50,7 @@ function Test-TmfAccessPackageAssignementPolicy
 					$result["GraphResource"] = $resource
 					if ($definition.present) {
 						$changes = @()
-						foreach ($property in ($definition.Properties() | ? {$_ -notin "displayName", "present", "sourceConfig", "accessPackage"})) {
+						foreach ($property in ($definition.Properties() | Where-Object {$_ -notin "displayName", "present", "sourceConfig", "accessPackage"})) {
 							$change = [PSCustomObject] @{
 								Property = $property										
 								Actions = $null
