@@ -59,7 +59,7 @@
 									$requestBody["conditions"][$conditionChildProperty][$property] = @($result.DesiredConfiguration.$property)
 								}
 								else {
-									$requestBody["conditions"][$conditionChildProperty][$property] = @($result.DesiredConfiguration.$property | foreach { & $resolveFunctionMapping[$conditionPropertyMatch.Groups[2].Value] -InputReference $_})								
+									$requestBody["conditions"][$conditionChildProperty][$property] = @($result.DesiredConfiguration.$property | ForEach-Object { & $resolveFunctionMapping[$conditionPropertyMatch.Groups[2].Value] -InputReference $_})								
 								}								
 							}
 							elseif ($property -in @("clientAppTypes", "signInRiskLevels", "userRiskLevels")) {

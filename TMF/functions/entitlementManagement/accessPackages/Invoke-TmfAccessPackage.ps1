@@ -102,7 +102,7 @@ function Invoke-TmfAccessPackage
 											$method = "POST"
 											$change.Actions[$action] | Foreach-Object {
 												$roleOriginId = $_
-												$roleScope = $result.DesiredConfiguration.accessPackageResourceRoleScopes | ? {$_.roleOriginId() -eq $roleOriginId}
+												$roleScope = $result.DesiredConfiguration.accessPackageResourceRoleScopes | Where-Object {$_.roleOriginId() -eq $roleOriginId}
 												$body = @{
 													"accessPackageResourceRole" = @{
 														"originId" = $roleScope.roleOriginId()
