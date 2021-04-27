@@ -28,7 +28,7 @@
 				$group = (Invoke-MgGraphRequest -Method GET -Uri ("$script:graphBaseUrl/groups/?`$filter=displayName eq '{0}'" -f $InputReference)).Value
 			}
 
-			if (-Not $group -and -Not $DontFailIfNotExisting) { throw "Cannot find user $InputReference" } 
+			if (-Not $group -and -Not $DontFailIfNotExisting) { throw "Cannot find group $InputReference" } 
 			elseif (-Not $group -and $DontFailIfNotExisting) { return }
 
 			if ($group.count -gt 1) { throw "Got multiple groups for $InputReference" }
