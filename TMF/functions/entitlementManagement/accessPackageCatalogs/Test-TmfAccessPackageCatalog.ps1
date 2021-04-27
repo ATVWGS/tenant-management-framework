@@ -1,5 +1,12 @@
 function Test-TmfAccessPackageCatalog
 {
+	<#
+		.SYNOPSIS
+			Test desired configuration against a Tenant.
+		.DESCRIPTION
+			Compare current configuration of a resource type with the desired configuration.
+			Return a result object with the required changes and actions.
+	#>
 	[CmdletBinding()]
 	Param (
 		[System.Management.Automation.PSCmdlet]

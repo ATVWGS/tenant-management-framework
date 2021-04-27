@@ -1,5 +1,9 @@
 ﻿function Invoke-TmfConditionalAccessPolicy
 {
+	<#
+		.SYNOPSIS
+			Performs the required actions for a resource type against the connected Tenant.
+	#>
 	[CmdletBinding()]
 	Param (
 		[System.Management.Automation.PSCmdlet]
