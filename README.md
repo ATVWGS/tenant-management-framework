@@ -46,7 +46,7 @@ adding a source control
     - [3.4.5. Storing configurations](#345-storing-configurations)
   - [3.5. General functions](#35-general-functions)
     - [3.5.1. Load-TmfConfiguration - Load definition files from configurations](#351-load-tmfconfiguration---load-definition-files-from-configurations)
-    - [3.5.2. Show the loaded desired configuration](#352-show-the-loaded-desired-configuration)
+    - [3.5.2. Get-TmfDesiredConfiguration - Show the current desired configuration](#352-get-tmfdesiredconfiguration---show-the-current-desired-configuration)
     - [3.5.3. Test-Tmf* - Test definitions against Graph](#353-test-tmf---test-definitions-against-graph)
     - [3.5.4. Invoke-Tmf* - Perform actions against Graph](#354-invoke-tmf---perform-actions-against-graph)
     - [3.5.5. Register-Tmf* - Add definitions temporary](#355-register-tmf---add-definitions-temporary)
@@ -231,7 +231,62 @@ In our case we store multiple configurations (Default configuration, DEV configu
 
 ## 3.5. General functions
 ### 3.5.1. Load-TmfConfiguration - Load definition files from configurations
-### 3.5.2. Show the loaded desired configuration
+The *Load-TmfConfiguration* function checks all *.json* files from the activated configurations and registers them into a runtime store. Technically this is the same process as if you use a register function for a single resource type (eg. *Register-TmfGroup*). All loaded resource definitions are considered when using test or invoke functions.
+
+```powershell
+PS> Load-TmfConfiguration
+```
+
+### 3.5.2. Get-TmfDesiredConfiguration - Show the current desired configuration
+
+You can check the currently loaded desired configuration with *Get-TmfDesiredConfiguration*. This returns the desired configuration as a hashtable.
+
+```powershell
+PS> Get-TmfConfiguration
+
+# Example output
+Name                           Value
+----                           -----
+accessPackages                 {}
+groups                         {@{displayName=Some group; description=This is a security group; groupTypes=System.String[]; securityEnabled=True; mailEnabled=False; mailNickname=someGroupForMembers; present=True... 
+namedLocations                 {}
+accessPackageCatalogs          {}
+conditionalAccessPolicies      {}
+agreements                     {}
+stringMappings                 {}
+
+# You can also checkout single resource definitions
+PS> (Get-TmfDesiredConfiguration)["groups"]
+
+# Example output
+displayName     : Some group
+description     : This is a security group
+groupTypes      : {}
+securityEnabled : True
+mailEnabled     : False
+mailNickname    : someGroupForMembers
+present         : True
+sourceConfig    : Example Configuration
+owners          : {group.owner@volkswagen.de}
+members         : {max.mustermann@volkswagen.de}
+
+# Filtering is also possible with Where-Object
+(Get-TmfDesiredConfiguration)["groups"] | Where-Object {$_.displayName -eq "Some group"}
+
+# Example output
+displayName     : Some group
+description     : This is a security group
+groupTypes      : {}
+securityEnabled : True
+mailEnabled     : False
+mailNickname    : someGroupForMembers
+present         : True
+sourceConfig    : Example Configuration
+owners          : {group.owner@volkswagen.de}
+members         : {max.mustermann@volkswagen.de}
+```
+
+
 ### 3.5.3. Test-Tmf* - Test definitions against Graph
 ### 3.5.4. Invoke-Tmf* - Perform actions against Graph
 ### 3.5.5. Register-Tmf* - Add definitions temporary
