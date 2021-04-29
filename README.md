@@ -1,4 +1,4 @@
-![Logo]($./Assets/Images/VWAG_Group_Services_CO_M.png =233x48)
+![Logo](./Assets/Images/s-VWAG_Group_Services_CO_M.png)
 
 Tenant Management Framework <!-- omit in toc -->
 ===========================
