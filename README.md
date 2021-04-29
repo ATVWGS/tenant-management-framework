@@ -31,8 +31,10 @@ adding a source control
 - [3. Getting started](#3-getting-started)
   - [3.1. Authentication](#31-authentication)
   - [3.2. Configurations](#32-configurations)
-    - [3.2.2. How can I create a configuration?](#322-how-can-i-create-a-configuration)
-    - [3.2.3. How can I use my configuration?](#323-how-can-i-use-my-configuration)
+    - [3.2.1. configuration.json](#321-configurationjson)
+    - [3.2.2. Folder structure](#322-folder-structure)
+    - [3.2.3. How can I create a configuration?](#323-how-can-i-create-a-configuration)
+    - [3.2.4. How can I use my configuration?](#324-how-can-i-use-my-configuration)
   - [3.3. Resources](#33-resources)
     - [3.3.1. Groups](#331-groups)
     - [3.3.2. Conditional Access Policies](#332-conditional-access-policies)
@@ -60,7 +62,7 @@ https://github.com/microsoftgraph/msgraph-sdk-powershell
 Please make sure you are connected to the correct Tenant before invoking configurations! 
 
 The required scopes depend on what components (resources) you want to configure.
-| Component (Resource)                                              | Required scopes                                                                                                              |
+| Resource                                                          | Required scopes                                                                                                              |
 |-------------------------------------------------------------------|------------------------------------------------------------------------------------------------------------------------------|
 | Groups                                                            | Group.ReadWrite.All, GroupMember.ReadWrite.All                                                                               |
 | Users                                                             | User.ReadWrite.All                                                                                                           |
@@ -75,9 +77,10 @@ Connect-MgGraph -Scopes (Get-TmfRequiredScope -All)
 ```
 
 ## 3.2. Configurations
-A Tenant Management Framework configuration is a collection of resource definition files. The defintion files describe instances of different resource types (eg. groups). 
+A Tenant Management Framework configuration is a collection of resource definition files. The defintion files describe instances of different resource types (eg. Groups, Conditional Access Policies, Named Locations). 
 
-Configurations contain a *configuration.json* on the root level that defines it.
+### 3.2.1. configuration.json
+Configurations always contain a *configuration.json* file at the root level. This file contains the properties that describe the configuration.
 
 ```json
 {
@@ -86,27 +89,66 @@ Configurations contain a *configuration.json* on the root level that defines it.
     "Author":  "Mustermann, Max",
     "Weight":  50,
     "Prerequisite":  [
-
+                        "Default Configuration"
                      ]
 }
 ```
 
-For each supported resource type there is a subfolder in a newly created configuration. Thos subfolders always contains an empty .json file and example.md. The empty .json can bee used for initial creation of resource instances.
-```
+| Property     | Description                                                                      
+|--------------|----------------------------------------------------------------------------------
+| Name         | The name of the configuration. Must be uniqe when using multiple configurations.
+| Description  | Description of the configuration. Here you can discribe, for which tenants this configurations should be used.
+| Author       | The responsible team or person for this configuration.
+| Weight       | When activating multiple configurations, the configuration with the highest weight is loaded last. This means that a resource definition will be overwriten, if the last configuration contains a definition with the same displayName.
+| Prerequisite | With this setting you can define a relationship to an another configuration. For example when a configurations requires a baseline configuration. **Currently not implemented!**
+
+### 3.2.2. Folder structure
+For each supported resource type there is a subfolder. These subfolders always contain an empty .json file and example.md. 
+
+The empty *.json* file is used to define resource instances. As an example a resource instance can be the definition of an Azure AD Security group or a Conditional Access policy. You can place multiple *.json* in a single resource type subfolder. By creating multiple *.json* files it is possible to structure resource definitions in a understandable way.
+
+ **The folder names are mandatory for the functionality of the framework! Folders that do not represent a supported resource type will be ignored!**
+
+The *example.md* file contains example resource instances and further information.
+
+
+```markdown
+# Folder structure of a newly created configuration
 ├───agreements
+│   │   agreements.json
+│   │   example.md
+│   │
 │   └───files
+│           Example Terms of Use.pdf
+│
 ├───conditionalAccessPolicies
+│       example.md
+│       policies.json
+│
 ├───entitlementManagement
 │   ├───accessPackageCatalogs
+│   │       accessPackageCatalogs.json
+│   │       example.md
+│   │
 │   └───accessPackages
+│           accessPackages.json
+│           example.md
+│
 ├───groups
+│       example.md
+│       groups.json
+│
 ├───namedLocations
-└───stringMappings
+│       example.md
+│       namedLocations.json
+│
+└────stringMappings
+        stringMappings.json
 ```
 
-### 3.2.2. How can I create a configuration?
+### 3.2.3. How can I create a configuration?
 
-### 3.2.3. How can I use my configuration?
+### 3.2.4. How can I use my configuration?
 
 ## 3.3. Resources
 
