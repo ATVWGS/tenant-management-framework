@@ -1,7 +1,70 @@
-# Introduction 
+ ________  __       __  ________ 
+|        \|  \     /  \|        \
+ \$$$$$$$$| $$\   /  $$| $$$$$$$$
+   | $$   | $$$\ /  $$$| $$__    
+   | $$   | $$$$\  $$$$| $$  \   
+   | $$   | $$\$$ $$ $$| $$$$$   
+   | $$   | $$ \$$$| $$| $$      
+   | $$   | $$  \$ | $$| $$      
+    \$$    \$$      \$$ \$$      
+Tenant Management Framework
+by Volkswagen Group Services                                
 
-# Authentication
-We are using the Microsoft.Graph module to make changes. This module also has a sub-module for authentication. You can connect using the following command.
+# 1. Introduction 
+The Tenant Management Framework is a Powershell module that is able to create, update and
+delete resources or settings via the Microsoft Graph API. The module provides simple
+Powershell cmdlets to deploy and manage a set of predefined configuration files. The basic idea is
+based on the [Active Directory Management Framework](https://admf.one).
+
+## Goals
+- Deliver a PowershellModule with standardized
+commands to deploy Tenant configurations
+- Provide a default configuration file format that is easy
+to read and to manage
+- Give the administrators pre-build configurations with
+best practices
+- Enable administrators to create a reusable tenant
+configurations
+
+## Benefits
+- Reproducable configuration
+- Easy readable, storable and shareable configurations
+- Enforced change documentation and versioning by
+adding a source control
+- Enables staging concept
+- Less prone to human error
+- Increased efficiency
+
+# 2. Table of contents
+- [1. Introduction](#1-introduction)
+  - [Goals](#goals)
+  - [Benefits](#benefits)
+- [2. Table of contents](#2-table-of-contents)
+- [3. Getting started](#3-getting-started)
+  - [3.1. Authentication](#31-authentication)
+  - [3.2. Configurations](#32-configurations)
+    - [3.2.1. What is a configuration?](#321-what-is-a-configuration)
+    - [3.2.2. How can I create a configuration?](#322-how-can-i-create-a-configuration)
+    - [3.2.3. How can I use my configuration?](#323-how-can-i-use-my-configuration)
+  - [3.3. Resources](#33-resources)
+    - [3.3.1. Groups](#331-groups)
+    - [3.3.2. Conditional Access Policies](#332-conditional-access-policies)
+    - [3.3.3. Named Locations](#333-named-locations)
+    - [3.3.4. Agreements (Terms of Use)](#334-agreements-terms-of-use)
+    - [3.3.5. Entitlement Management](#335-entitlement-management)
+    - [3.3.6. String mapping](#336-string-mapping)
+  - [3.4. General functions](#34-general-functions)
+    - [3.4.1. Getting the activated configurations](#341-getting-the-activated-configurations)
+    - [3.4.2. Show the loaded desired configuration](#342-show-the-loaded-desired-configuration)
+    - [3.4.3. Test functions](#343-test-functions)
+    - [3.4.4. Invoke functions](#344-invoke-functions)
+  - [3.5. Examples](#35-examples)
+    - [3.5.1. Invoking a simple group](#351-invoking-a-simple-group)
+    - [3.5.2. Invoking a Conditional Access policy set](#352-invoking-a-conditional-access-policy-set)
+
+# 3. Getting started
+## 3.1. Authentication
+We are using the Microsoft.Graph module to make changes in the targeted Azure AD Tenant. This module also has a sub-module for authentication against Microsoft Graph. You can connect using the following command.
 ```powershell
 Connect-MgGraph -Scopes "User.Read.All", "Group.ReadWrite.All"
 ```
@@ -10,21 +73,40 @@ https://github.com/microsoftgraph/msgraph-sdk-powershell
 Please make sure you are connected to the correct Tenant before invoking configurations! 
 
 The required scopes depend on what components (resources) you want to configure.
-| Component (Resource)      | Required scopes                                 |
-|---------------------------|-------------------------------------------------|
-| Groups                    | Group.ReadWrite.All, GroupMember.ReadWrite.All  |
-| Users                     | User.ReadWrite.All                              |
-| Named Locations           | Policy.ReadWrite.ConditionalAccess              |
-| Agreements (Terms of Use) | Agreement.ReadWrite.All                         |
+| Component (Resource)                                              | Required scopes                                                                                                              |
+|-------------------------------------------------------------------|------------------------------------------------------------------------------------------------------------------------------|
+| Groups                                                            | Group.ReadWrite.All, GroupMember.ReadWrite.All                                                                               |
+| Users                                                             | User.ReadWrite.All                                                                                                           |
+| Named Locations                                                   | Policy.ReadWrite.ConditionalAccess                                                                                           |
+| Agreements (Terms of Use)                                         | Agreement.ReadWrite.All                                                                                                      |
+| Conditional Access Policies                                       | Policy.ReadWrite.ConditionalAccess, Policy.Read.All, RoleManagement.Read.Directory, Application.Read.All, Agreement.Read.All |
+| Enitlement Management (Access Packages, Access Package Catalogs)  | EntitlementManagement.ReadWrite.All                                                                                          |
 
-You can use *Get-TmfRequiredScope* to get the required scopes.
+You can also use *Get-TmfRequiredScope* to get the required scopes and combine it with *Connect-MgGraph*.
 ```powershell
 Connect-MgGraph -Scopes (Get-TmfRequiredScope -All)
 ```
 
-# How to get started
+## 3.2. Configurations
+### 3.2.1. What is a configuration?
 
-### String mapping
+### 3.2.2. How can I create a configuration?
+
+### 3.2.3. How can I use my configuration?
+
+## 3.3. Resources
+
+### 3.3.1. Groups
+
+### 3.3.2. Conditional Access Policies
+
+### 3.3.3. Named Locations
+
+### 3.3.4. Agreements (Terms of Use)
+
+### 3.3.5. Entitlement Management
+
+### 3.3.6. String mapping
 
 You can create mappings between strings and the values they should be replaced with. Place the mappings in the *stringMappings.json* file in the *stringMappings* folder of your configuration.
 
@@ -64,6 +146,12 @@ To use the string mapping in a configuration file, you need to mention it by the
 }
 ```
 
-# To do
-- Required attributes to example.md for each supported component
-- Attributes which are not possible to update to example.md for each supported component
+## 3.4. General functions
+### 3.4.1. Getting the activated configurations
+### 3.4.2. Show the loaded desired configuration
+### 3.4.3. Test functions
+### 3.4.4. Invoke functions
+
+## 3.5. Examples
+### 3.5.1. Invoking a simple group
+### 3.5.2. Invoking a Conditional Access policy set
