@@ -1,22 +1,10 @@
- ________  __       __  ________ 
-|        \|  \     /  \|        \
- \$$$$$$$$| $$\   /  $$| $$$$$$$$
-   | $$   | $$$\ /  $$$| $$__    
-   | $$   | $$$$\  $$$$| $$  \   
-   | $$   | $$\$$ $$ $$| $$$$$   
-   | $$   | $$ \$$$| $$| $$      
-   | $$   | $$  \$ | $$| $$      
-    \$$    \$$      \$$ \$$      
-Tenant Management Framework
-by Volkswagen Group Services                                
-
 # 1. Introduction 
 The Tenant Management Framework is a Powershell module that is able to create, update and
 delete resources or settings via the Microsoft Graph API. The module provides simple
 Powershell cmdlets to deploy and manage a set of predefined configuration files. The basic idea is
-based on the [Active Directory Management Framework](https://admf.one).
+based on the [Active Directory Management Framework](https://admf.one>).
 
-## Goals
+## 1.1. Goals
 - Deliver a PowershellModule with standardized
 commands to deploy Tenant configurations
 - Provide a default configuration file format that is easy
@@ -26,7 +14,7 @@ best practices
 - Enable administrators to create a reusable tenant
 configurations
 
-## Benefits
+## 1.2. Benefits
 - Reproducable configuration
 - Easy readable, storable and shareable configurations
 - Enforced change documentation and versioning by
@@ -37,13 +25,12 @@ adding a source control
 
 # 2. Table of contents
 - [1. Introduction](#1-introduction)
-  - [Goals](#goals)
-  - [Benefits](#benefits)
+  - [1.1. Goals](#11-goals)
+  - [1.2. Benefits](#12-benefits)
 - [2. Table of contents](#2-table-of-contents)
 - [3. Getting started](#3-getting-started)
   - [3.1. Authentication](#31-authentication)
   - [3.2. Configurations](#32-configurations)
-    - [3.2.1. What is a configuration?](#321-what-is-a-configuration)
     - [3.2.2. How can I create a configuration?](#322-how-can-i-create-a-configuration)
     - [3.2.3. How can I use my configuration?](#323-how-can-i-use-my-configuration)
   - [3.3. Resources](#33-resources)
@@ -88,13 +75,42 @@ Connect-MgGraph -Scopes (Get-TmfRequiredScope -All)
 ```
 
 ## 3.2. Configurations
-### 3.2.1. What is a configuration?
+A Tenant Management Framework configuration is a collection of resource definition files. The defintion files describe instances of different resource types (eg. groups). 
+
+Configurations contain a *configuration.json* on the root level that defines it.
+
+```json
+{
+    "Name":  "Example Configuration",
+    "Description":  "This is a example configuration.",
+    "Author":  "Mustermann, Max",
+    "Weight":  50,
+    "Prerequisite":  [
+
+                     ]
+}
+```
+
+For each supported resource type there is a subfolder in a newly created configuration. Thos subfolders always contains an empty .json file and example.md. The empty .json can bee used for initial creation of resource instances.
+```
+├───agreements
+│   └───files
+├───conditionalAccessPolicies
+├───entitlementManagement
+│   ├───accessPackageCatalogs
+│   └───accessPackages
+├───groups
+├───namedLocations
+└───stringMappings
+```
 
 ### 3.2.2. How can I create a configuration?
 
 ### 3.2.3. How can I use my configuration?
 
 ## 3.3. Resources
+
+
 
 ### 3.3.1. Groups
 
