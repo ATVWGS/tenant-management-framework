@@ -49,7 +49,7 @@ adding a source control
     - [3.5.2. Get-TmfDesiredConfiguration - Show the current desired configuration](#352-get-tmfdesiredconfiguration---show-the-current-desired-configuration)
     - [3.5.3. Test-Tmf* - Test definitions against Graph](#353-test-tmf---test-definitions-against-graph)
     - [3.5.4. Invoke-Tmf* - Perform actions against Graph](#354-invoke-tmf---perform-actions-against-graph)
-    - [3.5.5. Register-Tmf* - Add definitions temporary](#355-register-tmf---add-definitions-temporary)
+    - [3.5.5. Register-Tmf* - Add definitions temporarily](#355-register-tmf---add-definitions-temporarily)
   - [3.6. Resources types](#36-resources-types)
     - [3.6.1. Groups](#361-groups)
     - [3.6.2. Conditional Access Policies](#362-conditional-access-policies)
@@ -60,8 +60,8 @@ adding a source control
       - [3.6.5.2. Access Packages](#3652-access-packages)
     - [3.6.6. String mapping](#366-string-mapping)
   - [3.7. Examples](#37-examples)
-    - [3.7.1. Invoking a simple group](#371-invoking-a-simple-group)
-    - [3.7.2. Invoking a Conditional Access policy set](#372-invoking-a-conditional-access-policy-set)
+    - [3.7.1. Example: Invoking a simple group](#371-example-invoking-a-simple-group)
+    - [3.7.2. Example: a Conditional Access policy set with the required groups](#372-example-a-conditional-access-policy-set-with-the-required-groups)
 
 # 3. Getting started
 ## 3.1. Installation
@@ -178,7 +178,6 @@ You can create new configuration by simple using the function *New-TmfConfigurat
 ```powershell
 PS> New-TmfConfiguration -Name "Example Configuration" -Description "This is an example configuration for the Tenant Management Framework!" -Author "Mustermann, Max" -Weight 50 -OutPath "$env:USERPROFILE\Desktop\Example_Configuration" -Force
 
-# Example output
 [16:02:04][New-TmfConfiguration] Creating configuration directory C:\Users\***REMOVED***\Desktop\Example_Configuration. [DONE]
 [16:02:04][New-TmfConfiguration] Copying template structure to C:\Users\***REMOVED***\Desktop\Example_Configuration. [DONE]
 [16:02:05][Activate-TmfConfiguration] Activating Example Configuration (C:\Users\***REMOVED***\Desktop\Example_Configuration\configuration.json). This configuration will be considered when applying Tenant configuration. [DONE]
@@ -197,7 +196,6 @@ This activation can simply be done using *Activate-TmfConfiguration*.
 ```powershell
 PS> Activate-TmfConfiguration "$env:USERPROFILE\Desktop\Example_Configuration" -Force
 
-# Example output
 [16:10:46][Activate-TmfConfiguration] Activating Example Configuration (C:\Users\***REMOVED***\Desktop\Example_Configuration\configuration.json). This configuration will be considered when applying Tenant configuration. [DONE]
 [16:10:46][Activate-TmfConfiguration] Sorting all activated configurations by weight. [DONE]
 ```
@@ -206,7 +204,6 @@ You can use *Get-TmfActiveConfiguration* to checkout all already activated confi
 ```powershell
 PS> Get-TmfActiveConfiguration
 
-# Example output
 Name         : Example Configuration
 Path         : C:\Users\***REMOVED***\Desktop\Example_Configuration
 Description  : This is an example configuration for the Tenant Management Framework!
@@ -221,7 +218,7 @@ Deactivate-TmfConfiguration -Name "Example Configuration" # By name
 Deactivate-TmfConfiguration -Path "$env:USERPROFILE\Desktop\Example_Configuration" # By path
 Deactivate-TmfConfiguration -All # Or all activated configurations!
 
-# Example output
+
 [16:18:08][Deactivate-TmfConfiguration] Deactivating Example Configuration. This configuration will not be considered when applying Tenant configuration. [DONE]
 ```
 
@@ -244,7 +241,6 @@ You can check the currently loaded desired configuration with *Get-TmfDesiredCon
 ```powershell
 PS> Get-TmfConfiguration
 
-# Example output
 Name                           Value
 ----                           -----
 accessPackages                 {}
@@ -258,7 +254,6 @@ stringMappings                 {}
 # You can also checkout single resource definitions
 PS> (Get-TmfDesiredConfiguration)["groups"]
 
-# Example output
 displayName     : Some group
 description     : This is a security group
 groupTypes      : {}
@@ -273,7 +268,6 @@ members         : {max.mustermann@volkswagen.de}
 # Filtering is also possible with Where-Object
 (Get-TmfDesiredConfiguration)["groups"] | Where-Object {$_.displayName -eq "Some group"}
 
-# Example output
 displayName     : Some group
 description     : This is a security group
 groupTypes      : {}
@@ -286,10 +280,69 @@ owners          : {group.owner@volkswagen.de}
 members         : {max.mustermann@volkswagen.de}
 ```
 
-
 ### 3.5.3. Test-Tmf* - Test definitions against Graph
+It is possible to run tests for a single resource type, for an resouce type group (eg. Entitlement Management) or for a whole tenant.
+
+If you want to only test your configured groups, you can use *Test-TmfGroup*. This will only consider all definitions of the resource type "groups".
+
+```powershell
+PS> Test-TmfGroup
+
+ActionType           : Create
+ResourceType         : Group
+ResourceName         : Example group
+Changes              :
+Tenant               : TENANT_NAME
+TenantId             : d369908f-8803-46bc-90cb-3c82854ddf93
+DesiredConfiguration : @{displayName=Example group; description=This is an example security group; groupTypes=System.String[]; securityEnabled=True; mailEnabled=False; mailNickname=someGroupForMembers;
+                       present=True; sourceConfig=Example Configuration}
+GraphResource        :
+```
+
+The resource type specific test functions always return test result objects. These objects show you, which actions are required in your tenant, to achive the desired configuration.
+
+You can test all available resource types using *Test-TmfTenant*. The *Test-TmfTenant* function and also all resource type group (eg. *Test-TmfEntitlementManagement*) functions automatically beautify the test results.
+
+```powershell
+PS> Test-TmfTenant
+
+[20:35:51][Test-TmfTenant] Currently connected to <TENANT_NAME> (d369908f-XXXX-XXXX-90cb-3c82854ddf93)
+[20:35:52][Test-TmfTenant] Starting tests for groups
+[20:35:52][TMF] [Tenant: TENANT_NAME][Group Resource: Example group] Required Action (Create)
+```
+
+It is also possible to beautify the results of any resouce type specific test command.
+
+```powershell
+PS> Test-TmfGroup | Beautify-TmfTestResult
+
+[20:37:34][TMF] [Tenant: TENANT_NAME][Group Resource: Example group] Required Action (Create)
+```
+
 ### 3.5.4. Invoke-Tmf* - Perform actions against Graph
-### 3.5.5. Register-Tmf* - Add definitions temporary
+It is possible to invoke actions for a single resource type, for an resouce type group (eg. Entitlement Management) or for a whole tenant.
+
+Example based on Access Packages:
+- *Invoke-TmfAccessPackage:* Only invokes actions for the defined Access Packages
+- *Invoke-TmfEntitlementManagement:* Invokes the required actions for Access Packages and also for all other resource types required for Entitlement Management.
+- *Invoke-TmfTenant*: Invokes the required actions for each resource type defined in your configurations.
+
+```powershell
+PS> Invoke-TmfGroup
+
+[20:44:17][Invoke-TmfGroup] [Tenant: TENANT_NAME][Group Resource: Example group] Required Action (Create)
+[20:44:17][Invoke-TmfGroup] [Tenant: TENANT_NAME][Group Resource: Example group] Completed.
+
+PS> Invoke-TmfTenant
+
+[20:49:46][Invoke-TmfTenant] Currently connected to TENANT_NAME (d369908f-8803-46bc-90cb-3c82854ddf93)
+Is this the correct tenant? [y/n]: y
+[20:49:48][Invoke-TmfTenant] Invoking groups
+[20:49:49][Invoke-TmfGroup] [Tenant: TENANT_NAME][Group Resource: Example group] Required Action (NoActionRequired)
+[20:49:49][Invoke-TmfGroup] [Tenant: TENANT_NAME][Group Resource: Example group] Completed.
+```
+
+### 3.5.5. Register-Tmf* - Add definitions temporarily
 
 ## 3.6. Resources types
 The supported resources are based on the endpoints and resource types provided by [Microsoft Graph](https://developer.microsoft.com/en-us/graph).
@@ -353,5 +406,5 @@ To use the string mapping in a configuration file, you need to mention it by the
 ```
 
 ## 3.7. Examples
-### 3.7.1. Invoking a simple group
-### 3.7.2. Invoking a Conditional Access policy set
+### 3.7.1. Example: Invoking a simple group
+### 3.7.2. Example: a Conditional Access policy set with the required groups
