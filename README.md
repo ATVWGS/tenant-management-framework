@@ -34,8 +34,8 @@ adding a source control
     - [3.2.1. configuration.json](#321-configurationjson)
     - [3.2.2. Folder structure](#322-folder-structure)
     - [3.2.3. How can I create a configuration?](#323-how-can-i-create-a-configuration)
-    - [3.2.4. How can I use my configuration?](#324-how-can-i-use-my-configuration)
-  - [3.3. Resources](#33-resources)
+    - [3.2.4. How can I activate or deactivate a configuration?](#324-how-can-i-activate-or-deactivate-a-configuration)
+  - [3.3. Resources types](#33-resources-types)
     - [3.3.1. Groups](#331-groups)
     - [3.3.2. Conditional Access Policies](#332-conditional-access-policies)
     - [3.3.3. Named Locations](#333-named-locations)
@@ -43,7 +43,7 @@ adding a source control
     - [3.3.5. Entitlement Management](#335-entitlement-management)
     - [3.3.6. String mapping](#336-string-mapping)
   - [3.4. General functions](#34-general-functions)
-    - [3.4.1. Getting the activated configurations](#341-getting-the-activated-configurations)
+    - [3.4.1. Getting activated configurations](#341-getting-activated-configurations)
     - [3.4.2. Show the loaded desired configuration](#342-show-the-loaded-desired-configuration)
     - [3.4.3. Test functions](#343-test-functions)
     - [3.4.4. Invoke functions](#344-invoke-functions)
@@ -77,10 +77,10 @@ Connect-MgGraph -Scopes (Get-TmfRequiredScope -All)
 ```
 
 ## 3.2. Configurations
-A Tenant Management Framework configuration is a collection of resource definition files. The defintion files describe instances of different resource types (eg. Groups, Conditional Access Policies, Named Locations). 
+A Tenant Management Framework configuration is a collection of resource definition files in a predefined folder structure. The definition files describe instances of different resource types (eg. Groups, Conditional Access Policies, Named Locations) in the [JavaScript Object Notation (.json)](https://de.wikipedia.org/wiki/JavaScript_Object_Notation). 
 
 ### 3.2.1. configuration.json
-Configurations always contain a *configuration.json* file at the root level. This file contains the properties that describe the configuration.
+Configurations always contain a *configuration.json* file at the root level. This file contains the properties that describe a configuration and is automatically created when using [*New-TmfConfiguration*](#323-how-can-i-create-a-configuration).
 
 ```json
 {
@@ -147,11 +147,18 @@ The *example.md* file contains example resource instances and further informatio
 ```
 
 ### 3.2.3. How can I create a configuration?
+You can create new configuration by simple using the function *New-TmfConfiguration*. This function will create the required folder structure and the *configuration.json* file in the given location.
+```powershell
+New-TmfConfiguration -Name "Example Configuration" -Description "This is an example configuration for the Tenant Management Framework!" -Author "Mustermann, Max" -Weight 50 -OutPath "$env:USERPROFILE\Desktop\Example_Configuration" -Force
+```
 
-### 3.2.4. How can I use my configuration?
+The *-Force* paramter tells the functions to automatically create the target directory or overwrite a configuration at the target directory. In the example it would create the folder "Example_Configuration".
 
-## 3.3. Resources
+A newly created configuration will be automatically activated. This means when using *Load-TmfConfiguration* the defined resources are loaded from the *.json* files and can be directly invoked or tested against the connected tenant.
 
+### 3.2.4. How can I activate or deactivate a configuration?
+
+## 3.3. Resources types
 
 
 ### 3.3.1. Groups
@@ -205,7 +212,7 @@ To use the string mapping in a configuration file, you need to mention it by the
 ```
 
 ## 3.4. General functions
-### 3.4.1. Getting the activated configurations
+### 3.4.1. Getting activated configurations
 ### 3.4.2. Show the loaded desired configuration
 ### 3.4.3. Test functions
 ### 3.4.4. Invoke functions
