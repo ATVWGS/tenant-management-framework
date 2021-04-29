@@ -37,6 +37,7 @@ adding a source control
     - [3.4.2. Folder structure](#342-folder-structure)
     - [3.4.3. How can I create a configuration?](#343-how-can-i-create-a-configuration)
     - [3.4.4. How can I activate or deactivate a configuration?](#344-how-can-i-activate-or-deactivate-a-configuration)
+    - [3.4.5. Storing configurations](#345-storing-configurations)
   - [3.5. Resources types](#35-resources-types)
     - [3.5.1. Groups](#351-groups)
     - [3.5.2. Conditional Access Policies](#352-conditional-access-policies)
@@ -79,14 +80,14 @@ https://github.com/microsoftgraph/msgraph-sdk-powershell
 Please make sure you are connected to the correct Tenant before invoking configurations! 
 
 The required scopes depend on what components (resources) you want to configure.
-| Resource                                                          | Required scopes                                                                                                              |
-|-------------------------------------------------------------------|------------------------------------------------------------------------------------------------------------------------------|
-| Groups                                                            | Group.ReadWrite.All, GroupMember.ReadWrite.All                                                                               |
-| Users                                                             | User.ReadWrite.All                                                                                                           |
-| Named Locations                                                   | Policy.ReadWrite.ConditionalAccess                                                                                           |
-| Agreements (Terms of Use)                                         | Agreement.ReadWrite.All                                                                                                      |
-| Conditional Access Policies                                       | Policy.ReadWrite.ConditionalAccess, Policy.Read.All, RoleManagement.Read.Directory, Application.Read.All, Agreement.Read.All |
-| Enitlement Management (Access Packages, Access Package Catalogs)  | EntitlementManagement.ReadWrite.All                                                                                          |
+| Resource                                                          | Required scopes                                                                                                              
+|-------------------------------------------------------------------|----------------------------------------------------------------------------------------
+| Groups                                                            | Group.ReadWrite.All, GroupMember.ReadWrite.All
+| Users                                                             | User.ReadWrite.All
+| Named Locations                                                   | Policy.ReadWrite.ConditionalAccess
+| Agreements (Terms of Use)                                         | Agreement.ReadWrite.All
+| Conditional Access Policies                                       | Policy.ReadWrite.ConditionalAccess, Policy.Read.All, RoleManagement.Read.Directory, Application.Read.All, Agreement.Read.All
+| Enitlement Management (Access Packages, Access Package Catalogs)  | EntitlementManagement.ReadWrite.All
 
 You can also use *Get-TmfRequiredScope* to get the required scopes and combine it with *Connect-MgGraph*.
 ```powershell
@@ -214,6 +215,10 @@ Deactivate-TmfConfiguration -All # Or all activated configurations!
 # Example output
 [16:18:08][Deactivate-TmfConfiguration] Deactivating Example Configuration. This configuration will not be considered when applying Tenant configuration. [DONE]
 ```
+
+### 3.4.5. Storing configurations
+We recommend you to store configurations in a git repository. This way you got versioning and changes to the configurations are automatically documented.
+In our case we store multiple configurations (Default configuration, DEV configuration, QA configuration and so on) in a single Azure DevOps repository.
 
 ## 3.5. Resources types
 
