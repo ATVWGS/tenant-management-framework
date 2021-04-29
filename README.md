@@ -29,30 +29,42 @@ adding a source control
   - [1.2. Benefits](#12-benefits)
 - [2. Table of contents](#2-table-of-contents)
 - [3. Getting started](#3-getting-started)
-  - [3.1. Authentication](#31-authentication)
-  - [3.2. Configurations](#32-configurations)
-    - [3.2.1. configuration.json](#321-configurationjson)
-    - [3.2.2. Folder structure](#322-folder-structure)
-    - [3.2.3. How can I create a configuration?](#323-how-can-i-create-a-configuration)
-    - [3.2.4. How can I activate or deactivate a configuration?](#324-how-can-i-activate-or-deactivate-a-configuration)
-  - [3.3. Resources types](#33-resources-types)
-    - [3.3.1. Groups](#331-groups)
-    - [3.3.2. Conditional Access Policies](#332-conditional-access-policies)
-    - [3.3.3. Named Locations](#333-named-locations)
-    - [3.3.4. Agreements (Terms of Use)](#334-agreements-terms-of-use)
-    - [3.3.5. Entitlement Management](#335-entitlement-management)
-    - [3.3.6. String mapping](#336-string-mapping)
-  - [3.4. General functions](#34-general-functions)
-    - [3.4.1. Getting activated configurations](#341-getting-activated-configurations)
-    - [3.4.2. Show the loaded desired configuration](#342-show-the-loaded-desired-configuration)
-    - [3.4.3. Test functions](#343-test-functions)
-    - [3.4.4. Invoke functions](#344-invoke-functions)
-  - [3.5. Examples](#35-examples)
-    - [3.5.1. Invoking a simple group](#351-invoking-a-simple-group)
-    - [3.5.2. Invoking a Conditional Access policy set](#352-invoking-a-conditional-access-policy-set)
+  - [3.1. Installation](#31-installation)
+  - [3.2. Importing the module](#32-importing-the-module)
+  - [3.3. Authentication](#33-authentication)
+  - [3.4. Configurations](#34-configurations)
+    - [3.4.1. configuration.json](#341-configurationjson)
+    - [3.4.2. Folder structure](#342-folder-structure)
+    - [3.4.3. How can I create a configuration?](#343-how-can-i-create-a-configuration)
+    - [3.4.4. How can I activate or deactivate a configuration?](#344-how-can-i-activate-or-deactivate-a-configuration)
+  - [3.5. Resources types](#35-resources-types)
+    - [3.5.1. Groups](#351-groups)
+    - [3.5.2. Conditional Access Policies](#352-conditional-access-policies)
+    - [3.5.3. Named Locations](#353-named-locations)
+    - [3.5.4. Agreements (Terms of Use)](#354-agreements-terms-of-use)
+    - [3.5.5. Entitlement Management](#355-entitlement-management)
+    - [3.5.6. String mapping](#356-string-mapping)
+  - [3.6. General functions](#36-general-functions)
+    - [3.6.1. Getting activated configurations](#361-getting-activated-configurations)
+    - [3.6.2. Show the loaded desired configuration](#362-show-the-loaded-desired-configuration)
+    - [3.6.3. Test functions](#363-test-functions)
+    - [3.6.4. Invoke functions](#364-invoke-functions)
+  - [3.7. Examples](#37-examples)
+    - [3.7.1. Invoking a simple group](#371-invoking-a-simple-group)
+    - [3.7.2. Invoking a Conditional Access policy set](#372-invoking-a-conditional-access-policy-set)
 
 # 3. Getting started
-## 3.1. Authentication
+## 3.1. Installation
+Currently we only deliver the module as a *.zip* file. Just unpack everything into one of your module directories. (eg. C:\Users\$env:USERNAME\Documents\WindowsPowerShell\Modules)
+The module folder must be called TMF, otherwise the Powershell function "Import-Module" will not work.
+
+Checkout <https://docs.microsoft.com/de-de/powershell/scripting/developer/module/installing-a-powershell-module?view=powershell-7.1> for further information.
+
+## 3.2. Importing the module
+You can simply import the module using *Import-Module TMF* if the module has been placed in one of your module directory. (Checkout $env:PSModulePath)
+It is also possible to directly import the module using *Import-Module <PATH_TO_MODULE>/TMF/TMF.psd1*
+
+## 3.3. Authentication
 We are using the Microsoft.Graph module to make changes in the targeted Azure AD Tenant. This module also has a sub-module for authentication against Microsoft Graph. You can connect using the following command.
 ```powershell
 Connect-MgGraph -Scopes "User.Read.All", "Group.ReadWrite.All"
@@ -76,10 +88,10 @@ You can also use *Get-TmfRequiredScope* to get the required scopes and combine i
 Connect-MgGraph -Scopes (Get-TmfRequiredScope -All)
 ```
 
-## 3.2. Configurations
+## 3.4. Configurations
 A Tenant Management Framework configuration is a collection of resource definition files in a predefined folder structure. The definition files describe instances of different resource types (eg. Groups, Conditional Access Policies, Named Locations) in the [JavaScript Object Notation (.json)](https://de.wikipedia.org/wiki/JavaScript_Object_Notation). 
 
-### 3.2.1. configuration.json
+### 3.4.1. configuration.json
 Configurations always contain a *configuration.json* file at the root level. This file contains the properties that describe a configuration and is automatically created when using [*New-TmfConfiguration*](#323-how-can-i-create-a-configuration).
 
 ```json
@@ -102,7 +114,7 @@ Configurations always contain a *configuration.json* file at the root level. Thi
 | Weight       | When activating multiple configurations, the configuration with the highest weight is loaded last. This means that a resource definition will be overwriten, if the last configuration contains a definition with the same displayName.
 | Prerequisite | With this setting you can define a relationship to an another configuration. For example when a configurations requires a baseline configuration. **Currently not implemented!**
 
-### 3.2.2. Folder structure
+### 3.4.2. Folder structure
 For each supported resource type there is a subfolder. These subfolders always contain an empty .json file and example.md. 
 
 The empty *.json* file is used to define resource instances. As an example a resource instance can be the definition of an Azure AD Security group or a Conditional Access policy. You can place multiple *.json* in a single resource type subfolder. By creating multiple *.json* files it is possible to structure resource definitions in a understandable way.
@@ -146,7 +158,7 @@ The *example.md* file contains example resource instances and further informatio
         stringMappings.json
 ```
 
-### 3.2.3. How can I create a configuration?
+### 3.4.3. How can I create a configuration?
 You can create new configuration by simple using the function *New-TmfConfiguration*. This function will create the required folder structure and the *configuration.json* file in the given location.
 ```powershell
 New-TmfConfiguration -Name "Example Configuration" -Description "This is an example configuration for the Tenant Management Framework!" -Author "Mustermann, Max" -Weight 50 -OutPath "$env:USERPROFILE\Desktop\Example_Configuration" -Force
@@ -156,22 +168,22 @@ The *-Force* paramter tells the functions to automatically create the target dir
 
 A newly created configuration will be automatically activated. This means when using *Load-TmfConfiguration* the defined resources are loaded from the *.json* files and can be directly invoked or tested against the connected tenant.
 
-### 3.2.4. How can I activate or deactivate a configuration?
+### 3.4.4. How can I activate or deactivate a configuration?
 
-## 3.3. Resources types
+## 3.5. Resources types
 
 
-### 3.3.1. Groups
+### 3.5.1. Groups
 
-### 3.3.2. Conditional Access Policies
+### 3.5.2. Conditional Access Policies
 
-### 3.3.3. Named Locations
+### 3.5.3. Named Locations
 
-### 3.3.4. Agreements (Terms of Use)
+### 3.5.4. Agreements (Terms of Use)
 
-### 3.3.5. Entitlement Management
+### 3.5.5. Entitlement Management
 
-### 3.3.6. String mapping
+### 3.5.6. String mapping
 
 You can create mappings between strings and the values they should be replaced with. Place the mappings in the *stringMappings.json* file in the *stringMappings* folder of your configuration.
 
@@ -211,12 +223,12 @@ To use the string mapping in a configuration file, you need to mention it by the
 }
 ```
 
-## 3.4. General functions
-### 3.4.1. Getting activated configurations
-### 3.4.2. Show the loaded desired configuration
-### 3.4.3. Test functions
-### 3.4.4. Invoke functions
+## 3.6. General functions
+### 3.6.1. Getting activated configurations
+### 3.6.2. Show the loaded desired configuration
+### 3.6.3. Test functions
+### 3.6.4. Invoke functions
 
-## 3.5. Examples
-### 3.5.1. Invoking a simple group
-### 3.5.2. Invoking a Conditional Access policy set
+## 3.7. Examples
+### 3.7.1. Invoking a simple group
+### 3.7.2. Invoking a Conditional Access policy set
