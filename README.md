@@ -30,7 +30,7 @@ adding a source control
 - [2. Table of contents](#2-table-of-contents)
 - [3. Getting started](#3-getting-started)
   - [3.1. Installation](#31-installation)
-  - [3.2. Importing the module](#32-importing-the-module)
+  - [3.2. Importing](#32-importing)
   - [3.3. Authentication](#33-authentication)
   - [3.4. Configurations](#34-configurations)
     - [3.4.1. configuration.json](#341-configurationjson)
@@ -58,16 +58,21 @@ adding a source control
 Currently we only deliver the module as a *.zip* file. Just unpack everything into one of your module directories. (eg. C:\Users\$env:USERNAME\Documents\WindowsPowerShell\Modules)
 The module folder must be called TMF, otherwise the Powershell function "Import-Module" will not work.
 
+It is also possible to just clone the repository.
+```bash
+git clone https://VWADO@dev.azure.com/VWADO/Tenant%20Management%20as%20Code/_git/Tenant%20Management%20Framework "Tenant Management Framework"
+```
+
 Checkout <https://docs.microsoft.com/de-de/powershell/scripting/developer/module/installing-a-powershell-module?view=powershell-7.1> for further information.
 
-## 3.2. Importing the module
+## 3.2. Importing
 You can simply import the module using *Import-Module TMF* if the module has been placed in one of your module directory. (Checkout $env:PSModulePath)
 It is also possible to directly import the module using *Import-Module <PATH_TO_MODULE>/TMF/TMF.psd1*
 
 ## 3.3. Authentication
 We are using the Microsoft.Graph module to make changes in the targeted Azure AD Tenant. This module also has a sub-module for authentication against Microsoft Graph. You can connect using the following command.
 ```powershell
-Connect-MgGraph -Scopes "User.Read.All", "Group.ReadWrite.All"
+PS> Connect-MgGraph -Scopes "User.Read.All", "Group.ReadWrite.All"
 ```
 https://github.com/microsoftgraph/msgraph-sdk-powershell
 
@@ -85,7 +90,7 @@ The required scopes depend on what components (resources) you want to configure.
 
 You can also use *Get-TmfRequiredScope* to get the required scopes and combine it with *Connect-MgGraph*.
 ```powershell
-Connect-MgGraph -Scopes (Get-TmfRequiredScope -All)
+PS> Connect-MgGraph -Scopes (Get-TmfRequiredScope -All)
 ```
 
 ## 3.4. Configurations
@@ -161,7 +166,14 @@ The *example.md* file contains example resource instances and further informatio
 ### 3.4.3. How can I create a configuration?
 You can create new configuration by simple using the function *New-TmfConfiguration*. This function will create the required folder structure and the *configuration.json* file in the given location.
 ```powershell
-New-TmfConfiguration -Name "Example Configuration" -Description "This is an example configuration for the Tenant Management Framework!" -Author "Mustermann, Max" -Weight 50 -OutPath "$env:USERPROFILE\Desktop\Example_Configuration" -Force
+PS> New-TmfConfiguration -Name "Example Configuration" -Description "This is an example configuration for the Tenant Management Framework!" -Author "Mustermann, Max" -Weight 50 -OutPath "$env:USERPROFILE\Desktop\Example_Configuration" -Force
+
+# Example output
+[16:02:04][New-TmfConfiguration] Creating configuration directory C:\Users\***REMOVED***\Desktop\Example_Configuration. [DONE]
+[16:02:04][New-TmfConfiguration] Copying template structure to C:\Users\***REMOVED***\Desktop\Example_Configuration. [DONE]
+[16:02:05][Activate-TmfConfiguration] Activating Example Configuration (C:\Users\***REMOVED***\Desktop\Example_Configuration\configuration.json). This configuration will be considered when applying Tenant configuration. [DONE]
+[16:02:05][Activate-TmfConfiguration] Sorting all activated configurations by weight. [DONE]
+[16:02:05][New-TmfConfiguration] Creation has finished! Have fun! [DONE]
 ```
 
 The *-Force* paramter tells the functions to automatically create the target directory or overwrite a configuration at the target directory. In the example it would create the folder "Example_Configuration".
@@ -169,6 +181,39 @@ The *-Force* paramter tells the functions to automatically create the target dir
 A newly created configuration will be automatically activated. This means when using *Load-TmfConfiguration* the defined resources are loaded from the *.json* files and can be directly invoked or tested against the connected tenant.
 
 ### 3.4.4. How can I activate or deactivate a configuration?
+To invoke or test defined resources against a tenant, you need to activate the containing configuration at the beginning. This means that you have to tell the TMF which configurations you want it to consider in the next steps.
+
+This activation can simply be done using *Activate-TmfConfiguration*.
+```powershell
+PS> Activate-TmfConfiguration "$env:USERPROFILE\Desktop\Example_Configuration" -Force
+
+# Example output
+[16:10:46][Activate-TmfConfiguration] Activating Example Configuration (C:\Users\***REMOVED***\Desktop\Example_Configuration\configuration.json). This configuration will be considered when applying Tenant configuration. [DONE]
+[16:10:46][Activate-TmfConfiguration] Sorting all activated configurations by weight. [DONE]
+```
+
+You can use *Get-TmfActiveConfiguration* to checkout all already activated configurations.
+```powershell
+PS> Get-TmfActiveConfiguration
+
+# Example output
+Name         : Example Configuration
+Path         : C:\Users\***REMOVED***\Desktop\Example_Configuration
+Description  : This is an example configuration for the Tenant Management Framework!
+Author       : Mustermann, Max
+Weight       : 50
+Prerequisite : {}
+```
+
+To deactivate a configuration use *Deactivate-TmfConfiguration*. After deactivating a configuration the TMF won't considere it in further steps.
+```powershell
+Deactivate-TmfConfiguration -Name "Example Configuration" # By name
+Deactivate-TmfConfiguration -Path "$env:USERPROFILE\Desktop\Example_Configuration" # By path
+Deactivate-TmfConfiguration -All # Or all activated configurations!
+
+# Example output
+[16:18:08][Deactivate-TmfConfiguration] Deactivating Example Configuration. This configuration will not be considered when applying Tenant configuration. [DONE]
+```
 
 ## 3.5. Resources types
 
