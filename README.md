@@ -1,3 +1,9 @@
+<img src="./Assets/Images/VWAG_Group_Services_CO_rgb.svg">
+
+Tenant Management Framework <!-- omit in toc -->
+===========================
+*by [Volkswagen Group Services GmbH](https://volkswagen-groupservices.com)*
+
 # 1. Introduction 
 The Tenant Management Framework is a Powershell module that is able to create, update and
 delete resources or settings via the Microsoft Graph API. The module provides simple
@@ -38,18 +44,21 @@ adding a source control
     - [3.4.3. How can I create a configuration?](#343-how-can-i-create-a-configuration)
     - [3.4.4. How can I activate or deactivate a configuration?](#344-how-can-i-activate-or-deactivate-a-configuration)
     - [3.4.5. Storing configurations](#345-storing-configurations)
-  - [3.5. Resources types](#35-resources-types)
-    - [3.5.1. Groups](#351-groups)
-    - [3.5.2. Conditional Access Policies](#352-conditional-access-policies)
-    - [3.5.3. Named Locations](#353-named-locations)
-    - [3.5.4. Agreements (Terms of Use)](#354-agreements-terms-of-use)
-    - [3.5.5. Entitlement Management](#355-entitlement-management)
-    - [3.5.6. String mapping](#356-string-mapping)
-  - [3.6. General functions](#36-general-functions)
-    - [3.6.1. Getting activated configurations](#361-getting-activated-configurations)
-    - [3.6.2. Show the loaded desired configuration](#362-show-the-loaded-desired-configuration)
-    - [3.6.3. Test functions](#363-test-functions)
-    - [3.6.4. Invoke functions](#364-invoke-functions)
+  - [3.5. General functions](#35-general-functions)
+    - [3.5.1. Load-TmfConfiguration - Load definition files from configurations](#351-load-tmfconfiguration---load-definition-files-from-configurations)
+    - [3.5.2. Show the loaded desired configuration](#352-show-the-loaded-desired-configuration)
+    - [3.5.3. Test-Tmf* - Test definitions against Graph](#353-test-tmf---test-definitions-against-graph)
+    - [3.5.4. Invoke-Tmf* - Perform actions against Graph](#354-invoke-tmf---perform-actions-against-graph)
+    - [3.5.5. Register-Tmf* - Add definitions temporary](#355-register-tmf---add-definitions-temporary)
+  - [3.6. Resources types](#36-resources-types)
+    - [3.6.1. Groups](#361-groups)
+    - [3.6.2. Conditional Access Policies](#362-conditional-access-policies)
+    - [3.6.3. Named Locations](#363-named-locations)
+    - [3.6.4. Agreements (Terms of Use)](#364-agreements-terms-of-use)
+    - [3.6.5. Entitlement Management](#365-entitlement-management)
+      - [3.6.5.1. Access Package Catalogs](#3651-access-package-catalogs)
+      - [3.6.5.2. Access Packages](#3652-access-packages)
+    - [3.6.6. String mapping](#366-string-mapping)
   - [3.7. Examples](#37-examples)
     - [3.7.1. Invoking a simple group](#371-invoking-a-simple-group)
     - [3.7.2. Invoking a Conditional Access policy set](#372-invoking-a-conditional-access-policy-set)
@@ -220,20 +229,35 @@ Deactivate-TmfConfiguration -All # Or all activated configurations!
 We recommend you to store configurations in a git repository. By adding a source control system you get enforced documentation and versioning.
 In our case we store multiple configurations (Default configuration, DEV configuration, QA configuration and so on) in a single Azure DevOps repository.
 
-## 3.5. Resources types
+## 3.5. General functions
+### 3.5.1. Load-TmfConfiguration - Load definition files from configurations
+### 3.5.2. Show the loaded desired configuration
+### 3.5.3. Test-Tmf* - Test definitions against Graph
+### 3.5.4. Invoke-Tmf* - Perform actions against Graph
+### 3.5.5. Register-Tmf* - Add definitions temporary
 
+## 3.6. Resources types
+The supported resources are based on the endpoints and resource types provided by [Microsoft Graph](https://developer.microsoft.com/en-us/graph).
+Most of the definition files use the json syntax that the API endpoint also uses.
 
-### 3.5.1. Groups
+### 3.6.1. Groups
 
-### 3.5.2. Conditional Access Policies
+### 3.6.2. Conditional Access Policies
 
-### 3.5.3. Named Locations
+### 3.6.3. Named Locations
 
-### 3.5.4. Agreements (Terms of Use)
+### 3.6.4. Agreements (Terms of Use)
 
-### 3.5.5. Entitlement Management
+### 3.6.5. Entitlement Management
 
-### 3.5.6. String mapping
+#### 3.6.5.1. Access Package Catalogs
+
+#### 3.6.5.2. Access Packages
+##### Access Package Resources <!-- omit in toc -->
+
+##### Access Package Assignement Policies <!-- omit in toc -->
+
+### 3.6.6. String mapping
 
 You can create mappings between strings and the values they should be replaced with. Place the mappings in the *stringMappings.json* file in the *stringMappings* folder of your configuration.
 
@@ -272,12 +296,6 @@ To use the string mapping in a configuration file, you need to mention it by the
     "present": true
 }
 ```
-
-## 3.6. General functions
-### 3.6.1. Getting activated configurations
-### 3.6.2. Show the loaded desired configuration
-### 3.6.3. Test functions
-### 3.6.4. Invoke functions
 
 ## 3.7. Examples
 ### 3.7.1. Invoking a simple group
