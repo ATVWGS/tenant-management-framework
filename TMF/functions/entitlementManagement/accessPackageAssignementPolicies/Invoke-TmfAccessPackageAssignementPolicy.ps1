@@ -1,5 +1,9 @@
 function Invoke-TmfAccessPackageAssignementPolicy
 {
+	<#
+		.SYNOPSIS
+			Performs the required actions for a resource type against the connected Tenant.
+	#>
 	[CmdletBinding()]
 	Param (
 		[System.Management.Automation.PSCmdlet]
@@ -15,7 +19,7 @@ function Invoke-TmfAccessPackageAssignementPolicy
 		}
 		Test-GraphConnection -Cmdlet $Cmdlet
 
-		function Build-RequestBody {
+		function ConvertTo-RequestBody {
 			Param (
 				$TestResult				
 			)
@@ -69,7 +73,7 @@ function Invoke-TmfAccessPackageAssignementPolicy
 				"Create" {
 					$requestUrl = "$script:graphBaseUrl/identityGovernance/entitlementManagement/accessPackageAssignmentPolicies"
 					$requestMethod = "POST"
-					$requestBody = Build-RequestBody -TestResult $result					
+					$requestBody = ConvertTo-RequestBody -TestResult $result					
 
 					try {
 						$requestBody = $requestBody | ConvertTo-Json -ErrorAction Stop -Depth 8
@@ -97,7 +101,7 @@ function Invoke-TmfAccessPackageAssignementPolicy
 					$requestUrl = "$script:graphBaseUrl/identityGovernance/entitlementManagement/accessPackageAssignmentPolicies/{0}" -f $result.GraphResource.Id
 					$requestMethod = "PUT"
 					if ($result.Changes.count -gt 0) {
-						$requestBody = Build-RequestBody -TestResult $result
+						$requestBody = ConvertTo-RequestBody -TestResult $result
 	
 						try {
 							$requestBody = $requestBody | ConvertTo-Json -ErrorAction Stop -Depth 8

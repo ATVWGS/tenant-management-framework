@@ -1,5 +1,12 @@
 function Test-TmfAccessPackageAssignementPolicy
 {
+	<#
+		.SYNOPSIS
+			Test desired configuration against a Tenant.
+		.DESCRIPTION
+			Compare current configuration of a resource type with the desired configuration.
+			Return a result object with the required changes and actions.
+	#>
 	[CmdletBinding()]
 	Param (
 		[System.Management.Automation.PSCmdlet]
@@ -50,7 +57,7 @@ function Test-TmfAccessPackageAssignementPolicy
 					$result["GraphResource"] = $resource
 					if ($definition.present) {
 						$changes = @()
-						foreach ($property in ($definition.Properties() | ? {$_ -notin "displayName", "present", "sourceConfig", "accessPackage"})) {
+						foreach ($property in ($definition.Properties() | Where-Object {$_ -notin "displayName", "present", "sourceConfig", "accessPackage"})) {
 							$change = [PSCustomObject] @{
 								Property = $property										
 								Actions = $null

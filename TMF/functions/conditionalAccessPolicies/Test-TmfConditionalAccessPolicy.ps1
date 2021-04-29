@@ -1,5 +1,12 @@
 ﻿function Test-TmfConditionalAccessPolicy
 {
+	<#
+		.SYNOPSIS
+			Test desired configuration against a Tenant.
+		.DESCRIPTION
+			Compare current configuration of a resource type with the desired configuration.
+			Return a result object with the required changes and actions.
+	#>
 	[CmdletBinding()]
 	Param (
 		[System.Management.Automation.PSCmdlet]
@@ -64,7 +71,7 @@
 
 							if ($propertyTargetResourceType -in @("Users", "Groups", "Roles")) {
 								$change.Actions = Compare-ResourceList -ReferenceList $resource.conditions.users.$property `
-														-DifferenceList $($definition.$property | foreach {& $resolveFunctionMapping[$propertyTargetResourceType] -InputReference $_ -Cmdlet $Cmdlet}) `
+														-DifferenceList $($definition.$property | ForEach-Object {& $resolveFunctionMapping[$propertyTargetResourceType] -InputReference $_ -Cmdlet $Cmdlet}) `
 														-Cmdlet $PSCmdlet -ReturnSetAction
 							}
 							elseif ($propertyTargetResourceType -in $resolveFunctionMapping.Keys) {
@@ -75,7 +82,7 @@
 								}
 								else {
 									$change.Actions = Compare-ResourceList -ReferenceList $resource.conditions.$($propertyTargetResourceType.toLower()).$property `
-														-DifferenceList $($definition.$property | foreach {& $resolveFunctionMapping[$propertyTargetResourceType] -InputReference $_ -Cmdlet $Cmdlet}) `
+														-DifferenceList $($definition.$property | ForEach-Object {& $resolveFunctionMapping[$propertyTargetResourceType] -InputReference $_ -Cmdlet $Cmdlet}) `
 														-Cmdlet $PSCmdlet -ReturnSetAction
 								}								
 							}
@@ -91,7 +98,7 @@
 							}
 							elseif ($property -eq "termsOfUse") {
 								$change.Actions = Compare-ResourceList -ReferenceList $resource.grantControls.$property `
-									-DifferenceList $($definition.$property | foreach {Resolve-Agreement -InputReference $_ -Cmdlet $Cmdlet}) `
+									-DifferenceList $($definition.$property | ForEach-Object {Resolve-Agreement -InputReference $_ -Cmdlet $Cmdlet}) `
 									-Cmdlet $PSCmdlet -ReturnSetAction
 							}
 							else {

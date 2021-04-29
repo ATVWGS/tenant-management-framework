@@ -1,5 +1,9 @@
 ﻿function Invoke-TmfAgreement
 {
+	<#
+		.SYNOPSIS
+			Performs the required actions for a resource type against the connected Tenant.
+	#>
 	[CmdletBinding()]
 	Param (
 		[System.Management.Automation.PSCmdlet]
@@ -31,13 +35,13 @@
 						"displayName" = $result.DesiredConfiguration.displayName
 					}
 					try {
-						"isViewingBeforeAcceptanceRequired", "isPerDeviceAcceptanceRequired", "userReacceptRequiredFrequency", "termsExpiration", "files" | foreach {
+						"isViewingBeforeAcceptanceRequired", "isPerDeviceAcceptanceRequired", "userReacceptRequiredFrequency", "termsExpiration", "files" | ForEach-Object {
 							if ($result.DesiredConfiguration.Properties() -contains "$_") {
 								switch ($_) {
 									"files" {										
-										$configPath = (Get-TmfActiveConfiguration | ? {$_.Name -eq $result.DesiredConfiguration.sourceConfig}).Path
-										$requestBody["files"] = @($result.DesiredConfiguration.files | foreach {
-											$file = $_ | select fileName, language, isDefault
+										$configPath = (Get-TmfActiveConfiguration | Where-Object {$_.Name -eq $result.DesiredConfiguration.sourceConfig}).Path
+										$requestBody["files"] = @($result.DesiredConfiguration.files | ForEach-Object {
+											$file = $_ | Select-Object fileName, language, isDefault
 											$filePath = "{0}/agreements/{1}" -f $configPath, $_.filePath
 											$data = [Convert]::ToBase64String([System.IO.File]::ReadAllBytes($filePath))
 											Add-Member -InputObject $file -MemberType NoteProperty -Name "fileData" -Value @{ data = $data }

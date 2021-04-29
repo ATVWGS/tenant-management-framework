@@ -1,5 +1,17 @@
 ﻿function Test-TmfTenant
 {
+	<#
+		.SYNOPSIS
+			Tests activated configurations against the connected Tenant.
+		
+		.DESCRIPTION
+			This command tests the desired configuration against the Tenant you are connected to.
+			You can connect to a Tenant using Connect-MgGraph.
+
+		.PARAMETER Exclude
+			Exclude resources from testing.
+			For example: -Exclude groups, users
+	#>
 	[CmdletBinding()]
 	Param (
 		[string[]] $Exclude
