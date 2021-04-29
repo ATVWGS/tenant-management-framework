@@ -217,7 +217,7 @@ Deactivate-TmfConfiguration -All # Or all activated configurations!
 ```
 
 ### 3.4.5. Storing configurations
-We recommend you to store configurations in a git repository. This way you got versioning and changes to the configurations are automatically documented.
+We recommend you to store configurations in a git repository. By adding a source control system you get enforced documentation and versioning.
 In our case we store multiple configurations (Default configuration, DEV configuration, QA configuration and so on) in a single Azure DevOps repository.
 
 ## 3.5. Resources types
