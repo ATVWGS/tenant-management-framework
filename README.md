@@ -311,7 +311,7 @@ PS> Test-TmfTenant
 [20:35:52][TMF] [Tenant: TENANT_NAME][Group Resource: Example group] Required Action (Create)
 ```
 
-It is also possible to beautify the results of any resouce type specific test command.
+With *Beautify-TmfTestResult* you are able to beautify the results of any resouce type specific test command.
 
 ```powershell
 PS> Test-TmfGroup | Beautify-TmfTestResult
@@ -320,7 +320,7 @@ PS> Test-TmfGroup | Beautify-TmfTestResult
 ```
 
 ### 3.5.4. Invoke-Tmf* - Perform actions against Graph
-It is possible to invoke actions for a single resource type, for an resouce type group (eg. Entitlement Management) or for a whole tenant.
+The invoke functions are available for a single resource type, for a resouce type group (eg. Entitlement Management) or for the whole tenant. These functions are capable of creating, updating or deleting resources using Microsoft Graph. The executed actions depend on the results the test functions return.
 
 Example based on Access Packages:
 - *Invoke-TmfAccessPackage:* Only invokes actions for the defined Access Packages
