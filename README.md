@@ -343,31 +343,217 @@ Is this the correct tenant? [y/n]: y
 ```
 
 ### 3.5.5. Register-Tmf* - Add definitions temporarily
+You can use the register functions to manually register a resource definition. When registering a resource definition it will be added to the desired configuration. 
+
+A resource must be registered before the Tenant Management Framework can test it's configuration against the Tenant.
+
+*The displayName property must be uniqe in the desired configuration!* Resources are searched by the displayName.
+
 
 ## 3.6. Resources types
 The supported resources are based on the endpoints and resource types provided by [Microsoft Graph](https://developer.microsoft.com/en-us/graph).
 Most of the definition files use the json syntax that the API endpoint also uses.
 
 ### 3.6.1. Groups
+An example definition for a simple Azure AD security group with a predefined member and a predefined owner.
+
+```json
+{   
+    "displayName": "Some group",
+    "description": "This is a security group",
+    "groupTypes": [],        
+    "securityEnabled": true,
+    "mailEnabled": false,
+    "mailNickname": "someGroupForMembers",
+    "members": ["max.mustermann@volkswagen.de"],
+    "owners": ["group.owner@volkswagen.de"],
+    "present": true
+}
+```
+
+Please check the [Groups example.md](./TMF/internal/data/configuration/groups/example.md) for further information.
 
 ### 3.6.2. Conditional Access Policies
+An example policy definition that would affect all members of a group to accept ToU and and provide MFA.
+
+```json
+{
+    "displayName" : "Require MFA and ToU for all members of Some group",
+    "excludeGroups": ["Some group for CA"],
+    "excludeUsers": ["johannes.seitle@TENANT_NAME.onmicrosoft.com"],        
+    "includeApplications": ["All"],        
+    "includeLocations": ["All"],
+    "clientAppTypes": ["browser", "mobileAppsAndDesktopClients"],
+    "includePlatforms": ["All"],
+    "builtInControls": ["mfa"],
+    "operator": "AND",
+    "termsOfUse": ["ToU for Some group"],        
+    "state" : "enabledForReportingButNotEnforced",
+    "present" : false
+}
+```
+
+Please check the [Conditional Access Policy example.md](./TMF/internal/data/configuration/conditionalAccessPolicies/example.md) for further information.
 
 ### 3.6.3. Named Locations
+An example IP Named Location definition.
+
+```json
+{
+    "type": "ipNamedLocation",
+    "displayName": "Untrusted IP named location",
+    "isTrusted": false,
+    "ipRanges": [
+        {
+            "@odata.type": "#microsoft.graph.iPv4CidrRange",
+            "cidrAddress": "12.34.221.11/22"
+        },
+        {
+            "@odata.type": "#microsoft.graph.iPv6CidrRange",
+            "cidrAddress": "2001:0:9d38:90d6:0:0:0:0/63"
+        }
+    ],
+    "present": true
+}
+```
+
+Please check the [Named Location example.md](./TMF/internal/data/configuration/namedLocations/example.md) for further information.
 
 ### 3.6.4. Agreements (Terms of Use)
 
+An example Agreement definition with a single PDF file added.
+
+```json
+{
+  "displayName": "An example agreement with a single files",
+  "isViewingBeforeAcceptanceRequired": true,
+  "isPerDeviceAcceptanceRequired": false,
+  "userReacceptRequiredFrequency": "P90D",
+  "termsExpiration": {
+    "startDateTime": "05.03.2021 00:00:00",
+    "frequency": "PT1M"
+  },
+  "files": [
+    {
+      "fileName": "Example Terms of Use.pdf",
+      "language": "en",
+      "isDefault": true,
+      "filePath": "files/Example Terms of Use.pdf"
+    }
+  ],
+  "present": true
+}
+```
+
+Please check the [Agreements example.md](./TMF/internal/data/configuration/agreements/example.md) for further information.
+
 ### 3.6.5. Entitlement Management
+Entitlement Management can be done by the following resource types. For further information about Azure AD Entitlement Management you can read the official documentation: https://docs.microsoft.com/en-us/azure/active-directory/governance/entitlement-management-overview.
 
 #### 3.6.5.1. Access Package Catalogs
+A simple Access Package Catalog definition.
+
+```json
+{    
+    "displayName": "Access package catalog for testing",
+    "description": "Sample access package catalog",
+    "isExternallyVisible": false,
+    "present": true
+}
+```
+
+Please check the [Access Package Catalogs example.md](./TMF/internal/data/configuration/entitlementManagement/accessPackageCatalogs/example.md) for further information.
 
 #### 3.6.5.2. Access Packages
-##### Access Package Resources <!-- omit in toc -->
+
+```json
+{
+    "displayName":"Access Package",
+    "description":"Access Package description",
+    "isHidden":true,
+    "isRoleScopesVisible":true,
+    "catalog":"General",
+    "present":true,
+    "accessPackageResources":[
+        {
+            "resourceIdentifier":"Some group",
+            "resourceRole":"Member",
+            "originSystem":"AadGroup"
+        }
+    ],
+    "assignementPolicies":[
+        {
+            "displayName":"Initial policy",
+            "canExtend":false,
+            "durationInDays":8,
+            "accessReviewSettings":{
+                "isEnabled":false,
+                "recurrenceType":"monthly",
+                "reviewerType":"Reviewers",
+                "durationInDays":14,
+                "reviewers":[
+                    {
+                        "type":"singleUser",
+                        "reference":"max.mustermann@tmacdev.onmicrosoft.com",
+                        "isBackup":false
+                    },
+                    {
+                        "type":"requestorManager",
+                        "managerLevel":1,
+                        "isBackup":false
+                    }
+                ]
+            },
+            "requestApprovalSettings":{
+                "isApprovalRequired":true,
+                "isApprovalRequiredForExtension":false,
+                "isRequestorJustificationRequired":true,
+                "approvalMode":"SingleStage",
+                "approvalStages":[
+                    {
+                        "approvalStageTimeOutInDays":14,
+                        "isApproverJustificationRequired":true,
+                        "isEscalationEnabled":false,
+                        "escalationTimeInMinutes":11520,
+                        "primaryApprovers":[
+                            {
+                                "type":"singleUser",
+                                "reference":"johannes.seitle@tmacdev.onmicrosoft.com",
+                                "isBackup":false
+                            }
+                        ]
+                    }
+                ]
+            },
+            "requestorSettings":{
+                "scopeType":"SpecificDirectorySubjects",
+                "acceptRequests":true,
+                "allowedRequestors":[
+                    {
+                        "type":"singleUser",
+                        "reference":"max.mustermann@tmacdev.onmicrosoft.com",
+                        "isBackup":false
+                    }
+                ]
+            }
+        }
+    ]
+}
+```
+
+Please check the [Access Packages example.md](./TMF/internal/data/configuration/entitlementManagement/accessPackages/example.md) for further information.
+
+##### Access Package Resources <!-- omit in toc --> 
+Access Package Resources are directly defined in the depending Access Package definition.
 
 ##### Access Package Assignement Policies <!-- omit in toc -->
+Access Package Assignement Policies are directly defined the depending Access Package definition.
 
 ### 3.6.6. String mapping
+String mappings can help you with parameterization of your TMF configurations.
 
 You can create mappings between strings and the values they should be replaced with. Place the mappings in the *stringMappings.json* file in the *stringMappings* folder of your configuration.
+
 
 | Property    | Description                                                                                |
 |-------------|--------------------------------------------------------------------------------------------|
