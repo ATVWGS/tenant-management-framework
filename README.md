@@ -46,10 +46,10 @@ adding a source control
     - [3.4.5. Storing configurations](#345-storing-configurations)
   - [3.5. General functions](#35-general-functions)
     - [3.5.1. Load-TmfConfiguration - Load definition files from configurations](#351-load-tmfconfiguration---load-definition-files-from-configurations)
-    - [3.5.2. Show the loaded desired configuration](#352-show-the-loaded-desired-configuration)
+    - [3.5.2. Get-TmfDesiredConfiguration - Show the current desired configuration](#352-get-tmfdesiredconfiguration---show-the-current-desired-configuration)
     - [3.5.3. Test-Tmf* - Test definitions against Graph](#353-test-tmf---test-definitions-against-graph)
     - [3.5.4. Invoke-Tmf* - Perform actions against Graph](#354-invoke-tmf---perform-actions-against-graph)
-    - [3.5.5. Register-Tmf* - Add definitions temporary](#355-register-tmf---add-definitions-temporary)
+    - [3.5.5. Register-Tmf* - Add definitions temporarily](#355-register-tmf---add-definitions-temporarily)
   - [3.6. Resources types](#36-resources-types)
     - [3.6.1. Groups](#361-groups)
     - [3.6.2. Conditional Access Policies](#362-conditional-access-policies)
@@ -60,8 +60,7 @@ adding a source control
       - [3.6.5.2. Access Packages](#3652-access-packages)
     - [3.6.6. String mapping](#366-string-mapping)
   - [3.7. Examples](#37-examples)
-    - [3.7.1. Invoking a simple group](#371-invoking-a-simple-group)
-    - [3.7.2. Invoking a Conditional Access policy set](#372-invoking-a-conditional-access-policy-set)
+    - [3.7.1. Example: A Conditional Access policy set and the required groups](#371-example-a-conditional-access-policy-set-and-the-required-groups)
 
 # 3. Getting started
 ## 3.1. Installation
@@ -178,7 +177,6 @@ You can create new configuration by simple using the function *New-TmfConfigurat
 ```powershell
 PS> New-TmfConfiguration -Name "Example Configuration" -Description "This is an example configuration for the Tenant Management Framework!" -Author "Mustermann, Max" -Weight 50 -OutPath "$env:USERPROFILE\Desktop\Example_Configuration" -Force
 
-# Example output
 [16:02:04][New-TmfConfiguration] Creating configuration directory C:\Users\***REMOVED***\Desktop\Example_Configuration. [DONE]
 [16:02:04][New-TmfConfiguration] Copying template structure to C:\Users\***REMOVED***\Desktop\Example_Configuration. [DONE]
 [16:02:05][Activate-TmfConfiguration] Activating Example Configuration (C:\Users\***REMOVED***\Desktop\Example_Configuration\configuration.json). This configuration will be considered when applying Tenant configuration. [DONE]
@@ -197,7 +195,6 @@ This activation can simply be done using *Activate-TmfConfiguration*.
 ```powershell
 PS> Activate-TmfConfiguration "$env:USERPROFILE\Desktop\Example_Configuration" -Force
 
-# Example output
 [16:10:46][Activate-TmfConfiguration] Activating Example Configuration (C:\Users\***REMOVED***\Desktop\Example_Configuration\configuration.json). This configuration will be considered when applying Tenant configuration. [DONE]
 [16:10:46][Activate-TmfConfiguration] Sorting all activated configurations by weight. [DONE]
 ```
@@ -206,7 +203,6 @@ You can use *Get-TmfActiveConfiguration* to checkout all already activated confi
 ```powershell
 PS> Get-TmfActiveConfiguration
 
-# Example output
 Name         : Example Configuration
 Path         : C:\Users\***REMOVED***\Desktop\Example_Configuration
 Description  : This is an example configuration for the Tenant Management Framework!
@@ -221,7 +217,7 @@ Deactivate-TmfConfiguration -Name "Example Configuration" # By name
 Deactivate-TmfConfiguration -Path "$env:USERPROFILE\Desktop\Example_Configuration" # By path
 Deactivate-TmfConfiguration -All # Or all activated configurations!
 
-# Example output
+
 [16:18:08][Deactivate-TmfConfiguration] Deactivating Example Configuration. This configuration will not be considered when applying Tenant configuration. [DONE]
 ```
 
@@ -231,35 +227,332 @@ In our case we store multiple configurations (Default configuration, DEV configu
 
 ## 3.5. General functions
 ### 3.5.1. Load-TmfConfiguration - Load definition files from configurations
-### 3.5.2. Show the loaded desired configuration
+The *Load-TmfConfiguration* function checks all *.json* files from the activated configurations and registers them into a runtime store. Technically this is the same process as if you use a register function for a single resource type (eg. *Register-TmfGroup*). All loaded resource definitions are considered when using test or invoke functions.
+
+```powershell
+PS> Load-TmfConfiguration
+```
+
+### 3.5.2. Get-TmfDesiredConfiguration - Show the current desired configuration
+
+You can check the currently loaded desired configuration with *Get-TmfDesiredConfiguration*. This returns the desired configuration as a hashtable.
+
+```powershell
+PS> Get-TmfConfiguration
+
+Name                           Value
+----                           -----
+accessPackages                 {}
+groups                         {@{displayName=Some group; description=This is a security group; groupTypes=System.String[]; securityEnabled=True; mailEnabled=False; mailNickname=someGroupForMembers; present=True... 
+namedLocations                 {}
+accessPackageCatalogs          {}
+conditionalAccessPolicies      {}
+agreements                     {}
+stringMappings                 {}
+
+# You can also checkout single resource definitions
+PS> (Get-TmfDesiredConfiguration)["groups"]
+
+displayName     : Some group
+description     : This is a security group
+groupTypes      : {}
+securityEnabled : True
+mailEnabled     : False
+mailNickname    : someGroupForMembers
+present         : True
+sourceConfig    : Example Configuration
+owners          : {group.owner@volkswagen.de}
+members         : {max.mustermann@volkswagen.de}
+
+# Filtering is also possible with Where-Object
+(Get-TmfDesiredConfiguration)["groups"] | Where-Object {$_.displayName -eq "Some group"}
+
+displayName     : Some group
+description     : This is a security group
+groupTypes      : {}
+securityEnabled : True
+mailEnabled     : False
+mailNickname    : someGroupForMembers
+present         : True
+sourceConfig    : Example Configuration
+owners          : {group.owner@volkswagen.de}
+members         : {max.mustermann@volkswagen.de}
+```
+
 ### 3.5.3. Test-Tmf* - Test definitions against Graph
+It is possible to run tests for a single resource type, for an resouce type group (eg. Entitlement Management) or for a whole tenant.
+
+If you want to only test your configured groups, you can use *Test-TmfGroup*. This will only consider all definitions of the resource type "groups".
+
+```powershell
+PS> Test-TmfGroup
+
+ActionType           : Create
+ResourceType         : Group
+ResourceName         : Example group
+Changes              :
+Tenant               : TENANT_NAME
+TenantId             : d369908f-8803-46bc-90cb-3c82854ddf93
+DesiredConfiguration : @{displayName=Example group; description=This is an example security group; groupTypes=System.String[]; securityEnabled=True; mailEnabled=False; mailNickname=someGroupForMembers;
+                       present=True; sourceConfig=Example Configuration}
+GraphResource        :
+```
+
+The resource type specific test functions always return test result objects. These objects show you, which actions are required in your tenant, to achive the desired configuration.
+
+You can test all available resource types using *Test-TmfTenant*. The *Test-TmfTenant* function and also all resource type group (eg. *Test-TmfEntitlementManagement*) functions automatically beautify the test results.
+
+```powershell
+PS> Test-TmfTenant
+
+[20:35:51][Test-TmfTenant] Currently connected to <TENANT_NAME> (d369908f-XXXX-XXXX-90cb-3c82854ddf93)
+[20:35:52][Test-TmfTenant] Starting tests for groups
+[20:35:52][TMF] [Tenant: TENANT_NAME][Group Resource: Example group] Required Action (Create)
+```
+
+With *Beautify-TmfTestResult* you are able to beautify the results of any resouce type specific test command.
+
+```powershell
+PS> Test-TmfGroup | Beautify-TmfTestResult
+
+[20:37:34][TMF] [Tenant: TENANT_NAME][Group Resource: Example group] Required Action (Create)
+```
+
 ### 3.5.4. Invoke-Tmf* - Perform actions against Graph
-### 3.5.5. Register-Tmf* - Add definitions temporary
+The invoke functions are available for a single resource type, for a resouce type group (eg. Entitlement Management) or for the whole tenant. These functions are capable of creating, updating or deleting resources using Microsoft Graph. The executed actions depend on the results the test functions return.
+
+Example based on Access Packages:
+- *Invoke-TmfAccessPackage:* Only invokes actions for the defined Access Packages
+- *Invoke-TmfEntitlementManagement:* Invokes the required actions for Access Packages and also for all other resource types required for Entitlement Management.
+- *Invoke-TmfTenant*: Invokes the required actions for each resource type defined in your configurations.
+
+```powershell
+PS> Invoke-TmfGroup
+
+[20:44:17][Invoke-TmfGroup] [Tenant: TENANT_NAME][Group Resource: Example group] Required Action (Create)
+[20:44:17][Invoke-TmfGroup] [Tenant: TENANT_NAME][Group Resource: Example group] Completed.
+
+PS> Invoke-TmfTenant
+
+[20:49:46][Invoke-TmfTenant] Currently connected to TENANT_NAME (d369908f-8803-46bc-90cb-3c82854ddf93)
+Is this the correct tenant? [y/n]: y
+[20:49:48][Invoke-TmfTenant] Invoking groups
+[20:49:49][Invoke-TmfGroup] [Tenant: TENANT_NAME][Group Resource: Example group] Required Action (NoActionRequired)
+[20:49:49][Invoke-TmfGroup] [Tenant: TENANT_NAME][Group Resource: Example group] Completed.
+```
+
+### 3.5.5. Register-Tmf* - Add definitions temporarily
+You can use the register functions to manually register a resource definition. When registering a resource definition it will be added to the desired configuration. 
+
+A resource must be registered before the Tenant Management Framework can test it's configuration against the Tenant.
+
+*The displayName property must be uniqe in the desired configuration!* Resources are searched by the displayName.
+
 
 ## 3.6. Resources types
 The supported resources are based on the endpoints and resource types provided by [Microsoft Graph](https://developer.microsoft.com/en-us/graph).
 Most of the definition files use the json syntax that the API endpoint also uses.
 
 ### 3.6.1. Groups
+An example definition for a simple Azure AD security group with a predefined member and a predefined owner.
+
+```json
+{   
+    "displayName": "Some group",
+    "description": "This is a security group",
+    "groupTypes": [],        
+    "securityEnabled": true,
+    "mailEnabled": false,
+    "mailNickname": "someGroupForMembers",
+    "members": ["max.mustermann@volkswagen.de"],
+    "owners": ["group.owner@volkswagen.de"],
+    "present": true
+}
+```
+
+Please check the [Groups example.md](./TMF/internal/data/configuration/groups/example.md) for further information.
 
 ### 3.6.2. Conditional Access Policies
+An example policy definition that would affect all members of a group to accept ToU and and provide MFA.
+
+```json
+{
+    "displayName" : "Require MFA and ToU for all members of Some group",
+    "excludeGroups": ["Some group for CA"],
+    "excludeUsers": ["johannes.seitle@TENANT_NAME.onmicrosoft.com"],        
+    "includeApplications": ["All"],        
+    "includeLocations": ["All"],
+    "clientAppTypes": ["browser", "mobileAppsAndDesktopClients"],
+    "includePlatforms": ["All"],
+    "builtInControls": ["mfa"],
+    "operator": "AND",
+    "termsOfUse": ["ToU for Some group"],        
+    "state" : "enabledForReportingButNotEnforced",
+    "present" : true
+}
+```
+
+Please check the [Conditional Access Policy example.md](./TMF/internal/data/configuration/conditionalAccessPolicies/example.md) for further information.
 
 ### 3.6.3. Named Locations
+An example IP Named Location definition.
+
+```json
+{
+    "type": "ipNamedLocation",
+    "displayName": "Untrusted IP named location",
+    "isTrusted": false,
+    "ipRanges": [
+        {
+            "@odata.type": "#microsoft.graph.iPv4CidrRange",
+            "cidrAddress": "12.34.221.11/22"
+        },
+        {
+            "@odata.type": "#microsoft.graph.iPv6CidrRange",
+            "cidrAddress": "2001:0:9d38:90d6:0:0:0:0/63"
+        }
+    ],
+    "present": true
+}
+```
+
+Please check the [Named Location example.md](./TMF/internal/data/configuration/namedLocations/example.md) for further information.
 
 ### 3.6.4. Agreements (Terms of Use)
 
+An example Agreement definition with a single PDF file added.
+
+```json
+{
+  "displayName": "An example agreement with a single files",
+  "isViewingBeforeAcceptanceRequired": true,
+  "isPerDeviceAcceptanceRequired": false,
+  "userReacceptRequiredFrequency": "P90D",
+  "termsExpiration": {
+    "startDateTime": "05.03.2021 00:00:00",
+    "frequency": "PT1M"
+  },
+  "files": [
+    {
+      "fileName": "Example Terms of Use.pdf",
+      "language": "en",
+      "isDefault": true,
+      "filePath": "files/Example Terms of Use.pdf"
+    }
+  ],
+  "present": true
+}
+```
+
+Please check the [Agreements example.md](./TMF/internal/data/configuration/agreements/example.md) for further information.
+
 ### 3.6.5. Entitlement Management
+Entitlement Management can be done by the following resource types. For further information about Azure AD Entitlement Management you can read the official documentation: https://docs.microsoft.com/en-us/azure/active-directory/governance/entitlement-management-overview.
 
 #### 3.6.5.1. Access Package Catalogs
+A simple Access Package Catalog definition.
+
+```json
+{    
+    "displayName": "Access package catalog for testing",
+    "description": "Sample access package catalog",
+    "isExternallyVisible": false,
+    "present": true
+}
+```
+
+Please check the [Access Package Catalogs example.md](./TMF/internal/data/configuration/entitlementManagement/accessPackageCatalogs/example.md) for further information.
 
 #### 3.6.5.2. Access Packages
-##### Access Package Resources <!-- omit in toc -->
+
+```json
+{
+    "displayName":"Access Package",
+    "description":"Access Package description",
+    "isHidden":true,
+    "isRoleScopesVisible":true,
+    "catalog":"General",
+    "present":true,
+    "accessPackageResources":[
+        {
+            "resourceIdentifier":"Some group",
+            "resourceRole":"Member",
+            "originSystem":"AadGroup"
+        }
+    ],
+    "assignementPolicies":[
+        {
+            "displayName":"Initial policy",
+            "canExtend":false,
+            "durationInDays":8,
+            "accessReviewSettings":{
+                "isEnabled":false,
+                "recurrenceType":"monthly",
+                "reviewerType":"Reviewers",
+                "durationInDays":14,
+                "reviewers":[
+                    {
+                        "type":"singleUser",
+                        "reference":"max.mustermann@tmacdev.onmicrosoft.com",
+                        "isBackup":false
+                    },
+                    {
+                        "type":"requestorManager",
+                        "managerLevel":1,
+                        "isBackup":false
+                    }
+                ]
+            },
+            "requestApprovalSettings":{
+                "isApprovalRequired":true,
+                "isApprovalRequiredForExtension":false,
+                "isRequestorJustificationRequired":true,
+                "approvalMode":"SingleStage",
+                "approvalStages":[
+                    {
+                        "approvalStageTimeOutInDays":14,
+                        "isApproverJustificationRequired":true,
+                        "isEscalationEnabled":false,
+                        "escalationTimeInMinutes":11520,
+                        "primaryApprovers":[
+                            {
+                                "type":"singleUser",
+                                "reference":"johannes.seitle@tmacdev.onmicrosoft.com",
+                                "isBackup":false
+                            }
+                        ]
+                    }
+                ]
+            },
+            "requestorSettings":{
+                "scopeType":"SpecificDirectorySubjects",
+                "acceptRequests":true,
+                "allowedRequestors":[
+                    {
+                        "type":"singleUser",
+                        "reference":"max.mustermann@tmacdev.onmicrosoft.com",
+                        "isBackup":false
+                    }
+                ]
+            }
+        }
+    ]
+}
+```
+
+Please check the [Access Packages example.md](./TMF/internal/data/configuration/entitlementManagement/accessPackages/example.md) for further information.
+
+##### Access Package Resources <!-- omit in toc --> 
+Access Package Resources are directly defined in the depending Access Package definition.
 
 ##### Access Package Assignement Policies <!-- omit in toc -->
+Access Package Assignement Policies are directly defined the depending Access Package definition.
 
 ### 3.6.6. String mapping
+String mappings can help you with parameterization of your TMF configurations.
 
 You can create mappings between strings and the values they should be replaced with. Place the mappings in the *stringMappings.json* file in the *stringMappings* folder of your configuration.
+
 
 | Property    | Description                                                                                |
 |-------------|--------------------------------------------------------------------------------------------|
@@ -273,7 +566,8 @@ You can create mappings between strings and the values they should be replaced w
 }
 ```
 
-Currently not all resource properties are considered. All string properties on the first level are replaced.
+Currently not all resource properties are considered. All string properties on the first level are replaced. String mappings also work when resolving users (eg. group owners or members), groups (in CA policies), applications (in CA Policies), namedLocations (in CA policies), agreements (in CA policies), accessPackages, accessPackageCatalogs, accessPackageResources, accessPackageAssignementPolicies.
+
 | Resource       | Supported properties                                                                       |
 |----------------|--------------------------------------------------------------------------------------------|
 | agreements     | displayName, userReacceptRequiredFrequency                                                 |
@@ -298,5 +592,69 @@ To use the string mapping in a configuration file, you need to mention it by the
 ```
 
 ## 3.7. Examples
-### 3.7.1. Invoking a simple group
-### 3.7.2. Invoking a Conditional Access policy set
+### 3.7.1. Example: A Conditional Access policy set and the required groups
+First of all you need to create a new configuration using *New-TmfConfiguration*
+```powershell
+New-TmfConfiguration -Name "Simple Group Example" -Author "Mustermann, Max" -Weight 50 -OutPath "$env:USERPROFILE\Desktop\Simple_Group_Example" -Force
+```
+After that you need to add the definition for the include group into your configuration. We will include this group into our Conditional Access Policy. Just place the definition it into the *groups/groups.json* file in your newly created configuration.
+
+The *groups.json* should now look like that.
+```json
+[
+  {   
+      "displayName": "Some group to include into Conditional Access",
+      "description": "This is a simple security group", 
+      "securityEnabled": true,
+      "mailEnabled": false,
+      "mailNickname": "someGroupForConditionalAccess",
+      "present": true
+  }
+]
+```
+The same is possible for the exclude group. Just add an additional group definition.
+```json
+[
+  {   
+      "displayName": "Some group to include into Conditional Access",
+      "description": "This is a simple security group", 
+      "securityEnabled": true,
+      "mailEnabled": false,
+      "mailNickname": "someGroupIncludeConditionalAccess",
+      "present": true
+  },
+  {   
+      "displayName": "Some group to exclude from Conditional Access",
+      "description": "This is a simple security group", 
+      "securityEnabled": true,
+      "mailEnabled": false,
+      "mailNickname": "someGroupExcludeConditionalAccess",
+      "present": true
+  }
+]
+```
+The required groups are now defined. Finally we can define our Conditional Access Policy. For this example we just want MFA required for all members of the group *Some group to include into Conditional Access*.
+
+You can add the following example Conditional Access Policy definition to *conditionalAccessPolicies/policies.json*.
+
+```json
+{
+    "displayName" : "An example Conditional Access Policy",
+    "excludeGroups": ["Some group to include into Conditional Access"],
+    "excludeGroups": ["Some group to exclude from Conditional Access"],        
+    "includeApplications": ["All"],        
+    "includeLocations": ["All"],
+    "clientAppTypes": ["browser", "mobileAppsAndDesktopClients"],
+    "includePlatforms": ["All"],
+    "builtInControls": ["mfa"],
+    "operator": "AND",
+    "state" : "enabled",
+    "present" : true
+}
+```
+
+Now that all required resource are defined, we can invoke the required actions. Simply use *Invoke-TmfTenant* to do the actions directly or use *Test-TmfTenant* to only test the configuration without changing anything.
+
+```powershell
+Invoke-TmfTenant
+```
