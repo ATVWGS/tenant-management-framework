@@ -60,8 +60,7 @@ adding a source control
       - [3.6.5.2. Access Packages](#3652-access-packages)
     - [3.6.6. String mapping](#366-string-mapping)
   - [3.7. Examples](#37-examples)
-    - [3.7.1. Example: Invoking a simple group](#371-example-invoking-a-simple-group)
-    - [3.7.2. Example: a Conditional Access policy set with the required groups](#372-example-a-conditional-access-policy-set-with-the-required-groups)
+    - [3.7.1. Example: A Conditional Access policy set and the required groups](#371-example-a-conditional-access-policy-set-and-the-required-groups)
 
 # 3. Getting started
 ## 3.1. Installation
@@ -389,7 +388,7 @@ An example policy definition that would affect all members of a group to accept 
     "operator": "AND",
     "termsOfUse": ["ToU for Some group"],        
     "state" : "enabledForReportingButNotEnforced",
-    "present" : false
+    "present" : true
 }
 ```
 
@@ -567,7 +566,8 @@ You can create mappings between strings and the values they should be replaced w
 }
 ```
 
-Currently not all resource properties are considered. All string properties on the first level are replaced.
+Currently not all resource properties are considered. All string properties on the first level are replaced. String mappings also work when resolving users (eg. group owners or members), groups (in CA policies), applications (in CA Policies), namedLocations (in CA policies), agreements (in CA policies), accessPackages, accessPackageCatalogs, accessPackageResources, accessPackageAssignementPolicies.
+
 | Resource       | Supported properties                                                                       |
 |----------------|--------------------------------------------------------------------------------------------|
 | agreements     | displayName, userReacceptRequiredFrequency                                                 |
@@ -592,5 +592,69 @@ To use the string mapping in a configuration file, you need to mention it by the
 ```
 
 ## 3.7. Examples
-### 3.7.1. Example: Invoking a simple group
-### 3.7.2. Example: a Conditional Access policy set with the required groups
+### 3.7.1. Example: A Conditional Access policy set and the required groups
+First of all you need to create a new configuration using *New-TmfConfiguration*
+```powershell
+New-TmfConfiguration -Name "Simple Group Example" -Author "Mustermann, Max" -Weight 50 -OutPath "$env:USERPROFILE\Desktop\Simple_Group_Example" -Force
+```
+After that you need to add the definition for the include group into your configuration. We will include this group into our Conditional Access Policy. Just place the definition it into the *groups/groups.json* file in your newly created configuration.
+
+The *groups.json* should now look like that.
+```json
+[
+  {   
+      "displayName": "Some group to include into Conditional Access",
+      "description": "This is a simple security group", 
+      "securityEnabled": true,
+      "mailEnabled": false,
+      "mailNickname": "someGroupForConditionalAccess",
+      "present": true
+  }
+]
+```
+The same is possible for the exclude group. Just add an additional group definition.
+```json
+[
+  {   
+      "displayName": "Some group to include into Conditional Access",
+      "description": "This is a simple security group", 
+      "securityEnabled": true,
+      "mailEnabled": false,
+      "mailNickname": "someGroupIncludeConditionalAccess",
+      "present": true
+  },
+  {   
+      "displayName": "Some group to exclude from Conditional Access",
+      "description": "This is a simple security group", 
+      "securityEnabled": true,
+      "mailEnabled": false,
+      "mailNickname": "someGroupExcludeConditionalAccess",
+      "present": true
+  }
+]
+```
+The required groups are now defined. Finally we can define our Conditional Access Policy. For this example we just want MFA required for all members of the group *Some group to include into Conditional Access*.
+
+You can add the following example Conditional Access Policy definition to *conditionalAccessPolicies/policies.json*.
+
+```json
+{
+    "displayName" : "An example Conditional Access Policy",
+    "excludeGroups": ["Some group to include into Conditional Access"],
+    "excludeGroups": ["Some group to exclude from Conditional Access"],        
+    "includeApplications": ["All"],        
+    "includeLocations": ["All"],
+    "clientAppTypes": ["browser", "mobileAppsAndDesktopClients"],
+    "includePlatforms": ["All"],
+    "builtInControls": ["mfa"],
+    "operator": "AND",
+    "state" : "enabled",
+    "present" : true
+}
+```
+
+Now that all required resource are defined, we can invoke the required actions. Simply use *Invoke-TmfTenant* to do the actions directly or use *Test-TmfTenant* to only test the configuration without changing anything.
+
+```powershell
+Invoke-TmfTenant
+```
