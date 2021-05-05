@@ -6,6 +6,8 @@
 		.DESCRIPTION
 			Loads the JSON files from the activated configurations.
 			All object definitions are stored in runtime variables.
+		.PARAMETER ReturnDesiredConfiguration
+			Returns the desired configuration after loading from activated configurations.
 	#>
 	[CmdletBinding()]
 	Param (
@@ -31,10 +33,10 @@
 				if (-Not $script:desiredConfiguration.ContainsKey($resourceDirectory.Name)) {
 					$script:desiredConfiguration[$resourceDirectory.Name] = @()
 				}				
-				Get-ChildItem -Path $resourceDirectory.FullName -File -Filter "*.json" | foreach {
+				Get-ChildItem -Path $resourceDirectory.FullName -File -Filter "*.json" | ForEach-Object {
 					$content = Get-Content $_.FullName | ConvertFrom-Json
 					if ($content.count -gt 0) {
-						$content | foreach {
+						$content | Foreach-Object {
 							$resource = $_ | Add-Member -NotePropertyMembers @{sourceConfig = $configuration.Name} -PassThru | ConvertTo-PSFHashtable -Include $($script:supportedResources[$resourceDirectory.Name]["registerFunction"].Parameters.Keys)
 							# Calls the Register-Tmf(.*) function
 							& $script:supportedResources[$resourceDirectory.Name]["registerFunction"] @resource -Cmdlet $PSCmdlet

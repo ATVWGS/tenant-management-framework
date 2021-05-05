@@ -1,13 +1,26 @@
 ﻿function Activate-TmfConfiguration
 {
 	<#
+		.SYNOPSIS
+			Activates already created TMF configurations.
+
+		.DESCRIPTION
+			Activate configurations you want to apply to your tenant. An activated configuration will be considered when testing or invoking configurations.
+
 		.PARAMETER ConfigurationPaths
 			One or more paths to Tenant Management Framework configuration directories can be provided.
+
 		.PARAMETER Force
 			Overwrite already loaded configurations.
+
 		.PARAMETER DoNotLoad
 			Do not load resource definitions after activating.
-	
+
+		.EXAMPLE
+			PS> Activate-TmfConfiguration -ConfigurationPaths "C:\Temp\SomeConfiguration"
+			
+			Activates the configuration in path C:\Temp\SomeConfiguration.
+
 	#>
 	[CmdletBinding()]
 	Param (
@@ -36,7 +49,7 @@
 			}
 
 			$contentDummy = Get-Content $configuration.filePath | ConvertFrom-Json -ErrorAction Stop
-			$contentDummy | Get-Member -MemberType NoteProperty | foreach {
+			$contentDummy | Get-Member -MemberType NoteProperty | ForEach-Object {
 				Add-Member -InputObject $configuration -MemberType NoteProperty -Name $_.Name -Value $contentDummy.$($_.Name)
 			}
 			$configuration.alreadyActivated = $script:activatedConfigurations.Name -contains $configuration.Name
@@ -63,7 +76,7 @@
 			}
 
 			Write-PSFMessage -Level Host -String "Activate-TMFConfiguration.Activating" -StringValues $configuration.Name, $configuration.filePath -NoNewLine			
-			$script:activatedConfigurations += $configuration | select Name, @{Name = "Path"; Expression = {$_.directoryPath}}, Description, Author, Weight, Prerequisite
+			$script:activatedConfigurations += $configuration | Select-Object Name, @{Name = "Path"; Expression = {$_.directoryPath}}, Description, Author, Weight, Prerequisite
 			Write-PSFHostColor -String ' [<c="green">DONE</c>]'
 		}
 

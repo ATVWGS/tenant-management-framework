@@ -2,11 +2,11 @@
 {
 	<#
 		.SYNOPSIS
-			Creates a empty Tenant configuration.
+			Creates a empty TMF Tenant configuration.
 		
 		.DESCRIPTION
-			Creates a empty Tenant configuration.
-			A Tenant configuration contains definitions for resources. Also Tenant settings can be defined in configuration files.
+			Creates a empty TMF Tenant configuration.
+			A configuration contains definitions for resources.
 		
 		.PARAMETER OutPath
 			Where to create the configuration. Any path is possible.
@@ -16,6 +16,23 @@
 
 		.PARAMETER DoNotAutoActivate
 			Do not automatically activate configuration after creation.
+
+		.PARAMETER Name
+			The name of the new configuration.
+
+		.PARAMETER Description
+			A description for the configuration. For example to explain which tenants this configuration should be applied to.
+		
+		.PARAMETER Weight
+			The weight of the configuration. This is considered when loading the desired configuration.
+			Configurations with a higher weight overwrite configurations (If they have resources with the same displayName or name) that have been loaded earlier.
+
+		.PARAMETER Author
+			Define who created this configuration or who is responsible for changes.
+		
+		.PARAMETER Prerequisite
+			On which other configurations this configuration depends.
+
 	#>
 	[CmdletBinding()]
 	Param (

@@ -1,6 +1,22 @@
 ﻿function Invoke-TmfTenant
 {
+	<#
+		.SYNOPSIS
+			Invoke required actions for all configured resources.
+		
+		.DESCRIPTION
+			This command applies the desired configuration to the Tenant you are connected to.
+			You can connect to a Tenant using Connect-MgGraph.
+
+		.PARAMETER Exclude
+			Exclude resources from invoking.
+			For example: -Exclude groups, users
+
+		.PARAMETER DoNotRequireTenantConfirm
+			Do not ask for confirmation when invoking configurations.
+	#>
 	Param (
+		[ValidateSet({$script:supportedResources.Keys()})]
 		[string[]] $Exclude,
 		[switch] $DoNotRequireTenantConfirm
 	)

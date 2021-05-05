@@ -1,20 +1,15 @@
 ﻿function Get-TmfDesiredConfiguration
 {
+	<#
+		.SYNOPSIS
+			Returns currently loaded desired configurations.
+	#>
 	[CmdletBinding()]
-	Param (
-	
+	Param (	
 	)
 	
-	begin
-	{
-		
-	}
 	process
 	{
 		return $script:desiredConfiguration
-	}
-	end
-	{
-	
 	}
 }
