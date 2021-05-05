@@ -50,5 +50,5 @@ stages:
           command: 'push'
           packagesToPush: '$(Pipeline.Workspace)/**/*.nupkg'
           nuGetFeedType: 'internal'
-          feedsToUse: 'config'
-          nugetConfigPath: '$(System.DefaultWorkingDirectory)/nuget.config'
+          publishVstsFeed: 'Tenant Management as Code/tmf-release'
+          allowPackageConflicts: true
