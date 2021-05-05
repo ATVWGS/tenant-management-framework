@@ -17,10 +17,9 @@ Param(
     [string] $modulePath = "$PSScriptRoot\..\TMF"
 )
 
+#region Update module manifest
 $manifestPath = Join-Path -Path $modulePath -ChildPath "$moduleName.psd1"
-
-## Update build version in manifest
 $manifestContent = Get-Content -Path $manifestPath -Raw
 $manifestContent = $manifestContent -replace "ModuleVersion = '[\d]+.[\d]+.[\d]+'", ("ModuleVersion = '{0}'" -f $buildVersion)
-
 $manifestContent | Set-Content -Path $manifestPath
+#endregion
