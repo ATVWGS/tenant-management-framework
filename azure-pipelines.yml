@@ -52,4 +52,3 @@ stages:
           nuGetFeedType: 'internal'
           feedsToUse: 'config'
           nugetConfigPath: '$(System.DefaultWorkingDirectory)/nuget.config'
-          publishVstsFeed: '$(releaseFeed)'
