@@ -32,7 +32,7 @@ function Register-TmfAccessPackageResource
 		}
 
 		if ($script:desiredConfiguration[$resourceName].displayName -contains $displayName) {			
-			$alreadyLoaded = $script:desiredConfiguration[$resourceName] | ? {$_.displayName -eq $displayName}
+			$alreadyLoaded = $script:desiredConfiguration[$resourceName] | Where-Object {$_.displayName -eq $displayName}
 		}
 
 	}

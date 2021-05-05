@@ -1,5 +1,9 @@
 ﻿function Invoke-TmfConditionalAccessPolicy
 {
+	<#
+		.SYNOPSIS
+			Performs the required actions for a resource type against the connected Tenant.
+	#>
 	[CmdletBinding()]
 	Param (
 		[System.Management.Automation.PSCmdlet]
@@ -59,7 +63,7 @@
 									$requestBody["conditions"][$conditionChildProperty][$property] = @($result.DesiredConfiguration.$property)
 								}
 								else {
-									$requestBody["conditions"][$conditionChildProperty][$property] = @($result.DesiredConfiguration.$property | foreach { & $resolveFunctionMapping[$conditionPropertyMatch.Groups[2].Value] -InputReference $_})								
+									$requestBody["conditions"][$conditionChildProperty][$property] = @($result.DesiredConfiguration.$property | ForEach-Object { & $resolveFunctionMapping[$conditionPropertyMatch.Groups[2].Value] -InputReference $_})								
 								}								
 							}
 							elseif ($property -in @("clientAppTypes", "signInRiskLevels", "userRiskLevels")) {

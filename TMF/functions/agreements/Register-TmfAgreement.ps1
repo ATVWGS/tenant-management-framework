@@ -28,7 +28,7 @@
 		}
 
 		if ($script:desiredConfiguration[$resourceName].displayName -contains $displayName) {			
-			$alreadyLoaded = $script:desiredConfiguration[$resourceName] | ? {$_.displayName -eq $displayName}
+			$alreadyLoaded = $script:desiredConfiguration[$resourceName] | Where-Object {$_.displayName -eq $displayName}
 		}
 	}
 	process
@@ -43,7 +43,7 @@
 			sourceConfig = $sourceConfig
 		}
 		
-		"userReacceptRequiredFrequency", "termsExpiration", "files" | foreach {
+		"userReacceptRequiredFrequency", "termsExpiration", "files" | ForEach-Object {
 			if ($PSBoundParameters.ContainsKey($_)) {			
 				Add-Member -InputObject $object -MemberType NoteProperty -Name $_ -Value $PSBoundParameters[$_]
 			}

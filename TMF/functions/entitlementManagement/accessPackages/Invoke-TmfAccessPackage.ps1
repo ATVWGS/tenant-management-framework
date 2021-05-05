@@ -1,5 +1,9 @@
 function Invoke-TmfAccessPackage
 {
+	<#
+		.SYNOPSIS
+			Performs the required actions for a resource type against the connected Tenant.
+	#>
 	[CmdletBinding()]
 	Param (
 		[System.Management.Automation.PSCmdlet]
@@ -102,7 +106,7 @@ function Invoke-TmfAccessPackage
 											$method = "POST"
 											$change.Actions[$action] | Foreach-Object {
 												$roleOriginId = $_
-												$roleScope = $result.DesiredConfiguration.accessPackageResourceRoleScopes | ? {$_.roleOriginId() -eq $roleOriginId}
+												$roleScope = $result.DesiredConfiguration.accessPackageResourceRoleScopes | Where-Object {$_.roleOriginId() -eq $roleOriginId}
 												$body = @{
 													"accessPackageResourceRole" = @{
 														"originId" = $roleScope.roleOriginId()

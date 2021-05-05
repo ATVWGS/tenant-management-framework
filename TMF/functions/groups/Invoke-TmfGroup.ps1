@@ -38,12 +38,12 @@
 					try {
 						if ($result.DesiredConfiguration.Properties() -contains "members") {
 							if ($result.DesiredConfiguration.members.count -gt 0) {
-								$requestBody["members@odata.bind"] = @($result.DesiredConfiguration.members | foreach {"$script:graphBaseUrl/users/{0}" -f (Resolve-User -InputReference $_ -Cmdlet $Cmdlet)})
+								$requestBody["members@odata.bind"] = @($result.DesiredConfiguration.members | ForEach-Object {"$script:graphBaseUrl/users/{0}" -f (Resolve-User -InputReference $_ -Cmdlet $Cmdlet)})
 							}
 						}
 						if ($result.DesiredConfiguration.Properties() -contains "owners") {
 							if ($result.DesiredConfiguration.owners.count -gt 0) {
-								$requestBody["owners@odata.bind"] = @($result.DesiredConfiguration.owners | foreach {"$script:graphBaseUrl/users/{0}" -f (Resolve-User -InputReference $_ -Cmdlet $Cmdlet)})
+								$requestBody["owners@odata.bind"] = @($result.DesiredConfiguration.owners | ForEach-Object-Object {"$script:graphBaseUrl/users/{0}" -f (Resolve-User -InputReference $_ -Cmdlet $Cmdlet)})
 							}							
 						}
 						if ($result.DesiredConfiguration.Properties() -contains "membershipRule") {
@@ -85,7 +85,7 @@
 											"Add" {
 												$url = "$script:graphBaseUrl/groups/{0}/members/`$ref" -f $result.GraphResource.Id
 												$method = "POST"
-												$change.Actions[$action] | foreach {													
+												$change.Actions[$action] | ForEach-Object {													
 													$body = @{ "@odata.id" = "$script:graphBaseUrl/users/{0}" -f $_ } | ConvertTo-Json -ErrorAction Stop
 													Write-PSFMessage -Level Verbose -String "TMF.Invoke.SendingRequestWithBody" -StringValues $method, $url, $body
 													Invoke-MgGraphRequest -Method $method -Uri $url -Body $body
@@ -93,7 +93,7 @@
 											}
 											"Remove" {												
 												$method = "DELETE"
-												$change.Actions[$action] | foreach {
+												$change.Actions[$action] | ForEach-Object {
 													$url = "$script:graphBaseUrl/groups/{0}/members/{1}/`$ref" -f $result.GraphResource.Id, $_
 													Write-PSFMessage -Level Verbose -String "TMF.Invoke.SendingRequest" -StringValues $method, $url
 													Invoke-MgGraphRequest -Method $method -Uri $url
@@ -108,7 +108,7 @@
 											"Add" {
 												$url = "$script:graphBaseUrl/groups/{0}/owners/`$ref" -f $result.GraphResource.Id
 												$method = "POST"
-												$change.Actions[$action] | foreach {													
+												$change.Actions[$action] | ForEach-Object {													
 													$body = @{ "@odata.id" = "$script:graphBaseUrl/users/{0}" -f $_ } | ConvertTo-Json -ErrorAction Stop
 													Write-PSFMessage -Level Verbose -String "TMF.Invoke.SendingRequestWithBody" -StringValues $method, $url, $body
 													Invoke-MgGraphRequest -Method $method -Uri $url -Body $body
@@ -116,7 +116,7 @@
 											}
 											"Remove" {												
 												$method = "DELETE"
-												$change.Actions[$action] | foreach {
+												$change.Actions[$action] | ForEach-Object {
 													$url = "$script:graphBaseUrl/groups/{0}/owners/{1}/`$ref" -f $result.GraphResource.Id, $_
 													Write-PSFMessage -Level Verbose -String "TMF.Invoke.SendingRequest" -StringValues $method, $url
 													Invoke-MgGraphRequest -Method $method -Uri $url

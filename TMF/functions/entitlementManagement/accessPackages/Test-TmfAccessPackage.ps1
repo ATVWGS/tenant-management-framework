@@ -1,5 +1,12 @@
 function Test-TmfAccessPackage
 {
+	<#
+		.SYNOPSIS
+			Test desired configuration against a Tenant.
+		.DESCRIPTION
+			Compare current configuration of a resource type with the desired configuration.
+			Return a result object with the required changes and actions.
+	#>
 	[CmdletBinding()]
 	Param (
 		[System.Management.Automation.PSCmdlet]
@@ -61,10 +68,10 @@ function Test-TmfAccessPackage
 									if ($compare) {
 										$change.Actions = @{}
 										if ($compare.SideIndicator -contains "=>" -and -not $ReturnSetAction) {
-											$change.Actions["Add"] = ($compare | ? {$_.SideIndicator -eq "=>"}).InputObject
+											$change.Actions["Add"] = ($compare | Where-Object {$_.SideIndicator -eq "=>"}).InputObject
 										}
 										if ($compare.SideIndicator -contains "<=" -and -not $ReturnSetAction) {
-											$change.Actions["Remove"] = ($compare | ? {$_.SideIndicator -eq "<="}).InputObject
+											$change.Actions["Remove"] = ($compare | Where-Object {$_.SideIndicator -eq "<="}).InputObject
 										}
 									}									
 								}

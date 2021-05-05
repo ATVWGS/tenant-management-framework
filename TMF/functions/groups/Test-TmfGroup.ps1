@@ -1,5 +1,12 @@
 ﻿function Test-TmfGroup
 {
+	<#
+		.SYNOPSIS
+			Test desired configuration against a Tenant.
+		.DESCRIPTION
+			Compare current configuration of a resource type with the desired configuration.
+			Return a result object with the required changes and actions.
+	#>
 	[CmdletBinding()]
 	Param (
 		[System.Management.Automation.PSCmdlet]
@@ -43,7 +50,7 @@
 					$result["GraphResource"] = $resource
 					if ($definition.present) {
 						$changes = @()
-						foreach ($property in ($definition.Properties() | ? {$_ -notin "displayName", "present", "sourceConfig"})) {
+						foreach ($property in ($definition.Properties() | Where-Object {$_ -notin "displayName", "present", "sourceConfig"})) {
 							$change = [PSCustomObject] @{
 								Property = $property
 								Actions = $null
@@ -52,13 +59,13 @@
 								"members" {
 									$resourceMembers = (Invoke-MgGraphRequest -Method GET -Uri ("$script:graphBaseUrl/groups/{0}/members" -f $resource.Id)).Value.Id
 									$change.Actions = Compare-ResourceList -ReferenceList $resourceMembers `
-														-DifferenceList $($definition.members | foreach {Resolve-User -InputReference $_ -Cmdlet $Cmdlet}) `
+														-DifferenceList $($definition.members | ForEach-Object {Resolve-User -InputReference $_ -Cmdlet $Cmdlet}) `
 														-Cmdlet $PSCmdlet
 								}
 								"owners" {									
 									$resourceOwners = (Invoke-MgGraphRequest -Method GET -Uri ("$script:graphBaseUrl/groups/{0}/owners" -f $resource.Id)).Value.Id
 									$change.Actions = Compare-ResourceList -ReferenceList $resourceOwners `
-														-DifferenceList $($definition.owners | foreach {Resolve-User -InputReference $_ -Cmdlet $Cmdlet}) `
+														-DifferenceList $($definition.owners | ForEach-Object {Resolve-User -InputReference $_ -Cmdlet $Cmdlet}) `
 														-Cmdlet $PSCmdlet
 								}
 								"membershipRule" {

@@ -32,7 +32,7 @@
 						"displayName" = $result.DesiredConfiguration.displayName
 					}
 					try {
-						"ipRanges", "countriesAndRegions", "isTrusted", "includeUnknownCountriesAndRegions" | foreach {
+						"ipRanges", "countriesAndRegions", "isTrusted", "includeUnknownCountriesAndRegions" | ForEach-Object {
 							if ($result.DesiredConfiguration.Properties() -contains "$_") {
 								$requestBody[$_] = $result.DesiredConfiguration.$_
 							}
