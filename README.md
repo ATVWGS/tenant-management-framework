@@ -12,6 +12,8 @@ delete resources or settings via the Microsoft Graph API. The module provides si
 Powershell cmdlets to deploy and manage a set of predefined configuration files. The basic idea is
 based on the [Active Directory Management Framework](https://admf.one>).
 
+![Showcase](./assets/images/showcase.gif)
+
 ## 1.1. Goals
 - Deliver a PowershellModule with standardized
 commands to deploy Tenant configurations
