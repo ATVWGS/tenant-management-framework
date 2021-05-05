@@ -1,0 +1,9 @@
+<?xml version="1.0"?>
+<package>
+    <metadata>
+        <id>TMF</id>
+        <version>$VERSIONHERE$</version>
+        <authors>Johannes Seitle</authors>
+        <description>The Tenant Management Framework is a Powershell module that is able to create, update and delete resources or settings via the Microsoft Graph API.</description>
+    </metadata>
+</package>
