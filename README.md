@@ -4,6 +4,8 @@ Tenant Management Framework <!-- omit in toc -->
 ===========================
 *by [Volkswagen Group Services GmbH](https://volkswagen-groupservices.com)*
 
+[![Build Status](https://dev.azure.com/VWADO/Tenant%20Management%20as%20Code/_apis/build/status/Tenant%20Management%20Framework?branchName=main)](https://dev.azure.com/VWADO/Tenant%20Management%20as%20Code/_build/latest?definitionId=13&branchName=main)
+
 # 1. Introduction 
 The Tenant Management Framework is a Powershell module that is able to create, update and
 delete resources or settings via the Microsoft Graph API. The module provides simple
@@ -36,6 +38,7 @@ adding a source control
 - [2. Table of contents](#2-table-of-contents)
 - [3. Getting started](#3-getting-started)
   - [3.1. Installation](#31-installation)
+    - [3.1.1. Installation with Install-Module](#311-installation-with-install-module)
   - [3.2. Importing](#32-importing)
   - [3.3. Authentication](#33-authentication)
   - [3.4. Configurations](#34-configurations)
@@ -64,15 +67,43 @@ adding a source control
 
 # 3. Getting started
 ## 3.1. Installation
-Currently we only deliver the module as a *.zip* file. Just unpack everything into one of your module directories. (eg. C:\Users\$env:USERNAME\Documents\WindowsPowerShell\Modules)
-The module folder must be called TMF, otherwise the Powershell function "Import-Module" will not work.
+Currently we deliver the module as a NuGet package. It is possible to directly download it from the [*Tenant Management as Code/tmf-release*](https://dev.azure.com/VWADO/Tenant%20Management%20as%20Code/_packaging?_a=feed&feed=tmf-release) feed and install it using *Install-Package tmf.X.X.X.nupkg*.
 
-It is also possible to just clone the repository.
+You can also attach the feed as local Powershell module repository. For this please follow [3.1.1 Installation with Install-Module](#311-installation-with-install-module).
+
+Cloning the repository is working too. Just copy the TMF folder directly into one of your module directories.
 ```bash
 git clone https://VWADO@dev.azure.com/VWADO/Tenant%20Management%20as%20Code/_git/Tenant%20Management%20Framework "Tenant Management Framework"
 ```
 
 Checkout <https://docs.microsoft.com/de-de/powershell/scripting/developer/module/installing-a-powershell-module?view=powershell-7.1> for further information.
+
+### 3.1.1. Installation with Install-Module
+First of all you need to create a Private Access Token for your account. The PAT at least requires "Packaging: Read" permissions. You can follow the following tutorial.
+https://docs.microsoft.com/de-de/azure/devops/organizations/accounts/use-personal-access-tokens-to-authenticate?view=azure-devops&tabs=preview-page#create-a-pat
+
+After that we can create a credentials variable in our Powershell session. Please provide your PAT and sign-in mail address.
+
+```powershell
+$patToken = "YOUR PERSONAL ACCESS TOKEN" | ConvertTo-SecureString -AsPlainText -Force
+$credsAzureDevopsServices = New-Object System.Management.Automation.PSCredential("YOUR EMAIL", $patToken)
+```
+
+With that credentials we are able to register a new PSRepository.
+
+```powershell
+Register-PSRepository -Name "tmf-release" -SourceLocation "https://pkgs.dev.azure.com/VWADO/be17a77c-fbfa-4536-8aa1-f05270395154/_packaging/tmf-release/nuget/v2/" -InstallationPolicy Trusted -Credential $credsAzureDevopsServices
+```
+
+And finally we can install TMF using Install-Module.
+```powershell
+Install-Module -Name TMF -Repository tmf-release -Scope CurrentUser -Credential $credsAzureDevopsServices
+```
+
+An update of an old installation is also possible with *Update-Module*.
+```powershell
+Update-Module TMF -Credential $credsAzureDevopsServices
+```
 
 ## 3.2. Importing
 You can simply import the module using *Import-Module TMF* if the module has been placed in one of your module directory. (Checkout $env:PSModulePath)
