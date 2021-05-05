@@ -1,0 +1,53 @@
+trigger:
+  - main
+
+name: '[Build and Publish] Tenant Management Framework'
+
+variables:
+  major: 0
+  minor: 0
+  patch: $(Build.BuildID)
+  moduleName: 'TMF'
+  releaseFeed: 'tmf-release'
+  buildVer: $(major).$(minor).$(Build.BuildID)
+
+pool:
+  vmImage: "ubuntu-latest"
+
+stages:
+- stage: Build
+  jobs:
+  - job: Build
+    steps:
+    - task: PowerShell@2
+      inputs:
+        filePath: '$(System.DefaultWorkingDirectory)/build/build.ps1'
+        arguments: '-moduleName $(moduleName)'
+    - task: NuGetCommand@2
+      inputs:
+        command: 'pack'
+        packagesToPack: '$(System.DefaultWorkingDirectory)/$(moduleName)/$(moduleName).nuspec'
+        versioningScheme: byEnvVar
+        versionEnvVar: buildVer
+        buildProperties: 'VERSIONHERE=$(buildVer)'
+    - task: PublishBuildArtifacts@1
+      inputs:
+        PathtoPublish: '$(Build.ArtifactStagingDirectory)'
+        ArtifactName: 'NuGetPackage'
+        publishLocation: 'Container'
+- stage: Deploy
+  jobs:
+  - job: Deploy
+    steps:
+      - task: DownloadPipelineArtifact@2
+        inputs:
+          buildType: 'current'
+          artifactName: 'NuGetPackage'
+          itemPattern: '**'
+          targetPath: '$(Pipeline.Workspace)'
+      - task: NuGetCommand@2
+        inputs:
+          command: 'push'
+          packagesToPush: '$(Pipeline.Workspace)/**/*.nupkg'
+          nuGetFeedType: 'internal'
+          publishVstsFeed: $(releaseFeed)
