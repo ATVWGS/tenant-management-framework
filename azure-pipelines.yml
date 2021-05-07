@@ -1,7 +1,12 @@
 trigger:
-  - main
+  branches:
+    include:
+      - main
+  paths:
+    include:
+      - TMF
 
-name: '[Build and Publish] Tenant Management Framework'
+name: '[Build and Deploy] Tenant Management Framework'
 
 variables:
   major: 0
