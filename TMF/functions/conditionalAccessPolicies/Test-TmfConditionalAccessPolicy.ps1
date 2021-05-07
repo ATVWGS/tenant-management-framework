@@ -46,7 +46,7 @@
 				DesiredConfiguration = $definition
 			}
 
-			$resource = (Invoke-MgGraphRequest -Method GET -Uri ("$script:graphBaseUrl/identity/conditionalAccess/policies?`$filter=displayName eq '{0}'" -f $definition.displayName)).Value
+			$resource = (Invoke-MgGraphRequest -Method GET -Uri ("$script:graphBaseUrl/identity/conditionalAccess/policies?`$filter=displayName eq '{0}'" -f [System.Web.HttpUtility]::UrlEncode($definition.displayName))).Value
 			switch ($resource.Count) {
 				0 {
 					if ($definition.present) {					
