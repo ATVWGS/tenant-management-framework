@@ -6,7 +6,7 @@ trigger:
     include:
       - TMF
 
-name: '[Build and Publish] Tenant Management Framework'
+name: '[Build and Deploy] Tenant Management Framework'
 
 variables:
   major: 0
