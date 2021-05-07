@@ -66,6 +66,8 @@ adding a source control
     - [3.6.6. String mapping](#366-string-mapping)
   - [3.7. Examples](#37-examples)
     - [3.7.1. Example: A Conditional Access policy set and the required groups](#371-example-a-conditional-access-policy-set-and-the-required-groups)
+  - [3.8. Adding existing resources to your configuration](#38-adding-existing-resources-to-your-configuration)
+    - [3.8.1. Named Locations (ipRange)](#381-named-locations-iprange)
 
 # 3. Getting started
 ## 3.1. Installation
@@ -690,4 +692,35 @@ Now that all required resource are defined, we can invoke the required actions. 
 
 ```powershell
 Invoke-TmfTenant
+```
+
+## 3.8. Adding existing resources to your configuration
+### 3.8.1. Named Locations (ipRange)
+
+```powershell
+Import-Module TMF -DisableNameChecking
+Connect-MgGraph -Scopes (Get-TmfRequiredScope -NamedLocations)
+
+$namedLocations = (Invoke-MgGraphRequest -Method GET -Uri "v1.0/identity/conditionalAccess/namedLocations/?`$filter=isof('microsoft.graph.ipNamedLocation')").value | Select-Object @{n = "displayName"; e = {$_["displayName"]}}, @{n = "type";e = {"ipNamedLocation"}}, @{n = "ipRanges";e = {$_["ipRanges"]}}, @{n = "isTrusted";e = {$_["isTrusted"]}}
+foreach ($location in $namedLocations) {
+    $ipRanges = @()
+    switch ($location.ipRanges.GetType().Name) {
+        "Object[]" {
+            $location.ipRanges | ForEach-Object {
+                $ipRanges += [PSCustomObject]@{
+                    "@odata.type" = $_["@odata.type"]
+                    "cidrAddress" = $_["cidrAddress"]
+                }
+            }
+         }
+        default {
+            $ipRanges += [PSCustomObject]@{
+                "@odata.type" = $location.ipRanges["@odata.type"]
+                "cidrAddress" = $location.ipRanges["cidrAddress"]
+            }
+        }
+    }
+    $location.ipRanges = $ipRanges
+}
+$namedLocations | ConvertTo-Json -Depth 6 | Out-File -FilePath "namedLocations.json" -Encoding UTF8
 ```
