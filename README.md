@@ -68,6 +68,7 @@ adding a source control
     - [3.7.1. Example: A Conditional Access policy set and the required groups](#371-example-a-conditional-access-policy-set-and-the-required-groups)
   - [3.8. Adding existing resources to your configuration](#38-adding-existing-resources-to-your-configuration)
     - [3.8.1. Named Locations (ipRange)](#381-named-locations-iprange)
+    - [3.8.2. Conditional Access Policies](#382-conditional-access-policies)
 
 # 3. Getting started
 ## 3.1. Installation
@@ -723,4 +724,41 @@ foreach ($location in $namedLocations) {
     $location.ipRanges = $ipRanges
 }
 $namedLocations | ConvertTo-Json -Depth 6 | Out-File -FilePath "namedLocations.json" -Encoding UTF8
+```
+
+### 3.8.2. Conditional Access Policies
+```powershell
+Import-Module TMF -DisableNameChecking
+Connect-MgGraph -Scopes (Get-TmfRequiredScope -ConditionalAccessPolicies)
+
+$policies = (Invoke-MgGraphRequest -Method GET -Uri "v1.0/identity/conditionalAccess/policies").Value | Select-Object @{n = "displayName"; e = {$_["displayName"]}}, @{n = "conditions"; e = {$_["conditions"]}}, @{n = "grantControls"; e = {$_["grantControls"]}}, @{n = "state"; e = {$_["state"]}}
+foreach ($policy in $policies) {    
+    #region conditions properties to first level
+    foreach ($property in $policy.conditions.GetEnumerator()) {
+        if ($property.Value) {
+            switch ($property.Value.GetType().Name) {
+                "Hashtable" {
+                    foreach ($childProperty in $policy.conditions.$($property.Key).GetEnumerator()) {
+                        if ($childProperty.Value) {
+                            Add-Member -InputObject $policy -MemberType NoteProperty -Name $childProperty.Key -Value $childProperty.Value
+                        }
+                    }
+                }
+                default {
+                    Add-Member -InputObject $policy -MemberType NoteProperty -Name $property.Key -Value $property.Value
+                }
+            }                
+        }            
+    }   
+    #endregion
+
+    #region grantControls properties to first level
+    foreach ($property in $policy.grantControls.GetEnumerator()) {
+        if ($property.Value) {
+            Add-Member -InputObject $policy -MemberType NoteProperty -Name $property.Key -Value $property.Value
+        }            
+    }
+    #endregion
+}
+$policies | Select-Object -Property * -ExcludeProperty conditions, grantControls | Out-File -FilePath "policies.json" -Encoding UTF8
 ```
