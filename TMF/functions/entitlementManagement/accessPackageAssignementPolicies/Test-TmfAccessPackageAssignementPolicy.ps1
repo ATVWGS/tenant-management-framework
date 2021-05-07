@@ -43,7 +43,7 @@ function Test-TmfAccessPackageAssignementPolicy
 				continue
 			}
 
-			$resource = (Invoke-MgGraphRequest -Method GET -Uri ("$script:graphBaseUrl/identityGovernance/entitlementManagement/accessPackageAssignmentPolicies?`$filter=(displayName eq '{0}') and (accessPackageId eq '{1}')" -f $definition.displayName, $accessPackageId)).Value
+			$resource = (Invoke-MgGraphRequest -Method GET -Uri ("$script:graphBaseUrl/identityGovernance/entitlementManagement/accessPackageAssignmentPolicies?`$filter=(displayName eq '{0}') and (accessPackageId eq '{1}')" -f [System.Web.HttpUtility]::UrlEncode($definition.displayName), $accessPackageId)).Value
 			switch ($resource.Count) {
 				0 {
 					if ($definition.present) {					
