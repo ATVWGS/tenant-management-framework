@@ -8,6 +8,7 @@ function Register-TmfGroup
 		[string[]] $groupTypes = @(),
 		[bool] $securityEnabled = $true,
 		[bool] $mailEnabled = $false,
+		[bool] $isAssignableToRole,
 		[Parameter(Mandatory = $true)]
 		[string] $mailNickname = $displayName.Replace(" ",""),
 		[Parameter(Mandatory = $true, ParameterSetName = "DynamicMembership")]
@@ -54,13 +55,13 @@ function Register-TmfGroup
 			description = $description
 			groupTypes = $groupTypes
 			securityEnabled = $securityEnabled
-			mailEnabled = $mailEnabled
+			mailEnabled = $mailEnabled			
 			mailNickname = $mailNickname						
 			present = $present
 			sourceConfig = $sourceConfig
 		}
 
-		"owners", "members", "membershipRule" | ForEach-Object {
+		"owners", "members", "membershipRule", "isAssignableToRole" | ForEach-Object {
 			if ($PSBoundParameters.ContainsKey($_)) {			
 				Add-Member -InputObject $object -MemberType NoteProperty -Name $_ -Value $PSBoundParameters[$_]
 			}

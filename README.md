@@ -66,6 +66,15 @@ adding a source control
     - [3.6.6. String mapping](#366-string-mapping)
   - [3.7. Examples](#37-examples)
     - [3.7.1. Example: A Conditional Access policy set and the required groups](#371-example-a-conditional-access-policy-set-and-the-required-groups)
+  - [3.8. Adding existing resources to your configuration](#38-adding-existing-resources-to-your-configuration)
+    - [3.8.1. Named Locations (ipRange)](#381-named-locations-iprange)
+    - [3.8.2. Conditional Access Policies](#382-conditional-access-policies)
+    - [3.8.3. Groups](#383-groups)
+<<<<<<< HEAD
+    - [3.8.3. Groups](#383-groups)
+=======
+    - [Groups](#groups)
+>>>>>>> 3995f27382ab296c484ab2deb6fb105f6193f60f
 
 # 3. Getting started
 ## 3.1. Installation
@@ -121,14 +130,16 @@ https://github.com/microsoftgraph/msgraph-sdk-powershell
 Please make sure you are connected to the correct Tenant before invoking configurations! 
 
 The required scopes depend on what components (resources) you want to configure.
-| Resource                                                          | Required scopes                                                                                                              
-|-------------------------------------------------------------------|----------------------------------------------------------------------------------------
-| Groups                                                            | Group.ReadWrite.All, GroupMember.ReadWrite.All
-| Users                                                             | User.ReadWrite.All
-| Named Locations                                                   | Policy.ReadWrite.ConditionalAccess
-| Agreements (Terms of Use)                                         | Agreement.ReadWrite.All
-| Conditional Access Policies                                       | Policy.ReadWrite.ConditionalAccess, Policy.Read.All, RoleManagement.Read.Directory, Application.Read.All, Agreement.Read.All
-| Enitlement Management (Access Packages, Access Package Catalogs)  | EntitlementManagement.ReadWrite.All
+
+| Resource                                                         | Required scopes                                                                                                              |
+|------------------------------------------------------------------|------------------------------------------------------------------------------------------------------------------------------|
+| Groups                                                           | Group.ReadWrite.All, GroupMember.ReadWrite.All                                                                               |
+| Users                                                            | User.ReadWrite.All                                                                                                           |
+| Named Locations                                                  | Policy.ReadWrite.ConditionalAccess                                                                                           |
+| Agreements (Terms of Use)                                        | Agreement.ReadWrite.All                                                                                                      |
+| Conditional Access Policies                                      | Policy.ReadWrite.ConditionalAccess, Policy.Read.All, RoleManagement.Read.Directory, Application.Read.All, Agreement.Read.All |
+| Enitlement Management (Access Packages, Access Package Catalogs) | EntitlementManagement.ReadWrite.All                                                                                          |
+
 
 You can also use *Get-TmfRequiredScope* to get the required scopes and combine it with *Connect-MgGraph*.
 ```powershell
@@ -690,4 +701,96 @@ Now that all required resource are defined, we can invoke the required actions. 
 
 ```powershell
 Invoke-TmfTenant
+```
+
+## 3.8. Adding existing resources to your configuration
+### 3.8.1. Named Locations (ipRange)
+
+```powershell
+Import-Module TMF -DisableNameChecking
+Connect-MgGraph -Scopes (Get-TmfRequiredScope -NamedLocations)
+
+$namedLocations = (Invoke-MgGraphRequest -Method GET -Uri "v1.0/identity/conditionalAccess/namedLocations/?`$filter=isof('microsoft.graph.ipNamedLocation')").value | Select-Object @{n = "displayName"; e = {$_["displayName"]}}, @{n = "type";e = {"ipNamedLocation"}}, @{n = "ipRanges";e = {$_["ipRanges"]}}, @{n = "isTrusted";e = {$_["isTrusted"]}}
+foreach ($location in $namedLocations) {
+    $ipRanges = @()
+    switch ($location.ipRanges.GetType().Name) {
+        "Object[]" {
+            $location.ipRanges | ForEach-Object {
+                $ipRanges += [PSCustomObject]@{
+                    "@odata.type" = $_["@odata.type"]
+                    "cidrAddress" = $_["cidrAddress"]
+                }
+            }
+         }
+        default {
+            $ipRanges += [PSCustomObject]@{
+                "@odata.type" = $location.ipRanges["@odata.type"]
+                "cidrAddress" = $location.ipRanges["cidrAddress"]
+            }
+        }
+    }
+    $location.ipRanges = $ipRanges
+}
+$namedLocations | ConvertTo-Json -Depth 6 | Out-File -FilePath "namedLocations.json" -Encoding UTF8
+```
+
+### 3.8.2. Conditional Access Policies
+```powershell
+Import-Module TMF -DisableNameChecking
+Connect-MgGraph -Scopes (Get-TmfRequiredScope -ConditionalAccessPolicies)
+
+$policies = (Invoke-MgGraphRequest -Method GET -Uri "v1.0/identity/conditionalAccess/policies").Value | Select-Object @{n = "displayName"; e = {$_["displayName"]}}, @{n = "conditions"; e = {$_["conditions"]}}, @{n = "grantControls"; e = {$_["grantControls"]}}, @{n = "state"; e = {$_["state"]}}
+foreach ($policy in $policies) {    
+    #region conditions properties to first level
+    foreach ($property in $policy.conditions.GetEnumerator()) {
+        if ($property.Value) {
+            switch ($property.Value.GetType().Name) {
+                "Hashtable" {
+                    foreach ($childProperty in $policy.conditions.$($property.Key).GetEnumerator()) {
+                        if ($childProperty.Value) {
+                            Add-Member -InputObject $policy -MemberType NoteProperty -Name $childProperty.Key -Value $childProperty.Value
+                        }
+                    }
+                }
+                default {
+                    Add-Member -InputObject $policy -MemberType NoteProperty -Name $property.Key -Value $property.Value
+                }
+            }                
+        }            
+    }   
+    #endregion
+
+    #region grantControls properties to first level
+    foreach ($property in $policy.grantControls.GetEnumerator()) {
+        if ($property.Value) {
+            Add-Member -InputObject $policy -MemberType NoteProperty -Name $property.Key -Value $property.Value
+        }            
+    }
+    #endregion
+}
+$policies | Select-Object -Property * -ExcludeProperty conditions, grantControls | Out-File -FilePath "policies.json" -Encoding UTF8
+```
+
+### 3.8.3. Groups
+```powershell
+Connect-MgGraph -Scopes (Get-TmfRequiredScope -Groups)
+Select-MgProfile -Name beta
+
+$groups = Get-MgGroup -Property id, displayName, description, groupTypes, securityEnabled, mailEnabled, visibility, mailNickname | Select-Object id, displayName, description, groupTypes, securityEnabled, mailEnabled, visibility, mailNickname
+foreach ($group in $groups) {
+    <# Uncomment if you want to add the group members to your configuration.
+    $members = @(Get-MgGroupMember -GroupId $group.Id -Property userPrincipalName | Foreach-Object {$_.AdditionalProperties["userPrincipalName"]})
+    if ($members) {
+        Add-Member -InputObject $group -MemberType NoteProperty -Name "members" -Value $members
+    } #>
+
+    <# Uncomment if you want to add the group owners to your configuration.
+    $owners = @(Get-MgGroupOwner -GroupId $group.Id -Property userPrincipalName | Foreach-Object {$_.AdditionalProperties["userPrincipalName"]})
+    if ($owners) {
+        Add-Member -InputObject $group -MemberType NoteProperty -Name "owners" -Value $owners
+    } #>
+
+    Add-Member -InputObject $group -MemberType NoteProperty -Name "present" -Value $true
+}
+$groups | ConvertTo-Json -Depth 6 | Out-File -FilePath "groups.json" -Encoding UTF8
 ```
