@@ -69,6 +69,7 @@ adding a source control
   - [3.8. Adding existing resources to your configuration](#38-adding-existing-resources-to-your-configuration)
     - [3.8.1. Named Locations (ipRange)](#381-named-locations-iprange)
     - [3.8.2. Conditional Access Policies](#382-conditional-access-policies)
+    - [Groups](#groups)
 
 # 3. Getting started
 ## 3.1. Installation
@@ -763,4 +764,28 @@ foreach ($policy in $policies) {
     #endregion
 }
 $policies | Select-Object -Property * -ExcludeProperty conditions, grantControls | Out-File -FilePath "policies.json" -Encoding UTF8
+```
+
+### Groups
+```powershell
+Connect-MgGraph -Scopes (Get-TmfRequiredScope -Groups)
+Select-MgProfile -Name beta
+
+$groups = Get-MgGroup -Property id, displayName, description, groupTypes, securityEnabled, mailEnabled, visibility, mailNickname | Select-Object id, displayName, description, groupTypes, securityEnabled, mailEnabled, visibility, mailNickname
+foreach ($group in $groups) {
+    <# Uncomment if you want to add the group members to your configuration.
+    $members = @(Get-MgGroupMember -GroupId $group.Id -Property userPrincipalName | Foreach-Object {$_.AdditionalProperties["userPrincipalName"]})
+    if ($members) {
+        Add-Member -InputObject $group -MemberType NoteProperty -Name "members" -Value $members
+    } #>
+
+    <# Uncomment if you want to add the group owners to your configuration.
+    $owners = @(Get-MgGroupOwner -GroupId $group.Id -Property userPrincipalName | Foreach-Object {$_.AdditionalProperties["userPrincipalName"]})
+    if ($owners) {
+        Add-Member -InputObject $group -MemberType NoteProperty -Name "owners" -Value $owners
+    } #>
+
+    Add-Member -InputObject $group -MemberType NoteProperty -Name "present" -Value $true
+}
+$groups | ConvertTo-Json -Depth 6 | Out-File -FilePath "groups.json" -Encoding UTF8
 ```
