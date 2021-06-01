@@ -29,13 +29,16 @@
 					$requestMethod = "POST"
 					$requestBody = @{
 						"description" = $result.DesiredConfiguration.description
-						"displayName" = $result.DesiredConfiguration.displayName
-						"mailNickname" = $result.DesiredConfiguration.mailNickname
-						"groupTypes" = $result.DesiredConfiguration.groupTypes
-						"mailEnabled" = $result.DesiredConfiguration.mailEnabled
-						"securityEnabled" = $result.DesiredConfiguration.securityEnabled
+						"displayName" = $result.DesiredConfiguration.displayName						
 					}
+
 					try {
+						@("mailNickname", "groupTypes", "mailEnabled", "isAssignableToRole", "securityEnabled") | ForEach-Object {
+							if ($result.DesiredConfiguration.Properties() -contains $_) {
+								$requestBody[$_] = $result.DesiredConfiguration.$_
+							}
+						}
+
 						if ($result.DesiredConfiguration.Properties() -contains "members") {
 							if ($result.DesiredConfiguration.members.count -gt 0) {
 								$requestBody["members@odata.bind"] = @($result.DesiredConfiguration.members | ForEach-Object {"$script:graphBaseUrl/users/{0}" -f (Resolve-User -InputReference $_ -Cmdlet $Cmdlet)})

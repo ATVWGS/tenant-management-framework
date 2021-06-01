@@ -61,7 +61,7 @@
 	process
 	{		
 		if ($Groups -or $All) {
-			$scopes += "Group.ReadWrite.All", "GroupMember.ReadWrite.All"
+			$scopes += "Group.ReadWrite.All", "GroupMember.ReadWrite.All", "Directory.ReadWrite.All", "Directory.AccessAsUser.All"
 		}
 		if ($Users -or $All) {
 			$scopes += "User.ReadWrite.All"
