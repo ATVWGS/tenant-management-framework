@@ -124,14 +124,16 @@ https://github.com/microsoftgraph/msgraph-sdk-powershell
 Please make sure you are connected to the correct Tenant before invoking configurations! 
 
 The required scopes depend on what components (resources) you want to configure.
-| Resource                                                          | Required scopes                                                                                                              
-|-------------------------------------------------------------------|----------------------------------------------------------------------------------------
-| Groups                                                            | Group.ReadWrite.All, GroupMember.ReadWrite.All
-| Users                                                             | User.ReadWrite.All
-| Named Locations                                                   | Policy.ReadWrite.ConditionalAccess
-| Agreements (Terms of Use)                                         | Agreement.ReadWrite.All
-| Conditional Access Policies                                       | Policy.ReadWrite.ConditionalAccess, Policy.Read.All, RoleManagement.Read.Directory, Application.Read.All, Agreement.Read.All
-| Enitlement Management (Access Packages, Access Package Catalogs)  | EntitlementManagement.ReadWrite.All
+
+| Resource                                                         | Required scopes                                                                                                              |
+|------------------------------------------------------------------|------------------------------------------------------------------------------------------------------------------------------|
+| Groups                                                           | Group.ReadWrite.All, GroupMember.ReadWrite.All                                                                               |
+| Users                                                            | User.ReadWrite.All                                                                                                           |
+| Named Locations                                                  | Policy.ReadWrite.ConditionalAccess                                                                                           |
+| Agreements (Terms of Use)                                        | Agreement.ReadWrite.All                                                                                                      |
+| Conditional Access Policies                                      | Policy.ReadWrite.ConditionalAccess, Policy.Read.All, RoleManagement.Read.Directory, Application.Read.All, Agreement.Read.All |
+| Enitlement Management (Access Packages, Access Package Catalogs) | EntitlementManagement.ReadWrite.All                                                                                          |
+
 
 You can also use *Get-TmfRequiredScope* to get the required scopes and combine it with *Connect-MgGraph*.
 ```powershell
