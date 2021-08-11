@@ -70,11 +70,6 @@ adding a source control
     - [3.8.1. Named Locations (ipRange)](#381-named-locations-iprange)
     - [3.8.2. Conditional Access Policies](#382-conditional-access-policies)
     - [3.8.3. Groups](#383-groups)
-<<<<<<< HEAD
-    - [3.8.3. Groups](#383-groups)
-=======
-    - [Groups](#groups)
->>>>>>> 3995f27382ab296c484ab2deb6fb105f6193f60f
 
 # 3. Getting started
 ## 3.1. Installation
