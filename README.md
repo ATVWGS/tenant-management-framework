@@ -34,7 +34,7 @@ adding a source control
 - Increased efficiency
 
 # 2. Table of contents
-- [1. Introduction](`#1-introduction`)
+- [1. Introduction](\#1-introduction)
   - [1.1. Goals](#11-goals)
   - [1.2. Benefits](#12-benefits)
 - [2. Table of contents](#2-table-of-contents)
