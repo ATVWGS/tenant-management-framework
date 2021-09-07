@@ -55,5 +55,5 @@ stages:
           command: 'push'
           packagesToPush: '$(Pipeline.Workspace)/**/*.nupkg'
           nuGetFeedType: 'internal'
-          publishVstsFeed: 'Tenant Management as Code/tmf-release'
+          publishVstsFeed: 'Azure Team VWGS/tmf-release'
           allowPackageConflicts: true
