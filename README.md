@@ -4,7 +4,7 @@ Tenant Management Framework <!-- omit in toc -->
 ===========================
 *by [Volkswagen Group Services GmbH](https://volkswagen-groupservices.com)*
 
-[![Build Status](https://dev.azure.com/VWADO/Tenant%20Management%20as%20Code/_apis/build/status/Tenant%20Management%20Framework?branchName=main)](https://dev.azure.com/VWADO/Tenant%20Management%20as%20Code/_build/latest?definitionId=13&branchName=main)
+[![Build Status](https://dev.azure.com/Volkswagen-Groupservices/Azure%20Team%20VWGS/_apis/build/status/tenant-management-framework?branchName=azure-pipelines)](https://dev.azure.com/Volkswagen-Groupservices/Azure%20Team%20VWGS/_build/latest?definitionId=1&branchName=main)
 
 # 1. Introduction 
 The Tenant Management Framework is a Powershell module that is able to create, update and

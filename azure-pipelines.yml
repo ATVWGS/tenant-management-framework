@@ -10,10 +10,10 @@ name: '[Build and Deploy] Tenant Management Framework'
 
 variables:
   major: 0
-  minor: 0
+  minor: 1
   patch: $(Build.BuildID)
   moduleName: 'TMF'
-  releaseFeed: 'tmf-release'
+  releaseFeed: 'vwgs-azdevops-release'
   buildVer: $(major).$(minor).$(Build.BuildID)
 
 pool:
@@ -55,5 +55,5 @@ stages:
           command: 'push'
           packagesToPush: '$(Pipeline.Workspace)/**/*.nupkg'
           nuGetFeedType: 'internal'
-          publishVstsFeed: 'Tenant Management as Code/tmf-release'
+          publishVstsFeed: 'Azure Team VWGS/vwgs-azdevops-release'
           allowPackageConflicts: true
