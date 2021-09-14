@@ -46,7 +46,7 @@
 						}
 						if ($result.DesiredConfiguration.Properties() -contains "owners") {
 							if ($result.DesiredConfiguration.owners.count -gt 0) {
-								$requestBody["owners@odata.bind"] = @($result.DesiredConfiguration.owners | ForEach-Object-Object {"$script:graphBaseUrl/users/{0}" -f (Resolve-User -InputReference $_ -Cmdlet $Cmdlet)})
+								$requestBody["owners@odata.bind"] = @($result.DesiredConfiguration.owners | ForEach-Object {"$script:graphBaseUrl/users/{0}" -f (Resolve-User -InputReference $_ -Cmdlet $Cmdlet)})
 							}							
 						}
 						if ($result.DesiredConfiguration.Properties() -contains "membershipRule") {
