@@ -98,12 +98,12 @@ $credsAzureDevopsServices = New-Object System.Management.Automation.PSCredential
 With that credentials we are able to register a new PSRepository.
 
 ```powershell
-Register-PSRepository -Name "tmf-release" -SourceLocation "https://pkgs.dev.azure.com/VWADO/be17a77c-fbfa-4536-8aa1-f05270395154/_packaging/tmf-release/nuget/v2/" -InstallationPolicy Trusted -Credential $credsAzureDevopsServices
+Register-PSRepository -Name "vwgs-azdevops-release" -SourceLocation "https://pkgs.dev.azure.com/Volkswagen-Groupservices/e1b93dda-f573-4088-b35c-bf0d3979c500/_packaging/vwgs-azdevops-release/nuget/v2" -InstallationPolicy Trusted -Credential $credsAzureDevopsServices
 ```
 
 And finally we can install TMF using Install-Module.
 ```powershell
-Install-Module -Name TMF -Repository tmf-release -Scope CurrentUser -Credential $credsAzureDevopsServices
+Install-Module -Name TMF -Repository "vwgs-azdevops-release" -Scope CurrentUser -Credential $credsAzureDevopsServices
 ```
 
 An update of an old installation is also possible with *Update-Module*.
