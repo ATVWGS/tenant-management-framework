@@ -282,7 +282,7 @@ PS> Load-TmfConfiguration
 You can check the currently loaded desired configuration with *Get-TmfDesiredConfiguration*. This returns the desired configuration as a hashtable.
 
 ```powershell
-PS> Get-TmfConfiguration
+PS> Get-TmfDesiredConfiguration
 
 Name                           Value
 ----                           -----

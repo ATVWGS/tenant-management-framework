@@ -73,6 +73,9 @@
 		'Register-TmfAccessPackageAssignementPolicy',
 		'Test-TmfAccessPackageAssignementPolicy',
 		'Invoke-TmfAccessPackageAssignementPolicy',
+		'Invoke-TmfAdministrativeUnits',
+        'Test-TmfAdministrativeUnits',
+        'Register-TmfAdministrativeUnits',
 		'Register-TmfAccessPackageResource',
 		'Test-TmfAccessPackageResource',
 		'Invoke-TmfAccessPackageResource'
