@@ -26,8 +26,13 @@ stages:
     steps:
     - task: PowerShell@2
       inputs:
-        filePath: '$(System.DefaultWorkingDirectory)/build/build.ps1'
+        filePath: 'build/build.ps1'
         arguments: '-moduleName $(moduleName)'
+    - task: CopyFiles@2
+      inputs:
+        SourceFolder: '$(System.DefaultWorkingDirectory)'
+        Contents: 'LICENSE'
+        TargetFolder: '$(System.DefaultWorkingDirectory)/TMF'
     - task: NuGetCommand@2
       inputs:
         command: 'pack'

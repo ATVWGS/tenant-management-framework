@@ -18,7 +18,7 @@
 	Copyright = 'Copyright (c) 2021 Volkswagen Group Services GmbH'
 	
 	# Description of the functionality provided by this module
-	Description = 'Helper module to manage Azure Tenants as code.'
+	Description = 'Helper module to manage Azure AD Tenants as code.'
 	
 	# Minimum version of the Windows PowerShell engine required by this module
 	PowerShellVersion = '5.1'
