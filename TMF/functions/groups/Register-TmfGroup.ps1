@@ -4,6 +4,7 @@ function Register-TmfGroup
 	Param (
 		[Parameter(Mandatory = $true)]
 		[string] $displayName,
+		[string[]] $oldNames,
 		[string] $description = "Group has been created with Tenant Management Framework",
 		[string[]] $groupTypes = @(),
 		[bool] $securityEnabled = $true,
@@ -52,6 +53,7 @@ function Register-TmfGroup
 
 		$object = [PSCustomObject] @{
 			displayName = Resolve-String -Text $displayName
+			oldNames = $oldNames | ForEach-Object {Resolve-String $_}
 			description = $description
 			groupTypes = $groupTypes
 			securityEnabled = $securityEnabled
