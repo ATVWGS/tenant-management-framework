@@ -36,7 +36,16 @@
 				DesiredConfiguration = $definition
 			}
 
-			$resource = (Invoke-MgGraphRequest -Method GET -Uri ("$script:graphBaseUrl/identity/conditionalAccess/namedLocations/?`$filter=displayName eq '{0}'" -f [System.Web.HttpUtility]::UrlEncode($definition.displayName))).Value
+			if ("oldNames" -in $definition.Properties()) {				
+				$filter = ($definition.oldNames + $definition.displayName | Foreach-Object {
+					"(displayName eq '{0}')" -f [System.Web.HttpUtility]::UrlEncode($_)
+				}) -join " or "
+			}
+			else {
+				$filter = "(displayName eq '{0}')" -f [System.Web.HttpUtility]::UrlEncode($definition.displayName)
+			}
+			$resource = (Invoke-MgGraphRequest -Method GET -Uri ("$script:graphBaseUrl/identity/conditionalAccess/namedLocations/?`$filter={0}" -f $filter)).Value
+			
 			switch ($resource.Count) {
 				0 {
 					if ($definition.present) {					
@@ -50,7 +59,7 @@
 					$result["GraphResource"] = $resource
 					if ($definition.present) {
 						$changes = @()
-						foreach ($property in ($definition.Properties() | Where-Object {$_ -notin "displayName", "present", "sourceConfig"})) {
+						foreach ($property in ($definition.Properties() | Where-Object {$_ -notin "oldNames", "present", "sourceConfig"})) {
 							$change = [PSCustomObject] @{
 								Property = $property										
 								Actions = $null
