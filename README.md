@@ -181,9 +181,9 @@ You can create new configuration by simple using the function *New-TmfConfigurat
 ```powershell
 PS> New-TmfConfiguration -Name "Example Configuration" -Description "This is an example configuration for the Tenant Management Framework!" -Author "Mustermann, Max" -Weight 50 -OutPath "$env:USERPROFILE\Desktop\Example_Configuration" -Force
 
-[16:02:04][New-TmfConfiguration] Creating configuration directory C:\Users\av01um7\Desktop\Example_Configuration. [DONE]
-[16:02:04][New-TmfConfiguration] Copying template structure to C:\Users\av01um7\Desktop\Example_Configuration. [DONE]
-[16:02:05][Activate-TmfConfiguration] Activating Example Configuration (C:\Users\av01um7\Desktop\Example_Configuration\configuration.json). This configuration will be considered when applying Tenant configuration. [DONE]
+[16:02:04][New-TmfConfiguration] Creating configuration directory C:\Users\username\Desktop\Example_Configuration. [DONE]
+[16:02:04][New-TmfConfiguration] Copying template structure to C:\Users\username\Desktop\Example_Configuration. [DONE]
+[16:02:05][Activate-TmfConfiguration] Activating Example Configuration (C:\Users\username\Desktop\Example_Configuration\configuration.json). This configuration will be considered when applying Tenant configuration. [DONE]
 [16:02:05][Activate-TmfConfiguration] Sorting all activated configurations by weight. [DONE]
 [16:02:05][New-TmfConfiguration] Creation has finished! Have fun! [DONE]
 ```
@@ -199,7 +199,7 @@ This activation can simply be done using *Activate-TmfConfiguration*.
 ```powershell
 PS> Activate-TmfConfiguration "$env:USERPROFILE\Desktop\Example_Configuration" -Force
 
-[16:10:46][Activate-TmfConfiguration] Activating Example Configuration (C:\Users\av01um7\Desktop\Example_Configuration\configuration.json). This configuration will be considered when applying Tenant configuration. [DONE]
+[16:10:46][Activate-TmfConfiguration] Activating Example Configuration (C:\Users\username\Desktop\Example_Configuration\configuration.json). This configuration will be considered when applying Tenant configuration. [DONE]
 [16:10:46][Activate-TmfConfiguration] Sorting all activated configurations by weight. [DONE]
 ```
 
@@ -208,7 +208,7 @@ You can use *Get-TmfActiveConfiguration* to checkout all already activated confi
 PS> Get-TmfActiveConfiguration
 
 Name         : Example Configuration
-Path         : C:\Users\av01um7\Desktop\Example_Configuration
+Path         : C:\Users\username\Desktop\Example_Configuration
 Description  : This is an example configuration for the Tenant Management Framework!
 Author       : Mustermann, Max
 Weight       : 50
