@@ -76,7 +76,7 @@
 			}
 
 			Write-PSFMessage -Level Host -String "Activate-TMFConfiguration.Activating" -StringValues $configuration.Name, $configuration.filePath -NoNewLine			
-			$script:activatedConfigurations += $configuration | Select-Object Name, @{Name = "Path"; Expression = {$_.directoryPath}}, Description, Author, Weight, Prerequisite
+			$script:activatedConfigurations += $configuration | Select-Object Name, @{Name = "Path"; Expression = {Resolve-Path $_.directoryPath}}, Description, Author, Weight, Prerequisite
 			Write-PSFHostColor -String ' [<c="green">DONE</c>]'
 		}
 
