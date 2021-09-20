@@ -52,8 +52,7 @@ function Register-TmfGroup
 		if (Test-PSFFunctionInterrupt) { return }		
 
 		$object = [PSCustomObject] @{
-			displayName = Resolve-String -Text $displayName
-			oldNames = $oldNames | ForEach-Object {Resolve-String $_}
+			displayName = Resolve-String -Text $displayName			
 			description = $description
 			groupTypes = $groupTypes
 			securityEnabled = $securityEnabled
@@ -61,6 +60,10 @@ function Register-TmfGroup
 			mailNickname = $mailNickname						
 			present = $present
 			sourceConfig = $sourceConfig
+		}
+
+		if ($PSBoundParameters.ContainsKey("oldNames")) {
+			Add-Member -InputObject $object -MemberType NoteProperty -Name "oldNames" -Value @($oldNames | ForEach-Object {Resolve-String $_})
 		}
 
 		"owners", "members", "membershipRule", "isAssignableToRole" | ForEach-Object {
