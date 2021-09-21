@@ -29,6 +29,12 @@ $script:supportedResources = @{
         "invokeFunction" = (Get-Command Invoke-TmfAgreement)
         "weight" = 10
     }
+    "administrativeUnits" = @{ 
+        "registerFunction" = (Get-Command Register-TmfAdministrativeUnits)
+        "testFunction" = (Get-Command Test-TmfAdministrativeUnits)
+        "invokeFunction" = (Get-Command Invoke-TmfAdministrativeUnits)
+        "weight" = 20
+    }
     "conditionalAccessPolicies" = @{
         "registerFunction" = (Get-Command Register-TmfConditionalAccessPolicy)
         "testFunction" = (Get-Command Test-TmfConditionalAccessPolicy)
@@ -56,13 +62,7 @@ $script:supportedResources = @{
         "testFunction" = (Get-Command Test-TmfAccessPackageAssignementPolicy)
         "invokeFunction" = (Get-Command Invoke-TmfAccessPackageAssignementPolicy)
         "weight" = 57
-    }
-    "administrativeUnits" = @{ 
-        "registerFunction" = (Get-Command Register-TmfAdministrativeUnits)
-        "testFunction" = (Get-Command Test-TmfAdministrativeUnits)
-        "invokeFunction" = (Get-Command Invoke-TmfAdministrativeUnits)
-        "weight" = 90
-    }
+    }    
 } # All currently supported components.
 Set-Variable -Name supportedResources -Option ReadOnly
 

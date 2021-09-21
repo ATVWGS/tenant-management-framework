@@ -1,4 +1,4 @@
-﻿function Resolve-scopedRoleMember
+﻿function Resolve-ScopedRoleMember
 {
 	[CmdletBinding()]
 	Param (

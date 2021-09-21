@@ -10,7 +10,7 @@ function Register-TmfAdministrativeUnits
         [string[]] $members,
         [string[]] $groups,
 
-        [string[]] $scopedRoleMembers,
+        [object[]] $scopedRoleMembers,
 		[bool] $present = $true,
 		[System.Management.Automation.PSCmdlet]
 		$Cmdlet = $PSCmdlet
