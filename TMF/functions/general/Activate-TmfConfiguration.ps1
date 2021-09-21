@@ -39,6 +39,7 @@
 				alreadyActivated = $false
 			}
 
+			#region Check if configuration.json exists
 			if (!(Test-Path $configuration.filePath)) {
 				Stop-PSFFunction -String "TMF.ConfigurationFileNotFound" -StringValues $configuration.filePath
 				return
@@ -47,13 +48,27 @@
 				# Clean configuration path
 				$configuration.filePath = Resolve-PSFPath -Provider FileSystem -Path $configuration.filePath -SingleItem
 			}
+			#endregion
 
+			#region Load configuration.json
 			$contentDummy = Get-Content $configuration.filePath | ConvertFrom-Json -ErrorAction Stop
 			$contentDummy | Get-Member -MemberType NoteProperty | ForEach-Object {
 				Add-Member -InputObject $configuration -MemberType NoteProperty -Name $_.Name -Value $contentDummy.$($_.Name)
 			}
 			$configuration.alreadyActivated = $script:activatedConfigurations.Name -contains $configuration.Name
+			#endregion
 
+			#region Check prerequisites
+			if ($configuration.Prerequisite.Count -gt 0) {				
+				foreach ($prereq in $configuration.Prerequisite) {
+					if ($prereq -notin $configurationsToActivate.Name) {
+						Stop-PSFFunction -String "TMF.PrerequisiteNotActivated" -StringValues $configuration.Name, $prereq
+						return
+					}
+				}
+			}
+			#endregion
+			
 			if (!$Force -and $configuration.alreadyActivated) {
 				Write-PSFMessage -Level Warning -String "Activate-TMFConfiguration.AlreadyActivated" -StringValues $configuration.Name, $configuration.filePath
 			}
