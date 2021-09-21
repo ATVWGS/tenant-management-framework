@@ -4,7 +4,8 @@ Tenant Management Framework <!-- omit in toc -->
 ===========================
 *by [Volkswagen Group Services GmbH](https://volkswagen-groupservices.com)*
 
-[![Build Status](https://dev.azure.com/Volkswagen-Groupservices/Azure%20Team%20VWGS/_apis/build/status/tenant-management-framework?branchName=azure-pipelines)](https://dev.azure.com/Volkswagen-Groupservices/Azure%20Team%20VWGS/_build/latest?definitionId=1&branchName=main)
+![GitHub](https://img.shields.io/github/license/ATVWGS/tenant-management-framework)
+[![TMF](https://img.shields.io/powershellgallery/v/TMF.svg?label=TMF)](https://www.powershellgallery.com/packages/TMF/0.1.21)
 
 # 1. Introduction 
 The Tenant Management Framework is a Powershell module that is able to create, update and
@@ -73,43 +74,7 @@ adding a source control
 
 # 3. Getting started
 ## 3.1. Installation
-Currently we deliver the module as a NuGet package. It is possible to directly download it from the [*Tenant Management as Code/tmf-release*](https://dev.azure.com/VWADO/Tenant%20Management%20as%20Code/_packaging?_a=feed&feed=tmf-release) feed and install it using *Install-Package tmf.X.X.X.nupkg*.
-
-You can also attach the feed as local Powershell module repository. For this please follow [3.1.1 Installation with Install-Module](#311-installation-with-install-module).
-
-Cloning the repository is working too. Just copy the TMF folder directly into one of your module directories.
-```bash
-git clone https://VWADO@dev.azure.com/VWADO/Tenant%20Management%20as%20Code/_git/Tenant%20Management%20Framework "Tenant Management Framework"
-```
-
-Checkout <https://docs.microsoft.com/de-de/powershell/scripting/developer/module/installing-a-powershell-module?view=powershell-7.1> for further information.
-
-### 3.1.1. Installation with Install-Module
-First of all you need to create a Private Access Token for your account. The PAT at least requires "Packaging: Read" permissions. You can follow the following tutorial.
-https://docs.microsoft.com/de-de/azure/devops/organizations/accounts/use-personal-access-tokens-to-authenticate?view=azure-devops&tabs=preview-page#create-a-pat
-
-After that we can create a credentials variable in our Powershell session. Please provide your PAT and sign-in mail address.
-
-```powershell
-$patToken = "YOUR PERSONAL ACCESS TOKEN" | ConvertTo-SecureString -AsPlainText -Force
-$credsAzureDevopsServices = New-Object System.Management.Automation.PSCredential("YOUR EMAIL", $patToken)
-```
-
-With that credentials we are able to register a new PSRepository.
-
-```powershell
-Register-PSRepository -Name "tmf-release" -SourceLocation "https://pkgs.dev.azure.com/VWADO/be17a77c-fbfa-4536-8aa1-f05270395154/_packaging/tmf-release/nuget/v2/" -InstallationPolicy Trusted -Credential $credsAzureDevopsServices
-```
-
-And finally we can install TMF using Install-Module.
-```powershell
-Install-Module -Name TMF -Repository tmf-release -Scope CurrentUser -Credential $credsAzureDevopsServices
-```
-
-An update of an old installation is also possible with *Update-Module*.
-```powershell
-Update-Module TMF -Credential $credsAzureDevopsServices
-```
+Checkout the [Powershell Gallery](https://www.powershellgallery.com/packages/TMF/)!
 
 ## 3.2. Importing
 You can simply import the module using *Import-Module TMF* if the module has been placed in one of your module directory. (Checkout $env:PSModulePath)
@@ -216,9 +181,9 @@ You can create new configuration by simple using the function *New-TmfConfigurat
 ```powershell
 PS> New-TmfConfiguration -Name "Example Configuration" -Description "This is an example configuration for the Tenant Management Framework!" -Author "Mustermann, Max" -Weight 50 -OutPath "$env:USERPROFILE\Desktop\Example_Configuration" -Force
 
-[16:02:04][New-TmfConfiguration] Creating configuration directory C:\Users\***REMOVED***\Desktop\Example_Configuration. [DONE]
-[16:02:04][New-TmfConfiguration] Copying template structure to C:\Users\***REMOVED***\Desktop\Example_Configuration. [DONE]
-[16:02:05][Activate-TmfConfiguration] Activating Example Configuration (C:\Users\***REMOVED***\Desktop\Example_Configuration\configuration.json). This configuration will be considered when applying Tenant configuration. [DONE]
+[16:02:04][New-TmfConfiguration] Creating configuration directory C:\Users\username\Desktop\Example_Configuration. [DONE]
+[16:02:04][New-TmfConfiguration] Copying template structure to C:\Users\username\Desktop\Example_Configuration. [DONE]
+[16:02:05][Activate-TmfConfiguration] Activating Example Configuration (C:\Users\username\Desktop\Example_Configuration\configuration.json). This configuration will be considered when applying Tenant configuration. [DONE]
 [16:02:05][Activate-TmfConfiguration] Sorting all activated configurations by weight. [DONE]
 [16:02:05][New-TmfConfiguration] Creation has finished! Have fun! [DONE]
 ```
@@ -234,7 +199,7 @@ This activation can simply be done using *Activate-TmfConfiguration*.
 ```powershell
 PS> Activate-TmfConfiguration "$env:USERPROFILE\Desktop\Example_Configuration" -Force
 
-[16:10:46][Activate-TmfConfiguration] Activating Example Configuration (C:\Users\***REMOVED***\Desktop\Example_Configuration\configuration.json). This configuration will be considered when applying Tenant configuration. [DONE]
+[16:10:46][Activate-TmfConfiguration] Activating Example Configuration (C:\Users\username\Desktop\Example_Configuration\configuration.json). This configuration will be considered when applying Tenant configuration. [DONE]
 [16:10:46][Activate-TmfConfiguration] Sorting all activated configurations by weight. [DONE]
 ```
 
@@ -243,7 +208,7 @@ You can use *Get-TmfActiveConfiguration* to checkout all already activated confi
 PS> Get-TmfActiveConfiguration
 
 Name         : Example Configuration
-Path         : C:\Users\***REMOVED***\Desktop\Example_Configuration
+Path         : C:\Users\username\Desktop\Example_Configuration
 Description  : This is an example configuration for the Tenant Management Framework!
 Author       : Mustermann, Max
 Weight       : 50
