@@ -12,6 +12,7 @@
     'TMF.NoDefinitions' = 'No <c="gray">{0}</c> definitions are loaded. There is nothing to do.'
     'TMF.CannotResolveResource' = 'Cannot resolve {0} resource'
     'TMF.UserCanceled' = 'User canceled the operation.'
+    'TMF.Error.QueryWithFilterFailed' = 'Query with filter {0} failed.'
 
     'TMF.Register.PropertySetNotPossible' = 'The provided property set for "{0}" (Type: {1}) is not applicable.'
     'TMF.Register.PropertyWrongType' = 'The provided property set for "{0}" (Type: {1}) is not applicable. The child property {2} has the wrong type. Must be {3} and is {4}.'
