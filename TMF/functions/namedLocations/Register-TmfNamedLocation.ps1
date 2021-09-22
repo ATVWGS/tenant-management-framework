@@ -4,6 +4,7 @@
 	Param (
 		[Parameter(Mandatory = $true)]
 		[string] $displayName,
+		[string[]] $oldNames,
 
 		[Parameter(Mandatory = $true)]
 		[ValidateSet('countryNamedLocation', 'ipNamedLocation')]
@@ -61,6 +62,10 @@
 			displayName = $displayName
 			present = $present
 			sourceConfig = $sourceConfig
+		}
+
+		if ($PSBoundParameters.ContainsKey("oldNames")) {
+			Add-Member -InputObject $object -MemberType NoteProperty -Name "oldNames" -Value @($oldNames | ForEach-Object {Resolve-String $_})
 		}
 
 		switch ($type) {

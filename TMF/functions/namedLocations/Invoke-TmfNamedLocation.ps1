@@ -62,7 +62,9 @@
 				"Update" {					
 					$requestUrl = "$script:graphBaseUrl/identity/conditionalAccess/namedLocations/{0}" -f $result.GraphResource.Id
 					$requestMethod = "PATCH"
-					$requestBody = @{}
+					$requestBody = @{
+						"@odata.type" = $result.GraphResource."@odata.type"
+					}
 					try {
 						foreach ($change in $result.Changes) {						
 							switch ($change.Property) {								

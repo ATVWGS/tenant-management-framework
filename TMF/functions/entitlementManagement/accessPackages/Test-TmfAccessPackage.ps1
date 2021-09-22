@@ -35,8 +35,19 @@ function Test-TmfAccessPackage
 				ResourceName = (Resolve-String -Text $definition.displayName)
 				DesiredConfiguration = $definition
 			}
-
-			$resource = (Invoke-MgGraphRequest -Method GET -Uri ("$script:graphBaseUrl/identityGovernance/entitlementManagement/accessPackages?`$filter=displayName eq '{0}'&`$expand=accessPackageResourceRoleScopes(`$expand=accessPackageResourceRole,accessPackageResourceScope)" -f [System.Web.HttpUtility]::UrlEncode($definition.displayName))).Value
+			
+			try {
+				$resource = (Invoke-MgGraphRequest -Method GET -Uri ("$script:graphBaseUrl/identityGovernance/entitlementManagement/accessPackages?`$filter=displayName eq '{0}'&`$expand=accessPackageResourceRoleScopes(`$expand=accessPackageResourceRole,accessPackageResourceScope)" -f [System.Web.HttpUtility]::UrlEncode($definition.displayName))).Value
+			}
+			catch {
+				Write-PSFMessage -Level Warning -String 'TMF.Error.QueryWithFilterFailed' -StringValues $filter -Tag 'failed'
+				$exception = New-Object System.Data.DataException("Query with filter $filter against Microsoft Graph failed. Error: $_")
+				$errorID = 'QueryWithFilterFailed'
+				$category = [System.Management.Automation.ErrorCategory]::NotSpecified
+				$recordObject = New-Object System.Management.Automation.ErrorRecord($exception, $errorID, $category, $Cmdlet)
+				$cmdlet.ThrowTerminatingError($recordObject)
+			}
+			
 			switch ($resource.Count) {
 				0 {
 					if ($definition.present) {					
