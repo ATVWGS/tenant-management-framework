@@ -37,7 +37,6 @@ When set to "HiddenMembership", only members of the administrative unit can list
 ```
 
 ## Create administrative unit with members, groups and scoped role Membership (Users with administrative roles)
-**Currently without function!**
 
 ```json
 {
@@ -48,16 +47,12 @@ When set to "HiddenMembership", only members of the administrative unit can list
   "groups": ["Group 1", "Group 2"],
   "scopedRoleMembers": [
     {
-    "role_id": "provide role name",
-    "roleMemberInfo":{
-        "id": "User 1 or Group 1"
-      }
+      "role": "Groups Administrator",
+      "identity": "Max Mustermann"
     },
     {
-    "role_id": "provide role name",
-    "roleMemberInfo":{
-        "id": "User 2 or Group 2"
-      }
+      "role": "User Administrator",
+      "identity": "Max Mustermann"
     }
   ],
   "present": true
