@@ -65,7 +65,8 @@ adding a source control
     - [3.6.6. Entitlement Management](\#3.6.6.-entitlement-management)
       - [3.6.6.1. Access Package Catalogs](\#3.6.6.1.-access-package-catalogs)
       - [3.6.6.2. Access Packages](\#3.6.6.2.-access-packages)
-    - [3.6.7. String mapping](\#3.6.7.-string-mapping)
+    - [3.6.7. Administrative Units](\#3.6.7.-administrative-units)
+    - [3.6.8. String mapping](\#3.6.8.-string-mapping)
   - [3.7. Examples](\#3.7.-examples)
     - [3.7.1. Example: A Conditional Access policy set and the required groups](\#3.7.1.-example%3A-a-conditional-access-policy-set-and-the-required-groups)
   - [3.8. Adding existing resources to your configuration](\#3.8.-adding-existing-resources-to-your-configuration)
@@ -556,7 +557,13 @@ Please check the [Access Package Catalogs example.md](./TMF/internal/data/config
 
 Please check the [Access Packages example.md](./TMF/internal/data/configuration/entitlementManagement/accessPackages/example.md) for further information.
 
-### 3.6.6. Access Package Catalogs
+##### Access Package Resources <!-- omit in toc --> 
+Access Package Resources are directly defined in the depending Access Package definition.
+
+##### Access Package Assignement Policies <!-- omit in toc -->
+Access Package Assignement Policies are directly defined the depending Access Package definition.
+
+### 3.6.7. Administrative Units
 A simple Administrative Unit definition.
 
 ```json
@@ -582,13 +589,7 @@ A simple Administrative Unit definition.
 
 Please check the [Administrative Units example.md](./TMF/internal/data/configuration/administrativeUnits/example.md) for further information.
 
-##### Access Package Resources <!-- omit in toc --> 
-Access Package Resources are directly defined in the depending Access Package definition.
-
-##### Access Package Assignement Policies <!-- omit in toc -->
-Access Package Assignement Policies are directly defined the depending Access Package definition.
-
-### 3.6.7. String mapping
+### 3.6.8. String mapping
 String mappings can help you with parameterization of your TMF configurations.
 
 You can create mappings between strings and the values they should be replaced with. Place the mappings in the *stringMappings.json* file in the *stringMappings* folder of your configuration.
