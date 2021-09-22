@@ -27,7 +27,26 @@ function Test-TmfAdministrativeUnits
 				ResourceName = (Resolve-String -Text $definition.displayName)
 				DesiredConfiguration = $definition
 			}
-			$resource = (Invoke-MgGraphRequest -Method GET -Uri ("$script:graphBaseUrl/administrativeUnits/?`$filter=displayName eq '{0}'" -f $definition.displayName)).Value;
+
+			if ("oldNames" -in $definition.Properties()) {				
+				$filter = ($definition.oldNames + $definition.displayName | Foreach-Object {
+					"(displayName eq '{0}')" -f [System.Web.HttpUtility]::UrlEncode($_)
+				}) -join " or "
+			}
+			else {
+				$filter = "(displayName eq '{0}')" -f [System.Web.HttpUtility]::UrlEncode($definition.displayName)
+			}
+			try {
+				$resource = (Invoke-MgGraphRequest -Method GET -Uri ("$script:graphBaseUrl/administrativeUnits/?`$filter={0}" -f $filter)).Value			
+			}
+			catch {
+				Write-PSFMessage -Level Warning -String 'TMF.Error.QueryWithFilterFailed' -StringValues $filter -Tag 'failed'
+				$exception = New-Object System.Data.DataException("Query with filter $filter against Microsoft Graph failed. Error: $_")
+				$errorID = 'QueryWithFilterFailed'
+				$category = [System.Management.Automation.ErrorCategory]::NotSpecified
+				$recordObject = New-Object System.Management.Automation.ErrorRecord($exception, $errorID, $category, $Cmdlet)
+				$cmdlet.ThrowTerminatingError($recordObject)
+			}			
 
 			switch ($resource.Count) {
 				0 {
@@ -42,7 +61,7 @@ function Test-TmfAdministrativeUnits
 					$result["GraphResource"] = $resource
 					if ($definition.present) {
 						$changes = @()
-						foreach ($property in ($definition.Properties() | Where-Object {$_ -notin "displayName", "present", "sourceConfig"})) {
+						foreach ($property in ($definition.Properties() | Where-Object {$_ -notin "oldNames", "present", "sourceConfig"})) {
 							$change = [PSCustomObject] @{
 								Property = $property
 								Actions = $null

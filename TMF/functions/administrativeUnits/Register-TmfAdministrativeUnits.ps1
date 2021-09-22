@@ -4,6 +4,8 @@ function Register-TmfAdministrativeUnits
 	Param (
 		[Parameter(Mandatory = $true)]
 		[string] $displayName,
+		[string[]] $oldNames,
+
 		[string] $description,
         [string] $visibility,
         
@@ -39,7 +41,11 @@ function Register-TmfAdministrativeUnits
 			description = $description
 			visibility = $visibility
 			present = $present
-		};
+		}
+
+		if ($PSBoundParameters.ContainsKey("oldNames")) {
+			Add-Member -InputObject $object -MemberType NoteProperty -Name "oldNames" -Value @($oldNames | ForEach-Object {Resolve-String $_})
+		}
 
 		"members", "groups", "scopedRoleMembers" | ForEach-Object {
 			if ($PSBoundParameters.ContainsKey($_)) {
