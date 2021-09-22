@@ -55,17 +55,15 @@ function Invoke-TmfAdministrativeUnits
                         $scopedRoleMemberships = @()
                         if ($result.DesiredConfiguration.Properties() -contains "scopedRoleMembers") {  
                             $scopedRoleMemberships += $result.DesiredConfiguration.scopedRoleMembers | Foreach-Object {
-                                $memberEndpointName = "users"
                                 $identityId = Resolve-User -InputReference $_.identity -Cmdlet $Cmdlet -DontFailIfNotExisting
                                 if (-Not $identityId) {
-                                    $memberEndpointName = "groups"
                                     $identityId = Resolve-Group -InputReference $_.identity -Cmdlet $Cmdlet
                                 }
 
                                 @{
                                     "roleId" = Resolve-DirectoryRole -InputReference $_.role -Cmdlet $Cmdlet
                                     "roleMemberInfo" = @{
-                                        "id" = "$script:graphBaseUrl/$memberEndpointName/$identityId"
+                                        "id" = $identityId
                                     }
                                 }
                             }
@@ -79,16 +77,19 @@ function Invoke-TmfAdministrativeUnits
                             $requestMethod = "POST"
                             $requestUrl = "{0}/{1}/members/`$ref" -f $requestUrl, $resultObject.id                            
                             $membersToAdd | Foreach-Object {
-                                Invoke-MgGraphRequest -Method $requestMethod -Uri $requestUrl -Body ($_ | ConvertTo-Json -ErrorAction Stop)
+                                $requestBody = ($_ | ConvertTo-Json -ErrorAction Stop)
+                                Write-PSFMessage -Level Verbose -String "TMF.Invoke.SendingRequestWithBody" -StringValues $requestMethod, $requestUrl, $requestBody
+                                Invoke-MgGraphRequest -Method $requestMethod -Uri $requestUrl -Body $requestBody | Out-Null
                             }
                         }
 
                         if ($scopedRoleMemberships.count -gt 0) {
                             $requestMethod = "POST"
-                            $requestUrl = "$script:graphBaseUrl/administrativeUnits/{0}/scopedRoleMembers/`$ref" -f $resultObject.id
+                            $requestUrl = "$script:graphBaseUrl/administrativeUnits/{0}/scopedRoleMembers" -f $resultObject.id
                             $scopedRoleMemberships | Foreach-Object {
-                                $_ | ConvertTo-Json -ErrorAction Stop
-                                Invoke-MgGraphRequest -Method $requestMethod -Uri $requestUrl -Body ($_ | ConvertTo-Json -ErrorAction Stop)
+                                $requestBody = ($_ | ConvertTo-Json -ErrorAction Stop)
+                                Write-PSFMessage -Level Verbose -String "TMF.Invoke.SendingRequestWithBody" -StringValues $requestMethod, $requestUrl, $requestBody
+                                Invoke-MgGraphRequest -Method $requestMethod -Uri $requestUrl -Body $requestBody | Out-Null
                             }
                         }
                     }
@@ -143,12 +144,26 @@ function Invoke-TmfAdministrativeUnits
                                     foreach ($action in $change.Actions.Keys) {
                                         switch ($action){
                                             "Add"{
-                                                $requestUrl = "$script:graphBaseUrl/administrativeUnits/{0}/scopedRoleMembers/`$ref" -f $result.GraphResource.Id
-                                                $requestMethod = "POST"
+                                                $url = "$script:graphBaseUrl/administrativeUnits/{0}/scopedRoleMembers" -f $result.GraphResource.Id
+                                                $method = "POST"
+                                                $change.Actions[$action] | ForEach-Object {													
+													$body = @{
+                                                        "roleId" = Resolve-DirectoryRole -InputReference $_.role -Cmdlet $Cmdlet
+                                                        "roleMemberInfo" = @{
+                                                            "id" = $_.identity
+                                                        }
+                                                    } | ConvertTo-Json -ErrorAction Stop
+													Write-PSFMessage -Level Verbose -String "TMF.Invoke.SendingRequestWithBody" -StringValues $method, $url, $body
+													Invoke-MgGraphRequest -Method $method -Uri $url -Body $body | Out-Null
+												}
                                             }
-                                            "Remove" {
-                                                $requestUrl = "$script:graphBaseUrl/administrativeUnits/{0}/scopedRoleMembers/`$ref" -f $result.GraphResource.Id
-                                                $requestMethod = "DELETE"
+                                            "Remove" {                                                
+                                                $method = "DELETE"
+                                                $change.Actions[$action] | ForEach-Object {
+                                                    $url = "$script:graphBaseUrl/directory/administrativeUnits/{0}/scopedRoleMembers/{1}" -f $result.GraphResource.Id, $_
+													Write-PSFMessage -Level Verbose -String "TMF.Invoke.SendingRequest" -StringValues $method, $url
+													Invoke-MgGraphRequest -Method $method -Uri $url -Body $body | Out-Null
+												}
                                             }
                                         }
                                     }

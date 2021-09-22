@@ -61,11 +61,37 @@ function Test-TmfAdministrativeUnits
 														-Cmdlet $PSCmdlet
 								}
 								"scopedRoleMembers" {
-									#$resourceScopedMembers 		= (Invoke-MgGraphRequest -Method GET -Uri ("$script:graphBaseUrl/administrativeUnits/{0}/scopedRoleMembers" -f $resource.Id)).Value.roleMemberInfo.Id
-									#$resourceScopedMembersRole 	= (Invoke-MgGraphRequest -Method GET -Uri ("$script:graphBaseUrl/administrativeUnits/{0}/scopedRoleMembers" -f $resource.Id)).Value.roleId
-									#$change.Actions = Compare-ResourceList -ReferenceList $resourceScopedMembers `
-									#					-DifferenceList $($definition.scopedRoleMembers | ForEach-Object {Resolve-scopedRoleMember -InputReference $_ -Cmdlet $Cmdlet}) `
-									#					-Cmdlet $PSCmdlet
+									$resourceScopedRoleMembers = (Invoke-MgGraphRequest -Method GET -Uri ("$script:graphBaseUrl/administrativeUnits/{0}/scopedRoleMembers" -f $resource.Id)).Value `
+																| Select-Object @{n = "identity"; e = { $_["roleMemberInfo"]["id"] }}, @{n = "role"; e = { $_["roleId"] }}, @{n = "id"; e = { $_["id"] }}
+
+									$definitionScopedRoleMembers = @()
+									$definition.scopedRoleMembers | Foreach-Object {
+										$identityId = Resolve-User -InputReference $_.identity -Cmdlet $Cmdlet -DontFailIfNotExisting
+										if (-Not $identityId) {
+											$identityId = Resolve-Group -InputReference $_.identity -Cmdlet $Cmdlet
+										}
+										$definitionScopedRoleMembers += [PSCustomObject]@{
+											identity = $identityId
+											role = Resolve-DirectoryRole -InputReference $_.role -Cmdlet $Cmdlet
+										}
+									}									
+									
+									$dummy = Compare-ResourceList -ReferenceList ($resourceScopedRoleMembers | Select-Object role, identity | Foreach-Object {$_ | ConvertTo-Json -Compress}) `
+														-DifferenceList ($definitionScopedRoleMembers | Select-Object role, identity | Foreach-Object {$_ | ConvertTo-Json -Compress}) `
+														-Cmdlet $PSCmdlet
+
+									if ($dummy.Keys.count -gt 0) {
+										$change.Actions = @{}
+										if ($dummy.Keys -contains "Add") { 
+											$change.Actions["Add"] = ($dummy["Add"] | Foreach-Object { $_ | ConvertFrom-Json })
+										}
+										if ($dummy.Keys -contains "Remove") {
+											$change.Actions["Remove"] = @()
+											foreach ($toRemove in ($dummy["Remove"] | Foreach-Object {$_ | ConvertFrom-Json})) {											
+												$change.Actions["Remove"] += ($resourceScopedRoleMembers | Where-Object {$_.role -eq $toRemove.role -and $_.identity -eq $toRemove.identity}).id
+											}
+										}								
+									}							
 								}
 								default {
 									if ($definition.$property -ne $resource.$property) {

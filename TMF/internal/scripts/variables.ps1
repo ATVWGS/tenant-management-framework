@@ -79,3 +79,4 @@ $script:validateFunctionMapping = @{
 
 $script:activatedConfigurations = @() # Overview of all activated configurations.
 $script:desiredConfiguration = @{} # The desired configuration.
+$script:cache = @{} # Multi purpose cache variable
