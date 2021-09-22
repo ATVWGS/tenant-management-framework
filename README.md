@@ -546,13 +546,39 @@ Please check the [Access Package Catalogs example.md](./TMF/internal/data/config
 
 Please check the [Access Packages example.md](./TMF/internal/data/configuration/entitlementManagement/accessPackages/example.md) for further information.
 
+### 3.6.6. Access Package Catalogs
+A simple Administrative Unit definition.
+
+```json
+{
+    "displayName": "Administrative Unit for Testing",
+    "description": "This AU is used for testing",
+    "visibility": "Public",
+    "members": ["max.mustermann@tmacdev.onmicrosoft.com"],
+    "groups": [],
+    "scopedRoleMembers": [
+        {
+            "role": "Groups Administrator",
+            "identity": "Max Mustermann"
+        },
+        {
+            "role": "User Administrator",
+            "identity": "Max Mustermann"
+        }
+    ],
+    "present": true
+}
+```
+
+Please check the [Administrative Units example.md](./TMF/internal/data/configuration/administrativeUnits/example.md) for further information.
+
 ##### Access Package Resources <!-- omit in toc --> 
 Access Package Resources are directly defined in the depending Access Package definition.
 
 ##### Access Package Assignement Policies <!-- omit in toc -->
 Access Package Assignement Policies are directly defined the depending Access Package definition.
 
-### 3.6.6. String mapping
+### 3.6.7. String mapping
 String mappings can help you with parameterization of your TMF configurations.
 
 You can create mappings between strings and the values they should be replaced with. Place the mappings in the *stringMappings.json* file in the *stringMappings* folder of your configuration.
