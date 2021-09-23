@@ -101,6 +101,7 @@ The required scopes depend on what components (resources) you want to configure.
 | Agreements (Terms of Use)                                        | Agreement.ReadWrite.All                                                                                                      |
 | Conditional Access Policies                                      | Policy.ReadWrite.ConditionalAccess, Policy.Read.All, RoleManagement.Read.Directory, Application.Read.All, Agreement.Read.All |
 | Enitlement Management (Access Packages, Access Package Catalogs) | EntitlementManagement.ReadWrite.All                                                                                          |
+| Administrative Units                                             | AdministrativeUnit.ReadWrite.All, Directory.AccessAsUser.All, RoleManagement.ReadWrite.Directory                             |
 
 
 You can also use *Get-TmfRequiredScope* to get the required scopes and combine it with *Connect-MgGraph*.
