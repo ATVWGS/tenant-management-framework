@@ -133,7 +133,7 @@ Configurations always contain a *configuration.json* file at the root level. Thi
 | Description  | Description of the configuration. Here you can discribe, for which tenants this configurations should be used.
 | Author       | The responsible team or person for this configuration.
 | Weight       | When activating multiple configurations, the configuration with the highest weight is loaded last. This means that a resource definition will be overwriten, if the last configuration contains a definition with the same displayName.
-| Prerequisite | With this setting you can define a relationship to an another configuration. For example when a configurations requires a baseline configuration. **Currently not implemented!**
+| Prerequisite | With this setting you can define a relationship to an another configuration by the configuration name. For example when a configurations requires a baseline configuration.
 
 ### 3.4.2. Folder structure
 For each supported resource type there is a subfolder. These subfolders always contain an empty .json file and example.md. 
