@@ -32,6 +32,7 @@
 	begin
 	{
 		$configurationsToActivate = @()
+		#region Prepare to activate
 		foreach ($path in $ConfigurationPaths) {
 			$configuration = [PSCustomObject] @{
 				filePath = "{0}\configuration.json" -f $path
@@ -56,25 +57,39 @@
 				Add-Member -InputObject $configuration -MemberType NoteProperty -Name $_.Name -Value $contentDummy.$($_.Name)
 			}
 			$configuration.alreadyActivated = $script:activatedConfigurations.Name -contains $configuration.Name
-			#endregion
-
-			#region Check prerequisites
-			if ($configuration.Prerequisite.Count -gt 0) {				
-				foreach ($prereq in $configuration.Prerequisite) {
-					if ($prereq -notin $configurationsToActivate.Name) {
-						Stop-PSFFunction -String "TMF.PrerequisiteNotActivated" -StringValues $configuration.Name, $prereq
-						return
-					}
-				}
-			}
-			#endregion
+			#endregion			
 			
 			if (!$Force -and $configuration.alreadyActivated) {
 				Write-PSFMessage -Level Warning -String "Activate-TMFConfiguration.AlreadyActivated" -StringValues $configuration.Name, $configuration.filePath
 			}
 
 			$configurationsToActivate += $configuration
-		}		
+		}
+		#endregion
+		
+		#region Check prerequisites
+		foreach ($configuration in $configurationsToActivate) {			
+			if ($configuration.Prerequisite.Count -gt 0) {				
+				foreach ($prereq in $configuration.Prerequisite) {
+					$prereqMet = $false
+					if ($prereq.contains("||")) {						
+						$prereq.split("||") | Foreach-Object {
+							if ($_.trim() -in $configurationsToActivate.Name) { $prereqMet = $true }
+						}
+					}
+					else {
+						if ($prereq -in $configurationsToActivate.Name) {
+							$prereqMet = $true
+						}
+					}
+					if (-Not $prereqMet) {
+						Stop-PSFFunction -String "TMF.PrerequisiteNotActivated" -StringValues $configuration.Name, $prereq
+						return
+					}
+				}
+			}
+		}
+		#endregion
 	}
 	process
 	{		
