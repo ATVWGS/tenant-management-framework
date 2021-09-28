@@ -4,6 +4,7 @@
 	Param (
 		[Parameter(Mandatory = $true)]
 		[string] $displayName,
+		[string[]] $oldNames,
 
 		[bool] $isViewingBeforeAcceptanceRequired = $true,
 		[bool] $isPerDeviceAcceptanceRequired = $false,
@@ -41,6 +42,10 @@
 			isPerDeviceAcceptanceRequired = $isPerDeviceAcceptanceRequired
 			present = $present
 			sourceConfig = $sourceConfig
+		}
+
+		if ($PSBoundParameters.ContainsKey("oldNames")) {
+			Add-Member -InputObject $object -MemberType NoteProperty -Name "oldNames" -Value @($oldNames | ForEach-Object {Resolve-String $_})
 		}
 		
 		"userReacceptRequiredFrequency", "termsExpiration", "files" | ForEach-Object {

@@ -25,6 +25,9 @@
 		
 		.PARAMETER ConditionalAccessPolicies
 			Return all scopes required for managing conditionalAccessPolicy-resources.
+
+		.PARAMETER ConditionalAccessPolicies
+			Return all scopes required for managing administrativeUnit-resources.
 		
 		.EXAMPLE
 			PS> Connect-MgGraph -Scopes (Get-TMFRequiredScope -Groups)
@@ -50,6 +53,8 @@
 		[switch] $ConditionalAccessPolicies,
 		[Parameter(ParameterSetName = "SpecifiedComponents")]
 		[switch] $EntitlementManagement,
+		[Parameter(ParameterSetName = "SpecifiedComponents")]
+		[switch] $AdministrativeUnits,
 		[Parameter(ParameterSetName = "All")]
 		[switch] $All
 	)
@@ -77,6 +82,9 @@
 		}
 		if ($EntitlementManagement -or $All) {
 			$scopes += "EntitlementManagement.ReadWrite.All"
+		}
+		if ($AdministrativeUnits -or $All) {
+			$scopes += "AdministrativeUnit.ReadWrite.All", "Directory.AccessAsUser.All", "RoleManagement.ReadWrite.Directory"
 		}
 		return ($scopes | Sort-Object -Unique)
 	}

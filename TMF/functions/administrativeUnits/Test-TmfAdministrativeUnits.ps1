@@ -1,22 +1,14 @@
-﻿function Test-TmfGroup
+function Test-TmfAdministrativeUnits
 {
-	<#
-		.SYNOPSIS
-			Test desired configuration against a Tenant.
-		.DESCRIPTION
-			Compare current configuration of a resource type with the desired configuration.
-			Return a result object with the required changes and actions.
-	#>
 	[CmdletBinding()]
 	Param (
 		[System.Management.Automation.PSCmdlet]
 		$Cmdlet = $PSCmdlet
 	)
-	
 	begin
 	{
 		Test-GraphConnection -Cmdlet $Cmdlet
-		$componentName = "groups"
+		$componentName = "administrativeUnits"
 		$tenant = Get-MgOrganization -Property displayName, Id		
 	}
 	process
@@ -31,7 +23,7 @@
 			$result = @{
 				Tenant = $tenant.displayName
 				TenantId = $tenant.Id
-				ResourceType = 'Group'
+				ResourceType = 'administrativeUnits'
 				ResourceName = (Resolve-String -Text $definition.displayName)
 				DesiredConfiguration = $definition
 			}
@@ -45,7 +37,7 @@
 				$filter = "(displayName eq '{0}')" -f [System.Web.HttpUtility]::UrlEncode($definition.displayName)
 			}
 			try {
-				$resource = (Invoke-MgGraphRequest -Method GET -Uri ("$script:graphBaseUrl/groups/?`$filter={0}" -f $filter)).Value
+				$resource = (Invoke-MgGraphRequest -Method GET -Uri ("$script:graphBaseUrl/administrativeUnits/?`$filter={0}" -f $filter)).Value			
 			}
 			catch {
 				Write-PSFMessage -Level Warning -String 'TMF.Error.QueryWithFilterFailed' -StringValues $filter -Tag 'failed'
@@ -54,7 +46,7 @@
 				$category = [System.Management.Automation.ErrorCategory]::NotSpecified
 				$recordObject = New-Object System.Management.Automation.ErrorRecord($exception, $errorID, $category, $Cmdlet)
 				$cmdlet.ThrowTerminatingError($recordObject)
-			}
+			}			
 
 			switch ($resource.Count) {
 				0 {
@@ -76,41 +68,55 @@
 							}
 							switch ($property) {
 								"members" {
-									$resourceMembers = (Invoke-MgGraphRequest -Method GET -Uri ("$script:graphBaseUrl/groups/{0}/members" -f $resource.Id)).Value.Id
+									$resourceMembers = (Invoke-MgGraphRequest -Method GET -Uri ("$script:graphBaseUrl/administrativeUnits/{0}/members/$/microsoft.graph.user" -f $resource.Id)).Value.Id;
 									$change.Actions = Compare-ResourceList -ReferenceList $resourceMembers `
 														-DifferenceList $($definition.members | ForEach-Object {Resolve-User -InputReference $_ -Cmdlet $Cmdlet}) `
 														-Cmdlet $PSCmdlet
 								}
-								"owners" {									
-									$resourceOwners = (Invoke-MgGraphRequest -Method GET -Uri ("$script:graphBaseUrl/groups/{0}/owners" -f $resource.Id)).Value.Id
-									$change.Actions = Compare-ResourceList -ReferenceList $resourceOwners `
-														-DifferenceList $($definition.owners | ForEach-Object {Resolve-User -InputReference $_ -Cmdlet $Cmdlet}) `
+								"groups" {
+									$resourceGroups = (Invoke-MgGraphRequest -Method GET -Uri ("$script:graphBaseUrl/administrativeUnits/{0}/members/$/microsoft.graph.group" -f $resource.Id)).Value.Id;
+									$change.Actions = Compare-ResourceList -ReferenceList $resourceGroups `
+														-DifferenceList $($definition.groups | ForEach-Object {Resolve-Group -InputReference $_ -Cmdlet $Cmdlet}) `
 														-Cmdlet $PSCmdlet
 								}
-								"membershipRule" {
-									if ($definition.$property -ne $resource.$property) {
-										$change.Actions = @{"Set" = $definition.$property}
-										$changes += [PSCustomObject] @{
-											Property = "membershipRuleProcessingState"										
-											Actions = @{"Set" = "On"}
+								"scopedRoleMembers" {
+									$resourceScopedRoleMembers = (Invoke-MgGraphRequest -Method GET -Uri ("$script:graphBaseUrl/administrativeUnits/{0}/scopedRoleMembers" -f $resource.Id)).Value `
+																| Select-Object @{n = "identity"; e = { $_["roleMemberInfo"]["id"] }}, @{n = "role"; e = { $_["roleId"] }}, @{n = "id"; e = { $_["id"] }}
+
+									$definitionScopedRoleMembers = @()
+									$definition.scopedRoleMembers | Foreach-Object {
+										$identityId = Resolve-User -InputReference $_.identity -Cmdlet $Cmdlet -DontFailIfNotExisting
+										if (-Not $identityId) {
+											$identityId = Resolve-Group -InputReference $_.identity -Cmdlet $Cmdlet
 										}
-									}								
-								}
-								"groupTypes" {
-									if ($resource.groupTypes) {
-										if (Compare-Object -ReferenceObject $resource.groupTypes -DifferenceObject $definition.groupTypes) {
-											$change.Actions = @{"Set" = $definition.groupTypes}
-										}
-									}
-									else {
-										if ($definition.groupTypes.count -gt 0) {
-											$change.Actions = @{"Set" = $definition.groupTypes}
+										$definitionScopedRoleMembers += [PSCustomObject]@{
+											identity = $identityId
+											role = Resolve-DirectoryRole -InputReference $_.role -Cmdlet $Cmdlet
 										}
 									}									
+									
+									$dummy = Compare-ResourceList -ReferenceList ($resourceScopedRoleMembers | Select-Object role, identity | Foreach-Object {$_ | ConvertTo-Json -Compress}) `
+														-DifferenceList ($definitionScopedRoleMembers | Select-Object role, identity | Foreach-Object {$_ | ConvertTo-Json -Compress}) `
+														-Cmdlet $PSCmdlet
+
+									if ($dummy.Keys.count -gt 0) {
+										$change.Actions = @{}
+										if ($dummy.Keys -contains "Add") { 
+											$change.Actions["Add"] = ($dummy["Add"] | Foreach-Object { $_ | ConvertFrom-Json })
+										}
+										if ($dummy.Keys -contains "Remove") {
+											$change.Actions["Remove"] = @()
+											foreach ($toRemove in ($dummy["Remove"] | Foreach-Object {$_ | ConvertFrom-Json})) {											
+												$change.Actions["Remove"] += ($resourceScopedRoleMembers | Where-Object {$_.role -eq $toRemove.role -and $_.identity -eq $toRemove.identity}).id
+											}
+										}								
+									}							
 								}
 								default {
 									if ($definition.$property -ne $resource.$property) {
-										$change.Actions = @{"Set" = $definition.$property}
+										if(!( ($property -eq "visibility") -and !($resource.$property) -and ($definition.$property -eq "Public") )){
+											$change.Actions = @{"Set" = $definition.$property};
+										}
 									}
 								}
 							}
@@ -133,7 +139,6 @@
 					$cmdlet.ThrowTerminatingError($recordObject)
 				}
 			}
-			
 			$result
 		}
 	}

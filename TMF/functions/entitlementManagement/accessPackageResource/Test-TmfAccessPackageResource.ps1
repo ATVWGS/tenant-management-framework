@@ -44,8 +44,18 @@ function Test-TmfAccessPackageResource
 			}
 
 			$originId = $definition.originId()
-
-			$resource = (Invoke-MgGraphRequest -Method GET -Uri ("$script:graphBaseUrl/identityGovernance/entitlementManagement/accessPackageCatalogs/{0}/accessPackageResources?`$filter=originId eq '{1}'" -f $catalogId, $originId)).Value
+			try {
+				$resource = (Invoke-MgGraphRequest -Method GET -Uri ("$script:graphBaseUrl/identityGovernance/entitlementManagement/accessPackageCatalogs/{0}/accessPackageResources?`$filter=originId eq '{1}'" -f $catalogId, $originId)).Value
+			}
+			catch {
+				Write-PSFMessage -Level Warning -String 'TMF.Error.QueryWithFilterFailed' -StringValues $filter -Tag 'failed'
+				$exception = New-Object System.Data.DataException("Query with filter $filter against Microsoft Graph failed. Error: $_")
+				$errorID = 'QueryWithFilterFailed'
+				$category = [System.Management.Automation.ErrorCategory]::NotSpecified
+				$recordObject = New-Object System.Management.Automation.ErrorRecord($exception, $errorID, $category, $Cmdlet)
+				$cmdlet.ThrowTerminatingError($recordObject)
+			}
+			
 			switch ($resource.count) {
 				0 {
 					if ($definition.present) {					

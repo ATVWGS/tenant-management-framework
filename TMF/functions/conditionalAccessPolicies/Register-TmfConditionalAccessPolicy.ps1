@@ -4,6 +4,7 @@
 	Param (
 		[Parameter(Mandatory = $true)]
 		[string] $displayName,
+		[string[]] $oldNames,
 
 		# Conditions
 		[string[]] $includeUsers,
@@ -76,6 +77,10 @@
 			state = $state
 			present = $present
 			sourceConfig = $sourceConfig
+		}
+
+		if ($PSBoundParameters.ContainsKey("oldNames")) {
+			Add-Member -InputObject $object -MemberType NoteProperty -Name "oldNames" -Value @($oldNames | ForEach-Object {Resolve-String $_})
 		}
 		
 		@(

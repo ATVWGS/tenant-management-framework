@@ -8,7 +8,7 @@
   "isPerDeviceAcceptanceRequired": false,
   "userReacceptRequiredFrequency": "P90D",
   "termsExpiration": {
-    "startDateTime": "05.03.2021 00:00:00",
+    "startDateTime": "2014-01-01T00:00:00Z",
     "frequency": "PT1M"
   },
   "files": [

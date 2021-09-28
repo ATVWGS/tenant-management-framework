@@ -22,7 +22,7 @@
 			return
 		}		
 		
-		$compare = Compare-Object -ReferenceObject $ReferenceList -DifferenceObject $DifferenceList
+		$compare = Compare-Object -ReferenceObject $ReferenceList -DifferenceObject $DifferenceList				
 		if (-Not $compare) { return }
 
 		$result = @{}

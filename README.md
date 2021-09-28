@@ -57,14 +57,16 @@ adding a source control
     - [3.5.4. Invoke-Tmf* - Perform actions against Graph](\#3.5.4.-invoke-tmf%2a---perform-actions-against-graph)
     - [3.5.5. Register-Tmf* - Add definitions temporarily](\#3.5.5.-register-tmf%2a---add-definitions-temporarily)
   - [3.6. Resources types](\#3.6.-resources-types)
-    - [3.6.1. Groups](\#3.6.1.-groups)
-    - [3.6.2. Conditional Access Policies](\#3.6.2.-conditional-access-policies)
-    - [3.6.3. Named Locations](\#3.6.3.-named-locations)
-    - [3.6.4. Agreements (Terms of Use)](\#3.6.4.-agreements-%28terms-of-use%29)
-    - [3.6.5. Entitlement Management](\#3.6.5.-entitlement-management)
-      - [3.6.5.1. Access Package Catalogs](\#3.6.5.1.-access-package-catalogs)
-      - [3.6.5.2. Access Packages](\#3.6.5.2.-access-packages)
-    - [3.6.6. String mapping](\#3.6.6.-string-mapping)
+    - [3.6.1. General properties](\#3.6.1.-general-properties)
+    - [3.6.2. Groups](\#3.6.2.-groups)
+    - [3.6.3. Conditional Access Policies](\#3.6.3.-conditional-access-policies)
+    - [3.6.4. Named Locations](\#3.6.4.-named-locations)
+    - [3.6.5. Agreements (Terms of Use)](\#3.6.5.-agreements-%28terms-of-use%29)
+    - [3.6.6. Entitlement Management](\#3.6.6.-entitlement-management)
+      - [3.6.6.1. Access Package Catalogs](\#3.6.6.1.-access-package-catalogs)
+      - [3.6.6.2. Access Packages](\#3.6.6.2.-access-packages)
+    - [3.6.7. Administrative Units](\#3.6.7.-administrative-units)
+    - [3.6.8. String mapping](\#3.6.8.-string-mapping)
   - [3.7. Examples](\#3.7.-examples)
     - [3.7.1. Example: A Conditional Access policy set and the required groups](\#3.7.1.-example%3A-a-conditional-access-policy-set-and-the-required-groups)
   - [3.8. Adding existing resources to your configuration](\#3.8.-adding-existing-resources-to-your-configuration)
@@ -99,6 +101,7 @@ The required scopes depend on what components (resources) you want to configure.
 | Agreements (Terms of Use)                                        | Agreement.ReadWrite.All                                                                                                      |
 | Conditional Access Policies                                      | Policy.ReadWrite.ConditionalAccess, Policy.Read.All, RoleManagement.Read.Directory, Application.Read.All, Agreement.Read.All |
 | Enitlement Management (Access Packages, Access Package Catalogs) | EntitlementManagement.ReadWrite.All                                                                                          |
+| Administrative Units                                             | AdministrativeUnit.ReadWrite.All, Directory.AccessAsUser.All, RoleManagement.ReadWrite.Directory                             |
 
 
 You can also use *Get-TmfRequiredScope* to get the required scopes and combine it with *Connect-MgGraph*.
@@ -130,7 +133,7 @@ Configurations always contain a *configuration.json* file at the root level. Thi
 | Description  | Description of the configuration. Here you can discribe, for which tenants this configurations should be used.
 | Author       | The responsible team or person for this configuration.
 | Weight       | When activating multiple configurations, the configuration with the highest weight is loaded last. This means that a resource definition will be overwriten, if the last configuration contains a definition with the same displayName.
-| Prerequisite | With this setting you can define a relationship to an another configuration. For example when a configurations requires a baseline configuration. **Currently not implemented!**
+| Prerequisite | With this setting you can define a relationship to an another configuration by the configuration name. For example when a configurations requires a baseline configuration.
 
 ### 3.4.2. Folder structure
 For each supported resource type there is a subfolder. These subfolders always contain an empty .json file and example.md. 
@@ -357,7 +360,16 @@ A resource must be registered before the Tenant Management Framework can test it
 The supported resources are based on the endpoints and resource types provided by [Microsoft Graph](https://developer.microsoft.com/en-us/graph).
 Most of the definition files use the json syntax that the API endpoint also uses.
 
-### 3.6.1. Groups
+### 3.6.1. General properties
+All main resource types support the following general properties.
+
+| Name | Type | Use case | Not supported by |
+|------|------|----------|------------------|
+| displayName | string | Is the mainly used identifier of a resource. We are always using the displayName to search resources. | |
+| oldNames | string[] | Allows you to rename a resource by searching it using an old name. **Example:** When group "Group A" should now be called "Group B", you can specify "Group A" in the oldNames property and set the displayName to "Group B". The TMF will update the displayName in the tenant automatically. | entitlementManagement (accessPackages, accessPackageCatalogs, accessPackageResource, accessPackageAssignementPolicies) |
+| present | bool | Is _true_ by default. If you set it to _false_, the resource is deleted. | |
+
+### 3.6.2. Groups
 An example definition for a simple Azure AD security group with a predefined member and a predefined owner.
 
 ```json
@@ -376,7 +388,7 @@ An example definition for a simple Azure AD security group with a predefined mem
 
 Please check the [Groups example.md](./TMF/internal/data/configuration/groups/example.md) for further information.
 
-### 3.6.2. Conditional Access Policies
+### 3.6.3. Conditional Access Policies
 An example policy definition that would affect all members of a group to accept ToU and and provide MFA.
 
 ```json
@@ -398,7 +410,7 @@ An example policy definition that would affect all members of a group to accept 
 
 Please check the [Conditional Access Policy example.md](./TMF/internal/data/configuration/conditionalAccessPolicies/example.md) for further information.
 
-### 3.6.3. Named Locations
+### 3.6.4. Named Locations
 An example IP Named Location definition.
 
 ```json
@@ -422,7 +434,7 @@ An example IP Named Location definition.
 
 Please check the [Named Location example.md](./TMF/internal/data/configuration/namedLocations/example.md) for further information.
 
-### 3.6.4. Agreements (Terms of Use)
+### 3.6.5. Agreements (Terms of Use)
 
 An example Agreement definition with a single PDF file added.
 
@@ -450,10 +462,10 @@ An example Agreement definition with a single PDF file added.
 
 Please check the [Agreements example.md](./TMF/internal/data/configuration/agreements/example.md) for further information.
 
-### 3.6.5. Entitlement Management
+### 3.6.6. Entitlement Management
 Entitlement Management can be done by the following resource types. For further information about Azure AD Entitlement Management you can read the official documentation: https://docs.microsoft.com/en-us/azure/active-directory/governance/entitlement-management-overview.
 
-#### 3.6.5.1. Access Package Catalogs
+#### 3.6.6.1. Access Package Catalogs
 A simple Access Package Catalog definition.
 
 ```json
@@ -467,7 +479,7 @@ A simple Access Package Catalog definition.
 
 Please check the [Access Package Catalogs example.md](./TMF/internal/data/configuration/entitlementManagement/accessPackageCatalogs/example.md) for further information.
 
-#### 3.6.5.2. Access Packages
+#### 3.6.6.2. Access Packages
 
 ```json
 {
@@ -552,7 +564,33 @@ Access Package Resources are directly defined in the depending Access Package de
 ##### Access Package Assignement Policies <!-- omit in toc -->
 Access Package Assignement Policies are directly defined the depending Access Package definition.
 
-### 3.6.6. String mapping
+### 3.6.7. Administrative Units
+A simple Administrative Unit definition.
+
+```json
+{
+    "displayName": "Administrative Unit for Testing",
+    "description": "This AU is used for testing",
+    "visibility": "Public",
+    "members": ["max.mustermann@tmacdev.onmicrosoft.com"],
+    "groups": [],
+    "scopedRoleMembers": [
+        {
+            "role": "Groups Administrator",
+            "identity": "Max Mustermann"
+        },
+        {
+            "role": "User Administrator",
+            "identity": "Max Mustermann"
+        }
+    ],
+    "present": true
+}
+```
+
+Please check the [Administrative Units example.md](./TMF/internal/data/configuration/administrativeUnits/example.md) for further information.
+
+### 3.6.8. String mapping
 String mappings can help you with parameterization of your TMF configurations.
 
 You can create mappings between strings and the values they should be replaced with. Place the mappings in the *stringMappings.json* file in the *stringMappings* folder of your configuration.
