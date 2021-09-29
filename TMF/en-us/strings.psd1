@@ -1,10 +1,9 @@
 # This is where the strings go, that are written by
 # Write-PSFMessage, Stop-PSFFunction or the PSFramework validation scriptblocks
-@{   
-
+@{
     'TMF.ConfigurationFileNotFound' = 'Can not find configuration file {0}.'
     'TMF.RegisterComponent.AlreadyLoaded' = 'A {0} with name "{1}" from source configuration {2} has already been loaded. Ignoring {0}.'
-    'TMF.PrerequisiteNotActivated' = '[{0}] Configuration "{1}" is not activated. Please activate related configurations before this configuration. It is also possible to activate them in a single command. Specify them in the correct order.'
+    'TMF.PrerequisiteNotActivated' = '[{0}] Configuration "{1}" is not activated. Please activate related configurations before this configuration. It is also possible to activate them in a single command.'
     'TMF.TenantInformation' = 'Currently connected to <c="red">{0}</c> (<c="gray">{1}</c>)'
     'TMF.StartingTestForResource' = 'Starting tests for <c="yellow">{0}</c>'
     'TMF.StartingInvokeForResource' = 'Invoking <c="yellow">{0}</c>'
