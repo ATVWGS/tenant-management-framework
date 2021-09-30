@@ -2,16 +2,15 @@
 
 Tenant Management Framework <!-- omit in toc -->
 ===========================
-*by [Volkswagen Group Services GmbH](https://volkswagen-groupservices.com)*
 
 ![GitHub](https://img.shields.io/github/license/ATVWGS/tenant-management-framework)
-[![TMF](https://img.shields.io/powershellgallery/v/TMF.svg?label=TMF)](https://www.powershellgallery.com/packages/TMF/0.1.21)
+[![TMF](https://img.shields.io/powershellgallery/v/TMF.svg?label=TMF)](https://www.powershellgallery.com/packages/TMF/)
 
 # 1. Introduction 
 The Tenant Management Framework is a Powershell module that is able to create, update and
 delete resources or settings via the Microsoft Graph API. The module provides simple
 Powershell cmdlets to deploy and manage a set of predefined configuration files. The basic idea is
-based on the [Active Directory Management Framework](https://admf.one>).
+based on the [Active Directory Management Framework](https://admf.one).
 
 ![Showcase](./assets/images/showcase.gif)
 
@@ -133,7 +132,22 @@ Configurations always contain a *configuration.json* file at the root level. Thi
 | Description  | Description of the configuration. Here you can discribe, for which tenants this configurations should be used.
 | Author       | The responsible team or person for this configuration.
 | Weight       | When activating multiple configurations, the configuration with the highest weight is loaded last. This means that a resource definition will be overwriten, if the last configuration contains a definition with the same displayName.
-| Prerequisite | With this setting you can define a relationship to an another configuration by the configuration name. For example when a configurations requires a baseline configuration.
+| Prerequisite | With this setting you can define a relationship to an another configuration by the configuration name. For example when a configurations requires a baseline configuration. It is also possible to allow different configurations as prerequisite using an OR-operator. This can be helpful when the target tenants are slightly different. For example: TenantConfig1 || TenantConfig2 || TenantConfig3
+
+#### 3.4.1.1. Prerequisite OR-operator example
+
+```json
+{
+    "Name":  "Example Configuration",
+    "Description":  "This is a example configuration.",
+    "Author":  "Mustermann, Max",
+    "Weight":  50,
+    "Prerequisite":  [
+                        "Default_Config",
+                        "DEV_Tenant_Config || QA_Tenant_Config || PROD_Tenant_Config"
+                     ]
+}
+```
 
 ### 3.4.2. Folder structure
 For each supported resource type there is a subfolder. These subfolders always contain an empty .json file and example.md. 
