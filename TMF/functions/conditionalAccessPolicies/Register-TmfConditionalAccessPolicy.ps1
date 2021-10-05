@@ -12,6 +12,7 @@
 		[string[]] $includeGroups,
 		[string[]] $excludeGroups,
 		[string[]] $includeRoles,
+		[string[]] $excludeRoles,
 		[string[]] $includeApplications,
 		[string[]] $excludeApplications,
 		[string[]] $includeLocations,
@@ -85,7 +86,7 @@
 		
 		@(
 			"includeUsers", "excludeUsers", "includeGroups", "excludeGroups",
-			"includeRoles", "includeApplications", "excludeApplications",
+			"includeRoles", "excludeRoles", "includeApplications", "excludeApplications",
 			"includeLocations", "excludeLocations", "includePlatforms", "excludePlatforms",
 			"clientAppTypes", "userRiskLevels", "signInRiskLevels", "builtInControls",
 			"customAuthenticationFactors", "operator", "termsOfUse"
