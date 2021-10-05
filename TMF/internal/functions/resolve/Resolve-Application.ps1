@@ -18,7 +18,7 @@
 			if ($InputReference -match $script:guidRegex) {
 				$application = (Invoke-MgGraphRequest -Method GET -Uri ("$script:graphBaseUrl/servicePrincipals/{0}" -f $InputReference)).Value
 			}
-			elseif ($InputReference -in @("All")) {
+			elseif ($InputReference -in @("All", "Office365")) {
 				return $InputReference
 			}
 			else {
