@@ -70,8 +70,13 @@
 								$requestBody["conditions"][$property] = $result.DesiredConfiguration.$property
 							}
 							elseif ($property -in @("operator", "builtInControls", "customAuthenticationFactors", "termsOfUse")) {
-								if (-Not $requestBody["grantControls"]) { $requestBody["grantControls"] = @{} }
-								$requestBody["grantControls"][$property] = $result.DesiredConfiguration.$property
+								if (-Not $requestBody["grantControls"]) { $requestBody["grantControls"] = @{} }								
+								if ($property -eq "termsOfUse") {
+									$requestBody["grantControls"][$property] = @($result.DesiredConfiguration.$property | ForEach-Object {Resolve-Agreement -InputReference $_ -Cmdlet $Cmdlet})
+								}
+								else {
+									$requestBody["grantControls"][$property] = $result.DesiredConfiguration.$property
+								}
 							}
 						}
 						
