@@ -18,7 +18,7 @@
 			if ($InputReference -match $script:guidRegex) {
 				$application = (Invoke-MgGraphRequest -Method GET -Uri ("$script:graphBaseUrl/servicePrincipals/{0}" -f $InputReference)).Value
 			}
-			elseif ($InputReference -in @("All")) {
+			elseif ($InputReference -in @("All", "Office365")) {
 				return $InputReference
 			}
 			else {
@@ -29,7 +29,7 @@
 			elseif (-Not $application -and $DontFailIfNotExisting) { return }
 
 			if ($application.count -gt 1) { throw "Got multiple applications for $InputReference" }
-			return $application.Id
+			return $application.appId
 		}
 		catch {
 			Write-PSFMessage -Level Warning -String 'TMF.CannotResolveResource' -StringValues "Application" -Tag 'failed' -ErrorRecord $_

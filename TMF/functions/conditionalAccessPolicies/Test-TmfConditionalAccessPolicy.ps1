@@ -23,7 +23,7 @@
 			"Users" = (Get-Command Resolve-User)
 			"Groups" = (Get-Command Resolve-Group)
 			"Applications" = (Get-Command Resolve-Application)
-			"Roles" = (Get-Command Resolve-DirectoryRole)
+			"Roles" = (Get-Command Resolve-DirectoryRoleTemplate)
 			"Locations" = (Get-Command Resolve-NamedLocation)
 			"Platforms" = "DirectCompare"
 		}
