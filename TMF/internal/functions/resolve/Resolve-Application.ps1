@@ -29,7 +29,7 @@
 			elseif (-Not $application -and $DontFailIfNotExisting) { return }
 
 			if ($application.count -gt 1) { throw "Got multiple applications for $InputReference" }
-			return $application.Id
+			return $application.appId
 		}
 		catch {
 			Write-PSFMessage -Level Warning -String 'TMF.CannotResolveResource' -StringValues "Application" -Tag 'failed' -ErrorRecord $_
