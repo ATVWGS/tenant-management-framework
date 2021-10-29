@@ -79,4 +79,8 @@ $script:validateFunctionMapping = @{
 
 $script:activatedConfigurations = @() # Overview of all activated configurations.
 $script:desiredConfiguration = @{} # The desired configuration.
+foreach ($resource in $script:supportedResources.Keys) {
+    $script:desiredConfiguration[$resource] = @()
+}
+
 $script:cache = @{} # Multi purpose cache variable

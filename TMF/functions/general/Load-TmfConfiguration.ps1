@@ -15,33 +15,50 @@
 	)
 	
 	begin
-	{	
+	{
+		function Register-Resources {
+			Param (
+				[object[]] $Resources,
+				[string] $ResourceType
+			)
+			if ($Resources.Count -gt 0) {
+				$Resources | Foreach-Object {
+					$resource = $_ | Add-Member -NotePropertyMembers @{sourceConfig = $configuration.Name} -PassThru | ConvertTo-PSFHashtable -Include $($script:supportedResources[$ResourceType]["registerFunction"].Parameters.Keys)
+					# Calls the Register-Tmf(.*) function
+					& $script:supportedResources[$ResourceType]["registerFunction"] @resource -Cmdlet $PSCmdlet
+				}
+			}
+		}
+
 		$configurationsToLoad = Get-TmfActiveConfiguration
 		$script:desiredConfiguration = @{}
 	}
 	process
 	{
+		# Register stringMappings first
+		# The stringMappings required for the template functions to work.
 		foreach ($configuration in $configurationsToLoad) {
-			$resourceDirectories = Get-ChildItem $configuration.Path -Directory -Recurse
-			foreach ($resourceDirectory in $resourceDirectories) {				
-				if ($resourceDirectory.Name -notin $script:supportedResources.Keys) {
-					Write-PSFMessage -Level Verbose -String "Load-TmfConfiguration.NotSupportedComponent" -StringValues $resourceDirectory.Name, $configuration.Name
-					continue
-				}
-				if ("registerFunction" -notin $script:supportedResources[$resourceDirectory.Name].Keys) { continue }
-				
-				if (-Not $script:desiredConfiguration.ContainsKey($resourceDirectory.Name)) {
-					$script:desiredConfiguration[$resourceDirectory.Name] = @()
-				}				
-				Get-ChildItem -Path $resourceDirectory.FullName -File -Filter "*.json" | ForEach-Object {
-					$content = Get-Content $_.FullName | ConvertFrom-Json
-					if ($content.count -gt 0) {
-						$content | Foreach-Object {
-							$resource = $_ | Add-Member -NotePropertyMembers @{sourceConfig = $configuration.Name} -PassThru | ConvertTo-PSFHashtable -Include $($script:supportedResources[$resourceDirectory.Name]["registerFunction"].Parameters.Keys)
-							# Calls the Register-Tmf(.*) function
-							& $script:supportedResources[$resourceDirectory.Name]["registerFunction"] @resource -Cmdlet $PSCmdlet
-						}
-					}					 
+			$stringMappingsDirectory = "{0}stringMappings" -f $configuration.Path
+			if (-Not (Test-Path $stringMappingsDirectory)) { continue }
+
+			Get-ChildItem -Path $stringMappingsDirectory -File -Filter "*.json" | ForEach-Object {
+				$content = Get-Content $_.FullName -Encoding UTF8 | Out-String | ConvertFrom-Json				
+				Register-Resources -Resources $content -ResourceType "stringMappings"								 
+			}
+		}
+
+		# Register all other resources
+		foreach ($configuration in $configurationsToLoad) {
+			$resourceDirectories = Get-ChildItem $configuration.Path -Directory -Recurse			
+
+			foreach ($resourceType in ($script:supportedResources.GetEnumerator() | Where-Object {$_.Name -ne "stringMappings"} | Sort-Object {$_.Value.weight}).Name) {					
+				$resourceDirectory = "{0}{1}" -f $configuration.Path, $resourceType
+				if (-Not (Test-Path $resourceDirectory)) { continue }
+
+				Get-ChildItem -Path $resourceDirectory -File -Filter "*.json" | ForEach-Object {
+					$content = Get-Content $_.FullName -Encoding UTF8 | Out-String
+					$content = Assert-TemplateFunctions -InputTemplate $content | ConvertFrom-Json
+					Register-Resources -Resources $content -ResourceType $resourceType
 				}
 			}
 		}
