@@ -45,22 +45,26 @@ $script:supportedResources = @{
         "registerFunction" = (Get-Command Register-TmfAccessPackageCatalog)
         "testFunction" = (Get-Command Test-TmfAccessPackageCatalog)
         "invokeFunction" = (Get-Command Invoke-TmfAccessPackageCatalog)
+        "parentType" = "entitlementManagement"
         "weight" = 54
     }
     "accessPackageResources" = @{
         "testFunction" = (Get-Command Test-TmfAccessPackageResource)
         "invokeFunction" = (Get-Command Invoke-TmfAccessPackageResource)
+        "parentType" = "entitlementManagement"
         "weight" = 55
     }
     "accessPackages" = @{
         "registerFunction" = (Get-Command Register-TmfAccessPackage)
         "testFunction" = (Get-Command Test-TmfAccessPackage)
         "invokeFunction" = (Get-Command Invoke-TmfAccessPackage)
+        "parentType" = "entitlementManagement"
         "weight" = 56
     }
     "accessPackageAssignementPolicies" = @{     
         "testFunction" = (Get-Command Test-TmfAccessPackageAssignementPolicy)
         "invokeFunction" = (Get-Command Invoke-TmfAccessPackageAssignementPolicy)
+        "parentType" = "entitlementManagement"
         "weight" = 57
     }    
 } # All currently supported components.

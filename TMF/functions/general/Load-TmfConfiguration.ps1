@@ -51,21 +51,29 @@
 		foreach ($configuration in $configurationsToLoad) {
 			Write-Progress -Id 0 -Activity "Activating $($configuration.Name)"
 			
-			foreach ($resourceType in ($script:supportedResources.GetEnumerator() | Where-Object {$_.Name -ne "stringMappings"} | Sort-Object {$_.Value.weight}).Name) {
-				Write-Progress -Id 1 -Activity "Loading $resourceType" -Status "Starting" -PercentComplete 0
-				$resourceDirectory = "{0}{1}" -f $configuration.Path, $resourceType
-				if (-Not (Test-Path $resourceDirectory)) { continue; Write-Progress -Id 1 -Activity "Loading $resourceType" -Completed }
+			foreach ($resourceType in ($script:supportedResources.GetEnumerator() | Where-Object {$_.Name -ne "stringMappings"} | Sort-Object {$_.Value.weight})) {
+				$resourceTypeName = $resourceType.Name
+				Write-Progress -Id 1 -Activity "Loading $resourceTypeName" -Status "Starting" -PercentComplete 0
+				
+				if ($resourceType.Value["parentType"]) {
+					$resourceDirectory = "{0}{1}\{2}" -f $configuration.Path, $resourceType.Value["parentType"], $resourceTypeName
+				}
+				else {
+					$resourceDirectory = "{0}{1}" -f $configuration.Path, $resourceTypeName
+				}
+				
+				if (-Not (Test-Path $resourceDirectory)) { continue; Write-Progress -Id 1 -Activity "Loading $resourceTypeName" -Completed }
 
 				$counter = 0
 				$definitionFiles = Get-ChildItem -Path $resourceDirectory -File -Filter "*.json"								
 				$definitionFiles | ForEach-Object {
-					Write-Progress -Id 1 -Activity "Loading $resourceType" -CurrentOperation "Reading file $($_.Name)" -PercentComplete (($counter / $definitionFiles.count) * 100)
+					Write-Progress -Id 1 -Activity "Loading $resourceTypeName" -CurrentOperation "Reading file $($_.Name)" -PercentComplete (($counter / $definitionFiles.count) * 100)
 					$content = Get-Content $_.FullName -Encoding UTF8 | Out-String
 					$content = Assert-TemplateFunctions -InputTemplate $content | ConvertFrom-Json
-					Register-Resources -Id 1 -Resources $content -ResourceType $resourceType					
+					Register-Resources -Id 1 -Resources $content -ResourceType $resourceTypeName					
 					$counter++
 				}
-				Write-Progress -Id 1 -Activity "Loading $resourceType" -Completed
+				Write-Progress -Id 1 -Activity "Loading $resourceTypeName" -Completed
 			}
 
 			Write-Progress -Id 0 -Activity "Activating $($configuration.Name)" -Completed
