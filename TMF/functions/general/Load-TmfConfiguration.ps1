@@ -42,8 +42,9 @@
 			if (-Not (Test-Path $stringMappingsDirectory)) { continue }
 
 			Get-ChildItem -Path $stringMappingsDirectory -File -Filter "*.json" | ForEach-Object {
+				Write-Progress -Activity "Loading string mappings from $($_.Name)"
 				$content = Get-Content $_.FullName -Encoding UTF8 | Out-String | ConvertFrom-Json				
-				Register-Resources -Resources $content -ResourceType "stringMappings"								 
+				Register-Resources -Resources $content -ResourceType "stringMappings"				
 			}
 		}
 
@@ -65,11 +66,11 @@
 				if (-Not (Test-Path $resourceDirectory)) { continue; Write-Progress -Id 1 -Activity "Loading $resourceTypeName" -Completed }
 
 				$counter = 0
-				$definitionFiles = Get-ChildItem -Path $resourceDirectory -File -Filter "*.json"								
+				$definitionFiles = Get-ChildItem -Path $resourceDirectory -File -Filter "*.json"
 				$definitionFiles | ForEach-Object {
 					Write-Progress -Id 1 -Activity "Loading $resourceTypeName" -CurrentOperation "Reading file $($_.Name)" -PercentComplete (($counter / $definitionFiles.count) * 100)
 					$content = Get-Content $_.FullName -Encoding UTF8 | Out-String
-					$content = Assert-TemplateFunctions -InputTemplate $content | ConvertFrom-Json
+					$content = Assert-TemplateFunctions -InputTemplate $content | ConvertFrom-Json					
 					Register-Resources -Id 1 -Resources $content -ResourceType $resourceTypeName					
 					$counter++
 				}
