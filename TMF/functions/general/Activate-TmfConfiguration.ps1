@@ -74,11 +74,11 @@
 					$prereqMet = $false
 					if ($prereq.contains("||")) {						
 						$prereq.split("||") | Foreach-Object {
-							if ($_.trim() -in $configurationsToActivate.Name) { $prereqMet = $true }
+							if ($_.trim() -in $configurationsToActivate.Name -or $_.trim() -in (Get-TmfActiveConfiguration).Name) { $prereqMet = $true }
 						}
 					}
 					else {
-						if ($prereq -in $configurationsToActivate.Name) {
+						if ($prereq -in $configurationsToActivate.Name -or $prereq -in (Get-TmfActiveConfiguration).Name) {
 							$prereqMet = $true
 						}
 					}
@@ -116,7 +116,7 @@
 	}
 	end
 	{
-		if (!$DoNotLoad) {
+		if (-Not $DoNotLoad) {
 			Load-TmfConfiguration
 		}
 	}
