@@ -38,7 +38,7 @@
 		# Register stringMappings first
 		# The stringMappings required for the template functions to work.
 		foreach ($configuration in $configurationsToLoad) {
-			$stringMappingsDirectory = "{0}stringMappings" -f $configuration.Path
+			$stringMappingsDirectory = "{0}\stringMappings" -f $configuration.Path
 			if (-Not (Test-Path $stringMappingsDirectory)) { continue }
 
 			Get-ChildItem -Path $stringMappingsDirectory -File -Filter "*.json" | ForEach-Object {
@@ -57,10 +57,10 @@
 				Write-Progress -Id 1 -Activity "Loading $resourceTypeName" -Status "Starting" -PercentComplete 0
 				
 				if ($resourceType.Value["parentType"]) {
-					$resourceDirectory = "{0}{1}\{2}" -f $configuration.Path, $resourceType.Value["parentType"], $resourceTypeName
+					$resourceDirectory = "{0}\{1}\{2}" -f $configuration.Path, $resourceType.Value["parentType"], $resourceTypeName
 				}
 				else {
-					$resourceDirectory = "{0}{1}" -f $configuration.Path, $resourceTypeName
+					$resourceDirectory = "{0}\{1}" -f $configuration.Path, $resourceTypeName
 				}
 				
 				if (-Not (Test-Path $resourceDirectory)) { continue; Write-Progress -Id 1 -Activity "Loading $resourceTypeName" -Completed }
