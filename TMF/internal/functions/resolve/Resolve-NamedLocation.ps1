@@ -16,7 +16,8 @@
 	{			
 		try {
 			if ($InputReference -match $script:guidRegex) {
-				$location = (Invoke-MgGraphRequest -Method GET -Uri ("$script:graphBaseUrl/identity/conditionalAccess/namedLocations/{0}" -f $InputReference)).Value
+				$providedId = $true
+				$location = Invoke-MgGraphRequest -Method GET -Uri ("$script:graphBaseUrl/identity/conditionalAccess/namedLocations/{0}" -f $InputReference)
 			}
 			elseif ($InputReference -in @("All", "AllTrusted")) {
 				return $InputReference
@@ -28,7 +29,7 @@
 			if (-Not $location -and -Not $DontFailIfNotExisting) { throw "Cannot find namedLocation $InputReference" } 
 			elseif (-Not $location -and $DontFailIfNotExisting) { return }
 
-			if ($location.count -gt 1) { throw "Got multiple namedLocations for $InputReference" }
+			if ($location.count -gt 1 -and -not $providedId) { throw "Got multiple namedLocations for $InputReference" }
 			return $location.Id
 		}
 		catch {
