@@ -16,7 +16,8 @@ function Resolve-AccessPackageCatalog
 	{			
 		try {
 			if ($InputReference -match $script:guidRegex) {
-				$catalog = (Invoke-MgGraphRequest -Method GET -Uri ("$script:graphBaseUrl/identityGovernance/entitlementManagement/accessPackageCatalogs/{0}" -f $InputReference)).Value
+				$providedId = $true
+				$catalog = Invoke-MgGraphRequest -Method GET -Uri ("$script:graphBaseUrl/identityGovernance/entitlementManagement/accessPackageCatalogs/{0}" -f $InputReference)
 			}
 			else {
 				$catalog = (Invoke-MgGraphRequest -Method GET -Uri ("$script:graphBaseUrl/identityGovernance/entitlementManagement/accessPackageCatalogs/?`$filter=displayName eq '{0}'" -f $InputReference)).Value
@@ -25,7 +26,7 @@ function Resolve-AccessPackageCatalog
 			if (-Not $catalog -and -Not $DontFailIfNotExisting){ throw "Cannot find accessPackageCatalog $InputReference" } 
 			elseif (-Not $catalog -and $DontFailIfNotExisting) { return }
 
-			if ($catalog.count -gt 1) { throw "Got multiple accessPackageCatalogs for $InputReference" }
+			if ($catalog.count -gt 1 -and -not $providedId) { throw "Got multiple accessPackageCatalogs for $InputReference" }
 			return $catalog.Id
 		}
 		catch {

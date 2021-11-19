@@ -16,7 +16,8 @@
 	{			
 		try {
 			if ($InputReference -match $script:guidRegex) {
-				$agreement = (Invoke-MgGraphRequest -Method GET -Uri ("$script:graphBaseUrl/agreements/{0}" -f $InputReference)).Value
+				$providedId = $true
+				$agreement = Invoke-MgGraphRequest -Method GET -Uri ("$script:graphBaseUrl/agreements/{0}" -f $InputReference)
 			}
 			else {
 				$agreement = (Invoke-MgGraphRequest -Method GET -Uri ("$script:graphBaseUrl/agreements/?`$filter=displayName eq '{0}'" -f $InputReference)).Value
@@ -25,7 +26,7 @@
 			if (-Not $agreement -and -Not $DontFailIfNotExisting) { throw "Cannot find agreement $InputReference" } 
 			elseif (-Not $location -and $DontFailIfNotExisting) { return }
 
-			if ($agreement.count -gt 1) { throw "Got multiple agreements for $InputReference" }
+			if ($agreement.count -gt 1 -and -not $providedId) { throw "Got multiple agreements for $InputReference" }
 			return $agreement.Id
 		}
 		catch {

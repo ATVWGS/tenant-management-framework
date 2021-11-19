@@ -16,7 +16,7 @@
 	{			
 		try {
 			if ($InputReference -match $script:guidRegex) {
-				$group = (Invoke-MgGraphRequest -Method GET -Uri ("$script:graphBaseUrl/groups/{0}" -f $InputReference)).Value
+				$group = Get-MgGroup -GroupId $InputReference
 			}
 			elseif ($InputReference -match $script:mailNicknameRegex) {
 				$group = (Invoke-MgGraphRequest -Method GET -Uri ("$script:graphBaseUrl/groups/?`$filter=mailNickname eq '{0}'" -f $InputReference)).Value				

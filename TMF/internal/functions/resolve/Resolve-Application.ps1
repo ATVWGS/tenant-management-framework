@@ -16,7 +16,8 @@
 	{
 		try {
 			if ($InputReference -match $script:guidRegex) {
-				$application = (Invoke-MgGraphRequest -Method GET -Uri ("$script:graphBaseUrl/servicePrincipals/{0}" -f $InputReference)).Value
+				$providedId = $true
+				$application = Invoke-MgGraphRequest -Method GET -Uri ("$script:graphBaseUrl/servicePrincipals/{0}" -f $InputReference)
 			}
 			elseif ($InputReference -in @("All", "Office365")) {
 				return $InputReference
@@ -28,7 +29,7 @@
 			if (-Not $application -and -Not $DontFailIfNotExisting) { throw "Cannot find application $InputReference" } 
 			elseif (-Not $application -and $DontFailIfNotExisting) { return }
 
-			if ($application.count -gt 1) { throw "Got multiple applications for $InputReference" }
+			if ($application.count -gt 1 -and -not $providedId) { throw "Got multiple applications for $InputReference" }
 			return $application.appId
 		}
 		catch {
