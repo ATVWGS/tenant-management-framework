@@ -29,9 +29,10 @@
 		[ValidateSet("low", "medium", "high", "hidden", "none")]
 		[string[]] $signInRiskLevels,
 
-		# Grant Controls
-		[ValidateSet("block", "mfa", "compliantDevice", "domainJoinedDevice", "approvedApplication", "compliantApplication", "passwordChange", "unknownFutureValue")]
-		[string[]] $builtInControls,
+		# Grant Controls		
+		[object] $grantControls,		
+		[ValidateSet("block", "mfa", "compliantDevice", "domainJoinedDevice", "approvedApplication", "compliantApplication", "passwordChange", "unknownFutureValue")]		
+		[string[]] $builtInControls,		
 		[string[]] $customAuthenticationFactors,		
 		[ValidateSet("AND", "OR")]
 		[string] $operator,
@@ -60,6 +61,10 @@
 		}
 
 		try {
+			if ($grantControls -and ($builtInControls -or $customAuthenticationFactors -or $operator -or $termsOfUse)) {
+				<# Workaround to support old conditionalAccessPolicy definition structure... #>
+				throw "It is not allowed to specify grantControls and grantControl child properties (builtInControls, operator, customAuthenticationFactors, termsOfUse) at the same time."
+			}
 			if (($buildInControls -and -not $operator) -or ($termsOfUse -and -not $operator)) {
 				throw "You need to provide an operator (AND or OR) if you want to use buildInControls or termsofUse."
 			}
@@ -88,12 +93,34 @@
 			"includeUsers", "excludeUsers", "includeGroups", "excludeGroups",
 			"includeRoles", "excludeRoles", "includeApplications", "excludeApplications",
 			"includeLocations", "excludeLocations", "includePlatforms", "excludePlatforms",
-			"clientAppTypes", "userRiskLevels", "signInRiskLevels", "builtInControls",
-			"customAuthenticationFactors", "operator", "termsOfUse"
+			"clientAppTypes", "userRiskLevels", "signInRiskLevels"
 		) | ForEach-Object {
 			if ($PSBoundParameters.ContainsKey($_)) {			
 				Add-Member -InputObject $object -MemberType NoteProperty -Name $_ -Value $PSBoundParameters[$_]
 			}
+		}
+		
+		if (-Not $grantControls -and ($builtInControls -or $customAuthenticationFactors -or $operator -or $termsOfUse)) {
+			<# Workaround to support old conditionalAccessPolicy definition structure... #>
+			$PSBoundParameters["grantControls"]	= @{}
+			"builtInControls", "customAuthenticationFactors", "operator", "termsOfUse" | ForEach-Object {
+				if ($PSBoundParameters.ContainsKey($_)) {
+					$PSBoundParameters["grantControls"][$_] = $PSBoundParameters[$_]
+				}
+			}
+		}
+
+		"grantControls", "sessionControls" | ForEach-Object {
+			if ($PSBoundParameters.ContainsKey($_)) {
+				if ($script:validateFunctionMapping.ContainsKey($_)) {
+					$validated = $PSBoundParameters[$_] | ConvertTo-PSFHashtable -Include $($script:validateFunctionMapping[$_].Parameters.Keys)
+					$validated = & $script:validateFunctionMapping[$_] @validated -Cmdlet $Cmdlet
+				}
+				else {
+					$validated = $PSBoundParameters[$_]
+				}
+				Add-Member -InputObject $object -MemberType NoteProperty -Name $_ -Value $validated
+			}			
 		}
 
 		Add-Member -InputObject $object -MemberType ScriptMethod -Name Properties -Value { ($this | Get-Member -MemberType NoteProperty).Name }
