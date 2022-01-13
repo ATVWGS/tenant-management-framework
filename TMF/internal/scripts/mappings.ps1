@@ -73,4 +73,8 @@ $script:validateFunctionMapping = @{
     "escalationApprovers" = (Get-Command Validate-UserSet)
     "grantControls" = (Get-Command Validate-ConditionalAccessGrantControls)
     "sessionControls" = (Get-Command Validate-ConditionalAccessSessionControls)
+    "applicationEnforcedRestrictions" = (Get-Command Validate-ApplicationEnforcedRestrictionsSessionControl)
+    "cloudAppSecurity" = (Get-Command Validate-CloudAppSecuritySessionControl)
+    "persistentBrowser" = (Get-Command Validate-PersistentBrowserSessionControl)
+    "signInFrequency" = (Get-Command Validate-SignInFrequencySessionControl)
 }

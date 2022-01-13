@@ -38,6 +38,9 @@
 		[string] $operator,
 		[string[]] $termsOfUse,
 		
+		# Session Controls
+		[object] $sessionControls,
+
 		[Parameter(Mandatory = $true)]
 		[ValidateSet("enabled", "disabled", "enabledForReportingButNotEnforced")]
 		[string] $state,
