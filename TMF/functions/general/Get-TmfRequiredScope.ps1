@@ -78,7 +78,7 @@
 			$scopes += "Agreement.ReadWrite.All"
 		}
 		if ($ConditionalAccessPolicies -or $All) {
-			$scopes += "Policy.ReadWrite.ConditionalAccess", "Policy.Read.All", "RoleManagement.Read.Directory", "Application.Read.All", "Agreement.Read.All"
+			$scopes += "Policy.ReadWrite.ConditionalAccess", "Policy.Read.All", "RoleManagement.Read.Directory", "Application.Read.All", "Agreement.Read.All", "Group.Read.All"
 		}
 		if ($EntitlementManagement -or $All) {
 			$scopes += "EntitlementManagement.ReadWrite.All"
