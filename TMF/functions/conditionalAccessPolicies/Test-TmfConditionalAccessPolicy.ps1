@@ -26,6 +26,7 @@
 			"Roles" = (Get-Command Resolve-DirectoryRoleTemplate)
 			"Locations" = (Get-Command Resolve-NamedLocation)
 			"Platforms" = "DirectCompare"
+			"Devices" = "DirectCompare"
 		}
 		$conditionPropertyRegex = [regex]"^(include|exclude)($($resolveFunctionMapping.Keys -join "|"))$"
 	}
@@ -109,6 +110,11 @@
 														-DifferenceList $($definition.$property | ForEach-Object {& $resolveFunctionMapping[$propertyTargetResourceType] -InputReference $_ -Cmdlet $Cmdlet}) `
 														-Cmdlet $PSCmdlet -ReturnSetAction
 								}								
+							}
+							elseif ($property -in @("deviceFilterMode", "deviceFilter")) {
+								if (Compare-Object -ReferenceObject $resource.conditions.devices.$property -DifferenceObject $definition.$property) {
+									$change.Actions = @{"Set" = $definition.$property}
+								}
 							}
 							elseif ($property -in @("clientAppTypes", "userRiskLevels", "signInRiskLevels")) {
 								if (Compare-Object -ReferenceObject $resource.conditions.$property -DifferenceObject $definition.$property) {

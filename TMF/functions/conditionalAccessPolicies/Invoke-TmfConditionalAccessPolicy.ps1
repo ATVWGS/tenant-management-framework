@@ -26,6 +26,7 @@
 			"Roles" = (Get-Command Resolve-DirectoryRoleTemplate)
 			"Locations" = (Get-Command Resolve-NamedLocation)
 			"Platforms" = "DirectCompare"
+			"Devices" = "DirectCompare"
 		}
 		$conditionPropertyRegex = [regex]"^(include|exclude)($($resolveFunctionMapping.Keys -join "|"))$"
 	}
@@ -65,6 +66,10 @@
 								else {
 									$requestBody["conditions"][$conditionChildProperty][$property] = @($result.DesiredConfiguration.$property | ForEach-Object { & $resolveFunctionMapping[$conditionPropertyMatch.Groups[2].Value] -InputReference $_})								
 								}								
+							}
+							elseif ($property -in @("deviceFilterMode", "deviceFilter")) {
+								if (-Not $requestBody["conditions"]["devices"]) { $requestBody["conditions"]["devices"] = @{}}
+								$requestBody["conditions"]["devices"][$property] = $result.DesiredConfiguration.$property
 							}
 							elseif ($property -in @("clientAppTypes", "signInRiskLevels", "userRiskLevels")) {
 								$requestBody["conditions"][$property] = $result.DesiredConfiguration.$property
@@ -120,6 +125,11 @@
 											
 											if (-Not $requestBody["conditions"][$conditionChildProperty]) { $requestBody["conditions"][$conditionChildProperty] = @{} }
 											$requestBody["conditions"][$conditionChildProperty][$change.property] = @($change.Actions[$action])
+										}
+										elseif ($change.property -in @("deviceFilterMode", "deviceFilter")) {
+											if (-Not $requestBody["conditions"]) { $requestBody["conditions"] = @{}}
+											if (-Not $requestBody["conditions"]["devices"]) { $requestBody["conditions"]["devices"] = @{}}
+											$requestBody["conditions"]["devices"][$property] = $result.DesiredConfiguration.$property
 										}
 										elseif ($change.property -in @("clientAppTypes", "signInRiskLevels", "userRiskLevels")) {
 											if (-Not $requestBody["conditions"]) { $requestBody["conditions"] = @{} }

@@ -21,6 +21,13 @@
 		[string[]] $includePlatforms,
 		[ValidateSet("android", "iOS", "windows", "windowsPhone", "macOS", "all")]
 		[string[]] $excludePlatforms,
+		[ValidateSet("All")]
+		[string] $includeDevices,
+		[ValidateSet("Compliant", "DomainJoined")]
+		[string] $excludeDevices,
+		[ValidateSet("include", "exclude")]
+		[string] $deviceFilterMode,
+		[string] $deviceFilter,
 		
 		[ValidateSet("all", "browser", "mobileAppsAndDesktopClients", "exchangeActiveSync", "easSupported", "other")]
 		[string[]] $clientAppTypes,
@@ -71,6 +78,7 @@
 			if (($buildInControls -and -not $operator) -or ($termsOfUse -and -not $operator)) {
 				throw "You need to provide an operator (AND or OR) if you want to use buildInControls or termsofUse."
 			}
+			if ($device)
 		}
 		catch {
 			Write-PSFMessage -Level Error -String 'TMF.Register.PropertySetNotPossible' -StringValues $displayName, "ConditionalAccess" -Tag "failed" -ErrorRecord $_ -FunctionName $Cmdlet.CommandRuntime			
