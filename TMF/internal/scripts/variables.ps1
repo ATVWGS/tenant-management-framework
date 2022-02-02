@@ -17,6 +17,12 @@ $script:supportedResources = @{
         "invokeFunction" = (Get-Command Invoke-TmfGroup)
         "weight" = 10
     }
+    "accessReviews" = @{
+        "registerFunction" = (Get-Command Register-TmfAccessReview)
+        "testFunction" = (Get-Command Test-TmfAccessReview)
+        "invokeFunction" = (Get-Command Invoke-TmfAccessReview)
+        "weight" = 15
+    }
     "namedLocations" = @{
         "registerFunction" = (Get-Command Register-TmfNamedLocation)
         "testFunction" = (Get-Command Test-TmfNamedLocation)
@@ -71,12 +77,17 @@ $script:supportedResources = @{
 Set-Variable -Name supportedResources -Option ReadOnly
 
 $script:validateFunctionMapping = @{
+    "scope" = (Get-Command Validate-AccessReviewScope)
+    "settings" = (Get-Command Validate-AccessReviewSettings)
+    "recurrence" = (Get-Command Validate-AccessReviewRecurrence)
+    "pattern" = (Get-Command Validate-AccessReviewPattern)
+    "range" = (Get-Command Validate-AccessReviewRange)
     "accessReviewSettings" = (Get-Command Validate-AssignmentReviewSettings)
     "requestApprovalSettings" = (Get-Command Validate-RequestApprovalSettings)
     "approvalStages" = (Get-Command Validate-ApprovalStage)
     "requestorSettings" = (Get-Command Validate-RequestorSettings)
     "allowedRequestors" = (Get-Command Validate-UserSet)
-    "reviewers" = (Get-Command Validate-UserSet)
+    "reviewers" = (Get-Command Validate-AccessReviewReviewers)
     "primaryApprovers" = (Get-Command Validate-UserSet)
     "escalationApprovers" = (Get-Command Validate-UserSet)
 }
