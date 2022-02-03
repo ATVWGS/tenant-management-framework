@@ -5,6 +5,7 @@ function Validate-ConditionalAccessConditionSet
 		[object] $applications,		
 		[object] $users,		
 		[object] $locations,
+		[object] $devices,
 		[object] $platforms,
 		
 		[ValidateSet("all", "browser", "mobileAppsAndDesktopClients", "exchangeActiveSync", "easSupported", "other")]

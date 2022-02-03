@@ -2,7 +2,9 @@ function Validate-ConditionalAccessFilter
 {
 	[CmdletBinding()]
 	Param (
+		[Parameter(Mandatory = $true)]
 		[string] $mode,
+		[Parameter(Mandatory = $true)]
 		[string] $rule,
 		[System.Management.Automation.PSCmdlet]
 		$Cmdlet = $PSCmdlet
