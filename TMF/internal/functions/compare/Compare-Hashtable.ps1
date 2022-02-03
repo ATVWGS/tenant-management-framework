@@ -13,8 +13,13 @@ function Compare-Hashtable {
     }
     process {
         foreach ($reference in $ReferenceObject.GetEnumerator()) {            
-            if ($DifferenceObject.ContainsKey($reference.Key)) {
-                if ($reference.Value.GetType().Name -eq "Hashtable") {
+            if ($DifferenceObject.ContainsKey($reference.Key)) {     
+                if ($reference.Value -eq $null) {
+                    if ($DifferenceObject[$reference.Key] -ne $null) {
+                        $same = $false
+                    }
+                }
+                elseif ($reference.Value.GetType().Name -eq "Hashtable") {
                     if ($DifferenceObject[$reference.Key]) {
                         if (-Not (Compare-Hashtable -ReferenceObject $reference.Value -DifferenceObject $DifferenceObject[$reference.Key])) {
                             $same = $false

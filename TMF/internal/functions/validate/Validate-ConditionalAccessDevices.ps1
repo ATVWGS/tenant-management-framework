@@ -44,7 +44,7 @@ function Validate-ConditionalAccessDevices
 				}				
 			}
 			else {
-				$validated = @($property.Value)
+				$validated = @($property.Value)			
 			}
 			$hashtable[$property.Key] = $validated
 		}
