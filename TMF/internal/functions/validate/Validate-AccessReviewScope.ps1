@@ -27,57 +27,14 @@ function Validate-AccessReviewScope
 				$hashtable["query"] = "/v1.0/groups/$($id)/transitiveMembers/microsoft.graph.user"
 			}
 			"directoryRole" {
-				$id = Resolve-DirectoryRole -InputReference $reference -Cmdlet $PSCmdlet
-				$hashtable["query"] = "/beta/roleManagement/directory/roleAssignmentScheduleInstances?`$expand=principal&`$filter=(isof(principal,'microsoft.graph.servicePrincipal') and roleDefinitionId eq '$($this.getId())')"
+				$id = Resolve-DirectoryRoleTemplate -InputReference $reference -Cmdlet $PSCmdlet
+				$hashtable["query"] = "/beta/roleManagement/directory/roleAssignmentScheduleInstances?`$expand=principal&`$filter=(isof(principal,'microsoft.graph.servicePrincipal') and roleDefinitionId eq '$($Id)')"
 			}
 		}
-		#return $hashtable
-		<#
-		$scopeObject = [PSCustomObject]@{
-			type = $type
-		}
-
-        Add-Member -InputObject $scopeObject -MemberType NoteProperty -Name "@odata.type" -Value ("#microsoft.graph.{0}" -f $type)
-
-        if ($type -in @("group","directoryRole")) {
-            Add-Member -InputObject $scopeObject -MemberType NoteProperty -Name reference -Value $reference
-            Add-Member -InputObject $scopeObject -MemberType ScriptMethod -Name getId -Value {
-				switch ($this.type) {
-					"group" {
-						Resolve-Group -InputReference $this.reference -Cmdlet $PSCmdlet
-					}
-					"directoryRole" {
-						Resolve-DirectoryRole -InputReference $this.reference -Cmdlet $PSCmdlet
-					}
-				}
-			}
-        }
-
-        Add-Member -InputObject $scopeObject -MemberType ScriptMethod -Name prepareBody -Value {
-			$hashtable = @{				
-				"@odata.type" = "#microsoft.graph.accessReviewQueryScope"
-				"queryType" = "MicrosoftGraph"
-				"queryRoot" = ""
-			}
-			if ($this.getId) {
-				switch ($this.type) {
-					"group" {
-						$hashtable["query"] = "/v1.0/groups/$($this.getId())/transitiveMembers/microsoft.graph.user"
-					}
-					"directoryRole" {
-						$hashtable["query"] = "/beta/roleManagement/directory/roleAssignmentScheduleInstances?`$expand=principal&`$filter=(isof(principal,'microsoft.graph.servicePrincipal') and roleDefinitionId eq '$($this.getId())')"
-					}
-				}
-				
-			}
-			return $hashtable
-		}
-		#>
     }
 
     end 
     {
 		$hashtable
-        #$scopeObject.prepareBody()
     }
 }

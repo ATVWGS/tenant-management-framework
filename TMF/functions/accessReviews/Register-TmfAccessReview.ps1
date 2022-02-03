@@ -31,20 +31,36 @@ function Register-TmfAccessReview
 		$object = [PSCustomObject] @{
 			displayName = $displayName
 			present = $present
+			reviewers = @()
 		}
 		
 		"scope", "reviewers", "settings" | ForEach-Object {
 			if ($PSBoundParameters.ContainsKey($_)) {
 				if ($script:validateFunctionMapping.ContainsKey($_)) {
-					$validated = $PSBoundParameters[$_] | ConvertTo-PSFHashtable -Include $($script:validateFunctionMapping[$_].Parameters.Keys)
-					$validated = & $script:validateFunctionMapping[$_] @validated -Cmdlet $Cmdlet
+					if ($_ -eq "reviewers") {
+						$reviewers = $PSBoundParameters[$_]
+						$property = "reviewers"
+						for ($i=0; $i -lt $reviewers.count;$i++) {
+							$validated = $PSBoundParameters[$property][$i] | ConvertTo-PSFHashtable -Include $($script:validateFunctionMapping[$property].Parameters.Keys)
+							$validated = & $script:validateFunctionMapping[$property] @validated -Cmdlet $Cmdlet
+							$object.reviewers += $validated
+						}
+					}
+					else {
+						$validated = $PSBoundParameters[$_] | ConvertTo-PSFHashtable -Include $($script:validateFunctionMapping[$_].Parameters.Keys)
+						$validated = & $script:validateFunctionMapping[$_] @validated -Cmdlet $Cmdlet
+						Add-Member -InputObject $object -MemberType NoteProperty -Name $_ -Value $validated
+					}
 				}
 				else {
 					$validated = $PSBoundParameters[$_]
+					Add-Member -InputObject $object -MemberType NoteProperty -Name $_ -Value $validated
 				}
-				Add-Member -InputObject $object -MemberType NoteProperty -Name $_ -Value $validated
+				
 			}			
 		}
+
+	
 
 		Add-Member -InputObject $object -MemberType ScriptMethod -Name Properties -Value { ($this | Get-Member -MemberType NoteProperty).Name };
 

@@ -38,7 +38,12 @@ function Validate-AccessReviewSettings
 				}				
 			}
 			else {
-				$validated = $property.Value
+				if ($property.Value.GetType().Name -eq "Object[]") {
+					$validated = @($property.Value | ConvertTo-PSFHashtable)
+				}
+				else {
+					$validated = $property.Value
+				}
 			}
 			$hashtable[$property.Key] = $validated
 		}

@@ -69,32 +69,33 @@ function Test-TmfAccessReview
 							
 							switch ($property) {
 								"settings" {
-									if ($definition.$property -ne $resource.$property) {
-										$change.Actions = @{"Set" = $definition.$property}
+									foreach ($item in ($definition.$property.GetEnumerator().Name | Where-Object {$_ -notin "applyActions","recurrence"})) {
+										if (($definition.$property.$item -ne $resource.$property.$item) -and $definition.$property.$item.gettype()) {
+											$change.Actions = @{"Set" = $definition.$property}
+										}
 									}
-									elseif ($definition.$property.recurrence.pattern -ne $resource.$property.recurrence.pattern) {
-										$change.Actions = @{"Set" = $definition.$property}
+									foreach ($item in $definition.$property.recurrence.pattern.GetEnumerator().Name) {
+										if ($definition.$property.recurrence.pattern.$item -ne $resource.$property.recurrence.pattern.$item){
+											$change.Actions = @{"Set" = $definition.$property}
+										}
 									}
-									elseif ($definition.$property.recurrence.range -ne $resource.$property.recurrence.range) {
-										$change.Actions = @{"Set" = $definition.$property}
+									foreach ($item in $definition.$property.recurrence.range.GetEnumerator().Name) {
+										if ($definition.$property.recurrence.pattern.$item -ne $resource.$property.recurrence.pattern.$item){
+											$change.Actions = @{"Set" = $definition.$property}
+										}
 									}
 								}
 								"reviewers" {
-									if ($definition.$property.query -ne $resource.$property.query) {
+									if (Compare-Object $definition.$property.query $resource.$property.query) {
 										$change.Actions = @{"Set" = $definition.$property}
 									}
 								}
 								"scope" {
-									if ($definition.$property.query -ne $resource.$property.query) {
+									if (Compare-Object $definition.$property.query $resource.$property.query) {
 										$change.Actions = @{"Set" = $definition.$property}
 									}
 								}
 							}
-
-							<#if ($definition.$property -ne $resource.$property) {#>
-							if (Compare-Object $definition $resource -Property $property) {
-										$change.Actions = @{"Set" = $definition.$property}
-                            }
 
 							if ($change.Actions) {$changes += $change}
                         }
