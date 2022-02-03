@@ -414,9 +414,11 @@ An example policy definition that would affect all members of a group to accept 
     "includeLocations": ["All"],
     "clientAppTypes": ["browser", "mobileAppsAndDesktopClients"],
     "includePlatforms": ["All"],
-    "builtInControls": ["mfa"],
-    "operator": "AND",
-    "termsOfUse": ["ToU for Some group"],        
+    "grantControls": {
+        "builtInControls": ["mfa"],
+        "operator": "AND",
+        "termsOfUse": ["ToU for Some group"]
+    },
     "state" : "enabledForReportingButNotEnforced",
     "present" : true
 }
@@ -702,8 +704,10 @@ You can add the following example Conditional Access Policy definition to *condi
     "includeLocations": ["All"],
     "clientAppTypes": ["browser", "mobileAppsAndDesktopClients"],
     "includePlatforms": ["All"],
-    "builtInControls": ["mfa"],
-    "operator": "AND",
+    "grantControls": {
+        "builtInControls": ["mfa"],
+        "operator": "AND"
+    },
     "state" : "enabled",
     "present" : true
 }
@@ -771,16 +775,8 @@ foreach ($policy in $policies) {
         }            
     }   
     #endregion
-
-    #region grantControls properties to first level
-    foreach ($property in $policy.grantControls.GetEnumerator()) {
-        if ($property.Value) {
-            Add-Member -InputObject $policy -MemberType NoteProperty -Name $property.Key -Value $property.Value
-        }            
-    }
-    #endregion
 }
-$policies | Select-Object -Property * -ExcludeProperty conditions, grantControls | Out-File -FilePath "policies.json" -Encoding UTF8
+$policies | Select-Object -Property * -ExcludeProperty conditions | Out-File -FilePath "policies.json" -Encoding UTF8
 ```
 
 ### 3.8.3. Groups

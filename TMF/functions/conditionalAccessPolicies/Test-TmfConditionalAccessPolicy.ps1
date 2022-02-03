@@ -94,10 +94,15 @@
 														-Cmdlet $PSCmdlet -ReturnSetAction
 							}
 							elseif ($propertyTargetResourceType -in $resolveFunctionMapping.Keys) {
-								if ($resolveFunctionMapping[$propertyTargetResourceType] -eq "DirectCompare") {									
-									if (Compare-Object -ReferenceObject $resource.conditions.$($propertyTargetResourceType.toLower()).$property -DifferenceObject $definition.$property) {
-										$change.Actions = @{"Set" = $definition.$property}
+								if ($resolveFunctionMapping[$propertyTargetResourceType] -eq "DirectCompare") {
+									if ($resource.conditions.$($propertyTargetResourceType.toLower()).$property) {
+										if (Compare-Object -ReferenceObject $resource.conditions.$($propertyTargetResourceType.toLower()).$property -DifferenceObject $definition.$property) {
+											$change.Actions = @{"Set" = $definition.$property}
+										}
 									}
+									else {
+										$change.Actions = @{"Set" = $definition.$property}
+									}									
 								}
 								else {
 									$change.Actions = Compare-ResourceList -ReferenceList $resource.conditions.$($propertyTargetResourceType.toLower()).$property `
@@ -110,10 +115,15 @@
 									$change.Actions = @{"Set" = $definition.$property}
 								}
 							}
-							elseif ($property -in @("builtInControls", "customAuthenticationFactors", "operator")) {
-								if (Compare-Object -ReferenceObject $resource.grantControls.$property -DifferenceObject $definition.$property) {
-									$change.Actions = @{"Set" = $definition.$property}
+							elseif ($property -in @("sessionControls", "grantControls")) {
+								if ($resource.$property) {
+									if (-Not (Compare-Hashtable -ReferenceObject $definition.$property -DifferenceObject ($resource.$property | ConvertTo-PSFHashTable))) {
+										$change.Actions = @{"Set" = $definition.$property}
+									}
 								}
+								else {
+									$change.Actions = @{"Set" = $definition.$property}
+								}								
 							}
 							elseif ($property -eq "termsOfUse") {
 								$change.Actions = Compare-ResourceList -ReferenceList $resource.grantControls.$property `

@@ -69,14 +69,11 @@
 							elseif ($property -in @("clientAppTypes", "signInRiskLevels", "userRiskLevels")) {
 								$requestBody["conditions"][$property] = $result.DesiredConfiguration.$property
 							}
-							elseif ($property -in @("operator", "builtInControls", "customAuthenticationFactors", "termsOfUse")) {
-								if (-Not $requestBody["grantControls"]) { $requestBody["grantControls"] = @{} }								
-								if ($property -eq "termsOfUse") {
-									$requestBody["grantControls"][$property] = @($result.DesiredConfiguration.$property | ForEach-Object {Resolve-Agreement -InputReference $_ -Cmdlet $Cmdlet})
+							elseif ($property -in @("grantControls", "sessionControls")) {
+								if ($result.DesiredConfiguration.$property.ContainsKey("termsOfUse")) {
+									$result.DesiredConfiguration.$property["termsOfUse"] = @($result.DesiredConfiguration.$property | ForEach-Object {Resolve-Agreement -InputReference $_ -Cmdlet $Cmdlet})
 								}
-								else {
-									$requestBody["grantControls"][$property] = $result.DesiredConfiguration.$property
-								}
+								$requestBody[$property] = $result.DesiredConfiguration.$property
 							}
 						}
 						
@@ -127,10 +124,6 @@
 										elseif ($change.property -in @("clientAppTypes", "signInRiskLevels", "userRiskLevels")) {
 											if (-Not $requestBody["conditions"]) { $requestBody["conditions"] = @{} }
 											$requestBody["conditions"][$change.property] = $change.Actions[$action]
-										}
-										elseif ($change.property -in @("operator", "builtInControls", "customAuthenticationFactors", "termsOfUse")) {
-											if (-Not $requestBody["grantControls"]) { $requestBody["grantControls"] = @{} }
-											$requestBody["grantControls"][$change.property] = $change.Actions[$action]
 										}
 										else {
 											$requestBody[$change.property] = $change.Actions[$action]

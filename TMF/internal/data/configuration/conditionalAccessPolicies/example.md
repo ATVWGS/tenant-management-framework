@@ -19,10 +19,25 @@ Additional properties will be added in the future.
     "excludePlatforms": [],
     "signInRiskLevels": ["String"],
     "userRiskLevels": [""],
-    "builtInControls": [],
-    "customAuthenticationFactors": [],
-    "operator": "",
-    "termsOfUse": [],        
+    "grantControls": {
+        "builtInControls": [],
+        "customAuthenticationFactors": [],
+        "operator": "",
+        "termsOfUse": []
+    },
+    "sessionControls": {
+        "applicationEnforcedRestrictions": null,
+        "persistentBrowser": null,
+        "cloudAppSecurity": {
+            "cloudAppSecurityType": "blockDownloads",
+            "isEnabled": true
+        },
+        "signInFrequency": {
+            "value": 4,
+            "type": "hours",
+            "isEnabled": true
+        }
+    },    
     "state" : "enabledForReportingButNotEnforced",
     "present" : true
 }
@@ -38,9 +53,11 @@ Additional properties will be added in the future.
     "includeLocations": ["All"],
     "clientAppTypes": ["browser", "mobileAppsAndDesktopClients"],
     "includePlatforms": ["All"],
-    "builtInControls": ["mfa"],
-    "operator": "AND",
-    "termsOfUse": ["ToU for Some group"],        
+    "grantControls": {
+        "builtInControls": ["mfa"],
+        "operator": "AND",
+        "termsOfUse": ["ToU for Some group"]
+    },
     "state" : "enabledForReportingButNotEnforced",
     "present" : false
 }
