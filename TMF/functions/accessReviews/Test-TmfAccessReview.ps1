@@ -71,17 +71,17 @@ function Test-TmfAccessReview
 								"settings" {
 									foreach ($item in ($definition.$property.GetEnumerator().Name | Where-Object {$_ -notin "applyActions","recurrence"})) {
 										if (($definition.$property.$item -ne $resource.$property.$item) -and $definition.$property.$item.gettype()) {
-											$change.Actions = @{"Set" = $definition.$property}
+											$change.Actions = @{"Set" = $definition.$property.$item}
 										}
 									}
 									foreach ($item in $definition.$property.recurrence.pattern.GetEnumerator().Name) {
 										if ($definition.$property.recurrence.pattern.$item -ne $resource.$property.recurrence.pattern.$item){
-											$change.Actions = @{"Set" = $definition.$property}
+											$change.Actions = @{"Set" = $definition.$property.recurrence.pattern}
 										}
 									}
 									foreach ($item in $definition.$property.recurrence.range.GetEnumerator().Name) {
-										if ($definition.$property.recurrence.pattern.$item -ne $resource.$property.recurrence.pattern.$item){
-											$change.Actions = @{"Set" = $definition.$property}
+										if ($definition.$property.recurrence.range.$item -ne $resource.$property.recurrence.range.$item){
+											$change.Actions = @{"Set" = $definition.$property.recurrence.range}
 										}
 									}
 								}
