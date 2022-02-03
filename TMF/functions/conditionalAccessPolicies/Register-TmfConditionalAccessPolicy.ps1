@@ -22,9 +22,9 @@
 		[ValidateSet("android", "iOS", "windows", "windowsPhone", "macOS", "all")]
 		[string[]] $excludePlatforms,
 		[ValidateSet("All")]
-		[string] $includeDevices,
+		[string[]] $includeDevices,
 		[ValidateSet("Compliant", "DomainJoined")]
-		[string] $excludeDevices,
+		[string[]] $excludeDevices,
 		[ValidateSet("include", "exclude")]
 		[string] $deviceFilterMode,
 		[string] $deviceFilter,
