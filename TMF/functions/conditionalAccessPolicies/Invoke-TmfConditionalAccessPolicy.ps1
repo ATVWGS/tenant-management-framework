@@ -26,6 +26,7 @@
 			"Roles" = (Get-Command Resolve-DirectoryRoleTemplate)
 			"Locations" = (Get-Command Resolve-NamedLocation)
 			"Platforms" = "DirectCompare"
+			"Devices" = "DirectCompare"
 		}
 		$conditionPropertyRegex = [regex]"^(include|exclude)($($resolveFunctionMapping.Keys -join "|"))$"
 	}
@@ -66,17 +67,18 @@
 									$requestBody["conditions"][$conditionChildProperty][$property] = @($result.DesiredConfiguration.$property | ForEach-Object { & $resolveFunctionMapping[$conditionPropertyMatch.Groups[2].Value] -InputReference $_})								
 								}								
 							}
+							elseif ($property -in @("deviceFilterMode", "deviceFilter")) {
+								if (-Not $requestBody["conditions"]["devices"]) { $requestBody["conditions"]["devices"] = @{}}
+								$requestBody["conditions"]["devices"][$property] = $result.DesiredConfiguration.$property
+							}
 							elseif ($property -in @("clientAppTypes", "signInRiskLevels", "userRiskLevels")) {
 								$requestBody["conditions"][$property] = $result.DesiredConfiguration.$property
 							}
-							elseif ($property -in @("operator", "builtInControls", "customAuthenticationFactors", "termsOfUse")) {
-								if (-Not $requestBody["grantControls"]) { $requestBody["grantControls"] = @{} }								
-								if ($property -eq "termsOfUse") {
-									$requestBody["grantControls"][$property] = @($result.DesiredConfiguration.$property | ForEach-Object {Resolve-Agreement -InputReference $_ -Cmdlet $Cmdlet})
+							elseif ($property -in @("grantControls", "sessionControls")) {
+								if ($result.DesiredConfiguration.$property.ContainsKey("termsOfUse")) {
+									$result.DesiredConfiguration.$property["termsOfUse"] = @($result.DesiredConfiguration.$property | ForEach-Object {Resolve-Agreement -InputReference $_ -Cmdlet $Cmdlet})
 								}
-								else {
-									$requestBody["grantControls"][$property] = $result.DesiredConfiguration.$property
-								}
+								$requestBody[$property] = $result.DesiredConfiguration.$property
 							}
 						}
 						
@@ -124,13 +126,14 @@
 											if (-Not $requestBody["conditions"][$conditionChildProperty]) { $requestBody["conditions"][$conditionChildProperty] = @{} }
 											$requestBody["conditions"][$conditionChildProperty][$change.property] = @($change.Actions[$action])
 										}
+										elseif ($change.property -in @("deviceFilterMode", "deviceFilter")) {
+											if (-Not $requestBody["conditions"]) { $requestBody["conditions"] = @{}}
+											if (-Not $requestBody["conditions"]["devices"]) { $requestBody["conditions"]["devices"] = @{}}
+											$requestBody["conditions"]["devices"][$property] = $result.DesiredConfiguration.$property
+										}
 										elseif ($change.property -in @("clientAppTypes", "signInRiskLevels", "userRiskLevels")) {
 											if (-Not $requestBody["conditions"]) { $requestBody["conditions"] = @{} }
 											$requestBody["conditions"][$change.property] = $change.Actions[$action]
-										}
-										elseif ($change.property -in @("operator", "builtInControls", "customAuthenticationFactors", "termsOfUse")) {
-											if (-Not $requestBody["grantControls"]) { $requestBody["grantControls"] = @{} }
-											$requestBody["grantControls"][$change.property] = $change.Actions[$action]
 										}
 										else {
 											$requestBody[$change.property] = $change.Actions[$action]
