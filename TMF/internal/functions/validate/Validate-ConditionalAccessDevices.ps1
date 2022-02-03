@@ -1,11 +1,12 @@
-function Validate-ConditionalAccessSessionControls
+function Validate-ConditionalAccessDevices
 {
 	[CmdletBinding()]
 	Param (
-		[object] $applicationEnforcedRestrictions,
-        [object] $cloudAppSecurity,
-        [object] $persistentBrowser,
-        [object] $signInFrequency,
+		[ValidateSet("All")]
+		[string[]] $includeDevices,
+		[ValidateSet("Compliant", "DomainJoined")]
+		[string[]] $excludeDevices,		
+		[object] $deviceFilter,
 		[System.Management.Automation.PSCmdlet]
 		$Cmdlet = $PSCmdlet
 	)
@@ -13,6 +14,15 @@ function Validate-ConditionalAccessSessionControls
 	begin
 	{
 		$parentResourceName = "conditionalAccessPolicies"
+		try {			
+			if (($includeDevices -or $excludeDevices) -and $deviceFilter) {
+				throw "It is not allowed to provide includeDevices/excludeDevices and a deviceFilter."
+			}
+		}
+		catch {
+			Write-PSFMessage -Level Error -String 'TMF.Register.PropertySetNotPossible' -StringValues $displayName, "ConditionalAccess" -Tag "failed" -ErrorRecord $_ -FunctionName $Cmdlet.CommandRuntime
+			$cmdlet.ThrowTerminatingError($_)
+		}
 	}
 	process
 	{
@@ -34,7 +44,7 @@ function Validate-ConditionalAccessSessionControls
 				}				
 			}
 			else {
-				$validated = $property.Value
+				$validated = @($property.Value)
 			}
 			$hashtable[$property.Key] = $validated
 		}

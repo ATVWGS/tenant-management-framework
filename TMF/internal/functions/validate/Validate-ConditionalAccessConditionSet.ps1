@@ -1,11 +1,18 @@
-function Validate-ConditionalAccessSessionControls
+function Validate-ConditionalAccessConditionSet
 {
 	[CmdletBinding()]
 	Param (
-		[object] $applicationEnforcedRestrictions,
-        [object] $cloudAppSecurity,
-        [object] $persistentBrowser,
-        [object] $signInFrequency,
+		[object] $applications,		
+		[object] $users,		
+		[object] $locations,
+		[object] $platforms,
+		
+		[ValidateSet("all", "browser", "mobileAppsAndDesktopClients", "exchangeActiveSync", "easSupported", "other")]
+		[string[]] $clientAppTypes,
+		[ValidateSet("low", "medium", "high", "hidden", "none")]
+		[string[]] $signInRiskLevels,
+		[ValidateSet("low", "medium", "high", "hidden", "none")]
+		[string[]] $userRiskLevels,
 		[System.Management.Automation.PSCmdlet]
 		$Cmdlet = $PSCmdlet
 	)

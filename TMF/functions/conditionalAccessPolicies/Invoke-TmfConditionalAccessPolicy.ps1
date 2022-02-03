@@ -44,42 +44,10 @@
 					$requestBody = @{						
 						"displayName" = $result.DesiredConfiguration.displayName
 						"state" = $result.DesiredConfiguration.state
-						"conditions" = @{}
 					}
-					try {
-						
+					try {						
 						foreach ($property in ($result.DesiredConfiguration.Properties() | Where-Object {$_ -notin @("displayName", "state", "present", "sourceConfig")})) {
-							$conditionPropertyMatch = $conditionPropertyRegex.Match($property)
-							if ($conditionPropertyMatch.Success) {
-								# Condition properties								
-								if ($conditionPropertyMatch.Groups[2].Value -in @("Users", "Groups", "Roles")) {
-									$conditionChildProperty = "users"	
-								}
-								else {
-									$conditionChildProperty = $conditionPropertyMatch.Groups[2].Value.ToLower()
-								}
-								
-								if (-Not $requestBody["conditions"][$conditionChildProperty]) { $requestBody["conditions"][$conditionChildProperty] = @{} }
-								if ($resolveFunctionMapping[$conditionPropertyMatch.Groups[2].Value] -eq "DirectCompare") {
-									$requestBody["conditions"][$conditionChildProperty][$property] = @($result.DesiredConfiguration.$property)
-								}
-								else {
-									$requestBody["conditions"][$conditionChildProperty][$property] = @($result.DesiredConfiguration.$property | ForEach-Object { & $resolveFunctionMapping[$conditionPropertyMatch.Groups[2].Value] -InputReference $_})								
-								}								
-							}
-							elseif ($property -in @("deviceFilterMode", "deviceFilter")) {
-								if (-Not $requestBody["conditions"]["devices"]) { $requestBody["conditions"]["devices"] = @{}}
-								$requestBody["conditions"]["devices"][$property] = $result.DesiredConfiguration.$property
-							}
-							elseif ($property -in @("clientAppTypes", "signInRiskLevels", "userRiskLevels")) {
-								$requestBody["conditions"][$property] = $result.DesiredConfiguration.$property
-							}
-							elseif ($property -in @("grantControls", "sessionControls")) {
-								if ($result.DesiredConfiguration.$property.ContainsKey("termsOfUse")) {
-									$result.DesiredConfiguration.$property["termsOfUse"] = @($result.DesiredConfiguration.$property | ForEach-Object {Resolve-Agreement -InputReference $_ -Cmdlet $Cmdlet})
-								}
-								$requestBody[$property] = $result.DesiredConfiguration.$property
-							}
+							$requestBody[$property] = $result.DesiredConfiguration.$property
 						}
 						
 						$requestBody = $requestBody | ConvertTo-Json -ErrorAction Stop -Depth 8
@@ -126,7 +94,7 @@
 											if (-Not $requestBody["conditions"][$conditionChildProperty]) { $requestBody["conditions"][$conditionChildProperty] = @{} }
 											$requestBody["conditions"][$conditionChildProperty][$change.property] = @($change.Actions[$action])
 										}
-										elseif ($change.property -in @("deviceFilterMode", "deviceFilter")) {
+										elseif ($change.property -eq "deviceFilter") {
 											if (-Not $requestBody["conditions"]) { $requestBody["conditions"] = @{}}
 											if (-Not $requestBody["conditions"]["devices"]) { $requestBody["conditions"]["devices"] = @{}}
 											$requestBody["conditions"]["devices"][$property] = $result.DesiredConfiguration.$property

@@ -1,10 +1,9 @@
-function Validate-CloudAppSecuritySessionControl
+function Validate-ConditionalAccessFilter
 {
 	[CmdletBinding()]
 	Param (
-		[bool] $isEnabled,
-		[ValidateSet("mcasConfigured", "monitorOnly", "blockDownloads", "unknownFutureValue")]
-		[string] $cloudAppSecurityType,
+		[string] $mode,
+		[string] $rule,
 		[System.Management.Automation.PSCmdlet]
 		$Cmdlet = $PSCmdlet
 	)

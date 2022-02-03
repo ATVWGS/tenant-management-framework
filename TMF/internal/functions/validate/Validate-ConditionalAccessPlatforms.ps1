@@ -1,10 +1,11 @@
-function Validate-CloudAppSecuritySessionControl
+function Validate-ConditionalAccessPlatforms
 {
 	[CmdletBinding()]
 	Param (
-		[bool] $isEnabled,
-		[ValidateSet("mcasConfigured", "monitorOnly", "blockDownloads", "unknownFutureValue")]
-		[string] $cloudAppSecurityType,
+		[ValidateSet("android", "iOS", "windows", "windowsPhone", "macOS", "all")]
+		[string[]] $includePlatforms,
+		[ValidateSet("android", "iOS", "windows", "windowsPhone", "macOS", "all")]
+		[string[]] $excludePlatforms,
 		[System.Management.Automation.PSCmdlet]
 		$Cmdlet = $PSCmdlet
 	)
@@ -19,7 +20,7 @@ function Validate-CloudAppSecuritySessionControl
 
 		$hashtable = @{}
 		foreach ($property in ($PSBoundParameters.GetEnumerator() | Where-Object {$_.Key -ne "Cmdlet"})) {			
-			$hashtable[$property.Key] = $property.Value
+			$hashtable[$property.Key] = @($property.Value)
 		}
 	}
 	end

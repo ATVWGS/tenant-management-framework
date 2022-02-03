@@ -1,10 +1,9 @@
-function Validate-CloudAppSecuritySessionControl
+function Validate-ConditionalAccessLocations
 {
 	[CmdletBinding()]
 	Param (
-		[bool] $isEnabled,
-		[ValidateSet("mcasConfigured", "monitorOnly", "blockDownloads", "unknownFutureValue")]
-		[string] $cloudAppSecurityType,
+		[string[]] $includeLocations,
+		[string[]] $excludeLocations,
 		[System.Management.Automation.PSCmdlet]
 		$Cmdlet = $PSCmdlet
 	)
@@ -19,7 +18,7 @@ function Validate-CloudAppSecuritySessionControl
 
 		$hashtable = @{}
 		foreach ($property in ($PSBoundParameters.GetEnumerator() | Where-Object {$_.Key -ne "Cmdlet"})) {			
-			$hashtable[$property.Key] = $property.Value
+			$hashtable[$property.Key] = @($property.Value | Foreach-Object {Resolve-NamedLocation -InputReference $_ -Cmdlet $Cmdlet})
 		}
 	}
 	end

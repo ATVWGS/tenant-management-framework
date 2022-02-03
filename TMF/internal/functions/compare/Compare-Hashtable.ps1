@@ -12,7 +12,7 @@ function Compare-Hashtable {
         $same = $true
     }
     process {
-        foreach ($reference in $ReferenceObject.GetEnumerator()) {
+        foreach ($reference in $ReferenceObject.GetEnumerator()) {            
             if ($DifferenceObject.ContainsKey($reference.Key)) {
                 if ($reference.Value.GetType().Name -eq "Hashtable") {
                     if ($DifferenceObject[$reference.Key]) {
@@ -24,6 +24,11 @@ function Compare-Hashtable {
                         $same = $false
                     }
                 }
+                elseif ($reference.Value.GetType() -in @("System.Object[]", "string[]")) {
+                    if (Compare-Object -ReferenceObject $reference.Value -DifferenceObject $DifferenceObject[$reference.Key]) {
+                        $same = $false
+                    }
+                }
                 else {
                     if ($reference.Value -ne $DifferenceObject[$reference.Key]) {
                         $same = $false
@@ -32,7 +37,7 @@ function Compare-Hashtable {
             }
             else {
                 $same = $false
-            }
+            }            
         }
     }
     end {
