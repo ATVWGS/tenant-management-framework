@@ -50,9 +50,9 @@ function Register-TmfAccessPackageAssignementPolicy
 
 		"accessReviewSettings", "requestApprovalSettings", "requestorSettings" | ForEach-Object {
 			if ($PSBoundParameters.ContainsKey($_)) {
-				if ($script:validateFunctionMapping.ContainsKey($_)) {
-					$validated = $PSBoundParameters[$_] | ConvertTo-PSFHashtable -Include $($script:validateFunctionMapping[$_].Parameters.Keys)
-					$validated = & $script:validateFunctionMapping[$_] @validated -Cmdlet $Cmdlet
+				if ($script:supportedResources[$resourceName]["validateFunctions"].ContainsKey($_)) {
+					$validated = $PSBoundParameters[$_] | ConvertTo-PSFHashtable -Include $($script:supportedResources[$resourceName]["validateFunctions"][$_].Parameters.Keys)
+					$validated = & $script:supportedResources[$resourceName]["validateFunctions"][$_] @validated -Cmdlet $Cmdlet
 				}
 				else {
 					$validated = $PSBoundParameters[$_]

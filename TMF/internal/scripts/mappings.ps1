@@ -71,6 +71,16 @@ $script:supportedResources = @{
     "accessPackageAssignementPolicies" = @{     
         "testFunction" = (Get-Command Test-TmfAccessPackageAssignementPolicy)
         "invokeFunction" = (Get-Command Invoke-TmfAccessPackageAssignementPolicy)
+        "validateFunctions" = @{
+            "accessReviewSettings" = (Get-Command Validate-AssignmentReviewSettings)
+            "requestApprovalSettings" = (Get-Command Validate-RequestApprovalSettings)
+            "requestorSettings" = (Get-Command Validate-RequestorSettings)
+            "approvalStages" = (Get-Command Validate-ApprovalStage)    
+            "allowedRequestors" = (Get-Command Validate-UserSet)
+            "reviewers" = (Get-Command Validate-UserSet)
+            "primaryApprovers" = (Get-Command Validate-UserSet)
+            "escalationApprovers" = (Get-Command Validate-UserSet)
+        }
         "parentType" = "entitlementManagement"
         "weight" = 57
     }    
@@ -78,12 +88,5 @@ $script:supportedResources = @{
 Set-Variable -Name supportedResources -Option ReadOnly
 
 $script:validateFunctionMapping = @{
-    "accessReviewSettings" = (Get-Command Validate-AssignmentReviewSettings)
-    "requestApprovalSettings" = (Get-Command Validate-RequestApprovalSettings)
-    "approvalStages" = (Get-Command Validate-ApprovalStage)
-    "requestorSettings" = (Get-Command Validate-RequestorSettings)
-    "allowedRequestors" = (Get-Command Validate-UserSet)
-    "reviewers" = (Get-Command Validate-UserSet)
-    "primaryApprovers" = (Get-Command Validate-UserSet)
-    "escalationApprovers" = (Get-Command Validate-UserSet)        
+    <# Legacy ... #>
 }
