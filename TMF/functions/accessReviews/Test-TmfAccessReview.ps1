@@ -51,6 +51,14 @@ function Test-TmfAccessReview
 			switch ($resource.Count) {
 				0 {
 					if ($definition.present) {					
+						if ((Get-Date -Date ($definition.settings.recurrence.range.startDate)) -lt (Get-Date -Format "yyyy-MM-dd")) {
+							Write-PSFMessage -Level Warning -String 'TMF.Error.StartDateValidationFailed' -StringValues $filter -Tag 'failed'
+							$exception = New-Object System.Data.DataException("$($result.ResourceType) ($($result.ResourceName)) can not be created with parameter startDate in the past!")
+							$errorID = "StartDateValidationFailed"
+							$category = [System.Management.Automation.ErrorCategory]::NotSpecified
+							$recordObject = New-Object System.Management.Automation.ErrorRecord($exception, $errorID, $category, $Cmdlet)
+							$cmdlet.ThrowTerminatingError($recordObject)
+						}
 						$result = New-TestResult @result -ActionType "Create"
 					}
 					else {					

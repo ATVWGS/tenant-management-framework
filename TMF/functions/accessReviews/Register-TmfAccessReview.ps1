@@ -14,6 +14,7 @@ function Register-TmfAccessReview
 	
 	begin
 	{
+		Test-GraphConnection -Cmdlet $Cmdlet
 		$resourceName = "accessReviews"
 		if (!$script:desiredConfiguration[$resourceName]) {
 			$script:desiredConfiguration[$resourceName] = @()

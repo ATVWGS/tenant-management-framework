@@ -58,17 +58,28 @@ $script:supportedResources = @{
         "invokeFunction" = (Get-Command Invoke-TmfAccessPackageAssignementPolicy)
         "parentType" = "entitlementManagement"
         "weight" = 57
-    }    
+    }
+    "accessReviews" = @{
+        "registerFunction" = (Get-Command Register-TmfAccessReview)
+        "testFunction" = (Get-Command Test-TmfAccessReview)
+        "invokeFunction" = (Get-Command Invoke-TmfAccessReview)
+        "weight" = 60
+    }
 } # All currently supported components.
 Set-Variable -Name supportedResources -Option ReadOnly
 
 $script:validateFunctionMapping = @{
+    "scope" = (Get-Command Validate-AccessReviewScope)
+    "settings" = (Get-Command Validate-AccessReviewSettings)
+    "recurrence" = (Get-Command Validate-AccessReviewRecurrence)
+    "pattern" = (Get-Command Validate-AccessReviewPattern)
+    "range" = (Get-Command Validate-AccessReviewRange)
+    "reviewers" = (Get-Command Validate-AccessReviewReviewers)
     "accessReviewSettings" = (Get-Command Validate-AssignmentReviewSettings)
     "requestApprovalSettings" = (Get-Command Validate-RequestApprovalSettings)
     "approvalStages" = (Get-Command Validate-ApprovalStage)
     "requestorSettings" = (Get-Command Validate-RequestorSettings)
     "allowedRequestors" = (Get-Command Validate-UserSet)
-    "reviewers" = (Get-Command Validate-UserSet)
     "primaryApprovers" = (Get-Command Validate-UserSet)
     "escalationApprovers" = (Get-Command Validate-UserSet)
     "grantControls" = (Get-Command Validate-ConditionalAccessGrantControls)
