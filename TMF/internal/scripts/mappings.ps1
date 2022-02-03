@@ -63,18 +63,21 @@ $script:supportedResources = @{
         "registerFunction" = (Get-Command Register-TmfAccessReview)
         "testFunction" = (Get-Command Test-TmfAccessReview)
         "invokeFunction" = (Get-Command Invoke-TmfAccessReview)
+        "validateFunctions" = @{
+            "scope" = (Get-Command Validate-AccessReviewScope)
+            "settings" = (Get-Command Validate-AccessReviewSettings)
+            "recurrence" = (Get-Command Validate-AccessReviewRecurrence)
+            "pattern" = (Get-Command Validate-AccessReviewPattern)
+            "range" = (Get-Command Validate-AccessReviewRange)
+            "reviewers" = (Get-Command Validate-AccessReviewReviewers)
+        }
         "weight" = 60
     }
 } # All currently supported components.
 Set-Variable -Name supportedResources -Option ReadOnly
 
 $script:validateFunctionMapping = @{
-    "scope" = (Get-Command Validate-AccessReviewScope)
-    "settings" = (Get-Command Validate-AccessReviewSettings)
-    "recurrence" = (Get-Command Validate-AccessReviewRecurrence)
-    "pattern" = (Get-Command Validate-AccessReviewPattern)
-    "range" = (Get-Command Validate-AccessReviewRange)
-    "reviewers" = (Get-Command Validate-AccessReviewReviewers)
+    
     "accessReviewSettings" = (Get-Command Validate-AssignmentReviewSettings)
     "requestApprovalSettings" = (Get-Command Validate-RequestApprovalSettings)
     "approvalStages" = (Get-Command Validate-ApprovalStage)

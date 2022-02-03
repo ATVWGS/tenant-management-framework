@@ -9,7 +9,9 @@ function Validate-AccessReviewScope
 		$Cmdlet = $PSCmdlet
 	)
 
-    begin{}
+    begin{
+		$parentResourceName = "accessReviews"
+	}
 
     process 
     {

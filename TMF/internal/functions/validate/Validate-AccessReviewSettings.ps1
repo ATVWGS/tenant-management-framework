@@ -16,7 +16,9 @@ function Validate-AccessReviewSettings
 		$Cmdlet = $PSCmdlet
 	)
 
-    begin{}
+    begin{
+		$parentResourceName = "accessReviews"
+	}
 
     process 
     {
@@ -24,17 +26,17 @@ function Validate-AccessReviewSettings
 
 		$hashtable = @{}
 		foreach ($property in ($PSBoundParameters.GetEnumerator() | Where-Object {$_.Key -ne "Cmdlet"})) {
-			if ($script:validateFunctionMapping.ContainsKey($property.Key)) {
+			if ($script:supportedResources[$parentResourceName]["validateFunctions"].ContainsKey($property.Key)) {
 				if ($property.Value.GetType().Name -eq "Object[]") {
 					$validated = @()
 					foreach ($value in $property.Value) {
-						$dummy = $value | ConvertTo-PSFHashtable -Include $($script:validateFunctionMapping[$property.Key].Parameters.Keys)
-						$validated += & $script:validateFunctionMapping[$property.Key] @dummy -Cmdlet $Cmdlet
+						$dummy = $value | ConvertTo-PSFHashtable -Include $($script:supportedResources[$parentResourceName]["validateFunctions"][$property.Key].Parameters.Keys)
+						$validated += & $script:supportedResources[$parentResourceName]["validateFunctions"][$property.Key] @dummy -Cmdlet $Cmdlet
 					}					
 				}
 				else {
-					$validated = $property.Value | ConvertTo-PSFHashtable -Include $($script:validateFunctionMapping[$property.Key].Parameters.Keys)
-					$validated = & $script:validateFunctionMapping[$property.Key] @validated -Cmdlet $Cmdlet
+					$validated = $property.Value | ConvertTo-PSFHashtable -Include $($script:supportedResources[$parentResourceName]["validateFunctions"][$property.Key].Parameters.Keys)
+					$validated = & $script:supportedResources[$parentResourceName]["validateFunctions"][$property.Key] @validated -Cmdlet $Cmdlet
 				}				
 			}
 			else {

@@ -37,19 +37,19 @@ function Register-TmfAccessReview
 		
 		"scope", "reviewers", "settings" | ForEach-Object {
 			if ($PSBoundParameters.ContainsKey($_)) {
-				if ($script:validateFunctionMapping.ContainsKey($_)) {
+				if ($script:supportedResources[$resourceName]["validateFunctions"].ContainsKey($_)) {
 					if ($_ -eq "reviewers") {
 						$reviewers = $PSBoundParameters[$_]
 						$property = "reviewers"
 						for ($i=0; $i -lt $reviewers.count;$i++) {
-							$validated = $PSBoundParameters[$property][$i] | ConvertTo-PSFHashtable -Include $($script:validateFunctionMapping[$property].Parameters.Keys)
-							$validated = & $script:validateFunctionMapping[$property] @validated -Cmdlet $Cmdlet
+							$validated = $PSBoundParameters[$property][$i] | ConvertTo-PSFHashtable -Include $($script:supportedResources[$resourceName]["validateFunctions"][$property].Parameters.Keys)
+							$validated = & $script:supportedResources[$resourceName]["validateFunctions"][$property] @validated -Cmdlet $Cmdlet
 							$object.reviewers += $validated
 						}
 					}
 					else {
-						$validated = $PSBoundParameters[$_] | ConvertTo-PSFHashtable -Include $($script:validateFunctionMapping[$_].Parameters.Keys)
-						$validated = & $script:validateFunctionMapping[$_] @validated -Cmdlet $Cmdlet
+						$validated = $PSBoundParameters[$_] | ConvertTo-PSFHashtable -Include $($script:supportedResources[$resourceName]["validateFunctions"][$_].Parameters.Keys)
+						$validated = & $script:supportedResources[$resourceName]["validateFunctions"][$_] @validated -Cmdlet $Cmdlet
 						Add-Member -InputObject $object -MemberType NoteProperty -Name $_ -Value $validated
 					}
 				}
@@ -57,7 +57,6 @@ function Register-TmfAccessReview
 					$validated = $PSBoundParameters[$_]
 					Add-Member -InputObject $object -MemberType NoteProperty -Name $_ -Value $validated
 				}
-				
 			}			
 		}
 

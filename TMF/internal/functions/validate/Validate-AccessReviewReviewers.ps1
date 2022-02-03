@@ -17,7 +17,10 @@ function Validate-AccessReviewReviewers
 		$Cmdlet = $PSCmdlet
 	)
 	
-	begin {}
+	begin {
+		$parentResourceName = "accessReviews"
+	}
+	
 	process
 	{
 		if (Test-PSFFunctionInterrupt) { return }				
