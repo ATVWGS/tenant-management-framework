@@ -2,6 +2,7 @@ trigger:
   branches:
     include:
       - main
+      - prepare-release/*
   paths:
     include:
       - TMF
@@ -10,11 +11,15 @@ name: '[Build and Deploy] Tenant Management Framework'
 
 variables:
   major: 1
-  minor: 2
+  minor: 3
   patch: $(Build.BuildID)
   moduleName: 'TMF'
   releaseFeed: 'vwgs-azdevops-release'
   buildVer: $(major).$(minor).$(Build.BuildID)
+  ${{ if eq(variables['Build.SourceBranchName'], 'main') }}:
+    nugetVer: $(buildVer)
+  ${{ else }}:
+    nugetVer: $(buildVer)-prerelease
 
 pool:
   vmImage: "ubuntu-latest"
@@ -38,8 +43,8 @@ stages:
         command: 'pack'
         packagesToPack: '$(System.DefaultWorkingDirectory)/$(moduleName)/$(moduleName).nuspec'
         versioningScheme: byEnvVar
-        versionEnvVar: buildVer
-        buildProperties: 'VERSIONHERE=$(buildVer)'
+        versionEnvVar: nugetVer
+        buildProperties: 'VERSIONHERE=$(nugetVer)'
     - task: PublishBuildArtifacts@1
       inputs:
         PathtoPublish: '$(Build.ArtifactStagingDirectory)'
