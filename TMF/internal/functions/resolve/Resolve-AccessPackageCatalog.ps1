@@ -17,10 +17,10 @@ function Resolve-AccessPackageCatalog
 	{			
 		try {
 			if ($InputReference -match $script:guidRegex) {
-				$catalog = (Invoke-MgGraphRequest -Method GET -Uri ("$script:graphBaseUrl/identityGovernance/entitlementManagement/accessPackageCatalogs/{0}" -f $InputReference)).Value
+				$catalog = (Invoke-MgGraphRequest -Method GET -Uri ("$script:graphBaseUrl/identityGovernance/entitlementManagement/accessPackageCatalogs/{0}" -f $InputReference)).Value.Id
 			}
 			else {
-				$catalog = (Invoke-MgGraphRequest -Method GET -Uri ("$script:graphBaseUrl/identityGovernance/entitlementManagement/accessPackageCatalogs/?`$filter=displayName eq '{0}'" -f $InputReference)).Value
+				$catalog = (Invoke-MgGraphRequest -Method GET -Uri ("$script:graphBaseUrl/identityGovernance/entitlementManagement/accessPackageCatalogs/?`$filter=displayName eq '{0}'" -f $InputReference)).Value.Id
 			}
 
 			if (-Not $catalog -and $SearchInDesiredConfiguration) {
@@ -33,7 +33,7 @@ function Resolve-AccessPackageCatalog
 			elseif (-Not $catalog -and $DontFailIfNotExisting) { return }
 
 			if ($catalog.count -gt 1) { throw "Got multiple accessPackageCatalogs for $InputReference" }
-			return $catalog.Id
+			return $catalog
 		}
 		catch {
 			Write-PSFMessage -Level Warning -String 'TMF.CannotResolveResource' -StringValues "AccessPackageCatalog" -Tag 'failed' -ErrorRecord $_

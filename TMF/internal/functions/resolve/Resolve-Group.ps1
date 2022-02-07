@@ -17,7 +17,7 @@
 	{			
 		try {
 			if ($InputReference -match $script:guidRegex) {
-				$group = (Invoke-MgGraphRequest -Method GET -Uri ("$script:graphBaseUrl/groups/{0}" -f $InputReference)).Value
+				$group = (Invoke-MgGraphRequest -Method GET -Uri ("$script:graphBaseUrl/groups/{0}" -f $InputReference)).Value.Id
 			}
 			elseif ($InputReference -match $script:mailNicknameRegex) {
 				$group = (Invoke-MgGraphRequest -Method GET -Uri ("$script:graphBaseUrl/groups/?`$filter=mailNickname eq '{0}'" -f $InputReference)).Value.Id
@@ -26,7 +26,8 @@
 				return $InputReference
 			}
 			else {
-				$group = (Invoke-MgGraphRequest -Method GET -Uri ("$script:graphBaseUrl/groups/?`$filter=displayName eq '{0}'" -f $InputReference)).Value.Id			}
+				$group = (Invoke-MgGraphRequest -Method GET -Uri ("$script:graphBaseUrl/groups/?`$filter=displayName eq '{0}'" -f $InputReference)).Value.Id
+			}
 			
 			if (-Not $group -and $SearchInDesiredConfiguration) {
 				if ($InputReference -in $script:desiredConfiguration["groups"].displayName) {

@@ -17,13 +17,13 @@
 	{			
 		try {
 			if ($InputReference -match $script:guidRegex) {
-				$role = (Invoke-MgGraphRequest -Method GET -Uri ("$script:graphBaseUrl/directoryRoles?`$filter=id eq '{0}'" -f $InputReference)).Value
+				$role = (Invoke-MgGraphRequest -Method GET -Uri ("$script:graphBaseUrl/directoryRoles?`$filter=id eq '{0}'" -f $InputReference)).Value.Id
 			}
 			elseif ($InputReference -in @("All")) {
 				return $InputReference
 			}
 			else {
-				$role = (Invoke-MgGraphRequest -Method GET -Uri ("$script:graphBaseUrl/directoryRoles/?`$filter=displayName eq '{0}'" -f $InputReference)).Value
+				$role = (Invoke-MgGraphRequest -Method GET -Uri ("$script:graphBaseUrl/directoryRoles/?`$filter=displayName eq '{0}'" -f $InputReference)).Value.Id
 			}
 
 			if (-Not $role -and $SearchInDesiredConfiguration) {
@@ -36,7 +36,7 @@
 			elseif (-Not $role -and $DontFailIfNotExisting) { return }
 
 			if ($role.count -gt 1) { throw "Got multiple directoryRoles for $InputReference" }
-			return $role.Id
+			return $role
 		}
 		catch {
 			Write-PSFMessage -Level Warning -String 'TMF.CannotResolveResource' -StringValues "DirectoryRole" -Tag 'failed' -ErrorRecord $_

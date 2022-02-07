@@ -17,18 +17,18 @@
 	{			
 		try {
 			if ($InputReference -match $script:guidRegex) {
-				$location = (Invoke-MgGraphRequest -Method GET -Uri ("$script:graphBaseUrl/identity/conditionalAccess/namedLocations/{0}" -f $InputReference)).Value
+				$location = (Invoke-MgGraphRequest -Method GET -Uri ("$script:graphBaseUrl/identity/conditionalAccess/namedLocations/{0}" -f $InputReference)).Value.Id
 			}
 			elseif ($InputReference -in @("All", "AllTrusted")) {
 				return $InputReference
 			}
 			else {
-				$location = (Invoke-MgGraphRequest -Method GET -Uri ("$script:graphBaseUrl/identity/conditionalAccess/namedLocations/?`$filter=displayName eq '{0}'" -f $InputReference)).Value
+				$location = (Invoke-MgGraphRequest -Method GET -Uri ("$script:graphBaseUrl/identity/conditionalAccess/namedLocations/?`$filter=displayName eq '{0}'" -f $InputReference)).Value.Id
 			}
 
 			if (-Not $location -and $SearchInDesiredConfiguration) {
 				if ($InputReference -in $script:desiredConfiguration["namedLocations"].displayName) {
-					$location = $InputReference
+					$location = $InputReference.Id
 				}
 			}
 
