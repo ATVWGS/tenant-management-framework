@@ -63,7 +63,7 @@ stages:
       - task: DownloadPipelineArtifact@2
         inputs:
           buildType: 'current'
-          artifactName: 'NuGetPackage'
+          artifactName: 'package'
           itemPattern: '**'
           targetPath: '$(Pipeline.Workspace)'
       - task: NuGetCommand@2
