@@ -38,19 +38,50 @@ function Register-TmfAccessReview
 		"scope", "reviewers", "settings" | ForEach-Object {
 			if ($PSBoundParameters.ContainsKey($_)) {
 				if ($script:supportedResources[$resourceName]["validateFunctions"].ContainsKey($_)) {
-					if ($_ -eq "reviewers") {
-						$reviewers = $PSBoundParameters[$_]
-						$property = "reviewers"
-						for ($i=0; $i -lt $reviewers.count;$i++) {
-							$validated = $PSBoundParameters[$property][$i] | ConvertTo-PSFHashtable -Include $($script:supportedResources[$resourceName]["validateFunctions"][$property].Parameters.Keys)
-							$validated = & $script:supportedResources[$resourceName]["validateFunctions"][$property] @validated -Cmdlet $Cmdlet
-							$object.reviewers += $validated
+					
+					switch ($_) {
+						"reviewers" {
+							$reviewers = $PSBoundParameters[$_]
+							$property = "reviewers"
+							for ($i=0; $i -lt $reviewers.count;$i++) {
+								$validated = $PSBoundParameters[$property][$i] | ConvertTo-PSFHashtable -Include $($script:supportedResources[$resourceName]["validateFunctions"][$property].Parameters.Keys)
+								$validated = & $script:supportedResources[$resourceName]["validateFunctions"][$property] @validated -Cmdlet $Cmdlet
+								$object.reviewers += $validated
+							}
 						}
-					}
-					else {
-						$validated = $PSBoundParameters[$_] | ConvertTo-PSFHashtable -Include $($script:supportedResources[$resourceName]["validateFunctions"][$_].Parameters.Keys)
-						$validated = & $script:supportedResources[$resourceName]["validateFunctions"][$_] @validated -Cmdlet $Cmdlet
-						Add-Member -InputObject $object -MemberType NoteProperty -Name $_ -Value $validated
+						"scope" {
+							if ($scope.subScope) {
+								$property = "scope"
+								switch ($scope.subScope) {
+									"servicePrincipals" {
+										$validated = $PSBoundParameters[$property] | ConvertTo-PSFHashtable -Include $($script:supportedResources[$resourceName]["validateFunctions"][$property].Parameters.Keys)
+										$validated = & $script:supportedResources[$resourceName]["validateFunctions"][$property] @validated -Cmdlet $Cmdlet
+										Add-Member -InputObject $object -MemberType NoteProperty -Name $property -Value $validated
+									}
+									"users_groups" {
+										$validated = $PSBoundParameters[$property] | ConvertTo-PSFHashtable -Include $($script:supportedResources[$resourceName]["validateFunctions"][$property].Parameters.Keys)
+										$validated = & $script:supportedResources[$resourceName]["validateFunctions"][$property] @validated -Cmdlet $Cmdlet
+										$objectscope = @{									
+															"@odata.type"="#microsoft.graph.principalResourceMembershipsScope"
+															"principalScopes"=@()
+															"resourceScopes"=@()
+										}
+										Add-Member -InputObject $object -MemberType NoteProperty -Name $property -Value $objectscope
+										$object.$property.principalScopes += $validated
+									}
+								}
+							}
+							else {
+								$validated = $PSBoundParameters[$_] | ConvertTo-PSFHashtable -Include $($script:supportedResources[$resourceName]["validateFunctions"][$_].Parameters.Keys)
+								$validated = & $script:supportedResources[$resourceName]["validateFunctions"][$_] @validated -Cmdlet $Cmdlet
+								Add-Member -InputObject $object -MemberType NoteProperty -Name $_ -Value $validated
+							}
+						}
+						default {
+							$validated = $PSBoundParameters[$_] | ConvertTo-PSFHashtable -Include $($script:supportedResources[$resourceName]["validateFunctions"][$_].Parameters.Keys)
+							$validated = & $script:supportedResources[$resourceName]["validateFunctions"][$_] @validated -Cmdlet $Cmdlet
+							Add-Member -InputObject $object -MemberType NoteProperty -Name $_ -Value $validated
+						}
 					}
 				}
 				else {

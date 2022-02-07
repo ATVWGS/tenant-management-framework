@@ -99,8 +99,40 @@ function Test-TmfAccessReview
 									}
 								}
 								"scope" {
-									if (Compare-Object $definition.$property.query $resource.$property.query) {
-										$change.Actions = @{"Set" = $definition.$property}
+									if ($definition.$property.query) {
+										if ($resource.$property.query) {
+											if (Compare-Object $definition.$property.query $resource.$property.query) {
+
+												Write-PSFMessage -Level Warning -String 'TMF.Error.ScopeValidationFailed' -StringValues $filter -Tag 'failed'
+												$exception = New-Object System.Data.DataException("$($result.ResourceType) ($($result.ResourceName)): Scope for existing access review can not be changed!")
+												$errorID = "ScopeValidationFailed"
+												$category = [System.Management.Automation.ErrorCategory]::NotSpecified
+												$recordObject = New-Object System.Management.Automation.ErrorRecord($exception, $errorID, $category, $Cmdlet)
+												$cmdlet.ThrowTerminatingError($recordObject)
+
+												#$change.Actions = @{"Set" = $definition.$property}
+											}
+										}
+										else {
+											Write-PSFMessage -Level Warning -String 'TMF.Error.ScopeValidationFailed' -StringValues $filter -Tag 'failed'
+											$exception = New-Object System.Data.DataException("$($result.ResourceType) ($($result.ResourceName)): Scope for existing access review can not be changed!")
+											$errorID = "ScopeValidationFailed"
+											$category = [System.Management.Automation.ErrorCategory]::NotSpecified
+											$recordObject = New-Object System.Management.Automation.ErrorRecord($exception, $errorID, $category, $Cmdlet)
+											$cmdlet.ThrowTerminatingError($recordObject)
+										}
+									}
+									else {
+										if ($definition.$property.principalScopes) {
+											if (Compare-Object $definition.$property.principalScopes.query $resource.$property.principalScopes.query) {
+												Write-PSFMessage -Level Warning -String 'TMF.Error.ScopeValidationFailed' -StringValues $filter -Tag 'failed'
+												$exception = New-Object System.Data.DataException("$($result.ResourceType) ($($result.ResourceName)): Scope for existing access review can not be changed!")
+												$errorID = "ScopeValidationFailed"
+												$category = [System.Management.Automation.ErrorCategory]::NotSpecified
+												$recordObject = New-Object System.Management.Automation.ErrorRecord($exception, $errorID, $category, $Cmdlet)
+												$cmdlet.ThrowTerminatingError($recordObject)
+											}
+										}
 									}
 								}
 							}
