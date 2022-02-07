@@ -60,5 +60,5 @@ stages:
           command: 'push'
           packagesToPush: '$(Pipeline.Workspace)/**/*.nupkg'
           nuGetFeedType: 'internal'
-          publishVstsFeed: 'Azure Team VWGS/vwgs-azdevops-release'
+          publishVstsFeed: 'Azure Team VWGS/vwgs-azdevops-release@prereleases'
           allowPackageConflicts: true
