@@ -1,0 +1,64 @@
+trigger:
+  branches:
+    include:
+      - prepare-release/*
+  paths:
+    include:
+      - TMF
+
+name: '[Build and Deploy] Tenant Management Framework'
+
+variables:
+  major: 1
+  minor: 3
+  patch: $(Build.BuildID)
+  moduleName: 'TMF'
+  releaseFeed: 'vwgs-azdevops-release'
+  buildVer: $(major).$(minor).$(Build.BuildID)-prerelease
+
+pool:
+  vmImage: "ubuntu-latest"
+
+stages:
+- stage: Build
+  jobs:
+  - job: Build
+    steps:
+    - task: PowerShell@2
+      inputs:
+        filePath: 'build/build.ps1'
+        arguments: '-moduleName $(moduleName)'
+    - task: CopyFiles@2
+      inputs:
+        SourceFolder: '$(System.DefaultWorkingDirectory)'
+        Contents: 'LICENSE'
+        TargetFolder: '$(System.DefaultWorkingDirectory)/TMF'
+    - task: NuGetCommand@2
+      inputs:
+        command: 'pack'
+        packagesToPack: '$(System.DefaultWorkingDirectory)/$(moduleName)/$(moduleName).nuspec'
+        versioningScheme: byEnvVar
+        versionEnvVar: buildVer
+        buildProperties: 'VERSIONHERE=$(buildVer)'
+    - task: PublishBuildArtifacts@1
+      inputs:
+        PathtoPublish: '$(Build.ArtifactStagingDirectory)'
+        ArtifactName: 'NuGetPackage'
+        publishLocation: 'Container'
+- stage: Deploy
+  jobs:
+  - job: Deploy
+    steps:
+      - task: DownloadPipelineArtifact@2
+        inputs:
+          buildType: 'current'
+          artifactName: 'NuGetPackage'
+          itemPattern: '**'
+          targetPath: '$(Pipeline.Workspace)'
+      - task: NuGetCommand@2
+        inputs:
+          command: 'push'
+          packagesToPush: '$(Pipeline.Workspace)/**/*.nupkg'
+          nuGetFeedType: 'internal'
+          publishVstsFeed: 'Azure Team VWGS/vwgs-azdevops-release'
+          allowPackageConflicts: true
