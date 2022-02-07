@@ -11,7 +11,6 @@ function Validate-AccessReviewSettings
 		[bool] $autoApplyDecisionsEnabled = $false,
         [bool] $recommendationsEnabled = $true,
         [object] $recurrence,
-		[object[]] $applyActions,
 		[System.Management.Automation.PSCmdlet]
 		$Cmdlet = $PSCmdlet
 	)

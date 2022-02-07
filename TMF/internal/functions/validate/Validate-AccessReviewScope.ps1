@@ -36,7 +36,7 @@ function Validate-AccessReviewScope
 							"@odata.type" = "#microsoft.graph.accessReviewQueryScope"
 							"queryType" = "MicrosoftGraph"
 							"queryRoot" = $null
-							"query" = "/beta/roleManagement/directory/roleAssignmentScheduleInstances?`$expand=principal&`$filter=(assignmentType eq 'Assigned' and isof(principal,'microsoft.graph.servicePrincipal') and roleDefinitionId eq '$($Id)')"
+							"query" = "/beta/roleManagement/directory/roleAssignmentScheduleInstances?`$expand=principal&`$filter=(isof(principal,'microsoft.graph.servicePrincipal') and roleDefinitionId eq '$($Id)')"
 						}
 					}
 					"users_groups" {

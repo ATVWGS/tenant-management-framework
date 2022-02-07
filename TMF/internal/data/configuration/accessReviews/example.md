@@ -41,12 +41,7 @@
                 "startDate": "2022-03-01",
                 "endDate": "9999-12-31"
             }
-        },
-        "applyActions": [
-            {
-                "@odata.type": "#microsoft.graph.removeAccessApplyAction"
-            }
-        ]
+        }
     }
   }
 ```
@@ -96,12 +91,7 @@
                 "startDate": "2022-03-01",
                 "endDate": "9999-12-31"
             }
-        },
-        "applyActions": [
-            {
-                "@odata.type": "#microsoft.graph.removeAccessApplyAction"
-            }
-        ]
+        }
     }
 }
 ```
@@ -147,12 +137,7 @@
                 "startDate": "2022-03-01",
                 "endDate": "9999-12-31"
             }
-        },
-        "applyActions": [
-            {
-                "@odata.type": "#microsoft.graph.removeAccessApplyAction"
-            }
-        ]
+        }
     }
 }
 ```
