@@ -11,7 +11,9 @@
 	#>
 	[CmdletBinding()]
 	Param (
-		[switch] $ReturnDesiredConfiguration
+		[switch] $ReturnDesiredConfiguration,
+		[System.Management.Automation.PSCmdlet]
+		$Cmdlet = $PSCmdlet
 	)
 	
 	begin

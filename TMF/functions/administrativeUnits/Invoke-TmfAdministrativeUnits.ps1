@@ -199,5 +199,8 @@ function Invoke-TmfAdministrativeUnits
             Write-PSFMessage -Level Host -String "TMF.Invoke.ActionCompleted" -StringValues $result.Tenant, $result.ResourceType, $result.ResourceName, (Get-ActionColor -Action $result.ActionType), $result.ActionType
         }
     }
-    end {}
+    end
+	{
+		Load-TmfConfiguration -Cmdlet $Cmdlet
+	}
 }

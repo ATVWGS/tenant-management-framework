@@ -18,16 +18,6 @@
 			return
 		}
 		Test-GraphConnection -Cmdlet $Cmdlet
-
-		$resolveFunctionMapping = @{
-			"Users" = (Get-Command Resolve-User)
-			"Groups" = (Get-Command Resolve-Group)
-			"Applications" = (Get-Command Resolve-Application)
-			"Roles" = (Get-Command Resolve-DirectoryRoleTemplate)
-			"Locations" = (Get-Command Resolve-NamedLocation)
-			"Platforms" = "DirectCompare"
-		}
-		$conditionPropertyRegex = [regex]"^(include|exclude)($($resolveFunctionMapping.Keys -join "|"))$"
 	}
 	process
 	{
@@ -43,41 +33,10 @@
 					$requestBody = @{						
 						"displayName" = $result.DesiredConfiguration.displayName
 						"state" = $result.DesiredConfiguration.state
-						"conditions" = @{}
 					}
-					try {
-						
+					try {						
 						foreach ($property in ($result.DesiredConfiguration.Properties() | Where-Object {$_ -notin @("displayName", "state", "present", "sourceConfig")})) {
-							$conditionPropertyMatch = $conditionPropertyRegex.Match($property)
-							if ($conditionPropertyMatch.Success) {
-								# Condition properties								
-								if ($conditionPropertyMatch.Groups[2].Value -in @("Users", "Groups", "Roles")) {
-									$conditionChildProperty = "users"	
-								}
-								else {
-									$conditionChildProperty = $conditionPropertyMatch.Groups[2].Value.ToLower()
-								}
-								
-								if (-Not $requestBody["conditions"][$conditionChildProperty]) { $requestBody["conditions"][$conditionChildProperty] = @{} }
-								if ($resolveFunctionMapping[$conditionPropertyMatch.Groups[2].Value] -eq "DirectCompare") {
-									$requestBody["conditions"][$conditionChildProperty][$property] = @($result.DesiredConfiguration.$property)
-								}
-								else {
-									$requestBody["conditions"][$conditionChildProperty][$property] = @($result.DesiredConfiguration.$property | ForEach-Object { & $resolveFunctionMapping[$conditionPropertyMatch.Groups[2].Value] -InputReference $_})								
-								}								
-							}
-							elseif ($property -in @("clientAppTypes", "signInRiskLevels", "userRiskLevels")) {
-								$requestBody["conditions"][$property] = $result.DesiredConfiguration.$property
-							}
-							elseif ($property -in @("operator", "builtInControls", "customAuthenticationFactors", "termsOfUse")) {
-								if (-Not $requestBody["grantControls"]) { $requestBody["grantControls"] = @{} }								
-								if ($property -eq "termsOfUse") {
-									$requestBody["grantControls"][$property] = @($result.DesiredConfiguration.$property | ForEach-Object {Resolve-Agreement -InputReference $_ -Cmdlet $Cmdlet})
-								}
-								else {
-									$requestBody["grantControls"][$property] = $result.DesiredConfiguration.$property
-								}
-							}
+							$requestBody[$property] = $result.DesiredConfiguration.$property
 						}
 						
 						$requestBody = $requestBody | ConvertTo-Json -ErrorAction Stop -Depth 8
@@ -107,34 +66,10 @@
 					$requestBody = @{}
 					try {
 						foreach ($change in $result.Changes) {
-							$conditionPropertyMatch = $conditionPropertyRegex.Match($change.property)
 							foreach ($action in $change.Actions.Keys) {
 								switch ($action) {
-									"Set" {
-										if ($conditionPropertyMatch.Success) {
-											if (-Not $requestBody["conditions"]) { $requestBody["conditions"] = @{} }
-											# Condition properties								
-											if ($conditionPropertyMatch.Groups[2].Value -in @("Users", "Groups", "Roles")) {
-												$conditionChildProperty = "users"	
-											}
-											else {
-												$conditionChildProperty = $conditionPropertyMatch.Groups[2].Value.ToLower()
-											}
-											
-											if (-Not $requestBody["conditions"][$conditionChildProperty]) { $requestBody["conditions"][$conditionChildProperty] = @{} }
-											$requestBody["conditions"][$conditionChildProperty][$change.property] = @($change.Actions[$action])
-										}
-										elseif ($change.property -in @("clientAppTypes", "signInRiskLevels", "userRiskLevels")) {
-											if (-Not $requestBody["conditions"]) { $requestBody["conditions"] = @{} }
-											$requestBody["conditions"][$change.property] = $change.Actions[$action]
-										}
-										elseif ($change.property -in @("operator", "builtInControls", "customAuthenticationFactors", "termsOfUse")) {
-											if (-Not $requestBody["grantControls"]) { $requestBody["grantControls"] = @{} }
-											$requestBody["grantControls"][$change.property] = $change.Actions[$action]
-										}
-										else {
-											$requestBody[$change.property] = $change.Actions[$action]
-										}
+									"Set" {										
+										$requestBody[$change.property] = $change.Actions[$action]
 									}									
 								}
 							}
@@ -161,6 +96,6 @@
 	}
 	end
 	{
-		
+		Load-TmfConfiguration -Cmdlet $Cmdlet
 	}
 }

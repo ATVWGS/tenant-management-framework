@@ -17,7 +17,7 @@
 	{
 		Test-GraphConnection -Cmdlet $Cmdlet
 		$componentName = "groups"
-		$tenant = Get-MgOrganization -Property displayName, Id		
+		$tenant = Get-MgOrganization -Property displayName, Id
 	}
 	process
 	{

@@ -99,6 +99,6 @@
 	}
 	end
 	{
-		
+		Load-TmfConfiguration -Cmdlet $Cmdlet
 	}
 }

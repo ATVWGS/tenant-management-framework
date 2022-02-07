@@ -41,13 +41,13 @@
 			Add-Member -InputObject $userSetObject -MemberType ScriptMethod -Name getId -Value {
 				switch ($this.type) {
 					"singleUser" {
-						Resolve-User -InputReference $this.reference -Cmdlet $PSCmdlet
+						Resolve-User -InputReference $this.reference -SearchInDesiredConfiguration -Cmdlet $PSCmdlet
 					}
 					"groupMembers" {
-						Resolve-Group -InputReference $this.reference -Cmdlet $PSCmdlet
+						Resolve-Group -InputReference $this.reference -SearchInDesiredConfiguration -Cmdlet $PSCmdlet
 					}
 					"connectedOrganizationMembers" {
-						Resolve-ConnectedOrganization -InputReference $this.reference -Cmdlet $PSCmdlet
+						Resolve-ConnectedOrganization -InputReference $this.reference -SearchInDesiredConfiguration -Cmdlet $PSCmdlet
 					}
 				}
 			}
