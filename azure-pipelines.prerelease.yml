@@ -14,7 +14,8 @@ variables:
   patch: $(Build.BuildID)
   moduleName: 'TMF'
   releaseFeed: 'vwgs-azdevops-release'
-  buildVer: $(major).$(minor).$(Build.BuildID)-prerelease
+  buildVer: $(major).$(minor).$(Build.BuildID)
+  nugetVer: $(buildVer)-prerelease
 
 pool:
   vmImage: "ubuntu-latest"
@@ -38,8 +39,8 @@ stages:
         command: 'pack'
         packagesToPack: '$(System.DefaultWorkingDirectory)/$(moduleName)/$(moduleName).nuspec'
         versioningScheme: byEnvVar
-        versionEnvVar: buildVer
-        buildProperties: 'VERSIONHERE=$(buildVer)'
+        versionEnvVar: nugetVer
+        buildProperties: 'VERSIONHERE=$(nugetVer)'
     - task: PublishBuildArtifacts@1
       inputs:
         PathtoPublish: '$(Build.ArtifactStagingDirectory)'
