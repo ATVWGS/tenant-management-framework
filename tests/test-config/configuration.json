@@ -1,0 +1,7 @@
+{
+  "Name": "test-config",
+  "Description": "<insert description here>",
+  "Author": "<author>",
+  "Weight": 50,
+  "Prerequisite": []
+}

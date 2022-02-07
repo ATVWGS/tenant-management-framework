@@ -174,6 +174,6 @@ function Invoke-TmfAccessPackage
 	}
 	end
 	{
-		
+		Load-TmfConfiguration -Cmdlet $Cmdlet
 	}
 }

@@ -5,6 +5,7 @@
 		[Parameter(Mandatory = $true)]
 		[string] $InputReference,
 		[switch] $DontFailIfNotExisting,
+		[switch] $SearchInDesiredConfiguration,
 		[System.Management.Automation.PSCmdlet]
 		$Cmdlet = $PSCmdlet
 	)
@@ -20,6 +21,12 @@
 			}
 			else {
 				$roleDefinition = (Invoke-MgGraphRequest -Method GET -Uri ("$script:graphBaseUrl/roleManagement/directory/roleDefinitions/?`$filter=displayName eq '{0}'" -f $InputReference)).Value
+			}
+
+			if (-Not $roleDefinition -and $SearchInDesiredConfiguration) {
+				if ($InputReference -in $script:desiredConfiguration["roleDefinitions"].displayName) {
+					$roleDefinition = $InputReference
+				}
 			}
 
 			if (-Not $roleDefinition -and -Not $DontFailIfNotExisting) { throw "Cannot find directoryRole $InputReference." } 

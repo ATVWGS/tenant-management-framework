@@ -89,6 +89,6 @@ function Invoke-TmfAccessPackageCatalog
 	}
 	end
 	{
-		
+		Load-TmfConfiguration -Cmdlet $Cmdlet
 	}
 }

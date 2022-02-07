@@ -60,6 +60,7 @@
 	
 	begin
 	{
+		Test-GraphConnection -Cmdlet $Cmdlet
 		$resourceName = "conditionalAccessPolicies"
 		if (!$script:desiredConfiguration[$resourceName]) {
 			$script:desiredConfiguration[$resourceName] = @()

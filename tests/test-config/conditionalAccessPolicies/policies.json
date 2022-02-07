@@ -1,0 +1,123 @@
+[
+    {
+        "displayName": "Test - Require MFA and ToU based on a group",
+        "includeGroups": [
+            "Test group for conditionalAccessPolicies",
+            "Test - Group for conditionalAccessPolicies 2"
+        ],
+        "includeApplications": [
+            "All"
+        ],
+        "includeLocations": [
+            "All"
+        ],
+        "clientAppTypes": [
+            "browser",
+            "mobileAppsAndDesktopClients"
+        ],
+        "includePlatforms": [
+            "All"
+        ],
+        "grantControls": {
+            "builtInControls": [
+                "mfa"
+            ],
+            "operator": "AND",
+            "termsOfUse": [
+                "Test - An example agreement with a single files"
+            ]
+        },
+        "state": "enabledForReportingButNotEnforced",
+        "present": true
+    },
+    {
+        "displayName": "Test - Test deviceFilters",
+        "conditions": {
+            "users": {
+                "excludeGroups": [
+                    "Test group for conditionalAccessPolicies"
+                ],
+                "excludeRoles": [],
+                "excludeUsers": [],
+                "includeGroups": [],
+                "includeRoles": [],
+                "includeUsers": [
+                    "All"
+                ]
+            },
+            "applications": {
+                "includeApplications": [
+                    "All"
+                ]
+            },
+            "devices": {
+                "deviceFilter": {
+                    "mode": "exclude",
+                    "rule": "(device.deviceOwnership -eq \"Company\" -and device.isCompliant -eq True) -or device.trustType -eq \"ServerAD\""
+                }
+            },
+            "clientAppTypes": [
+                "browser",
+                "mobileAppsAndDesktopClients"
+            ]
+        },
+        "grantControls": {
+            "builtInControls": [
+                "block"
+            ],
+            "operator": "OR"
+        },
+        "sessionControls": {
+            "cloudAppSecurity": {
+                "cloudAppSecurityType": "blockDownloads",
+                "isEnabled": true
+            }
+        },
+        "state": "enabledForReportingButNotEnforced",
+        "present": true
+    },
+    {
+        "displayName": "Test - Test includeDevices and excludeDevices",
+        "conditions": {
+            "users": {
+                "excludeGroups": [
+                    "Test group for conditionalAccessPolicies"
+                ],
+                "excludeRoles": [],
+                "excludeUsers": [],
+                "includeGroups": [],
+                "includeRoles": [],
+                "includeUsers": [
+                    "All"
+                ]
+            },
+            "applications": {
+                "includeApplications": [
+                    "All"
+                ]
+            },
+            "devices": {
+                "includeDevices": ["All"],
+                "excludeDevices": ["Compliant"]
+            },
+            "clientAppTypes": [
+                "browser",
+                "mobileAppsAndDesktopClients"
+            ]
+        },
+        "grantControls": {
+            "builtInControls": [
+                "block"
+            ],
+            "operator": "OR"
+        },
+        "sessionControls": {
+            "cloudAppSecurity": {
+                "cloudAppSecurityType": "blockDownloads",
+                "isEnabled": true
+            }
+        },
+        "state": "enabledForReportingButNotEnforced",
+        "present": true
+    }
+]

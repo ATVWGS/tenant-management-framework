@@ -5,6 +5,7 @@
 		[Parameter(Mandatory = $true)]
 		[string] $InputReference,
 		[switch] $DontFailIfNotExisting,
+		[switch] $SearchInDesiredConfiguration,
 		[System.Management.Automation.PSCmdlet]
 		$Cmdlet = $PSCmdlet
 	)
@@ -23,6 +24,12 @@
 			}
 			else {
 				$location = (Invoke-MgGraphRequest -Method GET -Uri ("$script:graphBaseUrl/identity/conditionalAccess/namedLocations/?`$filter=displayName eq '{0}'" -f $InputReference)).Value
+			}
+
+			if (-Not $location -and $SearchInDesiredConfiguration) {
+				if ($InputReference -in $script:desiredConfiguration["namedLocations"].displayName) {
+					$location = $InputReference
+				}
 			}
 
 			if (-Not $location -and -Not $DontFailIfNotExisting) { throw "Cannot find namedLocation $InputReference" } 

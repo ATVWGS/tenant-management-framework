@@ -23,7 +23,7 @@ function Validate-ConditionalAccessApplications
 				$validated = @($property.Value)
 			}
 			else {
-				$validated = @($property.Value | Foreach-Object {Resolve-Application -InputReference $_ -Cmdlet $Cmdlet})
+				$validated = @($property.Value | Foreach-Object {Resolve-Application -InputReference $_ -SearchInDesiredConfiguration -Cmdlet $Cmdlet})
 			}
 			$hashtable[$property.Key] = $validated
 		}

@@ -38,7 +38,7 @@ function Validate-ConditionalAccessGrantControls
 				}				
 			}
 			elseif ($property.Key -eq "termsOfUse") {
-				$validated = @($property.Value | Foreach-Object {Resolve-Agreement -InputReference $_ -Cmdlet $Cmdlet})
+				$validated = @($property.Value | Foreach-Object {Resolve-Agreement -InputReference $_ -SearchInDesiredConfiguration -Cmdlet $Cmdlet})
 			}
 			else {
 				$validated = $property.Value

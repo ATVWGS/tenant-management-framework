@@ -5,6 +5,7 @@
 		[Parameter(Mandatory = $true)]
 		[string] $InputReference,
 		[switch] $DontFailIfNotExisting,
+		[switch] $SearchInDesiredConfiguration,
 		[System.Management.Automation.PSCmdlet]
 		$Cmdlet = $PSCmdlet
 	)
@@ -26,6 +27,12 @@
 			}
 			else {
 				$user = Get-MgUser -Filter "displayName eq '$InputReference'"
+			}
+
+			if (-Not $user -and $SearchInDesiredConfiguration) {
+				if ($InputReference -in $script:desiredConfiguration["users"].displayName) {
+					$user = [ResolvePromise] @{InputReference = $InputReference; ResolveFunction = $MyInvocation.MyCommand}
+				}
 			}
 			
 			if (-Not $user -and -Not $DontFailIfNotExisting) { throw "Cannot find user $InputReference" } 

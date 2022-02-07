@@ -18,7 +18,7 @@ function Validate-ConditionalAccessLocations
 
 		$hashtable = @{}
 		foreach ($property in ($PSBoundParameters.GetEnumerator() | Where-Object {$_.Key -ne "Cmdlet"})) {			
-			$hashtable[$property.Key] = @($property.Value | Foreach-Object {Resolve-NamedLocation -InputReference $_ -Cmdlet $Cmdlet})
+			$hashtable[$property.Key] = @($property.Value | Foreach-Object {Resolve-NamedLocation -InputReference $_ -SearchInDesiredConfiguration -Cmdlet $Cmdlet})
 		}
 	}
 	end

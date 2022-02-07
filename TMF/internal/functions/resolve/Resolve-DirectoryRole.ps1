@@ -5,6 +5,7 @@
 		[Parameter(Mandatory = $true)]
 		[string] $InputReference,
 		[switch] $DontFailIfNotExisting,
+		[switch] $SearchInDesiredConfiguration,
 		[System.Management.Automation.PSCmdlet]
 		$Cmdlet = $PSCmdlet
 	)
@@ -23,6 +24,12 @@
 			}
 			else {
 				$role = (Invoke-MgGraphRequest -Method GET -Uri ("$script:graphBaseUrl/directoryRoles/?`$filter=displayName eq '{0}'" -f $InputReference)).Value
+			}
+
+			if (-Not $role -and $SearchInDesiredConfiguration) {
+				if ($InputReference -in $script:desiredConfiguration["roles"].displayName) {
+					$role = $InputReference
+				}
 			}
 
 			if (-Not $role -and -Not $DontFailIfNotExisting) { throw "Cannot find directoryRole $InputReference. Directory roles must be activated (assigned) once, before the /directoryRoles endpoint returns them." } 

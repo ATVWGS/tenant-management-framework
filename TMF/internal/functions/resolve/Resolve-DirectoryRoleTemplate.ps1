@@ -5,6 +5,7 @@
 		[Parameter(Mandatory = $true)]
 		[string] $InputReference,
 		[switch] $DontFailIfNotExisting,
+		[switch] $SearchInDesiredConfiguration,
 		[System.Management.Automation.PSCmdlet]
 		$Cmdlet = $PSCmdlet
 	)
@@ -25,6 +26,12 @@
 			}
 			else {
 				$roleTemplate = $script:cache["allRoleTemplates"] | Where-Object {$_.displayName -eq $InputReference}
+			}
+
+			if (-Not $roleTemplate -and $SearchInDesiredConfiguration) {
+				if ($InputReference -in $script:desiredConfiguration["roleTemplates"].displayName) {
+					$roleTemplate = $InputReference
+				}
 			}
 
 			if (-Not $roleTemplate -and -Not $DontFailIfNotExisting) { throw "Cannot find directoryRoleTemplate $InputReference." } 

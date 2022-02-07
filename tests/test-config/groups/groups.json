@@ -1,0 +1,20 @@
+[
+    {   
+        "displayName": "Test - Group for conditionalAccessPolicies",
+        "description": "This is a security group",
+        "groupTypes": [],        
+        "securityEnabled": true,
+        "mailEnabled": false,
+        "mailNickname": "testGroupForConditionalAccessPolicies",
+        "present": true
+    },
+    {   
+        "displayName": "Test - Group for conditionalAccessPolicies 2",
+        "description": "This is a security group",
+        "groupTypes": [],        
+        "securityEnabled": true,
+        "mailEnabled": false,
+        "mailNickname": "testGroupForConditionalAccessPolicies2",
+        "present": true
+    }
+]

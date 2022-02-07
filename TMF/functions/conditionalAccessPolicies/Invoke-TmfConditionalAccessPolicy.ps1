@@ -18,17 +18,6 @@
 			return
 		}
 		Test-GraphConnection -Cmdlet $Cmdlet
-
-		$resolveFunctionMapping = @{
-			"Users" = (Get-Command Resolve-User)
-			"Groups" = (Get-Command Resolve-Group)
-			"Applications" = (Get-Command Resolve-Application)
-			"Roles" = (Get-Command Resolve-DirectoryRoleTemplate)
-			"Locations" = (Get-Command Resolve-NamedLocation)
-			"Platforms" = "DirectCompare"
-			"Devices" = "DirectCompare"
-		}
-		$conditionPropertyRegex = [regex]"^(include|exclude)($($resolveFunctionMapping.Keys -join "|"))$"
 	}
 	process
 	{
@@ -80,32 +69,8 @@
 							$conditionPropertyMatch = $conditionPropertyRegex.Match($change.property)
 							foreach ($action in $change.Actions.Keys) {
 								switch ($action) {
-									"Set" {
-										if ($conditionPropertyMatch.Success) {
-											if (-Not $requestBody["conditions"]) { $requestBody["conditions"] = @{} }
-											# Condition properties								
-											if ($conditionPropertyMatch.Groups[2].Value -in @("Users", "Groups", "Roles")) {
-												$conditionChildProperty = "users"	
-											}
-											else {
-												$conditionChildProperty = $conditionPropertyMatch.Groups[2].Value.ToLower()
-											}
-											
-											if (-Not $requestBody["conditions"][$conditionChildProperty]) { $requestBody["conditions"][$conditionChildProperty] = @{} }
-											$requestBody["conditions"][$conditionChildProperty][$change.property] = @($change.Actions[$action])
-										}
-										elseif ($change.property -eq "deviceFilter") {
-											if (-Not $requestBody["conditions"]) { $requestBody["conditions"] = @{}}
-											if (-Not $requestBody["conditions"]["devices"]) { $requestBody["conditions"]["devices"] = @{}}
-											$requestBody["conditions"]["devices"][$property] = $result.DesiredConfiguration.$property
-										}
-										elseif ($change.property -in @("clientAppTypes", "signInRiskLevels", "userRiskLevels")) {
-											if (-Not $requestBody["conditions"]) { $requestBody["conditions"] = @{} }
-											$requestBody["conditions"][$change.property] = $change.Actions[$action]
-										}
-										else {
-											$requestBody[$change.property] = $change.Actions[$action]
-										}
+									"Set" {										
+										$requestBody[$change.property] = $change.Actions[$action]
 									}									
 								}
 							}
@@ -132,6 +97,6 @@
 	}
 	end
 	{
-		
+		Load-TmfConfiguration -Cmdlet $Cmdlet
 	}
 }

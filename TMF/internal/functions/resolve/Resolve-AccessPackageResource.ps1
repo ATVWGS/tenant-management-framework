@@ -7,6 +7,7 @@ function Resolve-AccessPackageResource
 		[Parameter(Mandatory = $true)]
 		[string] $CatalogId,
 		[switch] $DontFailIfNotExisting,
+		[switch] $SearchInDesiredConfiguration,
 		[System.Management.Automation.PSCmdlet]
 		$Cmdlet = $PSCmdlet
 	)
@@ -22,6 +23,12 @@ function Resolve-AccessPackageResource
 			}
 			else {
 				$resource = (Invoke-MgGraphRequest -Method GET -Uri ("$script:graphBaseUrl/identityGovernance/entitlementManagement/accessPackageCatalogs/{0}/accessPackageResources?`$filter=displayName eq '{1}'" -f $CatalogId, $InputReference)).Value
+			}
+
+			if (-Not $resource -and $SearchInDesiredConfiguration) {
+				if ($InputReference -in $script:desiredConfiguration["accessPackageResources"].displayName) {
+					$resource = $InputReference
+				}
 			}
 
 			if (-Not $resource -and -Not $DontFailIfNotExisting){ throw "Cannot find accessPackageResource $InputReference" } 

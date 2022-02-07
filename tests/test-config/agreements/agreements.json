@@ -1,0 +1,21 @@
+[
+    {
+        "displayName": "Test - An example agreement with a single files",
+        "isViewingBeforeAcceptanceRequired": true,
+        "isPerDeviceAcceptanceRequired": false,
+        "userReacceptRequiredFrequency": "P90D",
+        "termsExpiration": {
+          "startDateTime": "2014-01-01T00:00:00Z",
+          "frequency": "PT1M"
+        },
+        "files": [
+          {
+            "fileName": "Example Terms of Use.pdf",
+            "language": "en",
+            "isDefault": true,
+            "filePath": "files/Example Terms of Use.pdf"
+          }
+        ],
+        "present": true
+      }
+]

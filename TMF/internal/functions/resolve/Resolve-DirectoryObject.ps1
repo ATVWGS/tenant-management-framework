@@ -18,7 +18,7 @@
 			if ($InputReference -match $script:guidRegex) {
 				$directoryObject = Get-MgDirectoryObject -DirectoryObjectId $InputReference
 			}
-			
+
 			if (-Not $directoryObject -and -Not $DontFailIfNotExisting) { throw "Cannot find directoryObject $InputReference" } 
 			elseif (-Not $directoryObject -and $DontFailIfNotExisting) { return }
 

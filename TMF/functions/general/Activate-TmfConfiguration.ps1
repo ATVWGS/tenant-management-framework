@@ -117,7 +117,7 @@
 	end
 	{
 		if (-Not $DoNotLoad) {
-			Load-TmfConfiguration
+			Load-TmfConfiguration -Cmdlet $PSCmdlet
 		}
 	}
 }
