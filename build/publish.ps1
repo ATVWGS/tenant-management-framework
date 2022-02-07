@@ -7,6 +7,11 @@ Param (
     [string[]] $Tags = $env:tags
 )
 
+#region Install dependencies
+Install-Module -Name PSFramework -Scope CurrentUser -Force -Repository PSGallery
+Install-Module -Name 'Microsoft.Graph.Authentication' -Scope CurrentUser -Force -Repository PSGallery
+#endregion
+
 $package = Get-ChildItem -Filter "*.nupkg" -Path $ArtifactPath -Recurse | Sort-Object LastWriteTime -Descending | Select-Object -First 1
 Copy-Item -Path $package.FullName -Destination "$PSScriptRoot\$ModuleName.zip" -Force
 Expand-Archive -Path "$PSScriptRoot\$ModuleName.zip" -DestinationPath "$PSScriptRoot\$ModuleName" -Force
