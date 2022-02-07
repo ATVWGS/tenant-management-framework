@@ -31,6 +31,29 @@
         "present": true
     },
     {
+        "displayName": "Test - Require MFA for Admin roles",
+        "conditions": {
+            "users": {
+                "includeRoles": [
+                    "Global Administrator"
+                ]
+            },
+            "applications": {
+                "includeApplications": [
+                    "All"
+                ]
+            }
+        },
+        "grantControls": {
+            "builtInControls": [
+                "mfa"
+            ],
+            "operator": "OR"
+        },
+        "state": "enabledForReportingButNotEnforced",
+        "present": true
+    },
+    {
         "displayName": "Test - Test deviceFilters",
         "conditions": {
             "users": {
@@ -97,8 +120,12 @@
                 ]
             },
             "devices": {
-                "includeDevices": ["All"],
-                "excludeDevices": ["Compliant"]
+                "includeDevices": [
+                    "All"
+                ],
+                "excludeDevices": [
+                    "Compliant"
+                ]
             },
             "clientAppTypes": [
                 "browser",

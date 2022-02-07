@@ -66,7 +66,6 @@
 					$requestBody = @{}
 					try {
 						foreach ($change in $result.Changes) {
-							$conditionPropertyMatch = $conditionPropertyRegex.Match($change.property)
 							foreach ($action in $change.Actions.Keys) {
 								switch ($action) {
 									"Set" {										

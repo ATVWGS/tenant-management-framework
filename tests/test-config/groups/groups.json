@@ -4,6 +4,7 @@
         "description": "This is a security group",
         "groupTypes": [],        
         "securityEnabled": true,
+        "members": ["max.mustermann@tmacdev.onmicrosoft.com"],
         "mailEnabled": false,
         "mailNickname": "testGroupForConditionalAccessPolicies",
         "present": true
