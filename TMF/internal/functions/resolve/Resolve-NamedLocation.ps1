@@ -35,7 +35,7 @@
 			if (-Not $location -and -Not $DontFailIfNotExisting) { throw "Cannot find namedLocation $InputReference" } 
 			elseif (-Not $location -and $DontFailIfNotExisting) { return }
 
-			if ($location.count -gt 1) { throw "Got multiple namedLocations for $InputReference" }
+			if ($location.count -gt 1 -and -not $providedId) { throw "Got multiple namedLocations for $InputReference" }
 			return $location.Id
 		}
 		catch {
