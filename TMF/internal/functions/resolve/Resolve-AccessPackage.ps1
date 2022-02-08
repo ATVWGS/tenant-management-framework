@@ -34,9 +34,10 @@ function Resolve-AccessPackage
 
 			if ($package.count -gt 1) { throw "Got multiple accessPackages for $InputReference" }
 			return $package
-	}
-	catch {
-		Write-PSFMessage -Level Warning -String 'TMF.CannotResolveResource' -StringValues "Group" -Tag 'failed' -ErrorRecord $_
-		$Cmdlet.ThrowTerminatingError($_)				
-	}
+		}
+		catch {
+			Write-PSFMessage -Level Warning -String 'TMF.CannotResolveResource' -StringValues "Group" -Tag 'failed' -ErrorRecord $_
+			$Cmdlet.ThrowTerminatingError($_)				
+		}
+	}	
 }
