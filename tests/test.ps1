@@ -1,6 +1,7 @@
-Param (
+Param (    
+    [string] $ModuleName = $env:moduleName,
     [string] $ArtifactPath,
-    [string] $ModuleName = $env:moduleName
+    [string] $OutPath = $PSScriptRoot
 )
 
 begin {
@@ -21,5 +22,5 @@ begin {
 }
 process {
     Import-Module Pester
-    Invoke-Pester -OutputFile $(System.DefaultWorkingDirectory)\Test-Pester.XML -OutputFormat NUnitXML
+    Invoke-Pester -OutputFile $OutPath\Test-Pester.XML -OutputFormat NUnitXML
 }
