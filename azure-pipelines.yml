@@ -81,7 +81,8 @@ stages:
           itemPattern: '**'
           targetPath: '$(Pipeline.Workspace)'
       - task: PowerShell@2
-        inputs:
+        continueOnError: true
+        inputs:         
           filePath: 'tests/test.ps1'
           arguments: '-ModuleName $(moduleName) -ArtifactPath $(Pipeline.Workspace) -OutPath $(Pipeline.Workspace)'
       - task: PublishTestResults@2
