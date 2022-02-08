@@ -1,25 +1,41 @@
 <#
     .SYNOPSIS
         A simple build script for the Tenant Management Framework
-    .PARAMETER buildVersion
+    .PARAMETER BuildVersion
         Provide a version in the format "{MAJOR}.{MINOR}.{PATCH}"
         Example: 1.0.1
-    .PARAMETER moduleName
+    .PARAMETER ModuleName
         Provide the name of the Powershell Module.
         Example: TMF
-    .PARAMETER modulePath
+    .PARAMETER ModulePath
         Path to the module directory.
 #>
 
 Param(
-    [string] $buildVersion = $env:BUILDVER,
-    [string] $moduleName = "TMF",
-    [string] $modulePath = "$PSScriptRoot\..\TMF"
+    [string] $BuildVersion = $env:buildVer,
+    [string] $ModuleName = $env:moduleName,
+    [string] $ModulePath = "$PSScriptRoot\..\TMF",
+    [string] $LicenseUri = $env:licenseUri,
+    [string] $ProjectUri = $env:projectUri,
+    [string[]] $Tags = $env:tags,
+    [string] $Prerelease = $env:prerelease,
+    [string] $Description = $env:description
 )
 
-#region Update module manifest
 $manifestPath = Join-Path -Path $modulePath -ChildPath "$moduleName.psd1"
-$manifestContent = Get-Content -Path $manifestPath -Raw
-$manifestContent = $manifestContent -replace "ModuleVersion = '[\d]+.[\d]+.[\d]+'", ("ModuleVersion = '{0}'" -f $buildVersion)
-$manifestContent | Set-Content -Path $manifestPath
-#endregion
+$moduleParams = @{
+    Path = $manifestPath
+    Author = $Author
+    CompanyName = $CompanyName
+    Copyright = $Copyright
+    LicenseUri = $LicenseUri
+    ProjectUri = $ProjectUri
+    Tags = $Tags
+    Description = $Description
+}
+
+if ($Prerelease) {
+    $moduleParams["Prerelease"] = $Prerelease
+}
+
+Update-ModuleManifest @moduleParams
