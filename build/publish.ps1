@@ -5,9 +5,8 @@ Param (
 )
 
 begin {
-    $package = Get-ChildItem -Filter "*.nupkg" -Path $ArtifactPath -Recurse | Sort-Object LastWriteTime -Descending | Select-Object -First 1
-    Copy-Item -Path $package.FullName -Destination "$PSScriptRoot\$ModuleName.zip" -Force
-    Expand-Archive -Path "$PSScriptRoot\$ModuleName.zip" -DestinationPath "$PSScriptRoot\$ModuleName" -Force
+    $package = Get-ChildItem -Filter "*.zip" -Path $ArtifactPath -Recurse | Sort-Object LastWriteTime -Descending | Select-Object -First 1    
+    Expand-Archive -Path $package.FullName -DestinationPath "$PSScriptRoot\$ModuleName" -Force
     $manifest = Import-LocalizedData -BaseDirectory "$PSScriptRoot\$ModuleName" -FileName "$ModuleName.psd1"
 
     #region Install dependencies
