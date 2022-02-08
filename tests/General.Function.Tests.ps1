@@ -1,12 +1,21 @@
-Describe 'General.Function.Tests' {
-    $moduleRoot = Resolve-Path "$PSScriptRoot\..\TMF\"        
-    $functionFiles = Get-ChildItem -Path $moduleRoot -Filter "*.ps1" -Recurse
+$testDir = Split-Path $PSCommandPath -Parent
+$moduleRoot = Resolve-Path "$testDir\..\TMF\"
 
-    foreach ($file in $functionFiles) {
-        Context "$($file.Name)" {
-            It "Passes all default PSScriptAnalyzer rules" {                
-                $result = Invoke-ScriptAnalyzer -Path $($file.FullName) -ExcludeRule PSAvoidTrailingWhitespace
-                $result.Severity | Should -Not -Be "Warning"
+Describe 'General.Function.Tests' {    
+    $testCases = @()
+    $scriptAnalyzerRules = Get-ScriptAnalyzerRule -Name "PSAvoid*"
+
+    Get-ChildItem -Path $:moduleRoot -Filter "*.ps1" -Recurse | Foreach-Object {
+        $testCases += @{"fileName" = $_.Name; "filePath" = $_.FullName}
+    }
+            
+    foreach ($case in $testCases) {        
+        foreach ($rule in $scriptAnalyzerRules) {
+            It "[$($case.fileName)] Should not return any violation for the rule: $($rule.ruleName)" -TestCases @{
+                fileName = $case.filePath
+                ruleName = $rule.ruleName
+            } {
+                Invoke-ScriptAnalyzer -Path $fileName -IncludeRule $ruleName | Should -BeNullOrEmpty
             }
         }        
     }    
