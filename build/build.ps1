@@ -29,8 +29,8 @@ begin {
     #region Install dependencies
     foreach ($module in $manifest.RequiredModules) {
         switch ($module.GetType().Name) {
-            "String" { Install-Module -Name $_ -Scope CurrentUser -Force -Repository PSGallery }
-            "Hashtable" { Install-Module -Name $_["ModuleName"] -RequiredVersion ["RequiredVersion"] -Scope CurrentUser -Force -Repository PSGallery }
+            "String" { Install-Module -Name $module -Scope CurrentUser -Force -Repository PSGallery }
+            "Hashtable" { Install-Module -Name $module["ModuleName"] -RequiredVersion $module["RequiredVersion"] -Scope CurrentUser -Force -Repository PSGallery }
         }
     }
     #endregion
