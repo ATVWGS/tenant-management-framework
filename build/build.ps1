@@ -23,6 +23,7 @@ Param(
 
 $manifestPath = Join-Path -Path $ModulePath -ChildPath "$ModuleName.psd1"
 $moduleParams = @{
+    ModuleVersion = $BuildVersion
     Path = $manifestPath
     LicenseUri = $LicenseUri
     ProjectUri = $ProjectUri
