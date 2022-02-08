@@ -17,7 +17,7 @@ variables:
   releaseFeed: 'vwgs-azdevops-release'
   buildVer: $(major).$(minor).$(Build.BuildID)
   ${{ if ne(variables['Build.SourceBranchName'], 'main') }}:
-    prerelease: prerelease
+    prerelease: preview
     nugetVer: $(buildVer)-$(prerelease)
     zipVer: $(buildVer)-$(prerelease)
   ${{ else }}:
