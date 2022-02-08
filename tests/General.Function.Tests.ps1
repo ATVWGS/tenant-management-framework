@@ -1,5 +1,5 @@
 $testDir = Split-Path $PSCommandPath -Parent
-$moduleRoot = Resolve-Path "$testDir\..\TMF\"
+$moduleRoot = Resolve-Path "$testDir\TMF\"
 
 Describe 'General.Function.Tests' {    
     $testCases = @()

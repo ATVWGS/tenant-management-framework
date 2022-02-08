@@ -1,6 +1,6 @@
 Describe 'General.Module.Tests' {
     BeforeAll {
-        $moduleRoot = Resolve-Path "$PSScriptRoot\..\TMF\"
+        $moduleRoot = Resolve-Path "$PSScriptRoot\TMF\"
     }
     It 'the module imports successfully' {
         { Import-Module -Name "$moduleRoot\TMF.psd1" -ErrorAction Stop } | Should -Not -Throw
