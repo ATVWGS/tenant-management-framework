@@ -8,6 +8,16 @@ begin {
     $package = Get-ChildItem -Filter "*.nupkg" -Path $ArtifactPath -Recurse | Sort-Object LastWriteTime -Descending | Select-Object -First 1
     Copy-Item -Path $package.FullName -Destination "$PSScriptRoot\$ModuleName.zip" -Force
     Expand-Archive -Path "$PSScriptRoot\$ModuleName.zip" -DestinationPath "$PSScriptRoot\$ModuleName" -Force
+    $manifest = Import-LocalizedData -BaseDirectory "$PSScriptRoot\$ModuleName" -FileName "$ModuleName.psd1"
+
+    #region Install dependencies
+    foreach ($module in $manifest.RequiredModules) {
+        switch ($module.GetType().Name) {
+            "String" { Install-Module -Name $module -Scope CurrentUser -Force -Repository PSGallery }
+            "Hashtable" { Install-Module -Name $module["ModuleName"] -RequiredVersion $module["RequiredVersion"] -Scope CurrentUser -Force -Repository PSGallery }
+        }
+    }
+    #endregion
 }
 process {
     Publish-Module -Path "$PSScriptRoot\$ModuleName" -NuGetApiKey $ApiKey
