@@ -15,10 +15,9 @@ variables:
   patch: $(Build.BuildID)
   moduleName: 'TMF'
   releaseFeed: 'vwgs-azdevops-release'
-  ${{ if eq(variables['Build.SourceBranchName'], 'main') }}:
-    buildVer: $(major).$(minor).$(Build.BuildID)
-  ${{ else }}:
-    buildVer: $(major).$(minor).$(Build.BuildID)-prerelease
+  buildVer: $(major).$(minor).$(Build.BuildID)
+  ${{ if ne(variables['Build.SourceBranchName'], 'main') }}:
+    prerelease: prerelease
 
 pool:
   vmImage: "ubuntu-latest"
