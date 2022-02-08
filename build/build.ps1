@@ -18,20 +18,15 @@ Param(
     [string] $LicenseUri = $env:licenseUri,
     [string] $ProjectUri = $env:projectUri,
     [string[]] $Tags = $env:tags,
-    [string] $Prerelease = $env:prerelease,
-    [string] $Description = $env:description
+    [string] $Prerelease = $env:prerelease
 )
 
 $manifestPath = Join-Path -Path $modulePath -ChildPath "$moduleName.psd1"
 $moduleParams = @{
     Path = $manifestPath
-    Author = $Author
-    CompanyName = $CompanyName
-    Copyright = $Copyright
     LicenseUri = $LicenseUri
     ProjectUri = $ProjectUri
     Tags = $Tags
-    Description = $Description
 }
 
 if ($Prerelease) {
