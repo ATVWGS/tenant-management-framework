@@ -22,18 +22,35 @@ Param(
     [string] $Prerelease
 )
 
-$manifestPath = Join-Path -Path $ModulePath -ChildPath "$ModuleName.psd1"
-$moduleParams = @{
-    ModuleVersion = $BuildVersion
-    Path = $manifestPath
-    LicenseUri = $LicenseUri
-    ProjectUri = $ProjectUri
-    Tags = $Tags
+begin {
+    $manifestPath = Join-Path -Path $ModulePath -ChildPath "$ModuleName.psd1"
+    $manifest = Import-LocalizedData -BaseDirectory $ModulePath -FileName "$ModuleName.psd1"
+
+    #region Install dependencies
+    foreach ($module in $manifest.RequiredModules) {
+        switch ($module.GetType().Name) {
+            "String" { Install-Module -Name $_ -Scope CurrentUser -Force -Repository PSGallery }
+            "Hashtable" { Install-Module -Name $_["ModuleName"] -RequiredVersion ["RequiredVersion"] -Scope CurrentUser -Force -Repository PSGallery }
+        }
+    }
+    #endregion
+
+    $moduleParams = @{
+        ModuleVersion = $BuildVersion
+        Path = $manifestPath
+        LicenseUri = $LicenseUri
+        ProjectUri = $ProjectUri
+        Tags = $Tags
+    }
+    if ($Prerelease) {
+        $moduleParams["Prerelease"] = $Prerelease
+    }
+}
+process {
+    Write-Host "Updating module manifest ($manifestPath) with the following values: $($moduleParams | ConvertTo-Json)"
+    Update-ModuleManifest @moduleParams
 }
 
-if ($Prerelease) {
-    $moduleParams["Prerelease"] = $Prerelease
-}
 
-Write-Host "Updating module manifest ($manifestPath) with the following values: $($moduleParams | ConvertTo-Json)"
-Update-ModuleManifest @moduleParams
+
+
