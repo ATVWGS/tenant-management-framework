@@ -16,10 +16,8 @@ variables:
   moduleName: 'TMF'
   releaseFeed: 'vwgs-azdevops-release'
   buildVer: $(major).$(minor).$(Build.BuildID)
-  ${{ if eq(variables['Build.SourceBranchName'], 'main') }}:
-    nugetVer: $(buildVer)
-  ${{ else }}:
-    nugetVer: $(buildVer)-prerelease
+  ${{ if ne(variables['Build.SourceBranchName'], 'main') }}:
+    prerelease: prerelease
 
 pool:
   vmImage: "ubuntu-latest"
@@ -43,8 +41,8 @@ stages:
         command: 'pack'
         packagesToPack: '$(System.DefaultWorkingDirectory)/$(moduleName)/$(moduleName).nuspec'
         versioningScheme: byEnvVar
-        versionEnvVar: nugetVer
-        buildProperties: 'VERSIONHERE=$(nugetVer)'
+        versionEnvVar: buildVer
+        buildProperties: 'VERSIONHERE=$(buildVer)'
     - task: CopyFiles@2
       displayName: Copy publish.ps1 to staging directory
       inputs:
