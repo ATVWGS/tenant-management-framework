@@ -27,10 +27,10 @@
 
 		$result = @{}
 		if ($compare.SideIndicator -contains "=>" -and -not $ReturnSetAction) {
-			$result["Add"] = ($compare | ? {$_.SideIndicator -eq "=>"}).InputObject
+			$result["Add"] = ($compare | Where-Object {$_.SideIndicator -eq "=>"}).InputObject
 		}
 		if ($compare.SideIndicator -contains "<=" -and -not $ReturnSetAction) {
-			$result["Remove"] = ($compare | ? {$_.SideIndicator -eq "<="}).InputObject
+			$result["Remove"] = ($compare | Where-Object {$_.SideIndicator -eq "<="}).InputObject
 		}
 		if ($ReturnSetAction) {
 			$result["Set"] = @($DifferenceList)
