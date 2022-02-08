@@ -19,8 +19,10 @@ variables:
   ${{ if ne(variables['Build.SourceBranchName'], 'main') }}:
     prerelease: prerelease
     nugetVer: $(buildVer)-$(prerelease)
+    zipVer: $(buildVer)-$(prerelease)
   ${{ else }}:
     nugetVer: $(buildVer)
+    zipVer: $(buildVer)
 
 pool:
   vmImage: "ubuntu-latest"
@@ -40,7 +42,20 @@ stages:
       inputs:
         SourceFolder: '$(System.DefaultWorkingDirectory)'
         Contents: 'LICENSE'
-        TargetFolder: '$(System.DefaultWorkingDirectory)/TMF'
+        TargetFolder: '$(System.DefaultWorkingDirectory)/$(moduleName)'
+    - task: ArchiveFiles@2
+      displayName: Archiving module directory
+      inputs:
+        rootFolderOrFile: '$(System.DefaultWorkingDirectory)/$(moduleName)'
+        includeRootFolder: true
+        archiveType: 'zip'
+        archiveFile: '$(Build.ArtifactStagingDirectory)/$(moduleName).$(zipVer).zip'
+        replaceExistingArchive: true
+    - task: PublishBuildArtifacts@1
+      inputs:
+        PathtoPublish: '$(Build.ArtifactStagingDirectory)/**/*.zip'
+        ArtifactName: 'zip'
+        publishLocation: 'Container'
     - task: NuGetCommand@2
       displayName: Building NuGet package
       inputs:
@@ -48,11 +63,11 @@ stages:
         packagesToPack: '$(System.DefaultWorkingDirectory)/$(moduleName)/$(moduleName).nuspec'
         versioningScheme: byEnvVar
         versionEnvVar: nugetVer
-        buildProperties: 'VERSIONHERE=$(nugetVer)'    
+        buildProperties: 'VERSIONHERE=$(nugetVer)'  
     - task: PublishBuildArtifacts@1
       inputs:
-        PathtoPublish: '$(Build.ArtifactStagingDirectory)'
-        ArtifactName: 'package'
+        PathtoPublish: '$(Build.ArtifactStagingDirectory)/**/*.nupkg'
+        ArtifactName: 'nuget'
         publishLocation: 'Container'
 - stage: publish_gallery
   jobs:
@@ -61,7 +76,7 @@ stages:
       - task: DownloadPipelineArtifact@2
         inputs:
           buildType: 'current'
-          artifactName: 'package'
+          artifactName: 'zip'
           itemPattern: '**'
           targetPath: '$(Pipeline.Workspace)'
       - task: PowerShell@2
@@ -76,7 +91,7 @@ stages:
       - task: DownloadPipelineArtifact@2
         inputs:
           buildType: 'current'
-          artifactName: 'package'
+          artifactName: 'nuget'
           itemPattern: '**'
           targetPath: '$(Pipeline.Workspace)'
       - task: NuGetCommand@2
