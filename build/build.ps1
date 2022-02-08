@@ -12,13 +12,14 @@
 #>
 
 Param(
-    [string] $BuildVersion = $env:buildVer,
-    [string] $ModuleName = $env:moduleName,
-    [string] $ModulePath = "$PSScriptRoot\..\TMF",
-    [string] $LicenseUri = $env:licenseUri,
-    [string] $ProjectUri = $env:projectUri,
-    [string[]] $Tags = $env:tags,
-    [string] $Prerelease = $env:prerelease
+    [string] $BuildVersion,
+    [string] $ModuleName,
+    [string] $ModulePath = "$PSScriptRoot\..\$ModuleName",
+    [string] $LicenseUri,
+    [string] $ProjectUri,
+    [string[]] $Tags,
+    [AllowNull()]
+    [string] $Prerelease
 )
 
 $manifestPath = Join-Path -Path $ModulePath -ChildPath "$ModuleName.psd1"
