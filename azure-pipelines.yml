@@ -31,35 +31,47 @@ stages:
   - job: Build
     steps:
     - task: PowerShell@2
+      displayName: Updating module manifest
       inputs:
         filePath: 'build/build.ps1'
         arguments: '-ModuleName $(moduleName) -BuildVersion $(buildVer) -LicenseUri $(licenseUri) -ProjectUri $(projectUri) -Tags $(tags) -Prerelease $(prerelease)'
     - task: CopyFiles@2
+      displayName: Adding LICENSE to module
       inputs:
         SourceFolder: '$(System.DefaultWorkingDirectory)'
         Contents: 'LICENSE'
         TargetFolder: '$(System.DefaultWorkingDirectory)/TMF'
     - task: NuGetCommand@2
+      displayName: Building NuGet package
       inputs:
         command: 'pack'
         packagesToPack: '$(System.DefaultWorkingDirectory)/$(moduleName)/$(moduleName).nuspec'
         versioningScheme: byEnvVar
         versionEnvVar: nugetVer
-        buildProperties: 'VERSIONHERE=$(nugetVer)'
-    - task: CopyFiles@2
-      displayName: Copy publish.ps1 to staging directory
-      inputs:
-        SourceFolder: '$(System.DefaultWorkingDirectory)/build'
-        Contents: 'publish.ps1'
-        TargetFolder: '$(Build.ArtifactStagingDirectory)'
+        buildProperties: 'VERSIONHERE=$(nugetVer)'    
     - task: PublishBuildArtifacts@1
       inputs:
         PathtoPublish: '$(Build.ArtifactStagingDirectory)'
         ArtifactName: 'package'
         publishLocation: 'Container'
-- stage: Deploy
+- stage: Publish Gallery
   jobs:
-  - job: Deploy
+  - job: Publish
+    steps:
+      - task: DownloadPipelineArtifact@2
+        inputs:
+          buildType: 'current'
+          artifactName: 'package'
+          itemPattern: '**'
+          targetPath: '$(Pipeline.Workspace)'
+      - task: PowerShell@2
+        displayName: Publishing module to Powershell Gallery
+        inputs:
+          filePath: 'build/publish.ps1'
+          arguments: '-ModuleName $(moduleName) -ArtifactPath $(Pipeline.Workspace)'
+- stage: Publish Internal Feed
+  jobs:
+  - job: Publish
     steps:
       - task: DownloadPipelineArtifact@2
         inputs:
@@ -68,6 +80,7 @@ stages:
           itemPattern: '**'
           targetPath: '$(Pipeline.Workspace)'
       - task: NuGetCommand@2
+        displayName: Publishing module to internal NuGet feed
         inputs:
           command: 'push'
           packagesToPush: '$(Pipeline.Workspace)/**/*.nupkg'
