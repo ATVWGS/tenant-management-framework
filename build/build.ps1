@@ -33,4 +33,5 @@ if ($Prerelease) {
     $moduleParams["Prerelease"] = $Prerelease
 }
 
+Write-Host "Updating module manifest ($manifestPath) with the following values: $($moduleParams | ConvertTo-Json)"
 Update-ModuleManifest @moduleParams
