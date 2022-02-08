@@ -21,7 +21,7 @@ Param(
     [string] $Prerelease = $env:prerelease
 )
 
-$manifestPath = Join-Path -Path $modulePath -ChildPath "$moduleName.psd1"
+$manifestPath = Join-Path -Path $ModulePath -ChildPath "$ModuleName.psd1"
 $moduleParams = @{
     Path = $manifestPath
     LicenseUri = $LicenseUri
