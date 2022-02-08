@@ -70,6 +70,27 @@ stages:
         PathtoPublish: '$(Build.ArtifactStagingDirectory)/nuget'
         ArtifactName: 'nuget'
         publishLocation: 'Container'
+- stage: run_tests
+  jobs:
+  - job: pester
+    steps:
+      - task: DownloadPipelineArtifact@2
+        inputs:
+          buildType: 'current'
+          artifactName: 'zip'
+          itemPattern: '**'
+          targetPath: '$(Pipeline.Workspace)'
+      - task: PowerShell@2
+        displayName: Publishing module to Powershell Gallery
+        inputs:
+          filePath: 'build/test.ps1'
+          arguments: '-ModuleName $(moduleName) -ArtifactPath $(Pipeline.Workspace) -OutPath $(Pipeline.Workspace)'
+      - task: PublishTestResults@2
+        inputs:
+          testResultsFormat: 'NUnit'
+          testResultsFiles: '**/TEST-*.xml'
+          searchFolder: '$(Pipeline.Workspace)'
+          failTaskOnFailedTests: true      
 - stage: publish_gallery
   jobs:
   - job: publish
