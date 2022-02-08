@@ -47,7 +47,7 @@ stages:
       displayName: Archiving module directory
       inputs:
         rootFolderOrFile: '$(System.DefaultWorkingDirectory)/$(moduleName)'
-        includeRootFolder: true
+        includeRootFolder: false
         archiveType: 'zip'
         archiveFile: '$(Build.ArtifactStagingDirectory)/zip/$(moduleName).$(zipVer).zip'
         replaceExistingArchive: true
