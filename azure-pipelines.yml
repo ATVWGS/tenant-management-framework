@@ -18,6 +18,9 @@ variables:
   buildVer: $(major).$(minor).$(Build.BuildID)
   ${{ if ne(variables['Build.SourceBranchName'], 'main') }}:
     prerelease: prerelease
+    nugetVer: $(buildVer)-$(prerelease)
+  ${{ else }}:
+    nugetVer: $(buildVer)
 
 pool:
   vmImage: "ubuntu-latest"
@@ -41,8 +44,8 @@ stages:
         command: 'pack'
         packagesToPack: '$(System.DefaultWorkingDirectory)/$(moduleName)/$(moduleName).nuspec'
         versioningScheme: byEnvVar
-        versionEnvVar: buildVer
-        buildProperties: 'VERSIONHERE=$(buildVer)'
+        versionEnvVar: nugetVer
+        buildProperties: 'VERSIONHERE=$(nugetVer)'
     - task: CopyFiles@2
       displayName: Copy publish.ps1 to staging directory
       inputs:
