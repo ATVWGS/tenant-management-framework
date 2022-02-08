@@ -89,7 +89,7 @@ stages:
           testResultsFormat: 'NUnit'
           testResultsFiles: '**/TEST-*.xml'
           searchFolder: '$(Pipeline.Workspace)'
-          failTaskOnFailedTests: true      
+          failTaskOnFailedTests: true
 - stage: publish_gallery
   jobs:
   - job: publish
