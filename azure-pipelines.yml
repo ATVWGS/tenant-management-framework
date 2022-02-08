@@ -49,11 +49,11 @@ stages:
         rootFolderOrFile: '$(System.DefaultWorkingDirectory)/$(moduleName)'
         includeRootFolder: true
         archiveType: 'zip'
-        archiveFile: '$(Build.ArtifactStagingDirectory)/$(moduleName).$(zipVer).zip'
+        archiveFile: '$(Build.ArtifactStagingDirectory)/zip/$(moduleName).$(zipVer).zip'
         replaceExistingArchive: true
     - task: PublishBuildArtifacts@1
       inputs:
-        PathtoPublish: '$(Build.ArtifactStagingDirectory)/**/*.zip'
+        PathtoPublish: '$(Build.ArtifactStagingDirectory)/zip'
         ArtifactName: 'zip'
         publishLocation: 'Container'
     - task: NuGetCommand@2
@@ -63,10 +63,11 @@ stages:
         packagesToPack: '$(System.DefaultWorkingDirectory)/$(moduleName)/$(moduleName).nuspec'
         versioningScheme: byEnvVar
         versionEnvVar: nugetVer
-        buildProperties: 'VERSIONHERE=$(nugetVer)'  
+        buildProperties: 'VERSIONHERE=$(nugetVer)'
+        packDestination: '$(Build.ArtifactStagingDirectory)/nuget'
     - task: PublishBuildArtifacts@1
       inputs:
-        PathtoPublish: '$(Build.ArtifactStagingDirectory)/**/*.nupkg'
+        PathtoPublish: '$(Build.ArtifactStagingDirectory)/nuget'
         ArtifactName: 'nuget'
         publishLocation: 'Container'
 - stage: publish_gallery
