@@ -1,9 +1,12 @@
 $testDir = Split-Path $PSCommandPath -Parent
 $moduleRoot = Resolve-Path "$testDir\TMF\"
+$ignoredAnalyzerRules = @(
+    "PSAvoidTrailingWhitespace"
+)
 
 Describe 'General.Function.Tests' {    
     $testCases = @()
-    $scriptAnalyzerRules = Get-ScriptAnalyzerRule -Name "PSAvoid*"
+    $scriptAnalyzerRules = Get-ScriptAnalyzerRule -Name "PSAvoid*" | Where-Object {$_.RuleName -notin $ignoredAnalyzerRules}
 
     Get-ChildItem -Path $:moduleRoot -Filter "*.ps1" -Recurse | Foreach-Object {
         $testCases += @{"fileName" = $_.Name; "filePath" = $_.FullName}
