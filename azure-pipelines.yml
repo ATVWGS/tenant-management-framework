@@ -68,7 +68,7 @@ stages:
         displayName: Publishing module to Powershell Gallery
         inputs:
           filePath: 'build/publish.ps1'
-          arguments: '-ModuleName $(moduleName) -ArtifactPath $(Pipeline.Workspace)'
+          arguments: '-ModuleName $(moduleName) -ArtifactPath $(Pipeline.Workspace) -ApiKey $(apiKey)'
 - stage: Publish Internal Feed
   jobs:
   - job: Publish
