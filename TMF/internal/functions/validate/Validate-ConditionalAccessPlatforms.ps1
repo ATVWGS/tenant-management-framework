@@ -2,9 +2,9 @@ function Validate-ConditionalAccessPlatforms
 {
 	[CmdletBinding()]
 	Param (
-		[ValidateSet("android", "iOS", "windows", "windowsPhone", "macOS", "all")]
+		[ValidateSet("android", "iOS", "windows", "windowsPhone", "macOS", "linux", "all")]
 		[string[]] $includePlatforms,
-		[ValidateSet("android", "iOS", "windows", "windowsPhone", "macOS", "all")]
+		[ValidateSet("android", "iOS", "windows", "windowsPhone", "macOS", "linux", "all")]
 		[string[]] $excludePlatforms,
 		[System.Management.Automation.PSCmdlet]
 		$Cmdlet = $PSCmdlet
