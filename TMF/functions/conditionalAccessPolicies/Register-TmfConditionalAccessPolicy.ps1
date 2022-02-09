@@ -17,9 +17,9 @@
 		[string[]] $excludeApplications,
 		[string[]] $includeLocations,
 		[string[]] $excludeLocations,
-		[ValidateSet("android", "iOS", "windows", "windowsPhone", "macOS", "all")]
+		[ValidateSet("android", "iOS", "windows", "windowsPhone", "macOS", "linux", "all")]
 		[string[]] $includePlatforms,
-		[ValidateSet("android", "iOS", "windows", "windowsPhone", "macOS", "all")]
+		[ValidateSet("android", "iOS", "windows", "windowsPhone", "macOS", "linux", "all")]
 		[string[]] $excludePlatforms,
 		[ValidateSet("All")]
 		[string[]] $includeDevices,
@@ -93,6 +93,7 @@
 			"Applications" = @("includeApplications", "excludeApplications")
 			"Locations" = @("includeLocations", "excludeLocations")
 			"Devices" = @("includeDevices", "excludeDevices", "deviceFilter")
+			"Platforms" = @("includePlatforms", "excludePlatforms")
 		}
 	}
 	process
