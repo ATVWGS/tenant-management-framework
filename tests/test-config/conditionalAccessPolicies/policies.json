@@ -146,5 +146,33 @@
         },
         "state": "enabledForReportingButNotEnforced",
         "present": true
+    },
+    {
+        "displayName": "Test - Testing DevicePlatform linux",
+        "includeGroups": [
+            "Test group for conditionalAccessPolicies",
+            "Test - Group for conditionalAccessPolicies 2"
+        ],
+        "includeApplications": [
+            "All"
+        ],
+        "includeLocations": [
+            "All"
+        ],
+        "clientAppTypes": [
+            "browser",
+            "mobileAppsAndDesktopClients"
+        ],
+        "includePlatforms": [
+            "linux"
+        ],
+        "grantControls": {
+            "builtInControls": [
+                "mfa"
+            ],
+            "operator": "OR"
+        },
+        "state": "enabledForReportingButNotEnforced",
+        "present": true
     }
 ]
