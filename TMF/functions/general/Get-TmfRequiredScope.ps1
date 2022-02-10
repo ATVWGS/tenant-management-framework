@@ -42,6 +42,8 @@
 	[CmdletBinding(DefaultParameterSetName = 'All')]
 	Param (
 		[Parameter(ParameterSetName = "SpecifiedComponents")]
+		[switch] $AccessReviews,
+		[Parameter(ParameterSetName = "SpecifiedComponents")]
 		[switch] $Groups,
 		[Parameter(ParameterSetName = "SpecifiedComponents")]
 		[switch] $Users,
@@ -65,6 +67,9 @@
 	}
 	process
 	{		
+		if($AccessReviews -or $All) {
+			$scopes += "Group.Read.All", "AccessReview.ReadWrite.All", "RoleManagement.Read.Directory", "Directory.Read.All", "Directory.AccessAsUser.All"
+		}
 		if ($Groups -or $All) {
 			$scopes += "Group.ReadWrite.All", "GroupMember.ReadWrite.All", "Directory.ReadWrite.All", "Directory.AccessAsUser.All"
 		}
@@ -78,7 +83,7 @@
 			$scopes += "Agreement.ReadWrite.All"
 		}
 		if ($ConditionalAccessPolicies -or $All) {
-			$scopes += "Policy.ReadWrite.ConditionalAccess", "Policy.Read.All", "RoleManagement.Read.Directory", "Application.Read.All", "Agreement.Read.All"
+			$scopes += "Policy.ReadWrite.ConditionalAccess", "Policy.Read.All", "RoleManagement.Read.Directory", "Application.Read.All", "Agreement.Read.All", "Group.Read.All"
 		}
 		if ($EntitlementManagement -or $All) {
 			$scopes += "EntitlementManagement.ReadWrite.All"

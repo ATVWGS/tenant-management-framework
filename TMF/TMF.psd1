@@ -78,7 +78,10 @@
         'Register-TmfAdministrativeUnits',
 		'Register-TmfAccessPackageResource',
 		'Test-TmfAccessPackageResource',
-		'Invoke-TmfAccessPackageResource'
+		'Invoke-TmfAccessPackageResource',
+		'Register-TmfAccessReview',
+		'Test-TmfAccessReview',
+		'Invoke-TmfAccessReview'
 	)
 	
 	# Cmdlets to export from this module
