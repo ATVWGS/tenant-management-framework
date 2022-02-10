@@ -109,46 +109,48 @@
 		if ($PSBoundParameters.ContainsKey("oldNames")) {
 			Add-Member -InputObject $object -MemberType NoteProperty -Name "oldNames" -Value @($oldNames | ForEach-Object {Resolve-String $_})
 		}
-				
-		if (-Not $conditions) {
-			<# Workaround to support legacy conditionalAccessPolicy definition structure... #>
-			$PSBoundParameters["conditions"] = @{}
-			foreach ($mapping in $childPropertyToParentMapping.GetEnumerator()) {
-				foreach ($value in $mapping.Value) {
-					if ($PSBoundParameters.ContainsKey($value)) {
-						if (-Not $PSBoundParameters["conditions"][$mapping.Key]) { $PSBoundParameters["conditions"][$mapping.Key] = @{}}
-						$PSBoundParameters["conditions"][$mapping.Key][$value] = $PSBoundParameters[$value]
+
+		if ($present) {
+			if (-Not $conditions) {
+				<# Workaround to support legacy conditionalAccessPolicy definition structure... #>
+				$PSBoundParameters["conditions"] = @{}
+				foreach ($mapping in $childPropertyToParentMapping.GetEnumerator()) {
+					foreach ($value in $mapping.Value) {
+						if ($PSBoundParameters.ContainsKey($value)) {
+							if (-Not $PSBoundParameters["conditions"][$mapping.Key]) { $PSBoundParameters["conditions"][$mapping.Key] = @{}}
+							$PSBoundParameters["conditions"][$mapping.Key][$value] = $PSBoundParameters[$value]
+						}
+					}
+				}
+				"clientAppTypes", "userRiskLevels", "signInRiskLevels" | ForEach-Object {
+					if ($PSBoundParameters.ContainsKey($_)) {
+						$PSBoundParameters["conditions"][$_] = $PSBoundParameters[$_]
 					}
 				}
 			}
-			"clientAppTypes", "userRiskLevels", "signInRiskLevels" | ForEach-Object {
-				if ($PSBoundParameters.ContainsKey($_)) {
-					$PSBoundParameters["conditions"][$_] = $PSBoundParameters[$_]
+
+			if (-Not $grantControls -and ($builtInControls -or $customAuthenticationFactors -or $operator -or $termsOfUse)) {
+				<# Workaround to support legacy conditionalAccessPolicy definition structure... #>
+				$PSBoundParameters["grantControls"]	= @{}
+				"builtInControls", "customAuthenticationFactors", "operator", "termsOfUse" | ForEach-Object {
+					if ($PSBoundParameters.ContainsKey($_)) {
+						$PSBoundParameters["grantControls"][$_] = $PSBoundParameters[$_]
+					}
 				}
 			}
-		}
 
-		if (-Not $grantControls -and ($builtInControls -or $customAuthenticationFactors -or $operator -or $termsOfUse)) {
-			<# Workaround to support legacy conditionalAccessPolicy definition structure... #>
-			$PSBoundParameters["grantControls"]	= @{}
-			"builtInControls", "customAuthenticationFactors", "operator", "termsOfUse" | ForEach-Object {
+			"grantControls", "sessionControls", "conditions" | ForEach-Object {
 				if ($PSBoundParameters.ContainsKey($_)) {
-					$PSBoundParameters["grantControls"][$_] = $PSBoundParameters[$_]
-				}
+					if ($script:supportedResources[$resourceName]["validateFunctions"].ContainsKey($_)) {
+						$validated = $PSBoundParameters[$_] | ConvertTo-PSFHashtable -Include $($script:supportedResources[$resourceName]["validateFunctions"][$_].Parameters.Keys)
+						$validated = & $script:supportedResources[$resourceName]["validateFunctions"][$_] @validated -Cmdlet $Cmdlet
+					}
+					else {
+						$validated = $PSBoundParameters[$_]
+					}
+					Add-Member -InputObject $object -MemberType NoteProperty -Name $_ -Value $validated
+				}			
 			}
-		}
-
-		"grantControls", "sessionControls", "conditions" | ForEach-Object {
-			if ($PSBoundParameters.ContainsKey($_)) {
-				if ($script:supportedResources[$resourceName]["validateFunctions"].ContainsKey($_)) {
-					$validated = $PSBoundParameters[$_] | ConvertTo-PSFHashtable -Include $($script:supportedResources[$resourceName]["validateFunctions"][$_].Parameters.Keys)
-					$validated = & $script:supportedResources[$resourceName]["validateFunctions"][$_] @validated -Cmdlet $Cmdlet
-				}
-				else {
-					$validated = $PSBoundParameters[$_]
-				}
-				Add-Member -InputObject $object -MemberType NoteProperty -Name $_ -Value $validated
-			}			
 		}
 
 		Add-Member -InputObject $object -MemberType ScriptMethod -Name Properties -Value { ($this | Get-Member -MemberType NoteProperty).Name }
