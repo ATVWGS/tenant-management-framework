@@ -6,7 +6,7 @@ $script:supportedResources = @{
     "groups" = @{
         "registerFunction" = (Get-Command Register-TmfGroup)
         "testFunction" = (Get-Command Test-TmfGroup)
-        "invokeFunction" = (Get-Command Invoke-TmfGroup)
+        "invokeFunction" = (Get-Command Invoke-TmfGroup)        
         "weight" = 10
     }
     "namedLocations" = @{
@@ -24,13 +24,28 @@ $script:supportedResources = @{
     "administrativeUnits" = @{ 
         "registerFunction" = (Get-Command Register-TmfAdministrativeUnits)
         "testFunction" = (Get-Command Test-TmfAdministrativeUnits)
-        "invokeFunction" = (Get-Command Invoke-TmfAdministrativeUnits)
+        "invokeFunction" = (Get-Command Invoke-TmfAdministrativeUnits)       
         "weight" = 20
     }
     "conditionalAccessPolicies" = @{
         "registerFunction" = (Get-Command Register-TmfConditionalAccessPolicy)
         "testFunction" = (Get-Command Test-TmfConditionalAccessPolicy)
         "invokeFunction" = (Get-Command Invoke-TmfConditionalAccessPolicy)
+        "validateFunctions" = @{
+            "deviceFilter" = (Get-Command Validate-ConditionalAccessFilter)
+            "conditions" = (Get-Command Validate-ConditionalAccessConditionSet)
+            "applications" = (Get-Command Validate-ConditionalAccessApplications)
+            "users" = (Get-Command Validate-ConditionalAccessUsers)
+            "devices" = (Get-Command Validate-ConditionalAccessDevices)
+            "locations" = (Get-Command Validate-ConditionalAccessLocations)
+            "platforms" = (Get-Command Validate-ConditionalAccessPlatforms)
+            "grantControls" = (Get-Command Validate-ConditionalAccessGrantControls)
+            "sessionControls" = (Get-Command Validate-ConditionalAccessSessionControls)
+            "applicationEnforcedRestrictions" = (Get-Command Validate-ApplicationEnforcedRestrictionsSessionControl)
+            "cloudAppSecurity" = (Get-Command Validate-CloudAppSecuritySessionControl)
+            "persistentBrowser" = (Get-Command Validate-PersistentBrowserSessionControl)
+            "signInFrequency" = (Get-Command Validate-SignInFrequencySessionControl)
+        }
         "weight" = 50
     }
     "accessPackageCatalogs" = @{
@@ -56,6 +71,16 @@ $script:supportedResources = @{
     "accessPackageAssignementPolicies" = @{     
         "testFunction" = (Get-Command Test-TmfAccessPackageAssignementPolicy)
         "invokeFunction" = (Get-Command Invoke-TmfAccessPackageAssignementPolicy)
+        "validateFunctions" = @{
+            "accessReviewSettings" = (Get-Command Validate-AssignmentReviewSettings)
+            "requestApprovalSettings" = (Get-Command Validate-RequestApprovalSettings)
+            "requestorSettings" = (Get-Command Validate-RequestorSettings)
+            "approvalStages" = (Get-Command Validate-ApprovalStage)    
+            "allowedRequestors" = (Get-Command Validate-UserSet)
+            "reviewers" = (Get-Command Validate-UserSet)
+            "primaryApprovers" = (Get-Command Validate-UserSet)
+            "escalationApprovers" = (Get-Command Validate-UserSet)
+        }
         "parentType" = "entitlementManagement"
         "weight" = 57
     }
@@ -77,18 +102,5 @@ $script:supportedResources = @{
 Set-Variable -Name supportedResources -Option ReadOnly
 
 $script:validateFunctionMapping = @{
-    
-    "accessReviewSettings" = (Get-Command Validate-AssignmentReviewSettings)
-    "requestApprovalSettings" = (Get-Command Validate-RequestApprovalSettings)
-    "approvalStages" = (Get-Command Validate-ApprovalStage)
-    "requestorSettings" = (Get-Command Validate-RequestorSettings)
-    "allowedRequestors" = (Get-Command Validate-UserSet)
-    "primaryApprovers" = (Get-Command Validate-UserSet)
-    "escalationApprovers" = (Get-Command Validate-UserSet)
-    "grantControls" = (Get-Command Validate-ConditionalAccessGrantControls)
-    "sessionControls" = (Get-Command Validate-ConditionalAccessSessionControls)
-    "applicationEnforcedRestrictions" = (Get-Command Validate-ApplicationEnforcedRestrictionsSessionControl)
-    "cloudAppSecurity" = (Get-Command Validate-CloudAppSecuritySessionControl)
-    "persistentBrowser" = (Get-Command Validate-PersistentBrowserSessionControl)
-    "signInFrequency" = (Get-Command Validate-SignInFrequencySessionControl)
+    <# Legacy ... #>
 }
