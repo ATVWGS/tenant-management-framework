@@ -83,8 +83,8 @@ $script:supportedResources = @{
         }
         "parentType" = "entitlementManagement"
         "weight" = 57
-    }    
-	"accessReviews" = @{
+    }
+    "accessReviews" = @{
         "registerFunction" = (Get-Command Register-TmfAccessReview)
         "testFunction" = (Get-Command Test-TmfAccessReview)
         "invokeFunction" = (Get-Command Invoke-TmfAccessReview)
