@@ -103,4 +103,4 @@ Set-Variable -Name supportedResources -Option ReadOnly
 
 $script:validateFunctionMapping = @{
     <# Legacy ... #>
-}	
+}
