@@ -28,7 +28,7 @@
 
 			if (-Not $location -and $SearchInDesiredConfiguration) {
 				if ($InputReference -in $script:desiredConfiguration["namedLocations"].displayName) {
-					$location = $InputReference.Id
+					$location = $InputReference
 				}
 			}
 
@@ -36,7 +36,7 @@
 			elseif (-Not $location -and $DontFailIfNotExisting) { return }
 
 			if ($location.count -gt 1 -and -not $providedId) { throw "Got multiple namedLocations for $InputReference" }
-			return $location.Id
+			return $location
 		}
 		catch {
 			Write-PSFMessage -Level Warning -String 'TMF.CannotResolveResource' -StringValues "NamedLocation" -Tag 'failed' -ErrorRecord $_
