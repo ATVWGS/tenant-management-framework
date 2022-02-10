@@ -2,7 +2,6 @@ function Validate-ConditionalAccessGrantControls
 {
 	[CmdletBinding()]
 	Param (
-        [Parameter(Mandatory = $true)]
 		[ValidateSet("block", "mfa", "compliantDevice", "domainJoinedDevice", "approvedApplication", "compliantApplication", "passwordChange", "unknownFutureValue")]		
 		[string[]] $builtInControls,
 		[string[]] $customAuthenticationFactors,
