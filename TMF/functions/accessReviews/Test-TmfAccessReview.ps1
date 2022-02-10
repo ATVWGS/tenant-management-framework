@@ -109,8 +109,6 @@ function Test-TmfAccessReview
 												$category = [System.Management.Automation.ErrorCategory]::NotSpecified
 												$recordObject = New-Object System.Management.Automation.ErrorRecord($exception, $errorID, $category, $Cmdlet)
 												$cmdlet.ThrowTerminatingError($recordObject)
-
-												#$change.Actions = @{"Set" = $definition.$property}
 											}
 										}
 										else {
