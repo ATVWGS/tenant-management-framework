@@ -7,8 +7,6 @@ trigger:
     include:
       - TMF
 
-name: '[Build and Deploy] Tenant Management Framework'
-
 variables:
   major: 1
   minor: 3
@@ -23,6 +21,8 @@ variables:
   ${{ else }}:
     nugetVer: $(buildVer)
     zipVer: $(buildVer)
+
+name: '[Build and Release] TMF $zipVer'
 
 pool:
   vmImage: "ubuntu-latest"
