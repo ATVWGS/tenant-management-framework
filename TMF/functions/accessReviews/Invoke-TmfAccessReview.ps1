@@ -35,10 +35,15 @@ function Invoke-TmfAccessReview {
 						"reviewers" = $result.DesiredConfiguration.reviewers
                         "settings" = $result.DesiredConfiguration.settings
 					}
-                    $requestBody = $requestBody | ConvertTo-Json -Depth 4
-
-                    Write-PSFMessage -Level Verbose -String "TMF.Invoke.SendingRequestWithBody" -StringValues $requestMethod, $requestUrl, $requestBody
-                    Invoke-MgGraphRequest -Method $requestMethod -Uri $requestUrl -Body $requestBody | Out-Null
+                    try {
+						$requestBody = $requestBody | ConvertTo-Json -Depth 4
+						Write-PSFMessage -Level Verbose -String "TMF.Invoke.SendingRequestWithBody" -StringValues $requestMethod, $requestUrl, $requestBody
+						Invoke-MgGraphRequest -Method $requestMethod -Uri $requestUrl -Body $requestBody | Out-Null
+					}
+					catch {
+						Write-PSFMessage -Level Error -String "TMF.Invoke.ActionFailed" -StringValues $result.Tenant, $result.ResourceType, $result.ResourceName, $result.ActionType
+						throw $_
+					}
                 }
                 "Delete" {
                     $requestUrl = "$script:graphBaseUrl/identityGovernance/accessReviews/definitions/{0}" -f $result.GraphResource.Id
