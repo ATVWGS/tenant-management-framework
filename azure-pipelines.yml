@@ -22,7 +22,7 @@ variables:
     nugetVer: $(buildVer)
     zipVer: $(buildVer)
 
-name: '[Build and Release] TMF $zipVer'
+name: '[Build and Release] TMF $(zipVer)'
 
 pool:
   vmImage: "ubuntu-latest"
