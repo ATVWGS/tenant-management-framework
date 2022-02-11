@@ -1,4 +1,4 @@
-function Test-TmfAdministrativeUnits
+function Test-TmfAdministrativeUnit
 {
 	[CmdletBinding()]
 	Param (

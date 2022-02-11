@@ -1,4 +1,4 @@
-function Register-TmfAdministrativeUnits
+function Register-TmfAdministrativeUnit
 {
 	[CmdletBinding(DefaultParameterSetName = 'Default')]
 	Param (
