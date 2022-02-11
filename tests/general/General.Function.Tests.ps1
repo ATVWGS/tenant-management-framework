@@ -16,16 +16,27 @@ Describe 'General.Function.Tests' {
     $scriptAnalyzerRules = Get-ScriptAnalyzerRule | Where-Object {$_.RuleName -notin $globalIgnoredAnalyzerRules}
 
     Get-ChildItem -Path $ModuleRoot -Filter "*.ps1" -Recurse | Foreach-Object {
-        $testCases += @{"fileName" = $_.Name; "filePath" = $_.FullName}
+        $testCases += @{"fileName" = $_.Name; "baseName" = $_.BaseName; "filePath" = $_.FullName}
     }
             
     foreach ($case in $testCases) {        
         foreach ($rule in $scriptAnalyzerRules) {
-            It "$($case.fileName).$($rule.ruleName)" -Tag "General", $($case.fileName), $case.ruleName, "PSScriptAnalyzer" -TestCases @{
-                fileName = $case.filePath
+            It "$($case.baseName).$($rule.ruleName)" -Tag "General", $($case.baseName), $case.ruleName, "PSScriptAnalyzer" -TestCases @{
+                filePath = $case.filePath
+                baseName = $case.baseName
                 ruleName = $rule.ruleName
             } {
-                $results = Invoke-ScriptAnalyzer -Path $fileName -IncludeRule $ruleName -Recurse
+                # Skip rules based on function type                
+                switch ($baseName.split("-")) {
+                    "Validate" {
+                        $ignoredRules = @(
+                            "PSUseSingularNouns"
+                        )
+                    }
+                }
+                if ($ruleName -in $ignoredRules) { Set-ItResult -Skipped -Because "Ignored rule $ruleName" }
+
+                $results = Invoke-ScriptAnalyzer -Path $filePath -IncludeRule $ruleName -Recurse
                 foreach ($result in $results) {
                     switch ($result.Severity) {
                         "Information" {
