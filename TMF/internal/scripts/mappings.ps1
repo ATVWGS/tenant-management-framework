@@ -22,9 +22,9 @@ $script:supportedResources = @{
         "weight" = 10
     }
     "administrativeUnits" = @{ 
-        "registerFunction" = (Get-Command Register-TmfAdministrativeUnits)
-        "testFunction" = (Get-Command Test-TmfAdministrativeUnits)
-        "invokeFunction" = (Get-Command Invoke-TmfAdministrativeUnits)       
+        "registerFunction" = (Get-Command Register-TmfAdministrativeUnit)
+        "testFunction" = (Get-Command Test-TmfAdministrativeUnit)
+        "invokeFunction" = (Get-Command Invoke-TmfAdministrativeUnit)
         "weight" = 20
     }
     "conditionalAccessPolicies" = @{
