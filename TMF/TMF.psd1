@@ -81,7 +81,10 @@
 		'Invoke-TmfAccessPackageResource',
 		'Register-TmfAccessReview',
 		'Test-TmfAccessReview',
-		'Invoke-TmfAccessReview'
+		'Invoke-TmfAccessReview',
+		'Register-TmfDirectoryRole',
+		'Test-TmfDirectoryRole',
+		'Invoke-TmfDirectoryRole'
 	)
 	
 	# Cmdlets to export from this module

@@ -27,7 +27,7 @@
 			}
 
 			if (-Not $role -and $SearchInDesiredConfiguration) {
-				if ($InputReference -in $script:desiredConfiguration["roles"].displayName) {
+				if ($InputReference -in $script:desiredConfiguration["directoryRoles"].displayName) {
 					$role = $InputReference
 				}
 			}

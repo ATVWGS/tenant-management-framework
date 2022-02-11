@@ -44,6 +44,8 @@
 		[Parameter(ParameterSetName = "SpecifiedComponents")]
 		[switch] $AccessReviews,
 		[Parameter(ParameterSetName = "SpecifiedComponents")]
+		[switch] $RoleAssignments,
+		[Parameter(ParameterSetName = "SpecifiedComponents")]
 		[switch] $Groups,
 		[Parameter(ParameterSetName = "SpecifiedComponents")]
 		[switch] $Users,
@@ -69,6 +71,9 @@
 	{		
 		if($AccessReviews -or $All) {
 			$scopes += "Group.Read.All", "AccessReview.ReadWrite.All", "RoleManagement.Read.Directory", "Directory.Read.All", "Directory.AccessAsUser.All"
+		}
+		if($RoleAssignments -or $All) {
+			$scopes += "RoleManagement.ReadWrite.Directory", "Directory.AccessAsUser.All"
 		}
 		if ($Groups -or $All) {
 			$scopes += "Group.ReadWrite.All", "GroupMember.ReadWrite.All", "Directory.ReadWrite.All", "Directory.AccessAsUser.All"

@@ -32,11 +32,11 @@ function Validate-AccessReviewReviewers
 
         switch ($type) {
             "singleUser" {
-                $id = Resolve-User -InputReference $reference -Cmdlet $PSCmdlet
+                $id = Resolve-User -InputReference $reference -SearchInDesiredConfiguration -DontFailIfNotExisting -Cmdlet $PSCmdlet
                 $hashtable["query"] = "/v1.0/users/$($id)"
             }
             "groupMembers" {
-                $id = Resolve-Group -InputReference $reference -Cmdlet $PSCmdlet
+                $id = Resolve-Group -InputReference $reference -SearchInDesiredConfiguration -DontFailIfNotExisting -Cmdlet $PSCmdlet
 				$hashtable["query"] = "/v1.0/groups/$($id)/transitiveMembers/microsoft.graph.user"
             }
         }
