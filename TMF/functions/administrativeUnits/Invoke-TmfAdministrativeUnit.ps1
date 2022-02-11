@@ -1,4 +1,4 @@
-function Invoke-TmfAdministrativeUnits
+function Invoke-TmfAdministrativeUnit
 {
 	[CmdletBinding()]
 	Param (
