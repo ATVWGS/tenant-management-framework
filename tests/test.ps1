@@ -3,7 +3,7 @@ Param (
     [Parameter(Mandatory = $true, ParameterSetName = "TestArtifact")]
     [string] $ArtifactPath,
     [Parameter(Mandatory = $false, ParameterSetName = "Default")]
-    [string] $ModuleRoot = "../TMF",
+    [string] $ModuleRoot = "$PSScriptRoot/../TMF",
     [string] $OutPath = "$PSScriptRoot/results",
     
     [string] $TenantName,

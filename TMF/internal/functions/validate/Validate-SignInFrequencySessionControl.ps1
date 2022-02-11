@@ -11,9 +11,7 @@ function Validate-SignInFrequencySessionControl
 	)
 	
 	begin
-	{
-		$parentResourceName = "conditionalAccessPolicies"
-	}
+	{ }
 	process
 	{
 		if (Test-PSFFunctionInterrupt) { return }				

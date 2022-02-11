@@ -8,7 +8,9 @@ Param (
 $globalIgnoredAnalyzerRules = @(
     "PSAvoidTrailingWhitespace",
     "PSReviewUnusedParameter",
-    "PSUseApprovedVerbs"
+    "PSUseApprovedVerbs",
+    "PSUseDeclaredVarsMoreThanAssignments",
+    "PSUseShouldProcessForStateChangingFunctions"
 )
 
 Describe 'General.Function.Tests' {    
