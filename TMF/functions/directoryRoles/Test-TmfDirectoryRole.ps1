@@ -8,6 +8,7 @@ function Test-TmfDirectoryRole {
 	#>
 	[CmdletBinding()]
 	Param (
+		[string[]] $specificResources,
 		[System.Management.Automation.PSCmdlet]
 		$Cmdlet = $PSCmdlet
 	)
@@ -20,7 +21,44 @@ function Test-TmfDirectoryRole {
 	}
 	process
 	{
-		foreach ($definition in $script:desiredConfiguration[$resourceName]) {
+		$definitions = @()
+		if ($specificResources) {
+			foreach ($specificResource in $specificResources) {
+
+				if ($specificResource -match "\*") {
+					if ($script:desiredConfiguration[$resourceName] | Where-Object {$_.displayName -like $specificResource}) {
+						$definitions += $script:desiredConfiguration[$resourceName] | Where-Object {$_.displayName -like $specificResource}
+					}
+					else {
+						Write-PSFMessage -Level Warning -String 'TMF.Error.SpecificResourceNotExists' -StringValues $filter -Tag 'failed'
+						$exception = New-Object System.Data.DataException("$($specificResource) not exists in Desired Configuration for $($resourceName)!")
+						$errorID = "SpecificResourceNotExists"
+						$category = [System.Management.Automation.ErrorCategory]::NotSpecified
+						$recordObject = New-Object System.Management.Automation.ErrorRecord($exception, $errorID, $category, $Cmdlet)
+						$cmdlet.ThrowTerminatingError($recordObject)
+					}
+				}
+				else {
+					if ($script:desiredConfiguration[$resourceName] | Where-Object {$_.displayName -eq $specificResource}) {
+						$definitions += $script:desiredConfiguration[$resourceName] | Where-Object {$_.displayName -eq $specificResource}
+					}
+					else {
+						Write-PSFMessage -Level Warning -String 'TMF.Error.SpecificResourceNotExists' -StringValues $filter -Tag 'failed'
+						$exception = New-Object System.Data.DataException("$($specificResource) not exists in Desired Configuration for $($resourceName)!")
+						$errorID = "SpecificResourceNotExists"
+						$category = [System.Management.Automation.ErrorCategory]::NotSpecified
+						$recordObject = New-Object System.Management.Automation.ErrorRecord($exception, $errorID, $category, $Cmdlet)
+						$cmdlet.ThrowTerminatingError($recordObject)
+					}
+				}
+			}
+			$definitions = $definitions | Sort-Object -Property displayName -Unique
+		}
+		else {
+			$definitions = $script:desiredConfiguration[$resourceName]
+		}
+
+		foreach ($definition in $definitions) {
 			foreach ($property in $definition.Properties()) {
 				if ($definition.$property) {
 					if ($definition.$property.GetType().Name -eq "String") {

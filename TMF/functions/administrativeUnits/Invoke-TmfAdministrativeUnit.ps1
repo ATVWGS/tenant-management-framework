@@ -2,10 +2,10 @@ function Invoke-TmfAdministrativeUnit
 {
 	[CmdletBinding()]
 	Param (
+        [string[]] $specificResources,
 		[System.Management.Automation.PSCmdlet]
 		$Cmdlet = $PSCmdlet
 	)
-		
 	
 	begin
 	{
@@ -20,7 +20,12 @@ function Invoke-TmfAdministrativeUnit
     process
     {
         if(Test-PSFFunctionInterrupt) {return}
-        $testResults = Test-TmfAdministrativeUnits -Cmdlet $Cmdlet
+        if ($specificResources) {
+        	$testResults = Test-TmfDirectoryRole -specificResources $specificResources -Cmdlet $Cmdlet
+		}
+		else {
+			$testResults = Test-TmfDirectoryRole -Cmdlet $Cmdlet
+		}
 
         foreach ($result in $testResults) {
             Beautify-TmfTestResult -TestResult $result -FunctionName $MyInvocation.MyCommand

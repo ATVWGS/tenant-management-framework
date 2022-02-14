@@ -2,6 +2,7 @@
 {
 	[CmdletBinding()]
 	Param (
+		[string[]] $specificResources,
 		[System.Management.Automation.PSCmdlet]
 		$Cmdlet = $PSCmdlet
 	)
@@ -19,7 +20,12 @@
 	process
 	{
 		if (Test-PSFFunctionInterrupt) { return }
-		$testResults = Test-TmfNamedLocation -Cmdlet $Cmdlet
+		if ($specificResources) {
+        	$testResults = Test-TmfNamedLocation -specificResources $specificResources -Cmdlet $Cmdlet
+		}
+		else {
+			$testResults = Test-TmfNamedLocation -Cmdlet $Cmdlet
+		}
 
 		foreach ($result in $testResults) {
 			Beautify-TmfTestResult -TestResult $result -FunctionName $MyInvocation.MyCommand

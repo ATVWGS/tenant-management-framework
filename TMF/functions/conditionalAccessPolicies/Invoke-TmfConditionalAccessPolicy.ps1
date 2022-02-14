@@ -6,6 +6,7 @@
 	#>
 	[CmdletBinding()]
 	Param (
+		[string[]] $specificResources,
 		[System.Management.Automation.PSCmdlet]
 		$Cmdlet = $PSCmdlet
 	)
@@ -22,7 +23,12 @@
 	process
 	{
 		if (Test-PSFFunctionInterrupt) { return }
-		$testResults = Test-TmfConditionalAccessPolicy -Cmdlet $Cmdlet
+		if ($specificResources) {
+        	$testResults = Test-TmfConditionalAccessPolicy -specificResources $specificResources -Cmdlet $Cmdlet
+		}
+		else {
+			$testResults = Test-TmfConditionalAccessPolicy -Cmdlet $Cmdlet
+		}
 
 		foreach ($result in $testResults) {
 			Beautify-TmfTestResult -TestResult $result -FunctionName $MyInvocation.MyCommand
