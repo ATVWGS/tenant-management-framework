@@ -162,7 +162,7 @@
 					}
 				}
 				default {
-					Write-PSFMessage -Level Warning -String 'TMF.Test.MultipleResourcesError' -StringValues $componentName, $definition.displayName -Tag 'failed'
+					Write-PSFMessage -Level Warning -String 'TMF.Test.MultipleResourcesError' -StringValues $resourceName, $definition.displayName -Tag 'failed'
 					$exception = New-Object System.Data.DataException("Query returned multiple results. Cannot decide which resource to test.")
 					$errorID = 'MultipleResourcesError'
 					$category = [System.Management.Automation.ErrorCategory]::NotSpecified
