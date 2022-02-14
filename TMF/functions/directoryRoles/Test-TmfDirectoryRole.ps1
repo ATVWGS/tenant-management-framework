@@ -8,7 +8,7 @@ function Test-TmfDirectoryRole {
 	#>
 	[CmdletBinding()]
 	Param (
-		[string[]] $specificResources,
+		[string[]] $SpecificResources,
 		[System.Management.Automation.PSCmdlet]
 		$Cmdlet = $PSCmdlet
 	)
@@ -22,8 +22,8 @@ function Test-TmfDirectoryRole {
 	process
 	{
 		$definitions = @()
-		if ($specificResources) {
-			foreach ($specificResource in $specificResources) {
+		if ($SpecificResources) {
+			foreach ($specificResource in $SpecificResources) {
 
 				if ($specificResource -match "\*") {
 					if ($script:desiredConfiguration[$resourceName] | Where-Object {$_.displayName -like $specificResource}) {

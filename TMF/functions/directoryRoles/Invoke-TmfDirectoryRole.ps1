@@ -5,7 +5,7 @@ function Invoke-TmfDirectoryRole {
 	#>
 	[CmdletBinding()]
 	Param (
-		[string[]] $specificResources,
+		[string[]] $SpecificResources,
 		[System.Management.Automation.PSCmdlet]
 		$Cmdlet = $PSCmdlet
 	)
@@ -22,8 +22,8 @@ function Invoke-TmfDirectoryRole {
 	process
 	{
         if(Test-PSFFunctionInterrupt) {return}
-		if ($specificResources) {
-        	$testResults = Test-TmfDirectoryRole -specificResources $specificResources -Cmdlet $Cmdlet
+		if ($SpecificResources) {
+        	$testResults = Test-TmfDirectoryRole -SpecificResources $SpecificResources -Cmdlet $Cmdlet
 		}
 		else {
 			$testResults = Test-TmfDirectoryRole -Cmdlet $Cmdlet

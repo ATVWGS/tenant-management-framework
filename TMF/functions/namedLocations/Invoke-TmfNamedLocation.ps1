@@ -2,7 +2,7 @@
 {
 	[CmdletBinding()]
 	Param (
-		[string[]] $specificResources,
+		[string[]] $SpecificResources,
 		[System.Management.Automation.PSCmdlet]
 		$Cmdlet = $PSCmdlet
 	)
@@ -20,8 +20,8 @@
 	process
 	{
 		if (Test-PSFFunctionInterrupt) { return }
-		if ($specificResources) {
-        	$testResults = Test-TmfNamedLocation -specificResources $specificResources -Cmdlet $Cmdlet
+		if ($SpecificResources) {
+        	$testResults = Test-TmfNamedLocation -SpecificResources $SpecificResources -Cmdlet $Cmdlet
 		}
 		else {
 			$testResults = Test-TmfNamedLocation -Cmdlet $Cmdlet

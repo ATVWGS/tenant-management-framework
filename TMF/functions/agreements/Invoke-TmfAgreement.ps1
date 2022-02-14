@@ -6,7 +6,7 @@
 	#>
 	[CmdletBinding()]
 	Param (
-		[string[]] $specificResources,
+		[string[]] $SpecificResources,
 		[System.Management.Automation.PSCmdlet]
 		$Cmdlet = $PSCmdlet
 	)
@@ -24,8 +24,8 @@
 	process
 	{
 		if (Test-PSFFunctionInterrupt) { return }
-		if ($specificResources) {
-        	$testResults = Test-TmfAgreement -specificResources $specificResources -Cmdlet $Cmdlet
+		if ($SpecificResources) {
+        	$testResults = Test-TmfAgreement -SpecificResources $SpecificResources -Cmdlet $Cmdlet
 		}
 		else {
 			$testResults = Test-TmfAgreement -Cmdlet $Cmdlet

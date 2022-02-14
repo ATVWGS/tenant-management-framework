@@ -6,7 +6,7 @@ function Invoke-TmfAccessPackage
 	#>
 	[CmdletBinding()]
 	Param (
-		[string[]] $specificResources,
+		[string[]] $SpecificResources,
 		[System.Management.Automation.PSCmdlet]
 		$Cmdlet = $PSCmdlet
 	)
@@ -23,11 +23,11 @@ function Invoke-TmfAccessPackage
 	process
 	{
 		if (Test-PSFFunctionInterrupt) { return }
-		if ($specificResources) {
-        	$testResults = Test-TmfDirectoryRole -specificResources $specificResources -Cmdlet $Cmdlet
+		if ($SpecificResources) {
+        	$testResults = Test-TmfAccessPackage -SpecificResources $SpecificResources -Cmdlet $Cmdlet
 		}
 		else {
-			$testResults = Test-TmfDirectoryRole -Cmdlet $Cmdlet
+			$testResults = Test-TmfAccessPackage -Cmdlet $Cmdlet
 		}
 
 		foreach ($result in $testResults) {

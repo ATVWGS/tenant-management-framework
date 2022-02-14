@@ -6,6 +6,7 @@ function Invoke-TmfAccessPackageCatalog
 	#>
 	[CmdletBinding()]
 	Param (
+		[string[]] $SpecificResources,
 		[System.Management.Automation.PSCmdlet]
 		$Cmdlet = $PSCmdlet
 	)
@@ -22,7 +23,12 @@ function Invoke-TmfAccessPackageCatalog
 	process
 	{
 		if (Test-PSFFunctionInterrupt) { return }
-		$testResults = Test-TmfAccessPackageCatalog -Cmdlet $Cmdlet
+		if ($SpecificResources) {
+        	$testResults = Test-TmfAccessPackage -SpecificResources $SpecificResources -Cmdlet $Cmdlet
+		}
+		else {
+			$testResults = Test-TmfAccessPackage -Cmdlet $Cmdlet
+		}
 
 		foreach ($result in $testResults) {
 			Beautify-TmfTestResult -TestResult $result -FunctionName $MyInvocation.MyCommand
