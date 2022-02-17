@@ -65,7 +65,9 @@ adding a source control
       - [3.6.6.1. Access Package Catalogs](\#3.6.6.1.-access-package-catalogs)
       - [3.6.6.2. Access Packages](\#3.6.6.2.-access-packages)
     - [3.6.7. Administrative Units](\#3.6.7.-administrative-units)
-    - [3.6.8. String mapping](\#3.6.8.-string-mapping)
+    - [3.6.8. Access Reviews](\#3.6.8.-access-reviews)
+    - [3.6.9. Directory Roles](\#3.6.9.-directory-roles)
+    - [3.6.10. String mapping](\#3.6.10.-string-mapping)
   - [3.7. Examples](\#3.7.-examples)
     - [3.7.1. Example: A Conditional Access policy set and the required groups](\#3.7.1.-example%3A-a-conditional-access-policy-set-and-the-required-groups)
   - [3.8. Adding existing resources to your configuration](\#3.8.-adding-existing-resources-to-your-configuration)
@@ -161,6 +163,14 @@ The *example.md* file contains example resource instances and further informatio
 
 ```markdown
 # Folder structure of a newly created configuration
+├───accessReviews
+│       accessReviews.json
+│       example.md
+│
+├───administrativeUnits
+│       administrativeUnits.json
+│       example.md
+│
 ├───agreements
 │   │   agreements.json
 │   │   example.md
@@ -171,6 +181,10 @@ The *example.md* file contains example resource instances and further informatio
 ├───conditionalAccessPolicies
 │       example.md
 │       policies.json
+│
+├───directoryRoles
+│       directoryRoles.json
+│       example.md
 │
 ├───entitlementManagement
 │   ├───accessPackageCatalogs
@@ -321,6 +335,22 @@ GraphResource        :
 
 The resource type specific test functions always return test result objects. These objects show you, which actions are required in your tenant, to achive the desired configuration.
 
+Additionally you can test only specific resources of a resource type group by adding the -specificResources parameter. This parameter accepts a string array including wildcards.
+
+```powershell
+PS> Test-TmfGroup -specificResources "Example *"
+
+ActionType           : Create
+ResourceType         : Group
+ResourceName         : Example group
+Changes              :
+Tenant               : TENANT_NAME
+TenantId             : d369908f-8803-46bc-90cb-3c82854ddf93
+DesiredConfiguration : @{displayName=Example group; description=This is an example security group; groupTypes=System.String[]; securityEnabled=True; mailEnabled=False; mailNickname=someGroupForMembers;
+                       present=True; sourceConfig=Example Configuration}
+GraphResource        :
+```
+
 You can test all available resource types using *Test-TmfTenant*. The *Test-TmfTenant* function and also all resource type group (eg. *Test-TmfEntitlementManagement*) functions automatically beautify the test results.
 
 ```powershell
@@ -360,6 +390,15 @@ Is this the correct tenant? [y/n]: y
 [20:49:48][Invoke-TmfTenant] Invoking groups
 [20:49:49][Invoke-TmfGroup] [Tenant: TENANT_NAME][Group Resource: Example group] Required Action (NoActionRequired)
 [20:49:49][Invoke-TmfGroup] [Tenant: TENANT_NAME][Group Resource: Example group] Completed.
+```
+
+Additionally you can invoke only specific resources of a resource type group by adding the -specificResources parameter. This parameter accepts a string array including wildcards.
+
+```powershell
+PS> Invoke-TmfGroup -specificResources "Example*"
+
+[20:44:17][Invoke-TmfGroup] [Tenant: TENANT_NAME][Group Resource: Example group] Required Action (Create)
+[20:44:17][Invoke-TmfGroup] [Tenant: TENANT_NAME][Group Resource: Example group] Completed.
 ```
 
 ### 3.5.5. Register-Tmf* - Add definitions temporarily
@@ -606,7 +645,76 @@ A simple Administrative Unit definition.
 
 Please check the [Administrative Units example.md](./TMF/internal/data/configuration/administrativeUnits/example.md) for further information.
 
-### 3.6.8. String mapping
+### 3.6.8. Access Reviews
+
+```json
+{
+    "displayName": "Displayname of the access review",
+    "present": true,
+    "scope": {
+      "type": "group",
+      "reference": "some group"
+    },
+    "reviewers": [
+        {
+            "type": "groupMembers",
+            "reference":"some group"
+        }
+    ],
+    "settings": {
+        "mailNotificationsEnabled": true,
+        "reminderNotificationsEnabled": true,
+        "justificationRequiredOnApproval": true,
+        "defaultDecisionEnabled": false,
+        "defaultDecision": "None",
+        "instanceDurationInDays": 14,
+        "autoApplyDecisionsEnabled": false,
+        "recommendationsEnabled": true,
+        "recurrence": {
+            "pattern": {
+                "type": "absoluteMonthly",
+                "interval": 3,
+                "month": 0,
+                "dayOfMonth": 0,
+                "daysOfWeek": [],
+                "firstDayOfWeek": "sunday",
+                "index": "first"
+            },
+            "range": {
+                "type": "noEnd",
+                "numberOfOccurrences": 0,
+                "recurrenceTimeZone": null,
+                "startDate": "2022-03-01",
+                "endDate": "9999-12-31"
+            }
+        }
+    }
+  }
+```
+Please check the [Access Reviews example.md](./TMF/internal/data/configuration/accessReviews/example.md) for further information.
+
+### 3.6.9. Directory Roles
+
+```json
+{
+    "present": true,
+    "displayName": "Role displayname",
+    "members": [
+        {
+            "type": "group",
+            "reference": "some group"
+        },
+        {
+            "type": "singleUser",
+            "reference": "givenname.sn@tenant.onmicrosoft.com"
+        }
+    ]
+}
+
+```
+Please check the [Directory Roles example.md](./TMF/internal/data/configuration/directoryRoles/example.md) for further information.
+
+### 3.6.10. String mapping
 String mappings can help you with parameterization of your TMF configurations.
 
 You can create mappings between strings and the values they should be replaced with. Place the mappings in the *stringMappings.json* file in the *stringMappings* folder of your configuration.
