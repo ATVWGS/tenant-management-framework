@@ -23,7 +23,7 @@ function Invoke-TmfAccessReview {
 	{
         if(Test-PSFFunctionInterrupt) {return}
 		if ($SpecificResources) {
-        	$testResults = Test-TmfAccessReview -specificResoures $SpecificResources -Cmdlet $Cmdlet
+        	$testResults = Test-TmfAccessReview -specificResources $SpecificResources -Cmdlet $Cmdlet
 		}
 		else {
 			$testResults = Test-TmfAccessReview -Cmdlet $Cmdlet
