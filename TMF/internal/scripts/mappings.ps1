@@ -98,6 +98,12 @@ $script:supportedResources = @{
         }
         "weight" = 60
     }
+    "directoryRoles" = @{
+        "registerFunction" = (Get-Command Register-TmfDirectoryRole)
+        "testFunction" = (Get-Command Test-TmfDirectoryRole)
+        "invokeFunction" = (Get-Command Invoke-TmfDirectoryRole)
+        "weight" = 15
+    }
 } # All currently supported components.
 Set-Variable -Name supportedResources -Option ReadOnly
 

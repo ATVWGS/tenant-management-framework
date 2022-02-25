@@ -2,6 +2,7 @@
 {
 	[CmdletBinding()]
 	Param (
+		[string[]] $SpecificResources,
 		[System.Management.Automation.PSCmdlet]
 		$Cmdlet = $PSCmdlet
 	)
@@ -19,7 +20,12 @@
 	process
 	{
 		if (Test-PSFFunctionInterrupt) { return }
-		$testResults = Test-TmfGroup -Cmdlet $Cmdlet
+		if ($SpecificResources) {
+        	$testResults = Test-TmfGroup -SpecificResources $SpecificResources -Cmdlet $Cmdlet
+		}
+		else {
+			$testResults = Test-TmfGroup -Cmdlet $Cmdlet
+		}
 
 		foreach ($result in $testResults) {
 			Beautify-TmfTestResult -TestResult $result -FunctionName $MyInvocation.MyCommand

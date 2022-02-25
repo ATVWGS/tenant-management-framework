@@ -5,6 +5,7 @@ function Invoke-TmfAccessReview {
 	#>
 	[CmdletBinding()]
 	Param (
+		[string[]] $SpecificResources,
 		[System.Management.Automation.PSCmdlet]
 		$Cmdlet = $PSCmdlet
 	)
@@ -21,7 +22,12 @@ function Invoke-TmfAccessReview {
 	process
 	{
         if(Test-PSFFunctionInterrupt) {return}
-        $testResults = Test-TmfAccessReview -Cmdlet $Cmdlet
+		if ($SpecificResources) {
+        	$testResults = Test-TmfAccessReview -specificResources $SpecificResources -Cmdlet $Cmdlet
+		}
+		else {
+			$testResults = Test-TmfAccessReview -Cmdlet $Cmdlet
+		}
 
         foreach ($result in $testResults) {
             Beautify-TmfTestResult -TestResult $result -FunctionName $MyInvocation.MyCommand

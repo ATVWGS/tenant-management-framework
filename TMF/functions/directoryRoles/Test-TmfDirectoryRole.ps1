@@ -1,6 +1,5 @@
-function Test-TmfAccessPackageCatalog
-{
-	<#
+function Test-TmfDirectoryRole {
+    <#
 		.SYNOPSIS
 			Test desired configuration against a Tenant.
 		.DESCRIPTION
@@ -17,7 +16,7 @@ function Test-TmfAccessPackageCatalog
 	begin
 	{
 		Test-GraphConnection -Cmdlet $Cmdlet
-		$resourceName = "accessPackageCatalogs"
+		$resourceName = "DirectoryRoles"
 		$tenant = Get-MgOrganization -Property displayName, Id
 	}
 	process
@@ -61,78 +60,70 @@ function Test-TmfAccessPackageCatalog
 
 		foreach ($definition in $definitions) {
 			foreach ($property in $definition.Properties()) {
-				if ($definition.$property.GetType().Name -eq "String") {
-					$definition.$property = Resolve-String -Text $definition.$property
+				if ($definition.$property) {
+					if ($definition.$property.GetType().Name -eq "String") {
+						$definition.$property = Resolve-String -Text $definition.$property
+					}
 				}
 			}
 
-			$result = @{
+            $result = @{
 				Tenant = $tenant.displayName
 				TenantId = $tenant.Id
-				ResourceType = 'AccessPackageCatalog'
+				ResourceType = 'directoryRole'
 				ResourceName = (Resolve-String -Text $definition.displayName)
 				DesiredConfiguration = $definition
 			}
-
-			try {
-				$resource = (Invoke-MgGraphRequest -Method GET -Uri ("$script:graphBaseUrl/identityGovernance/entitlementManagement/accessPackageCatalogs?`$filter=displayName eq '{0}'" -f [System.Web.HttpUtility]::UrlEncode($definition.displayName))).Value
-			}
-			catch {
-				Write-PSFMessage -Level Warning -String 'TMF.Error.QueryWithFilterFailed' -StringValues $filter -Tag 'failed'
-				$exception = New-Object System.Data.DataException("Query with filter $filter against Microsoft Graph failed. Error: $_")
-				$errorID = 'QueryWithFilterFailed'
-				$category = [System.Management.Automation.ErrorCategory]::NotSpecified
-				$recordObject = New-Object System.Management.Automation.ErrorRecord($exception, $errorID, $category, $Cmdlet)
-				$cmdlet.ThrowTerminatingError($recordObject)
-			}
-			
-			switch ($resource.Count) {
-				0 {
-					if ($definition.present) {					
-						$result = New-TestResult @result -ActionType "Create"
+			if ($definition.present) {
+				if ($definition.roleID) {
+					$result["GraphResource"] = $definition.roleID
+					try {
+						$roleMembers = (Invoke-MgGraphRequest -Method GET -Uri ("$script:graphBaseUrl/directoryRoles/{0}/members" -f $definition.roleID)).Value
 					}
-					else {					
-						$result = New-TestResult @result -ActionType "NoActionRequired"
+					catch {
+						Write-PSFMessage -Level Warning -String 'TMF.Error.QueryWithFilterFailed' -StringValues $filter -Tag 'failed'
+						$exception = New-Object System.Data.DataException("Query with filter $filter against Microsoft Graph failed. Error: $_")
+						$errorID = 'QueryWithFilterFailed'
+						$category = [System.Management.Automation.ErrorCategory]::NotSpecified
+						$recordObject = New-Object System.Management.Automation.ErrorRecord($exception, $errorID, $category, $Cmdlet)
+						$cmdlet.ThrowTerminatingError($recordObject)
 					}
-				}
-				1 {
-					$result["GraphResource"] = $resource
-					if ($definition.present) {
-						$changes = @()
-						foreach ($property in ($definition.Properties() | Where-Object {$_ -notin "displayName", "present", "sourceConfig"})) {
-							$change = [PSCustomObject] @{
-								Property = $property										
-								Actions = $null
-							}
 
-							switch ($property) {
-								default {
-									if ($definition.$property -ne $resource.$property) {
-										$change.Actions = @{"Set" = $definition.$property}
-									}
-								}
+					if ($roleMembers) {
+
+						if ($definition.memberIDs) {
+
+							if (Compare-Object $roleMembers.id $definition.memberIDs) {
+								$result = New-TestResult @result -ActionType "Change members"
 							}
-							if ($change.Actions) {$changes += $change}
+							else {
+								$result = New-TestResult @result -ActionType "NoActionRequired"
+							}
 						}
-	
-						if ($changes.count -gt 0) { $result = New-TestResult @result -Changes $changes -ActionType "Update"}
-						else { $result = New-TestResult @result -ActionType "NoActionRequired" }
+						else {
+							$result = New-TestResult @result -ActionType "Change members"
+						}
 					}
 					else {
-						$result = New-TestResult @result -ActionType "Delete"
+						if ($definition.memberIDs) {
+							$result = New-TestResult @result -ActionType "Change members"
+						}
+						else {
+							$result = New-TestResult @result -ActionType "NoActionRequired"
+						}
 					}
 				}
-				default {
-					Write-PSFMessage -Level Warning -String 'TMF.Test.MultipleResourcesError' -StringValues $resourceName, $definition.displayName -Tag 'failed'
-					$exception = New-Object System.Data.DataException("Query returned multiple results. Cannot decide which resource to test.")
-					$errorID = 'MultipleResourcesError'
-					$category = [System.Management.Automation.ErrorCategory]::NotSpecified
-					$recordObject = New-Object System.Management.Automation.ErrorRecord($exception, $errorID, $category, $Cmdlet)
-					$cmdlet.ThrowTerminatingError($recordObject)
+				else {
+					$result = New-TestResult @result -ActionType "Activate"
 				}
 			}
-			
-			$result
-		}
-	}
+			else {
+				$result = New-TestResult @result -ActionType "NoActionRequired"
+			}
+            $result
+        }
+
+    }
+
+    end {}
 }
