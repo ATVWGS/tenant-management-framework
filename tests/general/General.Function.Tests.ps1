@@ -28,15 +28,21 @@ Describe 'General.Function.Tests' {
                 baseName = $case.baseName
                 ruleName = $rule.ruleName
             } {
-                # Skip rules based on function type                
+                # Skip rules based on function type
+                $ignoredRules = @()
                 switch ($baseName.split("-")) {
                     "Validate" {
-                        $ignoredRules = @(
-                            "PSUseSingularNouns"
-                        )
+                        $ignoredRules += "PSUseSingularNouns"
                     }
                 }
-                if ($ruleName -in $ignoredRules) { Set-ItResult -Skipped -Because "Ignored rule $ruleName" }
+                # Skip rules based on function name
+                switch ($baseName) {
+                    "Assert-TemplateFunctions" {
+                        $ignoredRules += "PSUseSingularNouns"
+                    }
+                }
+
+                if ($ruleName -in ($ignoredRules | Sort-Object -Unique)) { Set-ItResult -Skipped -Because "Ignored rule $ruleName" }
 
                 $results = Invoke-ScriptAnalyzer -Path $filePath -IncludeRule $ruleName -Recurse
                 foreach ($result in $results) {

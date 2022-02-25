@@ -1,3 +1,10 @@
+#region Variables
+$graphUris = @{
+    "groups" = "https://graph.microsoft.com/beta/groups"
+    "namedLocations" = "https://graph.microsoft.com/beta/identity/conditionalAccess/namedLocations/"
+}
+#endregion
+
 function Get-GraphAccessToken {
     Param (
         [Parameter(Mandatory = $true)]
@@ -24,4 +31,4 @@ function Get-GraphAccessToken {
     }
 }
 
-Export-ModuleMember -Function "Get-GraphAccessToken"
+Export-ModuleMember -Function "Get-GraphAccessToken" -Variable "uris"
