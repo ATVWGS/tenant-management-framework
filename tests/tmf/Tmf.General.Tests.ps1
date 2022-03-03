@@ -11,7 +11,7 @@ if ($PSVersionTable.OS -match "Microsoft Windows") {
     $global:testConfigPath = "$PSScriptRoot\test-config"
 }
 else {
-    $global:testConfigPath = "/tmp/test-config"
+    $global:testConfigPath = "$PWD/test-config"
 }
 
 #region Some test resource definitions
