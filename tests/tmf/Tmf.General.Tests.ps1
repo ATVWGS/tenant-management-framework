@@ -8,7 +8,7 @@ Param (
 )
 
 if ($PSVersionTable.OS -match "Microsoft Windows") {
-    $global:testConfigPath = "$PSScriptRoot\test-config"
+    $global:testConfigPath = "$env:TMP\test-config"
 }
 else {
     $global:testConfigPath = "$PWD/test-config"
