@@ -21,12 +21,6 @@ stages:
   jobs:
   - job: pester
     steps:
-      - task: DownloadPipelineArtifact@2
-        inputs:
-          buildType: 'current'
-          artifactName: 'zip'
-          itemPattern: '**'
-          targetPath: '$(Pipeline.Workspace)'
       - task: PowerShell@2
         continueOnError: true
         inputs:         
