@@ -16,6 +16,10 @@ else {
 
 #region Some test resource definitions
 $timestamp = Get-Date -UFormat "%Y%m%d"
+$global:graphUris = @{
+    "groups" = "https://graph.microsoft.com/beta/groups"
+    "namedLocations" = "https://graph.microsoft.com/beta/identity/conditionalAccess/namedLocations/"
+}
 $global:definitions = @{
     groups = @(
         @{
@@ -94,10 +98,6 @@ Describe 'Tmf.General.Config.Processing' {
 }
 
 Describe 'Tmf.General.Invoke.Creation' {
-    BeforeAll {
-        Import-Module "$PSScriptRoot\..\helpers.psm1" -Force
-    }
-
     It "should successfully test the TMF configuration" {
         { Test-TmfTenant } | Should -Not -Throw
     }
@@ -110,7 +110,7 @@ Describe 'Tmf.General.Invoke.Creation' {
         $testCases = $type.Value | Foreach-Object {
             return @{
                 "displayName" = $_["displayName"]
-                "uri" = $graphUris[$type.Name]
+                "uri" = $global:graphUris[$type.Name]
             }
         }
         It "should have created <displayName> (uri: <uri>)" -TestCases $testCases {
@@ -146,7 +146,7 @@ Describe 'Tmf.General.Invoke.Deletion' {
         $testCases = $type.Value | Foreach-Object {
             return @{
                 "displayName" = $_["displayName"]
-                "uri" = $graphUris[$type.Name]
+                "uri" = $global:graphUris[$type.Name]
                 "type" = $type.Name
             }
         }

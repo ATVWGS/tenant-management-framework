@@ -1,10 +1,3 @@
-#region Variables
-$graphUris = @{
-    "groups" = "https://graph.microsoft.com/beta/groups"
-    "namedLocations" = "https://graph.microsoft.com/beta/identity/conditionalAccess/namedLocations/"
-}
-#endregion
-
 function Get-GraphAccessToken {
     Param (
         [Parameter(Mandatory = $true)]
