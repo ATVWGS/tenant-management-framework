@@ -131,7 +131,7 @@ Describe 'Tmf.General.Invoke.Deletion' {
         $global:definitions.GetEnumerator() | Foreach-Object {
             $_.Value | Foreach-Object { $_["present"] = $false }
             $targetFilePath = Get-ChildItem -Path "$global:testConfigPath\$($_.Name)" -Depth 0 -Filter "*.json" | Select-Object -First 1 -ExpandProperty FullName
-            $_.Value | ConvertTo-Json -Depth 10 | Out-File -FilePath $targetFilePath -Encoding utf8
+            $_.Value | ConvertTo-Json -Depth 10 | Out-File -FilePath $targetFilePath -Encoding utf8 -Force
         }
         #endregion
     }
@@ -183,5 +183,5 @@ Describe 'Tmf.General.Config.Cleanup' {
 }
 
 AfterAll {
-    #Remove-Item -Path $global:testConfigPath -Recurse -Force
+    Remove-Item -Path $global:testConfigPath -Recurse -Force
 }
