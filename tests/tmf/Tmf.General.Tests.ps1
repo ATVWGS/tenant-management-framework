@@ -98,6 +98,10 @@ Describe 'Tmf.General.Config.Processing' {
 }
 
 Describe 'Tmf.General.Invoke.Creation' {
+    BeforeEach {
+        Start-Sleep -Seconds 10 # Ensure Graph has enough time to process our requests
+    }
+
     It "should successfully test the TMF configuration" {
         { Test-TmfTenant } | Should -Not -Throw
     }
@@ -123,8 +127,6 @@ Describe 'Tmf.General.Invoke.Creation' {
 
 Describe 'Tmf.General.Invoke.Deletion' {
     BeforeAll {
-        Import-Module "$PSScriptRoot\..\helpers.psm1" -Force
-        
         #region Set present to false for each definition
         $global:definitions.GetEnumerator() | Foreach-Object {
             $_.Value | Foreach-Object { $_["present"] = $false }
@@ -135,7 +137,7 @@ Describe 'Tmf.General.Invoke.Deletion' {
     }
 
     BeforeEach {
-        Start-Sleep -Seconds 5 # Ensure Graph has enough time to process our requests
+        Start-Sleep -Seconds 10 # Ensure Graph has enough time to process our requests
     }
 
     It "should successfully test the TMF configuration" {
