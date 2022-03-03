@@ -86,9 +86,9 @@ Describe 'Tmf.General.Config.Processing' {
         Get-TmfActiveConfiguration | Should -Not -BeNullOrEmpty
         Get-TmfDesiredConfiguration | Should -Not -BeNullOrEmpty
         
-        Get-ChildItem $global:testConfigPath -Exclude "configuration.json" -Filter "*.json" -Recurse 
+        Get-ChildItem $global:testConfigPath -Exclude "configuration.json" -Filter "*.json" -Recurse `
         | Where-Object {$_.Length -gt 2} | Split-Path -Parent | Foreach-Object {
-            (Get-TmfDesiredConfiguration).Keys | Should -Contain $_.split("\")[-1]
+                (Get-TmfDesiredConfiguration).Keys | Should -Contain $_.split("\")[-1]
         }
     }
 }
