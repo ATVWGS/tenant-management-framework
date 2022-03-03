@@ -25,7 +25,7 @@ begin {
     }
 
     #region Install dependencies
-    $manifest = Import-LocalizedData -BaseDirectory $ModuleRoot -FileName "$ModuleName.psd1"
+    $manifest = Import-PowerShellDataFile -Path "$ModuleRoot\$ModuleName.psd1"
     if (-Not $SkipDependencyDownload) {
         foreach ($module in $manifest.RequiredModules) {
             switch ($module.GetType().Name) {
