@@ -24,7 +24,7 @@ stages:
         continueOnError: true
         inputs:         
           filePath: 'tests/test.ps1'
-          arguments: '-OutPath "$(Pipeline.Workspace)/tests/results"'
+          arguments: '-OutPath "$(Pipeline.Workspace)/tests/results" -TestsToRun "Module"'
           workingDirectory: 'tests/'
       - task: PublishTestResults@2
         inputs:
@@ -38,7 +38,7 @@ stages:
         continueOnError: true
         inputs:         
           filePath: 'tests/test.ps1'
-          arguments: '-OutPath "$(Pipeline.Workspace)/tests/results" -TenantId $(testsTenantId) -TenantClientSecret $(testsClientSecret) -TenantClientId $(testsClientId)'
+          arguments: '-OutPath "$(Pipeline.Workspace)/tests/results" -TenantId $(testsTenantId) -TenantClientSecret $(testsClientSecret) -TenantClientId $(testsClientId) -TestsToRun "Module"'
           workingDirectory: 'tests/'
       - task: PublishTestResults@2
         inputs:
