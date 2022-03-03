@@ -9,7 +9,6 @@ trigger:
 
 variables:
   moduleName: 'TMF'
-  releaseFeed: 'vwgs-azdevops-release'
 
 name: Test TMF $(SourceBranchName) $(Date:yyyy-MM-dd).$(Rev:r)
 
@@ -19,13 +18,28 @@ pool:
 stages:
 - stage: run_tests
   jobs:
-  - job: pester
+  - job: general_tests
+    steps:
+      - task: PowerShell@2
+        continueOnError: true
+        inputs:         
+          filePath: 'tests/test.ps1'
+          arguments: '-OutPath "$(Pipeline.Workspace)/tests/results"'
+          workingDirectory: 'tests/'
+      - task: PublishTestResults@2
+        inputs:
+          testResultsFormat: 'NUnit'
+          testResultsFiles: '**/*.xml'
+          searchFolder: '$(Pipeline.Workspace)/tests/results'
+          failTaskOnFailedTests: true
+  - job: module_specific_tests
     steps:
       - task: PowerShell@2
         continueOnError: true
         inputs:         
           filePath: 'tests/test.ps1'
           arguments: '-OutPath "$(Pipeline.Workspace)/tests/results" -TenantId $(testsTenantId) -TenantClientSecret $(testsClientSecret) -TenantClientId $(testsClientId)'
+          workingDirectory: 'tests/'
       - task: PublishTestResults@2
         inputs:
           testResultsFormat: 'NUnit'

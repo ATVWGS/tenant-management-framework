@@ -3,8 +3,8 @@ Param (
     [Parameter(Mandatory = $true, ParameterSetName = "TestArtifact")]
     [string] $ArtifactPath,
     [Parameter(Mandatory = $false, ParameterSetName = "Default")]
-    [string] $ModuleRoot = "$PSScriptRoot/../TMF",
-    [string] $OutPath = "$PSScriptRoot/results",    
+    [string] $ModuleRoot = "$PWD/../TMF",
+    [string] $OutPath = "$PWD/results",    
     
     [string] $TenantId,
     [string] $TenantClientSecret,
@@ -19,7 +19,7 @@ begin {
     Import-Module "$PSScriptRoot\helpers.psm1" -Force
 
     if ($PSBoundParameters.ContainsKey("ArtifactPath")) {
-        $ModuleRoot = "$env:TEMP\$ModuleName"
+        $ModuleRoot = "$PWD\$ModuleName"
         $package = Get-ChildItem -Filter "*.zip" -Path $ArtifactPath -Recurse | Sort-Object LastWriteTime -Descending | Select-Object -First 1    
         Expand-Archive -Path $package.FullName -DestinationPath $ModuleRoot -Force
     }
