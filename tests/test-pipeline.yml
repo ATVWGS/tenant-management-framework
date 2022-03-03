@@ -24,7 +24,7 @@ stages:
         continueOnError: true
         inputs:         
           filePath: 'tests/test.ps1'
-          arguments: '-OutPath "$(Pipeline.Workspace)/tests/results" -TestsToRun "Module"'
+          arguments: '-OutPath "$(Pipeline.Workspace)/tests/results" -TestsToRun "General"'
           workingDirectory: 'tests/'
       - task: PublishTestResults@2
         inputs:

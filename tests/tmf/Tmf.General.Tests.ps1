@@ -107,7 +107,7 @@ Describe 'Tmf.General.Invoke.Creation' {
     }
 
     foreach ($type in $global:definitions.GetEnumerator()) {
-        $global:testCases = $type.Value | Foreach-Object {
+        $testCases = $type.Value | Foreach-Object {
             return @{
                 "displayName" = $_["displayName"]
                 "uri" = $graphUris[$type.Name]
@@ -143,7 +143,7 @@ Describe 'Tmf.General.Invoke.Deletion' {
     }
 
     foreach ($type in $global:definitions.GetEnumerator()) {
-        $global:testCases = $type.Value | Foreach-Object {
+        $testCases = $type.Value | Foreach-Object {
             return @{
                 "displayName" = $_["displayName"]
                 "uri" = $graphUris[$type.Name]
