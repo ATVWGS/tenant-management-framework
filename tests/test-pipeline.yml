@@ -11,7 +11,7 @@ variables:
   moduleName: 'TMF'
   releaseFeed: 'vwgs-azdevops-release'
 
-name: Test TMF $(SourceBranchName) $(Date:yyyy-MM-dd)$(Rev:r)
+name: Test TMF $(SourceBranchName) $(Date:yyyy-MM-dd).$(Rev:r)
 
 pool:
   vmImage: "ubuntu-latest"
