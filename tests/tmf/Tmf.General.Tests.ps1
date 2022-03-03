@@ -7,7 +7,12 @@ Param (
     [string] $AccessToken
 )
 
-$global:testConfigPath = "$env:TEMP\test-config"
+if ($PSVersionTable.OS -match "Microsoft Windows") {
+    $global:testConfigPath = "$PSScriptRoot\test-config"
+}
+else {
+    $global:testConfigPath = "/tmp/test-config"
+}
 
 #region Some test resource definitions
 $timestamp = Get-Date -UFormat "%Y%m%d"
