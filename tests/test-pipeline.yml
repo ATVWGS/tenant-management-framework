@@ -35,10 +35,11 @@ stages:
             Install-Module -Name Pester -Force -SkipPublisherCheck -RequiredVersion "5.3.1"
         condition: ne(variables.MODULES_RESTORED, 'true')
       - task: PowerShell@2
+        displayName: Invoke Pester tests
         continueOnError: true
         inputs:         
           filePath: 'tests/test.ps1'
-          arguments: '-OutPath "$(Pipeline.Workspace)/tests/results" -TestsToRun "General"'
+          arguments: '-SkipDependencyDownload -OutPath "$(Pipeline.Workspace)/tests/results" -TestsToRun "General"'
           workingDirectory: 'tests/'
       - task: PublishTestResults@2
         inputs:
@@ -63,10 +64,11 @@ stages:
             Install-Module -Name Pester -Force -SkipPublisherCheck -RequiredVersion "5.3.1"
         condition: ne(variables.MODULES_RESTORED, 'true')
       - task: PowerShell@2
+        displayName: Invoke Pester tests
         continueOnError: true
         inputs:         
           filePath: 'tests/test.ps1'
-          arguments: '-OutPath "$(Pipeline.Workspace)/tests/results" -TenantId $(testsTenantId) -TenantClientSecret $(testsClientSecret) -TenantClientId $(testsClientId) -TestsToRun "Module"'
+          arguments: '-SkipDependencyDownload -OutPath "$(Pipeline.Workspace)/tests/results" -TenantId $(testsTenantId) -TenantClientSecret $(testsClientSecret) -TenantClientId $(testsClientId) -TestsToRun "Module"'
           workingDirectory: 'tests/'
       - task: PublishTestResults@2
         inputs:
