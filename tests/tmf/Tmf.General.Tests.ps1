@@ -134,6 +134,10 @@ Describe 'Tmf.General.Invoke.Deletion' {
         #endregion
     }
 
+    BeforeEach {
+        Start-Sleep -Seconds 5 # Ensure Graph has enough time to process our requests
+    }
+
     It "should successfully test the TMF configuration" {
         { Test-TmfTenant } | Should -Not -Throw
     }
