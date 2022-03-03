@@ -56,6 +56,7 @@ process {
                     PassThru = $true
                 }
                 TestResult = @{
+                    TestSuiteName = "$ModuleName.General.Tests"
                     Enabled = $true
                     OutputPath = "$OutPath\$($_.BaseName).Test-Result.xml"
                     OutputFormat = "NUnitXML"
@@ -81,6 +82,7 @@ process {
                     PassThru = $true
                 }
                 TestResult = @{
+                    TestSuiteName = "$ModuleName.ModuleSpecific.Tests"
                     Enabled = $true
                     OutputPath = "$OutPath\$($_.BaseName).Test-Result.xml"
                     OutputFormat = "NUnitXML"

@@ -1,0 +1,40 @@
+trigger:
+  branches:
+    include:
+      - main
+      - prepare-release/*
+  paths:
+    include:
+      - TMF
+
+variables:
+  moduleName: 'TMF'
+  releaseFeed: 'vwgs-azdevops-release'
+
+name: Test TMF $(SourceBranchName) $(Date:yyyy-MM-dd)$(Rev:r)
+
+pool:
+  vmImage: "ubuntu-latest"
+
+stages:
+- stage: run_tests
+  jobs:
+  - job: pester
+    steps:
+      - task: DownloadPipelineArtifact@2
+        inputs:
+          buildType: 'current'
+          artifactName: 'zip'
+          itemPattern: '**'
+          targetPath: '$(Pipeline.Workspace)'
+      - task: PowerShell@2
+        continueOnError: true
+        inputs:         
+          filePath: 'tests/test.ps1'
+          arguments: '-OutPath "$(Pipeline.Workspace)/tests/results" -TenantId $(testsTenantId) -TenantClientSecret $(testsClientSecret) -TenantClientId $(testsClientId)'
+      - task: PublishTestResults@2
+        inputs:
+          testResultsFormat: 'NUnit'
+          testResultsFiles: '**/*.xml'
+          searchFolder: '$(Pipeline.Workspace)/tests/results'
+          failTaskOnFailedTests: true

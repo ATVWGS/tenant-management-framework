@@ -84,12 +84,12 @@ stages:
         continueOnError: true
         inputs:         
           filePath: 'tests/test.ps1'
-          arguments: '-ModuleName $(moduleName) -ArtifactPath $(Pipeline.Workspace) -OutPath $(Pipeline.Workspace)'
+          arguments: '-ArtifactPath $(Pipeline.Workspace) -OutPath "$(Pipeline.Workspace)/tests/results" -TenantId $(testsTenantId) -TenantClientSecret $(testsClientSecret) -TenantClientId $(testsClientId)'
       - task: PublishTestResults@2
         inputs:
           testResultsFormat: 'NUnit'
-          testResultsFiles: '**/Test-Pester.XML'
-          searchFolder: '$(Pipeline.Workspace)'
+          testResultsFiles: '**/*.xml'
+          searchFolder: '$(Pipeline.Workspace)/tests/results'
           failTaskOnFailedTests: true
 - stage: publish_gallery
   jobs:
