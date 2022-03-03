@@ -14,7 +14,7 @@ variables:
 name: Test TMF $(SourceBranchName) $(Date:yyyy-MM-dd).$(Rev:r)
 
 pool:
-  vmImage: "ubuntu-latest"
+  vmImage: "windows-latest"
 
 stages:
 - stage: run_tests
