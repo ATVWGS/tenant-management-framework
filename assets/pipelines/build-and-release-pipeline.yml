@@ -37,9 +37,9 @@ stages:
       inputs:
         filePath: 'build/build.ps1'
         ${{ if ne(variables['prerelease'], null) }}:
-        arguments: '-ModuleName $(moduleName) -BuildVersion $(buildVer) -LicenseUri $(licenseUri) -ProjectUri $(projectUri) -Tags $(tags) -Prerelease $(prerelease)'
+          arguments: '-ModuleName $(moduleName) -BuildVersion $(buildVer) -LicenseUri $(licenseUri) -ProjectUri $(projectUri) -Tags $(tags) -Prerelease $(prerelease)'
         ${{ else }}:
-        arguments: '-ModuleName $(moduleName) -BuildVersion $(buildVer) -LicenseUri $(licenseUri) -ProjectUri $(projectUri) -Tags $(tags)'
+          arguments: '-ModuleName $(moduleName) -BuildVersion $(buildVer) -LicenseUri $(licenseUri) -ProjectUri $(projectUri) -Tags $(tags)'
     - task: CopyFiles@2
       displayName: Adding LICENSE to module
       inputs:
