@@ -15,7 +15,7 @@ function Compare-Hashtable {
         foreach ($reference in $ReferenceObject.GetEnumerator()) {            
             if ($DifferenceObject.ContainsKey($reference.Key)) {     
                 if ($null -eq $reference.Value) {
-                    if ($DifferenceObject[$reference.Key] -ne $null) {
+                    if ($null -eq $DifferenceObject[$reference.Key]) {
                         $same = $false
                     }
                 }
