@@ -19,7 +19,7 @@ begin {
     Import-Module "$PSScriptRoot\helpers.psm1" -Force
 
     if ($PSBoundParameters.ContainsKey("ArtifactPath")) {
-        $ModuleRoot = "$PWD\$ModuleName"
+        $ModuleRoot = "$PWD\extracted\$ModuleName"
         $package = Get-ChildItem -Filter "*.zip" -Path $ArtifactPath -Recurse | Sort-Object LastWriteTime -Descending | Select-Object -First 1    
         Expand-Archive -Path $package.FullName -DestinationPath $ModuleRoot -Force
     }
