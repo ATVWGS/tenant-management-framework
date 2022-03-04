@@ -22,10 +22,7 @@ variables:
     nugetVer: $(buildVer)
     zipVer: $(buildVer)
 
-${{ if ne(variables['prerelease'], '') }}:
-  name: Build TMF $(major).$(minor).$(Build.BuildID) $(prerelease)
-${{ else }}:
-  name: Build TMF $(major).$(minor).$(Build.BuildID)
+name: Build TMF $(major).$(minor).$(Build.BuildID) ${{ variables.prerelease }}
 
 pool:
   vmImage: "windows-latest"
