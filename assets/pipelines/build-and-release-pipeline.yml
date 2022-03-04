@@ -22,10 +22,13 @@ variables:
     nugetVer: $(buildVer)
     zipVer: $(buildVer)
 
+${{ if ne(variables['prerelease'], null) }}:
 name: Build TMF $(major).$(minor).$(Build.BuildID) $(prerelease)
+${{ else }}:
+name: Build TMF $(major).$(minor).$(Build.BuildID)
 
 pool:
-  vmImage: "ubuntu-latest"
+  vmImage: "windows-latest"
 
 stages:
 - stage: build
@@ -36,7 +39,10 @@ stages:
       displayName: Updating module manifest
       inputs:
         filePath: 'build/build.ps1'
+        ${{ if ne(variables['prerelease'], null) }}:
         arguments: '-ModuleName $(moduleName) -BuildVersion $(buildVer) -LicenseUri $(licenseUri) -ProjectUri $(projectUri) -Tags $(tags) -Prerelease $(prerelease)'
+        ${{ else }}:
+        arguments: '-ModuleName $(moduleName) -BuildVersion $(buildVer) -LicenseUri $(licenseUri) -ProjectUri $(projectUri) -Tags $(tags)'
     - task: CopyFiles@2
       displayName: Adding LICENSE to module
       inputs:
