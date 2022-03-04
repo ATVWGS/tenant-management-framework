@@ -13,7 +13,7 @@
 	{
 		foreach ($item in $Text) {
 			foreach ($match in $mappingRegex.Matches($item)) {
-				$replaceValue = $script:desiredConfiguration["stringMappings"] | ? {$_.name -eq $match.Groups[1].Value}
+				$replaceValue = $script:desiredConfiguration["stringMappings"] | Where-Object {$_.name -eq $match.Groups[1].Value}
 				if ($replaceValue) {
 					$item = $item -replace $match.Value, $replaceValue.replace
 				}

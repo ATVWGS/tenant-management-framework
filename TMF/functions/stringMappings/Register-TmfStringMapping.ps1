@@ -22,7 +22,7 @@
 		}
 
 		if ($script:desiredConfiguration[$resourceName].name -contains $name) {			
-			$alreadyLoaded = $script:desiredConfiguration[$resourceName] | ? {$_.name -eq $name}
+			$alreadyLoaded = $script:desiredConfiguration[$resourceName] | Where-Object {$_.name -eq $name}
 		}
 	}
 	process

@@ -1,11 +1,11 @@
-function Invoke-TmfAdministrativeUnits
+function Invoke-TmfAdministrativeUnit
 {
 	[CmdletBinding()]
 	Param (
+        [string[]] $SpecificResources,
 		[System.Management.Automation.PSCmdlet]
 		$Cmdlet = $PSCmdlet
 	)
-		
 	
 	begin
 	{
@@ -20,7 +20,12 @@ function Invoke-TmfAdministrativeUnits
     process
     {
         if(Test-PSFFunctionInterrupt) {return}
-        $testResults = Test-TmfAdministrativeUnits -Cmdlet $Cmdlet
+        if ($SpecificResources) {
+        	$testResults = Test-TmfAdministrativeUnit -SpecificResources $SpecificResources -Cmdlet $Cmdlet
+		}
+		else {
+			$testResults = Test-TmfAdministrativeUnit -Cmdlet $Cmdlet
+		}
 
         foreach ($result in $testResults) {
             Beautify-TmfTestResult -TestResult $result -FunctionName $MyInvocation.MyCommand
@@ -199,5 +204,8 @@ function Invoke-TmfAdministrativeUnits
             Write-PSFMessage -Level Host -String "TMF.Invoke.ActionCompleted" -StringValues $result.Tenant, $result.ResourceType, $result.ResourceName, (Get-ActionColor -Action $result.ActionType), $result.ActionType
         }
     }
-    end {}
+    end
+	{
+		Load-TmfConfiguration -Cmdlet $Cmdlet
+	}
 }

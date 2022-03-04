@@ -89,6 +89,6 @@ function Invoke-TmfAccessPackageResource
 	}
 	end
 	{
-		
+		Load-TmfConfiguration -Cmdlet $Cmdlet
 	}
 }

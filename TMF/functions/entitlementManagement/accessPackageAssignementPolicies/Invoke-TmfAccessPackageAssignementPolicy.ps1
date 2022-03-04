@@ -124,6 +124,6 @@ function Invoke-TmfAccessPackageAssignementPolicy
 	}
 	end
 	{
-		
+		Load-TmfConfiguration -Cmdlet $Cmdlet
 	}
 }

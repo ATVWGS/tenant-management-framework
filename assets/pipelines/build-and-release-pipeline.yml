@@ -1,0 +1,179 @@
+trigger:
+  branches:
+    include:
+      - main
+      - prepare-release/*
+  paths:
+    include:
+      - TMF
+
+variables:
+  major: 1
+  minor: 3
+  patch: $(Build.BuildID)
+  moduleName: 'TMF'
+  releaseFeed: 'vwgs-azdevops-release'
+  buildVer: $(major).$(minor).$(Build.BuildID)
+  ${{ if ne(variables['Build.SourceBranchName'], 'main') }}:
+    prerelease: preview
+    nugetVer: $(buildVer)-$(prerelease)
+    zipVer: $(buildVer)-$(prerelease)
+  ${{ else }}:
+    nugetVer: $(buildVer)
+    zipVer: $(buildVer)
+
+name: Build TMF $(major).$(minor).$(Build.BuildID) $(prerelease)
+
+pool:
+  vmImage: "ubuntu-latest"
+
+stages:
+- stage: build
+  jobs:
+  - job: build
+    steps:
+    - task: PowerShell@2
+      displayName: Updating module manifest
+      inputs:
+        filePath: 'build/build.ps1'
+        arguments: '-ModuleName $(moduleName) -BuildVersion $(buildVer) -LicenseUri $(licenseUri) -ProjectUri $(projectUri) -Tags $(tags) -Prerelease $(prerelease)'
+    - task: CopyFiles@2
+      displayName: Adding LICENSE to module
+      inputs:
+        SourceFolder: '$(System.DefaultWorkingDirectory)'
+        Contents: 'LICENSE'
+        TargetFolder: '$(System.DefaultWorkingDirectory)/$(moduleName)'
+    - task: ArchiveFiles@2
+      displayName: Archiving module directory
+      inputs:
+        rootFolderOrFile: '$(System.DefaultWorkingDirectory)/$(moduleName)'
+        includeRootFolder: false
+        archiveType: 'zip'
+        archiveFile: '$(Build.ArtifactStagingDirectory)/zip/$(moduleName).$(zipVer).zip'
+        replaceExistingArchive: true
+    - task: PublishBuildArtifacts@1
+      inputs:
+        PathtoPublish: '$(Build.ArtifactStagingDirectory)/zip'
+        ArtifactName: 'zip'
+        publishLocation: 'Container'
+    - task: NuGetCommand@2
+      displayName: Building NuGet package
+      inputs:
+        command: 'pack'
+        packagesToPack: '$(System.DefaultWorkingDirectory)/$(moduleName)/$(moduleName).nuspec'
+        versioningScheme: byEnvVar
+        versionEnvVar: nugetVer
+        buildProperties: 'VERSIONHERE=$(nugetVer)'
+        packDestination: '$(Build.ArtifactStagingDirectory)/nuget'
+    - task: PublishBuildArtifacts@1
+      inputs:
+        PathtoPublish: '$(Build.ArtifactStagingDirectory)/nuget'
+        ArtifactName: 'nuget'
+        publishLocation: 'Container'
+- stage: run_tests
+  jobs:
+  - job: general_tests
+    steps:
+      - task: DownloadPipelineArtifact@2
+        inputs:
+          buildType: 'current'
+          artifactName: 'zip'
+          itemPattern: '**'
+          targetPath: '$(Pipeline.Workspace)'
+      - task: Cache@2
+        displayName: Restore required Powershell modules
+        inputs:
+          key: powershell-modules
+          path: C:\Users\VssAdministrator\Documents\WindowsPowerShell\Modules
+          cacheHitVar: MODULES_RESTORED
+      - task: PowerShell@2
+        displayName: Install dependencies
+        inputs:
+          targetType: inline
+          script: |
+            Install-Module -Name "Microsoft.Graph" -Force -Repository PSGallery -Scope CurrentUser
+            Install-Module -Name PSFramework -Force -Repository PSGallery -Scope CurrentUser
+            Install-Module -Name Pester -Force -SkipPublisherCheck -RequiredVersion "5.3.1" -Scope CurrentUser
+        condition: ne(variables.MODULES_RESTORED, 'true')
+      - task: PowerShell@2
+        displayName: Invoke Pester tests
+        continueOnError: true
+        inputs:         
+          filePath: 'tests/test.ps1'
+          arguments: '-SkipDependencyDownload -ArtifactPath $(Pipeline.Workspace) -OutPath "$(Pipeline.Workspace)/tests/results" -TestsToRun "General"'
+          workingDirectory: 'tests/'
+      - task: PublishTestResults@2
+        inputs:
+          testResultsFormat: 'NUnit'
+          testResultsFiles: '**/*.xml'
+          searchFolder: '$(Pipeline.Workspace)/tests/results'
+          failTaskOnFailedTests: true
+  - job: module_specific_tests
+    steps:
+      - task: DownloadPipelineArtifact@2
+        inputs:
+          buildType: 'current'
+          artifactName: 'zip'
+          itemPattern: '**'
+          targetPath: '$(Pipeline.Workspace)'
+      - task: Cache@2
+        displayName: Restore required Powershell modules
+        inputs:
+          key: powershell-modules
+          path: C:\Program Files\WindowsPowerShell\Modules\
+          cacheHitVar: MODULES_RESTORED
+      - task: PowerShell@2
+        displayName: Install dependencies
+        inputs:
+          targetType: inline
+          script: |
+            Install-Module -Name "Microsoft.Graph" -Force -Repository PSGallery
+            Install-Module -Name PSFramework -Force -Repository PSGallery
+            Install-Module -Name Pester -Force -SkipPublisherCheck -RequiredVersion "5.3.1"
+        condition: ne(variables.MODULES_RESTORED, 'true')
+      - task: PowerShell@2
+        displayName: Invoke Pester tests
+        continueOnError: true
+        inputs:         
+          filePath: 'tests/test.ps1'
+          arguments: '-SkipDependencyDownload -ArtifactPath $(Pipeline.Workspace) -OutPath "$(Pipeline.Workspace)/tests/results" -TenantId $(testsTenantId) -TenantClientSecret $(testsClientSecret) -TenantClientId $(testsClientId) -TestsToRun "Module"'
+          workingDirectory: 'tests/'
+      - task: PublishTestResults@2
+        inputs:
+          testResultsFormat: 'NUnit'
+          testResultsFiles: '**/*.xml'
+          searchFolder: '$(Pipeline.Workspace)/tests/results'
+          failTaskOnFailedTests: true
+- stage: publish_gallery
+  jobs:
+  - job: publish
+    steps:
+      - task: DownloadPipelineArtifact@2
+        inputs:
+          buildType: 'current'
+          artifactName: 'zip'
+          itemPattern: '**'
+          targetPath: '$(Pipeline.Workspace)'
+      - task: PowerShell@2
+        displayName: Publishing module to Powershell Gallery
+        inputs:
+          filePath: 'build/publish.ps1'
+          arguments: '-ModuleName $(moduleName) -ArtifactPath $(Pipeline.Workspace) -ApiKey $(apiKey)'
+- stage: publish_internal_feed
+  jobs:
+  - job: publish
+    steps:
+      - task: DownloadPipelineArtifact@2
+        inputs:
+          buildType: 'current'
+          artifactName: 'nuget'
+          itemPattern: '**'
+          targetPath: '$(Pipeline.Workspace)'
+      - task: NuGetCommand@2
+        displayName: Publishing module to internal NuGet feed
+        inputs:
+          command: 'push'
+          packagesToPush: '$(Pipeline.Workspace)/**/*.nupkg'
+          nuGetFeedType: 'internal'
+          publishVstsFeed: 'Azure Team VWGS/vwgs-azdevops-release'
+          allowPackageConflicts: true

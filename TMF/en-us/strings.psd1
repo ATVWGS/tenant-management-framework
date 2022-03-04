@@ -10,7 +10,7 @@
     'TMF.TestResult.BeautifySimple' = '[Tenant: <c="gray">{0}</c>][{2} Resource: <c="gray">{1}</c>] Required Action (<c="{4}">{3}</c>)'
     'TMF.TestResult.BeautifyPropertyChange' = ' > [<c="gray">{1}</c>][Property: <c="green">(</c><c="gray">{3}</c><c="green">)</c>] Action: (<c="yellow">{4}</c>) Value: (<c="gray">{5}</c>)'    
     'TMF.NoDefinitions' = 'No <c="gray">{0}</c> definitions are loaded. There is nothing to do.'
-    'TMF.CannotResolveResource' = 'Cannot resolve {0} resource'
+    'TMF.CannotResolveResource' = 'Cannot resolve {0} resource. Searched in the current tenant and in the loaded desired configuration.'
     'TMF.UserCanceled' = 'User canceled the operation.'
     'TMF.Error.QueryWithFilterFailed' = 'Query with filter {0} failed.'
 

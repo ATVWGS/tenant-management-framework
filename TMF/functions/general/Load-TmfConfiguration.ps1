@@ -11,12 +11,14 @@
 	#>
 	[CmdletBinding()]
 	Param (
-		[switch] $ReturnDesiredConfiguration
+		[switch] $ReturnDesiredConfiguration,
+		[System.Management.Automation.PSCmdlet]
+		$Cmdlet = $PSCmdlet
 	)
 	
 	begin
 	{
-		function Register-Resources {
+		function Register-Resource {
 			Param (
 				[object[]] $Resources,
 				[string] $ResourceType
@@ -44,7 +46,7 @@
 			Get-ChildItem -Path $stringMappingsDirectory -File -Filter "*.json" | ForEach-Object {
 				Write-Progress -Activity "Loading string mappings from $($_.Name)"
 				$content = Get-Content $_.FullName -Encoding UTF8 | Out-String | ConvertFrom-Json				
-				Register-Resources -Resources $content -ResourceType "stringMappings"				
+				Register-Resource -Resources $content -ResourceType "stringMappings"				
 			}
 		}
 
@@ -71,7 +73,7 @@
 					Write-Progress -Id 1 -Activity "Loading $resourceTypeName" -CurrentOperation "Reading file $($_.Name)" -PercentComplete (($counter / $definitionFiles.count) * 100)
 					$content = Get-Content $_.FullName -Encoding UTF8 | Out-String
 					$content = Assert-TemplateFunctions -InputTemplate $content | ConvertFrom-Json					
-					Register-Resources -Id 1 -Resources $content -ResourceType $resourceTypeName					
+					Register-Resource -Id 1 -Resources $content -ResourceType $resourceTypeName					
 					$counter++
 				}
 				Write-Progress -Id 1 -Activity "Loading $resourceTypeName" -Completed

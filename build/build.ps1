@@ -1,25 +1,56 @@
 <#
     .SYNOPSIS
         A simple build script for the Tenant Management Framework
-    .PARAMETER buildVersion
+    .PARAMETER BuildVersion
         Provide a version in the format "{MAJOR}.{MINOR}.{PATCH}"
         Example: 1.0.1
-    .PARAMETER moduleName
+    .PARAMETER ModuleName
         Provide the name of the Powershell Module.
         Example: TMF
-    .PARAMETER modulePath
+    .PARAMETER ModulePath
         Path to the module directory.
 #>
 
 Param(
-    [string] $buildVersion = $env:BUILDVER,
-    [string] $moduleName = "TMF",
-    [string] $modulePath = "$PSScriptRoot\..\TMF"
+    [string] $BuildVersion,
+    [string] $ModuleName,
+    [string] $ModulePath = "$PSScriptRoot\..\$ModuleName",
+    [string] $LicenseUri,
+    [string] $ProjectUri,
+    [string[]] $Tags,
+    [AllowNull()]
+    [string] $Prerelease
 )
 
-#region Update module manifest
-$manifestPath = Join-Path -Path $modulePath -ChildPath "$moduleName.psd1"
-$manifestContent = Get-Content -Path $manifestPath -Raw
-$manifestContent = $manifestContent -replace "ModuleVersion = '[\d]+.[\d]+.[\d]+'", ("ModuleVersion = '{0}'" -f $buildVersion)
-$manifestContent | Set-Content -Path $manifestPath
-#endregion
+begin {
+    $manifestPath = Join-Path -Path $ModulePath -ChildPath "$ModuleName.psd1"
+    $manifest = Import-LocalizedData -BaseDirectory $ModulePath -FileName "$ModuleName.psd1"
+
+    #region Install dependencies
+    foreach ($module in $manifest.RequiredModules) {
+        switch ($module.GetType().Name) {
+            "String" { Install-Module -Name $module -Scope CurrentUser -Force -Repository PSGallery }
+            "Hashtable" { Install-Module -Name $module["ModuleName"] -RequiredVersion $module["RequiredVersion"] -Scope CurrentUser -Force -Repository PSGallery }
+        }
+    }
+    #endregion
+
+    $moduleParams = @{
+        ModuleVersion = $BuildVersion
+        Path = $manifestPath
+        LicenseUri = $LicenseUri
+        ProjectUri = $ProjectUri
+        Tags = $Tags
+    }
+    if ($Prerelease) {
+        $moduleParams["Prerelease"] = $Prerelease
+    }
+}
+process {
+    Write-Host "Updating module manifest ($manifestPath) with the following values: $($moduleParams | ConvertTo-Json)"
+    Update-ModuleManifest @moduleParams
+}
+
+
+
+

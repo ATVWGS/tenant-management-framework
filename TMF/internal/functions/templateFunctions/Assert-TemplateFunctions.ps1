@@ -1,4 +1,4 @@
-function Assert-TemplateFunctions
+﻿function Assert-TemplateFunctions
 {
 	[CmdletBinding()]
 	Param (

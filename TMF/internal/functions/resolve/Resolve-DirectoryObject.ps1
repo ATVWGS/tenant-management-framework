@@ -16,14 +16,14 @@
 	{			
 		try {
 			if ($InputReference -match $script:guidRegex) {
-				$directoryObject = Get-MgDirectoryObject -DirectoryObjectId $InputReference
+				$directoryObject = (Get-MgDirectoryObject -DirectoryObjectId $InputReference).Id
 			}
-			
+
 			if (-Not $directoryObject -and -Not $DontFailIfNotExisting) { throw "Cannot find directoryObject $InputReference" } 
 			elseif (-Not $directoryObject -and $DontFailIfNotExisting) { return }
 
 			if ($directoryObject.count -gt 1) { throw "Got multiple directoryObject for $InputReference" }
-			return $directoryObject.Id
+			return $directoryObject
 		}
 		catch {
 			Write-PSFMessage -Level Warning -String 'TMF.CannotResolveResource' -StringValues "DirectoryObject" -Tag 'failed' -ErrorRecord $_

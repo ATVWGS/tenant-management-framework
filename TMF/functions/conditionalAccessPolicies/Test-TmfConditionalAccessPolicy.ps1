@@ -9,6 +9,7 @@
 	#>
 	[CmdletBinding()]
 	Param (
+		[string[]] $SpecificResources,
 		[System.Management.Automation.PSCmdlet]
 		$Cmdlet = $PSCmdlet
 	)
@@ -17,21 +18,48 @@
 	{
 		Test-GraphConnection -Cmdlet $Cmdlet
 		$resourceName = "conditionalAccessPolicies"
-		$tenant = Get-MgOrganization -Property displayName, Id
-		
-		$resolveFunctionMapping = @{
-			"Users" = (Get-Command Resolve-User)
-			"Groups" = (Get-Command Resolve-Group)
-			"Applications" = (Get-Command Resolve-Application)
-			"Roles" = (Get-Command Resolve-DirectoryRoleTemplate)
-			"Locations" = (Get-Command Resolve-NamedLocation)
-			"Platforms" = "DirectCompare"
-		}
-		$conditionPropertyRegex = [regex]"^(include|exclude)($($resolveFunctionMapping.Keys -join "|"))$"
+		$tenant = Get-MgOrganization -Property displayName, Id		
 	}
 	process
 	{
-		foreach ($definition in $script:desiredConfiguration[$resourceName]) {
+		$definitions = @()
+		if ($SpecificResources) {
+			foreach ($specificResource in $SpecificResources) {
+
+				if ($specificResource -match "\*") {
+					if ($script:desiredConfiguration[$resourceName] | Where-Object {$_.displayName -like $specificResource}) {
+						$definitions += $script:desiredConfiguration[$resourceName] | Where-Object {$_.displayName -like $specificResource}
+					}
+					else {
+						Write-PSFMessage -Level Warning -String 'TMF.Error.SpecificResourceNotExists' -StringValues $filter -Tag 'failed'
+						$exception = New-Object System.Data.DataException("$($specificResource) not exists in Desired Configuration for $($resourceName)!")
+						$errorID = "SpecificResourceNotExists"
+						$category = [System.Management.Automation.ErrorCategory]::NotSpecified
+						$recordObject = New-Object System.Management.Automation.ErrorRecord($exception, $errorID, $category, $Cmdlet)
+						$cmdlet.ThrowTerminatingError($recordObject)
+					}
+				}
+				else {
+					if ($script:desiredConfiguration[$resourceName] | Where-Object {$_.displayName -eq $specificResource}) {
+						$definitions += $script:desiredConfiguration[$resourceName] | Where-Object {$_.displayName -eq $specificResource}
+					}
+					else {
+						Write-PSFMessage -Level Warning -String 'TMF.Error.SpecificResourceNotExists' -StringValues $filter -Tag 'failed'
+						$exception = New-Object System.Data.DataException("$($specificResource) not exists in Desired Configuration for $($resourceName)!")
+						$errorID = "SpecificResourceNotExists"
+						$category = [System.Management.Automation.ErrorCategory]::NotSpecified
+						$recordObject = New-Object System.Management.Automation.ErrorRecord($exception, $errorID, $category, $Cmdlet)
+						$cmdlet.ThrowTerminatingError($recordObject)
+					}
+				}
+			}
+			$definitions = $definitions | Sort-Object -Property displayName -Unique
+		}
+		else {
+			$definitions = $script:desiredConfiguration[$resourceName]
+		}
+
+		foreach ($definition in $definitions) {
 			foreach ($property in $definition.Properties()) {
 				if ($definition.$property.GetType().Name -eq "String") {
 					$definition.$property = Resolve-String -Text $definition.$property
@@ -85,37 +113,7 @@
 								Actions = $null
 							}
 
-							$conditionPropertyMatch = $conditionPropertyRegex.Match($property)
-							$propertyTargetResourceType = $conditionPropertyMatch.Groups[2].Value
-
-							if ($propertyTargetResourceType -in @("Users", "Groups", "Roles")) {
-								$change.Actions = Compare-ResourceList -ReferenceList $resource.conditions.users.$property `
-														-DifferenceList $($definition.$property | ForEach-Object {& $resolveFunctionMapping[$propertyTargetResourceType] -InputReference $_ -Cmdlet $Cmdlet}) `
-														-Cmdlet $PSCmdlet -ReturnSetAction
-							}
-							elseif ($propertyTargetResourceType -in $resolveFunctionMapping.Keys) {
-								if ($resolveFunctionMapping[$propertyTargetResourceType] -eq "DirectCompare") {
-									if ($resource.conditions.$($propertyTargetResourceType.toLower()).$property) {
-										if (Compare-Object -ReferenceObject $resource.conditions.$($propertyTargetResourceType.toLower()).$property -DifferenceObject $definition.$property) {
-											$change.Actions = @{"Set" = $definition.$property}
-										}
-									}
-									else {
-										$change.Actions = @{"Set" = $definition.$property}
-									}									
-								}
-								else {
-									$change.Actions = Compare-ResourceList -ReferenceList $resource.conditions.$($propertyTargetResourceType.toLower()).$property `
-														-DifferenceList $($definition.$property | ForEach-Object {& $resolveFunctionMapping[$propertyTargetResourceType] -InputReference $_ -Cmdlet $Cmdlet}) `
-														-Cmdlet $PSCmdlet -ReturnSetAction
-								}								
-							}
-							elseif ($property -in @("clientAppTypes", "userRiskLevels", "signInRiskLevels")) {
-								if (Compare-Object -ReferenceObject $resource.conditions.$property -DifferenceObject $definition.$property) {
-									$change.Actions = @{"Set" = $definition.$property}
-								}
-							}
-							elseif ($property -in @("sessionControls", "grantControls")) {
+							if ($property -in @("sessionControls", "grantControls", "conditions")) {
 								if ($resource.$property) {
 									if (-Not (Compare-Hashtable -ReferenceObject $definition.$property -DifferenceObject ($resource.$property | ConvertTo-PSFHashTable))) {
 										$change.Actions = @{"Set" = $definition.$property}
@@ -123,12 +121,7 @@
 								}
 								else {
 									$change.Actions = @{"Set" = $definition.$property}
-								}								
-							}
-							elseif ($property -eq "termsOfUse") {
-								$change.Actions = Compare-ResourceList -ReferenceList $resource.grantControls.$property `
-									-DifferenceList $($definition.$property | ForEach-Object {Resolve-Agreement -InputReference $_ -Cmdlet $Cmdlet}) `
-									-Cmdlet $PSCmdlet -ReturnSetAction
+								}
 							}
 							else {
 								if ($definition.$property -ne $resource.$property) {
