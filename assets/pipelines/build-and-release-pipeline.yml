@@ -22,9 +22,6 @@ variables:
     nugetVer: $(buildVer)
     zipVer: $(buildVer)
 
-${{ if ne(variables['prerelease'], null) }}:
-name: Build TMF $(major).$(minor).$(Build.BuildID) $(prerelease)
-${{ else }}:
 name: Build TMF $(major).$(minor).$(Build.BuildID)
 
 pool:
