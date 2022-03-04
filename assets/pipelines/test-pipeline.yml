@@ -11,7 +11,6 @@ pool:
 stages:
 - stage: run_tests
   jobs:
-  - job:
   - job: general_tests
     steps:
       - task: Cache@2
