@@ -134,10 +134,12 @@ Describe 'Tmf.General.Invoke.Deletion' {
             $_.Value | ConvertTo-Json -Depth 10 | Out-File -FilePath $targetFilePath -Encoding utf8 -Force
         }
         #endregion
+
+        Start-Sleep -Seconds 60 # Give Microsoft Graph some time to process our requests
     }
 
-    BeforeEach {
-        Start-Sleep -Seconds 10 # Ensure Graph has enough time to process our requests
+    It "should successfully reload the TMF configuration" {
+        { Load-TmfConfiguration -ReturnDesiredConfiguration | ConvertTo-Json -Depth 10 } | Should -Not -Throw
     }
 
     It "should successfully test the TMF configuration" {
@@ -183,5 +185,5 @@ Describe 'Tmf.General.Config.Cleanup' {
 }
 
 AfterAll {
-    Remove-Item -Path $global:testConfigPath -Recurse -Force
+    # Remove-Item -Path $global:testConfigPath -Recurse -Force
 }
