@@ -18,9 +18,11 @@ pool:
 stages:
 - stage: run_tests
   jobs:
+  - job:
   - job: general_tests
     steps:
       - task: Cache@2
+        displayName: Restore required Powershell modules
         inputs:
           key: powershell-modules
           path: C:\Users\VssAdministrator\Documents\WindowsPowerShell\Modules
@@ -50,6 +52,7 @@ stages:
   - job: module_specific_tests
     steps:
       - task: Cache@2
+        displayName: Restore required Powershell modules
         inputs:
           key: powershell-modules
           path: C:\Program Files\WindowsPowerShell\Modules\
