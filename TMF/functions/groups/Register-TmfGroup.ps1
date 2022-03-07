@@ -71,7 +71,7 @@ function Register-TmfGroup
 			Add-Member -InputObject $object -MemberType NoteProperty -Name "oldNames" -Value @($oldNames | ForEach-Object {Resolve-String $_})
 		}
 
-		"owners", "members", "membershipRule", "isAssignableToRole" | ForEach-Object {
+		"owners", "members", "membershipRule", "isAssignableToRole", "hideFromAddressLists", "hideFromOutlookClients", "resourceBehaviorOptions" | ForEach-Object {
 			if ($PSBoundParameters.ContainsKey($_)) {			
 				Add-Member -InputObject $object -MemberType NoteProperty -Name $_ -Value $PSBoundParameters[$_]
 			}
