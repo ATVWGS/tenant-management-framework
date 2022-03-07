@@ -145,6 +145,7 @@
 										}
 									}									
 								}
+								"resourceBehaviorOptions" {<# Is only used while creation of a group. #>}
 								default {
 									if ($definition.$property -ne $resource.$property) {
 										$change.Actions = @{"Set" = $definition.$property}

@@ -5,20 +5,18 @@ function Register-TmfGroup
 		[Parameter(Mandatory = $true)]
 		[string] $displayName,
 		[string[]] $oldNames,
-		[string] $description = "Group has been created with Tenant Management Framework",
+		[string] $description = "Group has been created with Tenant Management Framework",		
 		[string[]] $groupTypes = @(),
 		[bool] $securityEnabled = $true,
 		[bool] $mailEnabled = $false,
-		[bool] $isAssignableToRole,
-		[Parameter(Mandatory = $true)]
+		[bool] $isAssignableToRole,		
 		[string] $mailNickname = $displayName.Replace(" ",""),
 		[Parameter(Mandatory = $true, ParameterSetName = "DynamicMembership")]
 		[string] $membershipRule,		
 		[Parameter(ParameterSetName = "Default")]
 		[string[]] $members,
-		[string[]] $owners,
-		[ValidateSet("AllowOnlyMembersToPost", "HideGroupInOutlook", "SubscribeNewGroupMembers", "WelcomeEmailDisabled")]
-		[ValidateScript({$groupTypes -contains "Unified"})]
+		[string[]] $owners,		
+		[ValidateSet("AllowOnlyMembersToPost", "HideGroupInOutlook", "SubscribeNewGroupMembers", "WelcomeEmailDisabled")]		
 		[string[]] $resourceBehaviorOptions,
 		[bool] $hideFromAddressLists,
 		[bool] $hideFromOutlookClients,
@@ -40,17 +38,22 @@ function Register-TmfGroup
 			$alreadyLoaded = $script:desiredConfiguration[$resourceName] | Where-Object {$_.displayName -eq $displayName}
 		}
 
-		if (
-			($groupTypes -contains "DynamicMembership" -and -not $PSBoundParameters.ContainsKey('membershipRule')) -or
-			($groupTypes -notcontains "DynamicMembership" -and $PSBoundParameters.ContainsKey('membershipRule'))
-		) {
-			Write-PSFMessage -Level Error -String 'TMF.Register.PropertySetNotPossible' -StringValues $displayName, "Group" -FunctionName $Cmdlet.CommandRuntime
-			$exception = New-Object System.Data.DataException("If you want to define a dynamic group, you need to provide a membershipRule and add the group type DynamicMembership in your configuration.")
-			$errorID = 'PropertySetNotPossible'
-			$category = [System.Management.Automation.ErrorCategory]::NotSpecified
-			$recordObject = New-Object System.Management.Automation.ErrorRecord($exception, $errorID, $category, $Cmdlet)
-			$cmdlet.ThrowTerminatingError($recordObject)
+		try {
+			if ($groupTypes -notcontains "Unified" -and $PSBoundParameters.ContainsKey('resourceBehaviorOptions')) {				
+				throw "You can only define resourceBehaviorOptions for Unified groups."
+			}
+	
+			if (
+				($groupTypes -contains "DynamicMembership" -and -not $PSBoundParameters.ContainsKey('membershipRule')) -or
+				($groupTypes -notcontains "DynamicMembership" -and $PSBoundParameters.ContainsKey('membershipRule'))
+			) {
+				throw "If you want to define a dynamic group, you need to provide a membershipRule and add the group type DynamicMembership in your configuration."
+			}
 		}
+		catch {
+			Write-PSFMessage -Level Error -String 'TMF.Register.PropertySetNotPossible' -StringValues $displayName, "Group" -FunctionName $Cmdlet.CommandRuntime
+			$Cmdlet.ThrowTerminatingError($_)
+		}		
 	}
 	process
 	{
