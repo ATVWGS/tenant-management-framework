@@ -17,6 +17,11 @@ function Register-TmfGroup
 		[Parameter(ParameterSetName = "Default")]
 		[string[]] $members,
 		[string[]] $owners,
+		[ValidateSet("AllowOnlyMembersToPost", "HideGroupInOutlook", "SubscribeNewGroupMembers", "WelcomeEmailDisabled")]
+		[ValidateScript({$groupTypes -contains "Unified"})]
+		[string[]] $resourceBehaviorOptions,
+		[bool] $hideFromAddressLists,
+		[bool] $hideFromOutlookClients,
 		[bool] $present = $true,
 		[string] $sourceConfig = "<Custom>",
 
