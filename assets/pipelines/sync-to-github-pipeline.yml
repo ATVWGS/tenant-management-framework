@@ -7,5 +7,5 @@ pool:
 
 steps:
 - bash: |
-    git push --force --prune https://$(githubPAT)@github.com/ATVWGS/tenant-management-framework.git $(Build.SourceBranchName)
+    git push --force --prune https://$(githubPAT)@github.com/ATVWGS/tenant-management-framework.git refs/heads/$(Build.SourceBranchName)
   displayName: 'Push to github'
