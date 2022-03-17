@@ -7,5 +7,7 @@ pool:
 
 steps:
 - bash: |
-    git push --force --prune https://$(githubPAT)@github.com/ATVWGS/tenant-management-framework.git refs/heads/$(Build.SourceBranchName)
+    git remote add --mirror=fetch target https://$(githubPAT)@github.com/ATVWGS/tenant-management-framework.git
+    git fetch origin
+    git push target $(Build.SourceBranchName)
   displayName: 'Push to github'
