@@ -1,0 +1,11 @@
+trigger:
+- main
+- prepare-release/*
+
+pool:
+  vmImage: ubuntu-latest
+
+steps:
+- bash: |
+    git push --force --prune https://$(githubPAT)@github.com/ATVWGS/tenant-management-framework.git $(Build.SourceBranchName)
+  displayName: 'Push to github'
