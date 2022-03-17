@@ -24,7 +24,7 @@
 	PowerShellVersion = '5.1'
 	
 	# Modules that must be imported into the global environment prior to importing this module
-	RequiredModules = @(@{ ModuleName='PSFramework'; ModuleVersion='1.5.171' }, 'Microsoft.Graph')
+	RequiredModules = @(@{ ModuleName='PSFramework'; ModuleVersion='1.5.171' }, 'Microsoft.Graph.Authentication', 'Microsoft.Graph.Identity.DirectoryManagement', 'Microsoft.Graph.Identity.Governance')
 	
 	# Assemblies that must be loaded prior to importing this module
 	# RequiredAssemblies = @('bin\TMF.dll')
