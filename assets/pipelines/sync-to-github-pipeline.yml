@@ -1,0 +1,12 @@
+trigger:
+- main
+- prepare-release/*
+
+pool:
+  vmImage: ubuntu-latest
+
+steps:
+- bash: |
+    git remote add --mirror=fetch target https://$(githubPAT)@github.com/ATVWGS/tenant-management-framework.git
+    git push target HEAD:$(Build.SourceBranch)
+  displayName: 'Push to github'

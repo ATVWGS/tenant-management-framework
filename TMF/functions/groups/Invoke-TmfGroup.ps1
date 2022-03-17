@@ -39,7 +39,7 @@
 					}
 
 					try {
-						@("mailNickname", "groupTypes", "mailEnabled", "isAssignableToRole", "securityEnabled") | ForEach-Object {
+						@("mailNickname", "groupTypes", "mailEnabled", "isAssignableToRole", "securityEnabled", "hideFromAddressLists", "hideFromOutlookClients", "resourceBehaviorOptions") | ForEach-Object {
 							if ($result.DesiredConfiguration.Properties() -contains $_) {
 								$requestBody[$_] = $result.DesiredConfiguration.$_
 							}
