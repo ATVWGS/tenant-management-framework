@@ -180,3 +180,11 @@ stages:
           nuGetFeedType: 'internal'
           publishVstsFeed: 'Azure Team VWGS/vwgs-azdevops-release'
           allowPackageConflicts: true
+- stage: finish_pipeline
+  jobs:
+  - job: add_tag
+    steps:
+    - task: git-tag-on-release-task@9
+      displayName: "Add tag to git"
+      inputs:
+        staticTagName: "v$(major).$(minor).$(Build.BuildID)-${{ variables.prerelease }}"
