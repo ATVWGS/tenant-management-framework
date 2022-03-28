@@ -201,4 +201,9 @@ stages:
           $headers.Add("Content-Type", "application/json")
           $uri = "$(devOpsProjectUrl)/_apis/build/builds/$(Build.BuildId)/tags/$(gitTag)?api-version=6.0"
           Invoke-RestMethod -Uri $uri -Headers $headers -Method PUT
+    - script: |
+        git config --global user.email "AzureTeamVWGS@Volkswagen-Groupservices.dev.azure.com"
+        git config --global user.name "Azure Team VWGS Build Bot"
+        git tag -a $(gitTag) -m "Release $(gitTag)"
+        git push --tags origin HEAD:$(Build.SourceBranch)
         
