@@ -842,7 +842,7 @@ foreach ($policy in $policies) {
     }   
     #endregion
 }
-$policies | Select-Object -Property * -ExcludeProperty conditions | Out-File -FilePath "policies.json" -Encoding UTF8
+$policies | ConvertTo-Json -Depth 6 | Out-File -FilePath "policies.json"  -Encoding UTF8
 ```
 
 ### 2.8.3. Groups

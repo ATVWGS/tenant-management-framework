@@ -24,4 +24,25 @@ function Get-GraphAccessToken {
     }
 }
 
-Export-ModuleMember -Function "Get-GraphAccessToken" -Variable "uris"
+function Get-Definitions {
+    Param (
+        [Parameter(Mandatory = $true)]
+        $DataFilePath
+    )
+    begin {
+        $timestamp = Get-Date -UFormat "%Y%m%d"
+        $definitions = Import-PowerShellDataFile -Path $DataFilePath
+    }
+    process {
+        $definitions.GetEnumerator() | Foreach-Object {
+            $_.Value | Foreach-Object {
+                $_["displayName"] = $_["displayName"] -replace "{{ timestamp }}", $timestamp
+            }
+        }
+    }
+    end {
+        return $definitions
+    }
+}
+
+Export-ModuleMember -Function "Get-GraphAccessToken", "Get-Definitions" -Variable "uris"
