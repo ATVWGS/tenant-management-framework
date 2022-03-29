@@ -254,8 +254,8 @@ mailEnabled     : False
 mailNickname    : someGroupForMembers
 present         : True
 sourceConfig    : Example Configuration
-owners          : {group.owner@volkswagen.de}
-members         : {max.mustermann@volkswagen.de}
+owners          : {group.owner@example.org}
+members         : {max.mustermann@example.org}
 
 # Filtering is also possible with Where-Object
 (Get-TmfDesiredConfiguration)["groups"] | Where-Object {$_.displayName -eq "Some group"}
@@ -268,8 +268,8 @@ mailEnabled     : False
 mailNickname    : someGroupForMembers
 present         : True
 sourceConfig    : Example Configuration
-owners          : {group.owner@volkswagen.de}
-members         : {max.mustermann@volkswagen.de}
+owners          : {group.owner@example.org}
+members         : {max.mustermann@example.org}
 ```
 
 ### 2.5.3. Test-Tmf* - Test definitions against Graph
@@ -391,8 +391,8 @@ An example definition for a simple Azure AD security group with a predefined mem
     "securityEnabled": true,
     "mailEnabled": false,
     "mailNickname": "someGroupForMembers",
-    "members": ["max.mustermann@volkswagen.de"],
-    "owners": ["group.owner@volkswagen.de"],
+    "members": ["max.mustermann@example.org"],
+    "owners": ["group.owner@example.org"],
     "present": true
 }
 ```
@@ -406,7 +406,7 @@ An example policy definition that would affect all members of a group to accept 
 {
     "displayName" : "Require MFA and ToU for all members of Some group",
     "excludeGroups": ["Some group for CA"],
-    "excludeUsers": ["johannes.seitle@TENANT_NAME.onmicrosoft.com"],        
+    "excludeUsers": ["max.mustermann@TENANT_NAME.onmicrosoft.com"],        
     "includeApplications": ["All"],        
     "includeLocations": ["All"],
     "clientAppTypes": ["browser", "mobileAppsAndDesktopClients"],
@@ -546,7 +546,7 @@ Please check the [Access Package Catalogs example.md](./TMF/internal/data/config
                         "primaryApprovers":[
                             {
                                 "type":"singleUser",
-                                "reference":"johannes.seitle@tmacdev.onmicrosoft.com",
+                                "reference":"max.mustermann@tmacdev.onmicrosoft.com",
                                 "isBackup":false
                             }
                         ]
@@ -686,7 +686,7 @@ You can create mappings between strings and the values they should be replaced w
 ```json
 {
     "name": "GroupManagerName",
-    "replace": "group.manager@volkswagen.de"
+    "replace": "group.manager@example.org"
 }
 ```
 
@@ -709,8 +709,8 @@ To use the string mapping in a configuration file, you need to mention it by the
     "securityEnabled": true,
     "mailEnabled": false,
     "mailNickname": "someGroupForMembers",
-    "members": ["max.mustermann@volkswagen.de"],
-    "owners": ["group.owner@volkswagen.de"],
+    "members": ["max.mustermann@example.org"],
+    "owners": ["group.owner@example.org"],
     "present": true
 }
 ```
