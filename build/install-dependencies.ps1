@@ -49,7 +49,7 @@ process {
             }
         }
         if ($PSBoundParameters.ContainsKey("UsePrivatePackageFeed")) {
-            $installParameters["Credentials"] = $feedCredential
+            $installParameters["Credential"] = $feedCredential
         }
         Install-Module @installParameters
     }    
