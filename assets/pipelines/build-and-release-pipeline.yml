@@ -18,9 +18,11 @@ variables:
     prerelease: preview
     nugetVer: $(buildVer)-$(prerelease)
     zipVer: $(buildVer)-$(prerelease)
+    gitTag: v$(buildVer)-$(prerelease)
   ${{ else }}:
     nugetVer: $(buildVer)
     zipVer: $(buildVer)
+    gitTag: v$(buildVer)
 
 name: Build TMF $(major).$(minor).$(Build.BuildID) ${{ variables.prerelease }}
 
@@ -180,3 +182,28 @@ stages:
           nuGetFeedType: 'internal'
           publishVstsFeed: 'Azure Team VWGS/vwgs-azdevops-release'
           allowPackageConflicts: true
+- stage: finish_pipeline
+  jobs:
+  - job: add_tag
+    steps:
+    - checkout: self
+      persistCredentials: true
+    - task: PowerShell@2
+      displayName: 'Add Build Tag'
+      condition: succeeded()  # Only when all previous tasks have succeeded
+      env:
+        SYSTEM_ACCESSTOKEN: $(System.AccessToken)
+      inputs:
+        targetType: inline
+        script: |
+          $headers = New-Object "System.Collections.Generic.Dictionary[[String],[String]]"
+          $headers.Add("Authorization", "Bearer $env:SYSTEM_ACCESSTOKEN")
+          $headers.Add("Content-Type", "application/json")
+          $uri = "$(devOpsProjectUrl)/_apis/build/builds/$(Build.BuildId)/tags/$(gitTag)?api-version=6.0"
+          Invoke-RestMethod -Uri $uri -Headers $headers -Method PUT
+    - script: |
+        git config --global user.email "AzureTeamVWGS@Volkswagen-Groupservices.dev.azure.com"
+        git config --global user.name "Azure Team VWGS Build Bot"
+        git tag -a $(gitTag) -m "Release $(gitTag)"
+        git push --tags origin HEAD:$(Build.SourceBranch)
+        
