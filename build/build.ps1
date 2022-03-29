@@ -24,16 +24,6 @@ Param(
 
 begin {
     $manifestPath = Join-Path -Path $ModulePath -ChildPath "$ModuleName.psd1"
-    $manifest = Import-LocalizedData -BaseDirectory $ModulePath -FileName "$ModuleName.psd1"
-
-    #region Install dependencies
-    foreach ($module in $manifest.RequiredModules) {
-        switch ($module.GetType().Name) {
-            "String" { Install-Module -Name $module -Scope CurrentUser -Force -Repository PSGallery }
-            "Hashtable" { Install-Module -Name $module["ModuleName"] -RequiredVersion $module["RequiredVersion"] -Scope CurrentUser -Force -Repository PSGallery }
-        }
-    }
-    #endregion
 
     $moduleParams = @{
         ModuleVersion = $BuildVersion

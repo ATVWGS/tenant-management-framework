@@ -7,6 +7,8 @@ Param (
     [string] $AccessToken
 )
 
+Import-Module "$PSScriptRoot\..\helpers.psm1"
+
 if ($PSVersionTable.OS -match "Microsoft Windows") {
     $global:testConfigPath = "$env:TMP\test-config"
 }
@@ -15,52 +17,11 @@ else {
 }
 
 #region Some test resource definitions
-$timestamp = Get-Date -UFormat "%Y%m%d"
 $global:graphUris = @{
     "groups" = "https://graph.microsoft.com/beta/groups"
     "namedLocations" = "https://graph.microsoft.com/beta/identity/conditionalAccess/namedLocations/"
 }
-$global:definitions = @{
-    groups = @(
-        @{
-            "displayName" = "Test - $timestamp - Group for conditionalAccessPolicies"
-            "description" = "This is a security group"
-            "groupTypes" = @()
-            "securityEnabled" = $true
-            "members"= @()
-            "mailEnabled" = $false
-            "mailNickname" = "testGroupForConditionalAccessPolicies"
-            "present" = $true
-        }
-        @{
-            "displayName" = "Test - $timestamp - Group for conditionalAccessPolicies 2"
-            "description" = "This is a security group"
-            "groupTypes" = @()
-            "securityEnabled" = $true
-            "members"= @()
-            "mailEnabled" = $false
-            "mailNickname" = "testGroupForConditionalAccessPolicies2"
-            "present" = $true
-        }
-    )
-    namedLocations = @(
-        @{
-            "type" = "ipNamedLocation"
-            "displayName" = "Test - $timestamp - Trusted Named Location"
-            "isTrusted" = $true
-            "ipRanges" = @(
-                @{
-                    "@odata.type" = "#microsoft.graph.iPv4CidrRange"
-                    "cidrAddress" = "12.34.221.11/22"
-                },
-                @{
-                    "@odata.type" = "#microsoft.graph.iPv4CidrRange"
-                    "cidrAddress" = "12.34.221.12/22"
-                }
-            )
-        }
-    )
-}
+$global:definitions = Get-Definitions -DataFilePath "$PSScriptRoot\definitions\General.Definitions.psd1"
 #endregion
 
 Describe 'Tmf.General.Config.Creation' {
@@ -135,7 +96,7 @@ Describe 'Tmf.General.Invoke.Deletion' {
         }
         #endregion
 
-        Start-Sleep -Seconds 60 # Give Microsoft Graph some time to process our requests
+        Start-Sleep -Seconds 10 # Give Microsoft Graph some time to process our requests
     }
 
     It "should successfully reload the TMF configuration" {

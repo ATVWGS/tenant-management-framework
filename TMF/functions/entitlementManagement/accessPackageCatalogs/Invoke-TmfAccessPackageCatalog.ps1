@@ -24,10 +24,10 @@ function Invoke-TmfAccessPackageCatalog
 	{
 		if (Test-PSFFunctionInterrupt) { return }
 		if ($SpecificResources) {
-        	$testResults = Test-TmfAccessPackage -SpecificResources $SpecificResources -Cmdlet $Cmdlet
+        	$testResults = Test-TmfAccessPackageCatalog -SpecificResources $SpecificResources -Cmdlet $Cmdlet
 		}
 		else {
-			$testResults = Test-TmfAccessPackage -Cmdlet $Cmdlet
+			$testResults = Test-TmfAccessPackageCatalog -Cmdlet $Cmdlet
 		}
 
 		foreach ($result in $testResults) {
