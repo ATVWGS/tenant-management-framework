@@ -36,7 +36,7 @@ stages:
     - task: Cache@2
       displayName: Restore required Powershell modules
       inputs:
-        key: powershell-modules | 
+        key: powershell-modules
         path: C:\Users\VssAdministrator\Documents\WindowsPowerShell\Modules
         cacheHitVar: MODULES_RESTORED
     - task: PowerShell@2
