@@ -1,6 +1,11 @@
 trigger:
-- main
-- prepare-release/*
+ branches:
+   include:     
+   - main
+   - prepare-release/*
+ tags:
+  include:
+    - v*
 
 pool:
   vmImage: ubuntu-latest
