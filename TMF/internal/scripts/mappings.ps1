@@ -68,9 +68,9 @@ $script:supportedResources = @{
         "parentType" = "entitlementManagement"
         "weight" = 56
     }
-    "accessPackageAssignementPolicies" = @{     
-        "testFunction" = (Get-Command Test-TmfAccessPackageAssignementPolicy)
-        "invokeFunction" = (Get-Command Invoke-TmfAccessPackageAssignementPolicy)
+    "accessPackageAssignmentPolicies" = @{     
+        "testFunction" = (Get-Command Test-TmfAccessPackageAssignmentPolicy)
+        "invokeFunction" = (Get-Command Invoke-TmfAccessPackageAssignmentPolicy)
         "validateFunctions" = @{
             "accessReviewSettings" = (Get-Command Validate-AssignmentReviewSettings)
             "requestApprovalSettings" = (Get-Command Validate-RequestApprovalSettings)
