@@ -1,4 +1,4 @@
-function Test-TmfAccessPackageAssignementPolicy
+function Test-TmfAccessPackageAssignmentPolicy
 {
 	<#
 		.SYNOPSIS
@@ -16,7 +16,7 @@ function Test-TmfAccessPackageAssignementPolicy
 	begin
 	{
 		Test-GraphConnection -Cmdlet $Cmdlet
-		$resourceName = "accessPackageAssignementPolicies"
+		$resourceName = "accessPackageAssignmentPolicies"
 		$tenant = Get-MgOrganization -Property displayName, Id
 	}
 	process
@@ -31,7 +31,7 @@ function Test-TmfAccessPackageAssignementPolicy
 			$result = @{
 				Tenant = $tenant.displayName
 				TenantId = $tenant.Id
-				ResourceType = 'AccessPackageAssignementPolicy'
+				ResourceType = 'AccessPackageAssignmentPolicy'
 				ResourceName = (Resolve-String -Text $definition.displayName)
 				DesiredConfiguration = $definition
 			}

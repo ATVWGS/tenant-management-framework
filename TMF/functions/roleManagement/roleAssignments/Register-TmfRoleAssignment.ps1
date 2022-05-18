@@ -13,16 +13,19 @@ function Register-TmfRoleAssignment {
         [string] $principalReference,
         [Parameter(Mandatory = $true, ParameterSetName = "AzureAD")]
         [Parameter(Mandatory = $true, ParameterSetName = "AzureResources")]
+        [ValidateSet('group', 'user')]
         [string] $principalType,
         [Parameter(Mandatory = $true, ParameterSetName = "AzureResources")]
         [string] $subscriptionReference,
         [Parameter(Mandatory = $true, ParameterSetName = "AzureResources")]
         [string] $scopeReference,
         [Parameter(Mandatory = $true, ParameterSetName = "AzureResources")]
+        [ValidateSet('subscription', 'resourceGroup')]
         [string] $scopeType,
         [Parameter(Mandatory = $true, ParameterSetName = "AzureAD")]
         [string] $directoryScopeReference,
         [Parameter(Mandatory = $true, ParameterSetName = "AzureAD")]
+        [ValidateSet('directory', 'administrativeUnit')]
         [string] $directoryScopeType,
         [Parameter(Mandatory = $true, ParameterSetName = "AzureAD")]
         [Parameter(Mandatory = $true, ParameterSetName = "AzureResources")]

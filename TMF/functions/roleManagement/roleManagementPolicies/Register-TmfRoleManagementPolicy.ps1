@@ -7,10 +7,19 @@ function Register-TmfRoleManagementPolicy {
         [string]$subscriptionReference,
         [Parameter(Mandatory = $true, ParameterSetName = "AzureAD")]
         [Parameter(Mandatory = $true, ParameterSetName = "AzureResources")]
+        [string]$scopeReference,
+        [Parameter(Mandatory = $true, ParameterSetName = "AzureAD")]
+        [Parameter(Mandatory = $true, ParameterSetName = "AzureResources")]
+        [string]$scopeType,
+        [Parameter(Mandatory = $true, ParameterSetName = "AzureAD")]
+        [Parameter(Mandatory = $true, ParameterSetName = "AzureResources")]
         [string]$ruleTemplate,
         [Parameter(Mandatory = $true, ParameterSetName = "AzureAD")]
         [Parameter(Mandatory = $true, ParameterSetName = "AzureResources")]
         [object[]]$activationApprover,
+        [Parameter(ParameterSetName = "AzureAD")]
+        [Parameter(ParameterSetName = "AzureResources")]
+		[string] $sourceConfig = "<Custom>",
         [Parameter(ParameterSetName = "AzureAD")]
         [Parameter(ParameterSetName = "AzureResources")]
 		[System.Management.Automation.PSCmdlet]
@@ -31,14 +40,14 @@ function Register-TmfRoleManagementPolicy {
 
         switch ($policyScope) {
             "AzureAD"   {
-                if ($script:desiredConfiguration[$resourceName].roleReference -contains $roleReference) {			
-                    $alreadyLoaded = $script:desiredConfiguration[$resourceName] | Where-Object {$_.roleReference -eq $roleReference}
+                if ($script:desiredConfiguration[$resourceName] | Where-Object {$_.roleReference -eq $roleReference -and $_.scopeReference -eq $scopeReference}) {			
+                    $alreadyLoaded = $script:desiredConfiguration[$resourceName] | Where-Object {$_.roleReference -eq $roleReference -and $_.scopeReference -eq $scopeReference}
                 }
             }
 
             "AzureResources" {
-                if ($script:desiredConfiguration[$resourceName].roleReference -contains $roleReference) {			
-                    $alreadyLoaded = $script:desiredConfiguration[$resourceName] | Where-Object {$_.roleReference -eq $roleReference -and $_.subscriptionReference -eq $subscriptionReference}
+                if ($script:desiredConfiguration[$resourceName] | Where-Object {$_.roleReference -eq $roleReference -and $_.subscriptionReference -eq $subscriptionReference -and $_.scopeReference -eq $scopeReference}) {			
+                    $alreadyLoaded = $script:desiredConfiguration[$resourceName] | Where-Object {$_.roleReference -eq $roleReference -and $_.subscriptionReference -eq $subscriptionReference -and $_.scopeReference -eq $scopeReference}
                 }
             }
         }
@@ -50,18 +59,24 @@ function Register-TmfRoleManagementPolicy {
         switch ($policyScope) {
             "AzureAD"   {
                 $object = [PSCustomObject] @{
-                    "roleReference" = $roleReference
-                    "ruleTemplate" = $ruleTemplate
-                    "activationApprover" = $activationApprover
+                    roleReference = $roleReference
+                    scopeReference = $scopeReference
+                    scopeType = $scopeType
+                    ruleTemplate = $ruleTemplate
+                    activationApprover = $activationApprover
+                    sourceConfig = $sourceConfig
                 }
             }
 
             "AzureResources" {
                 $object = [PSCustomObject] @{
-                    "roleReference" = $roleReference
-                    "subscriptionReference" = $subscriptionReference
-                    "ruleTemplate" = $ruleTemplate
-                    "activationApprover" = $activationApprover
+                    roleReference = $roleReference
+                    subscriptionReference = $subscriptionReference
+                    scopeReference = $scopeReference
+                    scopeType = $scopeType
+                    ruleTemplate = $ruleTemplate
+                    activationApprover = $activationApprover
+                    sourceConfig = $sourceConfig
                 }
             }
         }

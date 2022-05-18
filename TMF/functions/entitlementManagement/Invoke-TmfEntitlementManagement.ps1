@@ -5,7 +5,7 @@
 			Performs the required actions for a resource type against the connected Tenant.
 		.DESCRIPTION
 			This command combines the Invoke commands of all Entitlement Management resources.
-			accessPackageCatalogs, accessPackages, accessPackageAssignementPolicies, accessPackageResources
+			accessPackageCatalogs, accessPackages, accessPackageAssignmentPolicies, accessPackageResources
 	#>
 	Param (
 		[switch] $DoNotRequireTenantConfirm
@@ -15,7 +15,7 @@
 	{
 		Test-GraphConnection -Cmdlet $PSCmdlet
 		$tenant = Get-MgOrganization -Property displayName, Id
-		$entitlementManagementResources = @("accessPackageCatalogs", "accessPackages", "accessPackageAssignementPolicies", "accessPackageResources")
+		$entitlementManagementResources = @("accessPackageCatalogs", "accessPackages", "accessPackageAssignmentPolicies", "accessPackageResources")
 	}
 	process
 	{

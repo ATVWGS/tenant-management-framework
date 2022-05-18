@@ -15,7 +15,7 @@
             "originSystem":"AadGroup"
         }
     ],
-    "assignementPolicies":[
+    "assignmentPolicies":[
         {
             "displayName":"Initial policy",
             "canExtend":false,

@@ -104,7 +104,7 @@ function Test-TmfRoleAssignment
                             }
                         }
                         1 {
-                            $result["AzureResource"] = $resource
+                            $result["GraphResource"] = $resource
                             if ($definition.present) {
                                 $changes = @()
                                 if ($definition.type -eq "eligible") {
@@ -227,18 +227,12 @@ function Test-TmfRoleAssignment
                             if ($definition.present) {
                                 $changes = @()
 
-                                foreach ($property in ($definition.Properties() | Where-Object {$_ -notin "displayName", "present"})) {
+                                foreach ($property in ($definition.Properties() | Where-Object {$_ -notin "displayName", "present", "startDateTime"})) {
                                     $change = [PSCustomObject] @{
                                         Property = $property										
                                         Actions = $null
                                     }
                                     switch ($property) {
-                                        "startDateTime" {
-                                            if ($definition.startDateTime -ne $resource.scheduleInfo.startDateTime -and $definition.startDateTime -ge (Get-Date -Hour 0 -Minute 0 -Second 0 -Millisecond 0)) {
-                                                $change.Actions = @{"Set" = $definition.$property}
-                                            }
-                                        }
-                                        
                                         "endDateTime" {
                                             if ($definition.expirationType -eq "AfterDateTime") {
                                                 if ($definition.endDateTime -ne $resource.scheduleInfo.expiration.endDateTime) {

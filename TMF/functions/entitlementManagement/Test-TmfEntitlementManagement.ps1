@@ -7,7 +7,7 @@
 	{
 		Test-GraphConnection -Cmdlet $PSCmdlet
 		$tenant = Get-MgOrganization -Property displayName, Id
-		$entitlementManagementResources = @("accessPackageCatalogs", "accessPackages", "accessPackageAssignementPolicies", "accessPackageResources")
+		$entitlementManagementResources = @("accessPackageCatalogs", "accessPackages", "accessPackageAssignmentPolicies", "accessPackageResources")
 	}
 	process
 	{

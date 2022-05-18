@@ -19,6 +19,7 @@
 
     'TMF.Test.RelatedResourceDoesNotExist' = 'The related {0} {0} for the {0} {1} does not exist at the moment. Cannot test {0}.'
     'TMF.Test.MultipleResourcesError' = 'There are multiple {0} with displayName {1} already created. Please clean your Tenant.'
+    'TMF.Test.MissingPolicyRuleTemplate' = 'Referenced policy rule template {1} for {0} not found.'
 
     'TMF.Invoke.ActionTypeUnknown' = 'Action type (<c="yellow">{0}</c>) is unknown!'
     'TMF.Invoke.ActionFailed' = '[Tenant: <c="gray">{0}</c>][{1} Resource: <c="gray">{2}</c>] Action ({3}) failed! Stopping actions.'
@@ -43,4 +44,5 @@
     'Load-TmfConfiguration.NotSupportedComponent' = 'Component {0} from configuration {1} is currently not supported and will be ignored.'    
 
     'Test-GraphConnection.Failed' = 'You are not connected to any Microsoft Tenant! Use Connect-MgGraph before testing or invoking settings.'
+    'Test-AzureConnection.Failed' = 'You are not connected with a Microsoft Tenant for Azure Resource Management! Use Connect-AzAccount before testing or invoking settings.'
 }

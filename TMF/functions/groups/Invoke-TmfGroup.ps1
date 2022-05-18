@@ -63,6 +63,20 @@
 						$requestBody = $requestBody | ConvertTo-Json -ErrorAction Stop
 						Write-PSFMessage -Level Verbose -String "TMF.Invoke.SendingRequestWithBody" -StringValues $requestMethod, $requestUrl, $requestBody
 						Invoke-MgGraphRequest -Method $requestMethod -Uri $requestUrl -Body $requestBody | Out-Null
+
+						if ($result.DesiredConfiguration.Properties() -contains "privilegedAccess") {
+							if ($result.DesiredConfiguration.privilegedAccess) {
+								$groupId = (Invoke-MgGraphRequest -Method "GET" -Uri "$script:graphBaseUrl/groups?`$filter=displayName eq '$($result.DesiredConfiguration.displayName)'").value.Id
+								$requestMethod = "POST"
+								$requestUrl = "$script:graphBaseUrl/privilegedAccess/aadGroups/resources/register"
+								$requestBody = @{
+									"externalId" = $groupId
+								}
+								$requestBody = $requestBody | ConvertTo-Json -ErrorAction Stop
+								Write-PSFMessage -Level Verbose -String "TMF.Invoke.SendingRequestWithBody" -StringValues $requestMethod, $requestUrl, $requestBody
+								Invoke-MgGraphRequest -Method $requestMethod -Uri $requestUrl -Body $requestBody | Out-Null
+							}
+						}
 					}
 					catch {
 						Write-PSFMessage -Level Error -String "TMF.Invoke.ActionFailed" -StringValues $result.Tenant, $result.ResourceType, $result.ResourceName, $result.ActionType
@@ -133,6 +147,16 @@
 											}
 										}
 									}
+								}
+								"privilegedAccess" {
+									$requestMethod = "POST"
+									$requestUrl = "$script:graphBaseUrl/privilegedAccess/aadGroups/resources/register"
+									$requestBody = @{
+										"externalId" = $result.GraphResource.Id
+									}
+									$requestBody = $requestBody | ConvertTo-Json -ErrorAction Stop
+									Write-PSFMessage -Level Verbose -String "TMF.Invoke.SendingRequestWithBody" -StringValues $requestMethod, $requestUrl, $requestBody
+									Invoke-MgGraphRequest -Method $requestMethod -Uri $requestUrl -Body $requestBody | Out-Null
 								}
 								default {
 									foreach ($action in $change.Actions.Keys) {

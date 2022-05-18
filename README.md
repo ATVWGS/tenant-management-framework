@@ -377,7 +377,7 @@ All main resource types support the following general properties.
 | Name | Type | Use case | Not supported by |
 |------|------|----------|------------------|
 | displayName | string | Is the mainly used identifier of a resource. We are always using the displayName to search resources. | |
-| oldNames | string[] | Allows you to rename a resource by searching it using an old name. **Example:** When group "Group A" should now be called "Group B", you can specify "Group A" in the oldNames property and set the displayName to "Group B". The TMF will update the displayName in the tenant automatically. | entitlementManagement (accessPackages, accessPackageCatalogs, accessPackageResource, accessPackageAssignementPolicies) |
+| oldNames | string[] | Allows you to rename a resource by searching it using an old name. **Example:** When group "Group A" should now be called "Group B", you can specify "Group A" in the oldNames property and set the displayName to "Group B". The TMF will update the displayName in the tenant automatically. | entitlementManagement (accessPackages, accessPackageCatalogs, accessPackageResource, accessPackageAssignmentPolicies) |
 | present | bool | Is _true_ by default. If you set it to _false_, the resource is deleted. | |
 
 ### 2.6.2. Groups
@@ -509,7 +509,7 @@ Please check the [Access Package Catalogs example.md](./TMF/internal/data/config
             "originSystem":"AadGroup"
         }
     ],
-    "assignementPolicies":[
+    "assignmentPolicies":[
         {
             "displayName":"Initial policy",
             "canExtend":false,
@@ -574,8 +574,8 @@ Please check the [Access Packages example.md](./TMF/internal/data/configuration/
 ##### Access Package Resources <!-- omit in toc --> 
 Access Package Resources are directly defined in the depending Access Package definition.
 
-##### Access Package Assignement Policies <!-- omit in toc -->
-Access Package Assignement Policies are directly defined the depending Access Package definition.
+##### Access Package Assignment Policies <!-- omit in toc -->
+Access Package Assignment Policies are directly defined the depending Access Package definition.
 
 ### 2.6.7. Administrative Units
 A simple Administrative Unit definition.
@@ -690,7 +690,7 @@ You can create mappings between strings and the values they should be replaced w
 }
 ```
 
-Currently not all resource properties are considered. All string properties on the first level are replaced. String mappings also work when resolving users (eg. group owners or members), groups (in CA policies), applications (in CA Policies), namedLocations (in CA policies), agreements (in CA policies), accessPackages, accessPackageCatalogs, accessPackageResources, accessPackageAssignementPolicies.
+Currently not all resource properties are considered. All string properties on the first level are replaced. String mappings also work when resolving users (eg. group owners or members), groups (in CA policies), applications (in CA Policies), namedLocations (in CA policies), agreements (in CA policies), accessPackages, accessPackageCatalogs, accessPackageResources, accessPackageAssignmentPolicies.
 
 | Resource       | Supported properties                                                                       |
 |----------------|--------------------------------------------------------------------------------------------|

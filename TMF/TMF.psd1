@@ -70,9 +70,9 @@
 		'Register-TmfAccessPackage',
 		'Test-TmfAccessPackage',
 		'Invoke-TmfAccessPackage',
-		'Register-TmfAccessPackageAssignementPolicy',
-		'Test-TmfAccessPackageAssignementPolicy',
-		'Invoke-TmfAccessPackageAssignementPolicy',
+		'Register-TmfAccessPackageAssignmentPolicy',
+		'Test-TmfAccessPackageAssignmentPolicy',
+		'Invoke-TmfAccessPackageAssignmentPolicy',
 		'Invoke-TmfAdministrativeUnit',
         'Test-TmfAdministrativeUnit',
         'Register-TmfAdministrativeUnit',
@@ -84,7 +84,17 @@
 		'Invoke-TmfAccessReview',
 		'Register-TmfDirectoryRole',
 		'Test-TmfDirectoryRole',
-		'Invoke-TmfDirectoryRole'
+		'Invoke-TmfDirectoryRole',
+		'Register-TmfRoleManagementPolicy',
+		'Test-TmfRoleManagementPolicy',
+		'Invoke-TmfRoleManagementPolicy',
+		'Register-TmfRoleManagementPolicyRuleTemplates',
+		'Register-TmfRoleAssignment',
+		'Test-TmfRoleAssignment',
+		'Invoke-TmfRoleAssignment',
+		'Register-TmfRoleDefinition',
+		'Test-TmfRoleDefinition',
+		'Invoke-TmfRoleDefinition'
 	)
 	
 	# Cmdlets to export from this module

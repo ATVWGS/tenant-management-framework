@@ -68,9 +68,9 @@ $script:supportedResources = @{
         "parentType" = "entitlementManagement"
         "weight" = 56
     }
-    "accessPackageAssignementPolicies" = @{     
-        "testFunction" = (Get-Command Test-TmfAccessPackageAssignementPolicy)
-        "invokeFunction" = (Get-Command Invoke-TmfAccessPackageAssignementPolicy)
+    "accessPackageAssignmentPolicies" = @{     
+        "testFunction" = (Get-Command Test-TmfAccessPackageAssignmentPolicy)
+        "invokeFunction" = (Get-Command Invoke-TmfAccessPackageAssignmentPolicy)
         "validateFunctions" = @{
             "accessReviewSettings" = (Get-Command Validate-AssignmentReviewSettings)
             "requestApprovalSettings" = (Get-Command Validate-RequestApprovalSettings)
@@ -102,6 +102,32 @@ $script:supportedResources = @{
         "registerFunction" = (Get-Command Register-TmfDirectoryRole)
         "testFunction" = (Get-Command Test-TmfDirectoryRole)
         "invokeFunction" = (Get-Command Invoke-TmfDirectoryRole)
+        "weight" = 15
+    }
+    "roleManagementPolicies" = @{
+        "registerFunction" = (Get-Command Register-TmfRoleManagementPolicy)
+        "testFunction" = (Get-Command Test-TmfRoleManagementPolicy)
+        "invokeFunction" = (Get-Command Invoke-TmfRoleManagementPolicy)
+        "parentType" = "roleManagement"
+        "weight" = 15
+    }
+    "roleAssignments" = @{
+        "registerFunction" = (Get-Command Register-TmfRoleAssignment)
+        "testFunction" = (Get-Command Test-TmfRoleAssignment)
+        "invokeFunction" = (Get-Command Invoke-TmfRoleAssignment)
+        "parentType" = "roleManagement"
+        "weight" = 15
+    }
+    "roleDefinitions" = @{
+        "registerFunction" = (Get-Command Register-TmfRoleDefinition)
+        "testFunction" = (Get-Command Test-TmfRoleDefinition)
+        "invokeFunction" = (Get-Command Invoke-TmfRoleDefinition)
+        "parentType" = "roleManagement"
+        "weight" = 15
+    }
+    "roleManagementPolicyRuleTemplates" = @{
+        "registerFunction" = (Get-Command Register-TmfRoleManagementPolicyRuleTemplates)
+        "parentType" = "roleManagement"
         "weight" = 15
     }
 } # All currently supported components.
