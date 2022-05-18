@@ -9,7 +9,7 @@ trigger:
 
 variables:
   major: 1
-  minor: 4
+  minor: 5
   patch: $(Build.BuildID)
   moduleName: 'TMF'
   buildVer: $(major).$(minor).$(Build.BuildID)
@@ -113,6 +113,11 @@ stages:
           path: C:\Users\VssAdministrator\Documents\WindowsPowerShell\Modules
           cacheHitVar: MODULES_RESTORED
       - task: PowerShell@2
+        inputs:
+          targetType: 'inline'
+          script: |
+            New-Item -Path "$(Pipeline.Workspace)\tests\results" -ItemType Directory -Force
+      - task: PowerShell@2
         displayName: Invoke Pester tests
         continueOnError: true
         inputs:         
@@ -139,6 +144,11 @@ stages:
           key: powershell-modules
           path: C:\Program Files\WindowsPowerShell\Modules\
           cacheHitVar: MODULES_RESTORED
+      - task: PowerShell@2
+        inputs:
+          targetType: 'inline'
+          script: |
+            New-Item -Path "$(Pipeline.Workspace)\tests\results" -ItemType Directory -Force
       - task: PowerShell@2
         displayName: Invoke Pester tests
         continueOnError: true
