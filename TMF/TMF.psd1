@@ -84,17 +84,7 @@
 		'Invoke-TmfAccessReview',
 		'Register-TmfDirectoryRole',
 		'Test-TmfDirectoryRole',
-		'Invoke-TmfDirectoryRole',
-		'Register-TmfRoleManagementPolicy',
-		'Test-TmfRoleManagementPolicy',
-		'Invoke-TmfRoleManagementPolicy',
-		'Register-TmfRoleManagementPolicyRuleTemplates',
-		'Register-TmfRoleAssignment',
-		'Test-TmfRoleAssignment',
-		'Invoke-TmfRoleAssignment',
-		'Register-TmfRoleDefinition',
-		'Test-TmfRoleDefinition',
-		'Invoke-TmfRoleDefinition'
+		'Invoke-TmfDirectoryRole'
 	)
 	
 	# Cmdlets to export from this module
