@@ -17,5 +17,22 @@
         "mailEnabled": false,
         "mailNickname": "testGroupForConditionalAccessPolicies2",
         "present": true
+    },
+    {   
+        "displayName": "Test - Group with licenses assigned",
+        "description": "This is a security group",
+        "groupTypes": [],        
+        "securityEnabled": true,
+        "mailEnabled": false,
+        "mailNickname": "testGroupWithLicensesAssigned",
+        "assignedLicenses": [
+            {
+                "skuId": "FLOW_FREE",
+                "disabledPlans": [
+                    "FLOW_P2_VIRAL"
+                ]
+            }
+        ],
+        "present": true
     }
 ]
