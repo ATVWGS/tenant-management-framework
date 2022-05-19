@@ -23,6 +23,7 @@ BeforeAll {
 Describe 'Tmf.Groups.Register' {
     It "should successfully register group definitions" {
         foreach ($group in $global:definitions["groups"]) {
+            Write-Host ($group | ConvertTo-Json)
             { Register-TmfGroup @group } | Should -Not -Throw
         }
         Get-TmfDesiredConfiguration | Should -Not -BeNullOrEmpty        
