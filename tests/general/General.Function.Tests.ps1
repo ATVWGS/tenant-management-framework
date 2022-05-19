@@ -34,6 +34,9 @@ Describe 'General.Function.Tests' {
                     "Validate" {
                         $ignoredRules += "PSUseSingularNouns"
                     }
+                    "Compare" {
+                        $ignoredRules += "PSUseSingularNouns"
+                    }
                 }
                 # Skip rules based on function name
                 switch ($baseName) {
