@@ -65,6 +65,32 @@
             "membershipRule" = "(user.userType -eq `"Guest`")"
             "mailEnabled" = $false
             "present" = $true
+        },
+        @{
+            "displayName" = "Test - {{ timestamp }} - Security Group - Assigned Licenses"
+            "description" = "This is a group with assigned licenses"
+            "groupTypes" = @()
+            "securityEnabled" = $true
+            "mailEnabled" = $false
+            "assignedLicenses" = @(
+                @{
+                    "skuId" = "FLOW_FREE"
+                    "disabledPlans" = @(
+                        "FLOW_P2_VIRAL"
+                    )
+                }
+            )
+            "present" = $true
+        },
+        @{
+            "displayName" = "Test - {{ timestamp }} - Security Group - Privileged Access"
+            "description" = "This is a group with assigned licenses"
+            "groupTypes" = @()
+            "securityEnabled" = $true
+            "mailEnabled" = $false
+            "isAssignableToRole" = $true
+            "privilegedAccess" = $true
+            "present" = $true
         }
     )
 }
