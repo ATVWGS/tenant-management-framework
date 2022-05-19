@@ -76,7 +76,8 @@
                 @{
                     "skuId" = "FLOW_FREE"
                     "disabledPlans" = @(
-                        "FLOW_P2_VIRAL"
+                        "FLOW_P2_VIRAL",
+                        "DYN365_CDS_VIRAL"
                     )
                 }
             )
