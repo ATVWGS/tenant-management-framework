@@ -22,6 +22,8 @@ function Validate-AssignedLicense
             skuId = $sku.skuId
         }
 
+		Write-Verbose ($sku | ConvertTo-Json -Depth 8)
+
         $hashtable["disabledPlans"] = @($disabledPlans | ForEach-Object {
             $plan = $_
             $sku.servicePlans | Where-Object { $_.servicePlanId -eq $plan -or $_.servicePlanName -eq $plan } | Select-Object -ExpandProperty servicePlanId
