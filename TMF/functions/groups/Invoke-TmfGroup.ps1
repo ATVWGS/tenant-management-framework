@@ -39,7 +39,7 @@
 					}
 
 					try {
-						@("mailNickname", "groupTypes", "mailEnabled", "isAssignableToRole", "securityEnabled", "hideFromAddressLists", "hideFromOutlookClients", "resourceBehaviorOptions") | ForEach-Object {
+						@("mailNickname", "groupTypes", "mailEnabled", "isAssignableToRole", "securityEnabled", "resourceBehaviorOptions") | ForEach-Object {
 							if ($result.DesiredConfiguration.Properties() -contains $_) {
 								$requestBody[$_] = $result.DesiredConfiguration.$_
 							}
@@ -63,6 +63,21 @@
 						$requestBody = $requestBody | ConvertTo-Json -ErrorAction Stop
 						Write-PSFMessage -Level Verbose -String "TMF.Invoke.SendingRequestWithBody" -StringValues $requestMethod, $requestUrl, $requestBody
 						$resource = Invoke-MgGraphRequest -Method $requestMethod -Uri $requestUrl -Body $requestBody
+
+						if ($result.DesiredConfiguration.Properties() -contains "hideFromOutlookClients" -or $result.DesiredConfiguration.Properties() -contains "hideFromAddressLists") {
+							$requestMethod = "PATCH"
+							$requestUrl = "$script:graphBaseUrl/groups/{0}" -f $resource.id
+							$requestBody = @{}
+							@("hideFromOutlookClients", "hideFromAddressLists") | Foreach-Object {
+								if ($result.DesiredConfiguration.Properties() -contains $_) {
+									$requestBody[$_] = $result.DesiredConfiguration.$_
+								}
+							}
+							$requestBody = $requestBody | ConvertTo-Json -ErrorAction Stop
+							Start-Sleep -Seconds 10 # Wait for group creation
+							Write-PSFMessage -Level Verbose -String "TMF.Invoke.SendingRequestWithBody" -StringValues $requestMethod, $requestUrl, $requestBody
+							Invoke-MgGraphRequest -Method $requestMethod -Uri $requestUrl -Body $requestBody | Out-Null
+						}						
 
 						if ($result.DesiredConfiguration.Properties() -contains "privilegedAccess") {
 							if ($result.DesiredConfiguration.privilegedAccess) {								

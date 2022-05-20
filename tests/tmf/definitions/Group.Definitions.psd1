@@ -83,5 +83,21 @@
             )
             "present" = $true
         }
+        @{
+            "displayName" = "Test - {{ timestamp }} - M365 Group - Hide Group"
+            "description" = "This is a M365 group"
+            "groupTypes" = @(
+                "Unified"
+            )
+            "resourceBehaviorOptions" = @(
+                "WelcomeEmailDisabled"
+            )
+            "hideFromAddressLists" = $true
+            "hideFromOutlookClients" = $true
+            "securityEnabled" = $false
+            "members"= @()
+            "mailEnabled" = $false
+            "present" = $true
+        }
     )
 }
