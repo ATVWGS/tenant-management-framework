@@ -21,6 +21,7 @@ function Register-TmfGroup
 		[bool] $privilegedAccess,
 		[bool] $hideFromAddressLists,
 		[bool] $hideFromOutlookClients,
+		[object[]] $assignedLicenses,
 		[bool] $present = $true,
 		[string] $sourceConfig = "<Custom>",
 
@@ -79,6 +80,13 @@ function Register-TmfGroup
 			if ($PSBoundParameters.ContainsKey($_)) {			
 				Add-Member -InputObject $object -MemberType NoteProperty -Name $_ -Value $PSBoundParameters[$_]
 			}
+		}
+
+		if ($PSBoundParameters.ContainsKey("assignedLicenses")) {
+			$assignedLicenses = @($assignedLicenses | Foreach-Object {
+				Validate-AssignedLicense -skuId $_.skuId -disabledPlans $_.disabledPlans
+			})
+			Add-Member -InputObject $object -MemberType NoteProperty -Name "assignedLicenses" -Value $assignedLicenses
 		}
 		
 		Add-Member -InputObject $object -MemberType ScriptMethod -Name Properties -Value { ($this | Get-Member -MemberType NoteProperty).Name }

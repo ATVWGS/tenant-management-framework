@@ -66,5 +66,22 @@
             "mailEnabled" = $false
             "present" = $true
         }
+        @{
+            "displayName" = "Test - {{ timestamp }} - Security Group - Assigned Licenses"
+            "description" = "This is a group with assigned licenses"
+            "groupTypes" = @()
+            "securityEnabled" = $true
+            "mailEnabled" = $false
+            "assignedLicenses" = @(
+                @{
+                    "skuId" = "FLOW_FREE"
+                    "disabledPlans" = @(
+                        "FLOW_P2_VIRAL",
+                        "DYN365_CDS_VIRAL"
+                    )
+                }
+            )
+            "present" = $true
+        }
     )
 }

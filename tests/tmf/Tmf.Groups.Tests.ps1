@@ -23,7 +23,8 @@ BeforeAll {
 Describe 'Tmf.Groups.Register' {
     It "should successfully register group definitions" {
         foreach ($group in $global:definitions["groups"]) {
-            { Register-TmfGroup @group } | Should -Not -Throw
+            Write-Host ($group | ConvertTo-Json -Depth 10)
+            { Register-TmfGroup @group -Verbose } | Should -Not -Throw
         }
         Get-TmfDesiredConfiguration | Should -Not -BeNullOrEmpty        
     }
@@ -48,17 +49,17 @@ Describe 'Tmf.Groups.Register' {
     )
     It "should throw an exception" -TestCases $testCases {
         Param ($because, $definition)
-        { Register-TmfGroup @definition } | Should -Throw -Because $because
+        { Register-TmfGroup @definition -Verbose } | Should -Throw -Because $because
     }
 }
 
 Describe 'Tmf.Groups.Invoke.Creation' {
     It "should successfully test the TMF configuration" {
-        { Test-TmfGroup } | Should -Not -Throw
+        { Test-TmfGroup -Verbose } | Should -Not -Throw
     }
 
     It "should successfully invoke the TMF configuration" {
-        { Invoke-TmfTenant -DoNotRequireTenantConfirm } | Should -Not -Throw
+        { Invoke-TmfTenant -DoNotRequireTenantConfirm -Verbose } | Should -Not -Throw
     }
 
     
@@ -78,7 +79,7 @@ Describe 'Tmf.Groups.Invoke.Creation' {
 Describe 'Tmf.General.Invoke.Deletion' {
     BeforeAll {
         #region Set present to false for each definition
-        $global:definitions["groups"] | Foreach-Object {
+        $global:definitions["groups"] | Where-Object { -Not $_["assignedLicenses"] -and -Not $_["privilegedAccess"] } | Foreach-Object {
             $_["present"] = $false
         }
         #endregion
@@ -86,20 +87,20 @@ Describe 'Tmf.General.Invoke.Deletion' {
 
     It "should successfully register group definitions" {
         foreach ($group in $global:definitions["groups"]) {
-            Register-TmfGroup @group
+            Register-TmfGroup @group -Verbose
         }
-        Get-TmfDesiredConfiguration | Should -Not -BeNullOrEmpty        
+        Get-TmfDesiredConfiguration -Verbose | Should -Not -BeNullOrEmpty        
     }
 
     It "should successfully test the TMF configuration" {
-        { Test-TmfGroup } | Should -Not -Throw
+        { Test-TmfGroup -Verbose } | Should -Not -Throw
     }
 
     It "should successfully invoke the TMF configuration" {
-        { Invoke-TmfGroup } | Should -Not -Throw
+        { Invoke-TmfGroup -Verbose } | Should -Not -Throw
     }
 
-    $testCases = $global:definitions["groups"] | Foreach-Object {
+    $testCases = $global:definitions["groups"] | Where-Object { -Not $_["assignedLicenses"] -and -Not $_["privilegedAccess"] } | Foreach-Object {
         return @{
             "displayName" = $_["displayName"]
             "uri" = $global:graphUri
