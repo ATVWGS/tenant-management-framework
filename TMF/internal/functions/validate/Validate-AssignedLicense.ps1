@@ -22,11 +22,16 @@ function Validate-AssignedLicense
             skuId = $sku.skuId
         }
 
-		Write-Verbose ($sku | ConvertTo-Json -Depth 8)
+		if ($sku.servicePlans.GetType().Name -eq "Object[]") {
+			$servicePlans = $sku.servicePlans
+		}
+		else {
+			$servicePlans = $sku.servicePlans.value
+		}
 
         $hashtable["disabledPlans"] = @($disabledPlans | ForEach-Object {
             $plan = $_
-            $sku.servicePlans | Where-Object { $_.servicePlanId -eq $plan -or $_.servicePlanName -eq $plan } | Select-Object -ExpandProperty servicePlanId
+            $servicePlans | Where-Object { $_.servicePlanId -eq $plan -or $_.servicePlanName -eq $plan } | Select-Object -ExpandProperty servicePlanId
         })
 	}
 	end
