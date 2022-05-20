@@ -28,6 +28,7 @@ function Validate-AssignedLicense
 		else {
 			$servicePlans = $sku.servicePlans.value
 		}
+		Write-Verbose ($servicePlans | ConvertTo-Json -Depth 10)
 
         $hashtable["disabledPlans"] = @($disabledPlans | ForEach-Object {
             $plan = $_
