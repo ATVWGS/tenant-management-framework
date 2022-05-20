@@ -12,7 +12,7 @@ function Validate-AssignedLicense
 	
 	begin
 	{
-		$sku = Resolve-SubscribedSku -InputReference $skuId -Cmdlet $Cmdlet
+		$sku = Resolve-SubscribedSku -InputReference $skuId -Cmdlet $Cmdlet		
 	}
 	process
 	{

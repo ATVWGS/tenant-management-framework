@@ -83,15 +83,5 @@
             )
             "present" = $true
         }
-        @{
-            "displayName" = "Test - {{ timestamp }} - Security Group - Privileged Access"
-            "description" = "This is a group with assigned licenses"
-            "groupTypes" = @()
-            "securityEnabled" = $true
-            "mailEnabled" = $false
-            "isAssignableToRole" = $true
-            "privilegedAccess" = $true
-            "present" = $true
-        }
     )
 }
