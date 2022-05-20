@@ -28,11 +28,10 @@ function Validate-AssignedLicense
 		else {
 			$servicePlans = $sku.servicePlans.value
 		}
-		Write-Verbose ($servicePlans | ConvertTo-Json -Depth 10)
 
         $hashtable["disabledPlans"] = @($disabledPlans | ForEach-Object {
             $plan = $_
-            $servicePlans | Where-Object { $_.servicePlanId -eq $plan -or $_.servicePlanName -eq $plan } | Select-Object -ExpandProperty servicePlanId
+            ($servicePlans | Where-Object { $_.servicePlanId -eq $plan -or $_.servicePlanName -eq $plan }).servicePlanId
         })
 	}
 	end
