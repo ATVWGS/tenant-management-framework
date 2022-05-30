@@ -42,7 +42,15 @@ function Invoke-TmfRoleManagementPolicy {
                                 foreach ($item in $result.DesiredConfiguration.rules) {
 
                                     if ($result.GraphResource.value | Where-Object {$_.id -eq $item.id}) {
-                                        if (-not (Compare-PolicyProperties -ReferenceObject $item -DifferenceObject ($result.GraphResource.value | Where-Object {$_.id -eq $item.id}))) {
+
+                                        if (($result.GraphResource.value.id | Where-Object {$_ -eq $item.id}).count -gt 1) {
+                                            $targetRule = ($result.GraphResource.value | Where-Object {$_.id -eq $item.id})[-1]
+                                        }
+                                        else {
+                                            $targetRule = $result.GraphResource.value | Where-Object {$_.id -eq $item.id}
+                                        }
+
+                                        if (-not (Compare-PolicyProperties -ReferenceObject $item -DifferenceObject $targetRule -assignmentScope $assignmentScope)) {
                                             $requestBody = $item
                                             $requestBody = $requestBody | ConvertTo-Json -Depth 8
                 
