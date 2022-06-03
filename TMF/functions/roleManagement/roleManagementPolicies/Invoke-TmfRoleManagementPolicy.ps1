@@ -39,24 +39,10 @@ function Invoke-TmfRoleManagementPolicy {
                             try {
                                 $requestMethod = "PATCH"
                                 $policyID = $result.GraphResource."@odata.context".split("'")[1]
-                                foreach ($item in $result.DesiredConfiguration.rules) {
-
-                                    if ($result.GraphResource.value | Where-Object {$_.id -eq $item.id}) {
-
-                                        if (($result.GraphResource.value.id | Where-Object {$_ -eq $item.id}).count -gt 1) {
-                                            $targetRule = ($result.GraphResource.value | Where-Object {$_.id -eq $item.id})[-1]
-                                        }
-                                        else {
-                                            $targetRule = $result.GraphResource.value | Where-Object {$_.id -eq $item.id}
-                                        }
-
-                                        if (-not (Compare-PolicyProperties -ReferenceObject $item -DifferenceObject $targetRule -assignmentScope $assignmentScope)) {
-                                            $requestBody = $item
-                                            $requestBody = $requestBody | ConvertTo-Json -Depth 8
-                
-                                            Invoke-MgGraphRequest -Method $requestMethod -Uri "$($script:graphBaseUrl)/policies/roleManagementPolicies/$($policyID)/rules/$($item.id)" -Body $requestBody -ContentType "application/json" | Out-Null
-                                        }
-                                    }
+                                foreach ($ruleToChange in $result.changes.actions.values) {
+                                    $item = $result.DesiredConfiguration.rules | Where-Object {$_.id -eq $ruleToChange}
+                                    $requestBody = $item | ConvertTo-Json -Depth 8
+                                    Invoke-MgGraphRequest -Method $requestMethod -Uri "$($script:graphBaseUrl)/policies/roleManagementPolicies/$($policyID)/rules/$($item.id)" -Body $requestBody -ContentType "application/json" | Out-Null
                                 }
                                 
                                 Write-PSFMessage -Level Host -String "TMF.Invoke.ActionCompleted" -StringValues $result.Tenant, $result.ResourceType, $result.ResourceName, (Get-ActionColor -Action $result.ActionType), $result.ActionType

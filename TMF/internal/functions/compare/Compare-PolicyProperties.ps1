@@ -32,12 +32,48 @@ function Compare-PolicyProperties {
     
 
     foreach ($itemSet in $ReferenceObject) {
-        $itemSetProperties = ($itemSet | Get-Member -MemberType NoteProperty).Name
+        $itemSetProperties = ($itemSet | Get-Member -MemberType NoteProperty).Name | Where-Object {$_ -notin 'target','@odata.type', 'id'}
         $compareProperties = $CompareObject | Where-Object {$_.id -eq $itemSet.id}
 
         foreach ($property in $itemSetProperties) {
             if ($null -ne $itemSet.$property) {
-                if ($itemSet.$property.GetType().Name -in @("PSCustomObject","Object[]","System.Object[]")) {
+                #if ($itemSet.$property.GetType().Name -in @("PSCustomObject","Object[]","System.Object[]")) {
+                switch ($itemSet.$property.GetType().Name) {
+                    "PSCustomObject" {
+                        if ($itemSet.$property -and $compareProperties.$property) {
+                            if (-not (Compare-PolicyProperties -ReferenceObject $itemSet.$property -DifferenceObject $compareProperties.$property -assignmentScope $assignmentScope)) {
+                                Write-Host "Line 45: $($property)"
+                                $same = $false
+                            }
+                        }
+                        else {
+                            if (($itemSet.$property -and (-not($compareProperties.$property))) -or ((-not($itemSet.$property) -and $compareProperties.$property))) {
+                                $same = $false
+                            }
+                        }
+                    }
+                    "Hashtable" {
+                        if (-not (Compare-Hashtable $itemSet.$property $compareProperties.$property)) {
+                            Write-Host "Line 57: $($property)"
+                            $same = $false
+                        }
+                    }
+                    "Object[]" {
+
+                        if (-not (Compare-Hashtable -ReferenceObject $itemSet.$property[0] -DifferenceObject $compareProperties.$property[0])) {
+                            Write-Host "Line 64: $($property)"
+                            $same = $false
+                        }
+                    }
+                    default {
+                        if ($itemSet.$property -ne $compareProperties.$property) {
+                            Write-Host "Line 70: $($property)"
+                            Write-Host "$($itemSet.$property.gettype().Name)"
+                            $same = $false
+                        }
+                    }
+                }
+                <#if ($itemSet.$property.GetType().Name -in @("PSCustomObject")) {
                     if ($itemSet.$property -and $compareProperties.$property) {
                         if (-not (Compare-PolicyProperties -ReferenceObject $itemSet.$property -DifferenceObject $compareProperties.$property -assignmentScope $assignmentScope)) {
                             $same = $false
@@ -53,17 +89,41 @@ function Compare-PolicyProperties {
                     if ($itemSet.$property -ne $compareProperties.$property) {
                         $same = $false
                     }
-                }
+                }#>
             }
         }
     }
     foreach ($itemSet in $CompareObject) {
-        $itemSetProperties = ($itemSet | Get-Member -MemberType NoteProperty).Name
+        $itemSetProperties = ($itemSet | Get-Member -MemberType NoteProperty).Name | Where-Object {$_ -notin 'target','@odata.type', 'id'}
         $compareProperties = $ReferenceObject | Where-Object {$_.id -eq $itemSet.id}
 
         foreach ($property in $itemSetProperties) {
 
-            if ($null -ne $itemSet.$property) {
+            switch ($itemSet.$property.GetType().Name) {
+                "PSCustomObject" {
+                    if ($itemSet.$property -and $compareProperties.$property) {
+                        if (-not (Compare-PolicyProperties -ReferenceObject $itemSet.$property -DifferenceObject $compareProperties.$property -assignmentScope $assignmentScope)) {
+                            $same = $false
+                        }
+                    }
+                    else {
+                        if (($itemSet.$property -and (-not($compareProperties.$property))) -or ((-not($itemSet.$property) -and $compareProperties.$property))) {
+                            $same = $false
+                        }
+                    }
+                }
+                "Hashtable" {
+                    if (-not (Compare-Hashtable $itemSet.$property $compareProperties.$property)) {
+                        $same = $false
+                    }
+                }
+                default {
+                    if ($itemSet.$property -ne $compareProperties.$property) {
+                        $same = $false
+                    }
+                }
+            }
+            <#if ($null -ne $itemSet.$property) {
                 if ($itemSet.$property.GetType().Name -in @("PSCustomObject","Object[]","System.Object[]")) {
                     if ($itemSet.$property -and $compareProperties.$property) {
                         if (-not (Compare-PolicyProperties -ReferenceObject $itemSet.$property -DifferenceObject $compareProperties.$property -assignmentScope $assignmentScope)) {
@@ -86,7 +146,7 @@ function Compare-PolicyProperties {
                 if ($null -ne $compareProperties.$property) {
                     $same = $false
                 }
-            }
+            }#>
         }
     }
     return $same

@@ -95,7 +95,7 @@ function Test-TmfRoleManagementPolicy {
                             $referenceID = Resolve-User -InputReference $item.reference
                             switch ($assignmentScope) {
                                 "AzureAD" {
-                                    $primaryApprovers += @{
+                                    $primaryApprovers +=  @{
                                         "id" = $referenceID
                                         #"description" = $item.reference
                                         "isBackup" = $false
@@ -116,7 +116,7 @@ function Test-TmfRoleManagementPolicy {
                             $referenceID = Resolve-Group -InputReference $item.reference
                             switch ($assignmentScope) {
                                 "AzureAD" {
-                                    $primaryApprovers += @{
+                                    $primaryApprovers +=  @{
                                         "id" = $referenceID
                                         #"description" = $item.reference
                                         "isBackup" = $false
@@ -138,21 +138,21 @@ function Test-TmfRoleManagementPolicy {
 
                 switch ($assignmentScope) {
                     "AzureAD" {
-                        $activationApprover = @{
+                        $activationApprover = [PSCustomObject]@{
                             
-                            "setting"= @{
+                            "setting"=  @{
                                 "isApprovalRequired" = $true
                                 "isApprovalRequiredForExtension" = $false
                                 "isRequestorJustificationRequired" = $true
                                 "approvalMode" = "SingleStage"
                                 "approvalStages"= @(
-                                @{
-                                    "approvalStageTimeOutInDays" = 1
-                                    "isApproverJustificationRequired" = $true
-                                    "escalationTimeInMinutes" = 0
-                                    "primaryApprovers" = $primaryApprovers
-                                    "isEscalationEnabled" = $false
-                                }
+                                    @{
+                                        "approvalStageTimeOutInDays" = 1
+                                        "isApproverJustificationRequired" = $true
+                                        "escalationTimeInMinutes" = 0
+                                        "primaryApprovers" = $primaryApprovers
+                                        "isEscalationEnabled" = $false
+                                    }
                                 )
                             }
                             "id" = "Approval_EndUser_Assignment"
@@ -204,21 +204,21 @@ function Test-TmfRoleManagementPolicy {
             else {
                 switch ($assignmentScope) {
                     "AzureAD" {
-                        $activationApprover = @{
+                        $activationApprover = [PSCustomObject]@{
                             
-                            "setting"= @{
+                            "setting"=  @{
                                 "isApprovalRequired" = $false
                                 "isApprovalRequiredForExtension" = $false
                                 "isRequestorJustificationRequired" = $true
                                 "approvalMode" = "SingleStage"
                                 "approvalStages"= @(
-                                @{
-                                    "approvalStageTimeOutInDays" = 1
-                                    "isApproverJustificationRequired" = $true
-                                    "escalationTimeInMinutes" = 0
-                                    "primaryApprovers" = @()
-                                    "isEscalationEnabled" = $false
-                                }
+                                    @{
+                                        "approvalStageTimeOutInDays" = 1
+                                        "isApproverJustificationRequired" = $true
+                                        "escalationTimeInMinutes" = 0
+                                        "primaryApprovers" = @()
+                                        "isEscalationEnabled" = $false
+                                    }
                                 )
                             }
                             "id" = "Approval_EndUser_Assignment"
@@ -281,13 +281,22 @@ function Test-TmfRoleManagementPolicy {
 
                     switch ($assignmentScope) {
                         "AzureAD" {
-                            if (-not (Compare-PolicyProperties -ReferenceObject ($result.DesiredConfiguration.rules) -DifferenceObject $resource.value -assignmentScope $assignmentScope)) {
+                            foreach ($rule in $result.DesiredConfiguration.rules) {
+                                if (-not (Compare-PolicyProperties -ReferenceObject $rule -DifferenceObject ($resource.value | Where-Object {$_.id -eq $rule.id}) -assignmentScope $assignmentScope)) {    
+                                    $change = [PSCustomObject] @{
+                                        Property = "rules"
+                                        Actions = @{"Set" = $rule.id}
+                                    }
+                                    $changes += $change
+                                }
+                            }
+                            <#if (-not (Compare-PolicyProperties -ReferenceObject ($result.DesiredConfiguration.rules) -DifferenceObject $resource.value -assignmentScope $assignmentScope)) {
                                 $change = [PSCustomObject] @{
                                     Property = "rules"
                                     Actions = @{"Set" = $result.DesiredConfiguration.rules}
                                 }
                                 $changes += $change
-                            }
+                            }#>
                             if ($changes.count -gt 0) { $result = New-TestResult @result -Changes $changes -ActionType "Update"}
                             else { $result = New-TestResult @result -ActionType "NoActionRequired" }
                         }
