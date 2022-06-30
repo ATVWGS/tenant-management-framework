@@ -14,8 +14,8 @@ function Register-TmfRoleManagementPolicy {
         [Parameter(Mandatory = $true, ParameterSetName = "AzureAD")]
         [Parameter(Mandatory = $true, ParameterSetName = "AzureResources")]
         [string]$ruleTemplate,
-        [Parameter(Mandatory = $true, ParameterSetName = "AzureAD")]
-        [Parameter(Mandatory = $true, ParameterSetName = "AzureResources")]
+        [Parameter(ParameterSetName = "AzureAD")]
+        [Parameter(ParameterSetName = "AzureResources")]
         [object[]]$activationApprover,
         [Parameter(ParameterSetName = "AzureAD")]
         [Parameter(ParameterSetName = "AzureResources")]

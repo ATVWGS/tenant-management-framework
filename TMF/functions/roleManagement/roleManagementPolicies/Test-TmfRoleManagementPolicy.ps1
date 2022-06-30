@@ -97,7 +97,6 @@ function Test-TmfRoleManagementPolicy {
                                 "AzureAD" {
                                     $primaryApprovers +=  @{
                                         "id" = $referenceID
-                                        #"description" = $item.reference
                                         "isBackup" = $false
                                         "@odata.type" = "#microsoft.graph.singleUser"
                                     }
@@ -105,7 +104,6 @@ function Test-TmfRoleManagementPolicy {
                                 "AzureResources" {
                                     $primaryApprovers += @{
                                         "id" = $referenceID
-                                        #"description" = $item.reference
                                         "isBackup" = $false
                                         "userType" = "User"
                                     }
@@ -116,17 +114,15 @@ function Test-TmfRoleManagementPolicy {
                             $referenceID = Resolve-Group -InputReference $item.reference
                             switch ($assignmentScope) {
                                 "AzureAD" {
-                                    $primaryApprovers +=  @{
+                                    $primaryApprovers +=  [PSCustomObject]@{
                                         "id" = $referenceID
-                                        #"description" = $item.reference
                                         "isBackup" = $false
                                         "@odata.type" = "#microsoft.graph.groupMembers"
                                     }
                                 }
                                 "AzureResources"{
-                                    $primaryApprovers += @{
+                                    $primaryApprovers += [PSCustomObject]@{
                                         "id" = $referenceID
-                                        #"description" = $item.reference
                                         "isBackup" = $false
                                         "userType" = "Group"
                                     }
@@ -170,7 +166,7 @@ function Test-TmfRoleManagementPolicy {
                         $rules += $activationApprover
                     }
                     "AzureResources" {
-                        $activationApprover = @{
+                        $activationApprover = [PSCustomObject]@{
                             
                             "setting"= @{
                                 "isApprovalRequired" = $true
@@ -236,7 +232,7 @@ function Test-TmfRoleManagementPolicy {
                         $rules += $activationApprover
                     }
                     "AzureResources" {
-                        $activationApprover = @{
+                        $activationApprover = [PSCustomObject]@{
                             
                             "setting"= @{
                                 "isApprovalRequired" = $false
@@ -265,24 +261,19 @@ function Test-TmfRoleManagementPolicy {
                         $rules += $activationApprover
                     }
                 }
-                
-                
             }
 
             Add-Member -InputObject $result.DesiredConfiguration -MemberType NoteProperty -Name rules -Value $rules -Force
 
             switch ($resource.count) {
-                0	{
-
-                }
-
+                0	{}
                 1	{
                     $changes = @()
 
                     switch ($assignmentScope) {
                         "AzureAD" {
                             foreach ($rule in $result.DesiredConfiguration.rules) {
-                                if (-not (Compare-PolicyProperties -ReferenceObject $rule -DifferenceObject ($resource.value | Where-Object {$_.id -eq $rule.id}) -assignmentScope $assignmentScope)) {    
+                                if (-not (Compare-PolicyProperties -ReferenceObject ($rule | ConvertTo-PSFHashtable) -DifferenceObject ($resource.value | Where-Object {$_.id -eq $rule.id} | ConvertTo-PSFHashtable))) {    
                                     $change = [PSCustomObject] @{
                                         Property = "rules"
                                         Actions = @{"Set" = $rule.id}
@@ -290,23 +281,19 @@ function Test-TmfRoleManagementPolicy {
                                     $changes += $change
                                 }
                             }
-                            <#if (-not (Compare-PolicyProperties -ReferenceObject ($result.DesiredConfiguration.rules) -DifferenceObject $resource.value -assignmentScope $assignmentScope)) {
-                                $change = [PSCustomObject] @{
-                                    Property = "rules"
-                                    Actions = @{"Set" = $result.DesiredConfiguration.rules}
-                                }
-                                $changes += $change
-                            }#>
+
                             if ($changes.count -gt 0) { $result = New-TestResult @result -Changes $changes -ActionType "Update"}
                             else { $result = New-TestResult @result -ActionType "NoActionRequired" }
                         }
                         "AzureResources" {
-                            if (-not (Compare-PolicyProperties -ReferenceObject $result.DesiredConfiguration.rules -DifferenceObject $resource.properties.rules -assignmentScope $assignmentScope)) {
-                                $change = [PSCustomObject] @{
-                                    Property = "rules"
-                                    Actions = @{"Set" = $result.DesiredConfiguration.rules}
+                            foreach ($rule in $result.DesiredConfiguration.rules) {
+                                if (-not (Compare-PolicyProperties -ReferenceObject ($rule | ConvertTo-PSFHashtable) -DifferenceObject ($resource.properties.rules | Where-Object {$_.id -eq $rule.id} | ConvertTo-PSFHashtable))) {
+                                    $change = [PSCustomObject] @{
+                                        Property = "rules"
+                                        Actions = @{"Set" = $rule.id}
+                                    }
+                                    $changes += $change
                                 }
-                                $changes += $change
                             }
                             if ($changes.count -gt 0) { $result = New-TestResult @result -Changes $changes -ActionType "Update"}
                             else { $result = New-TestResult @result -ActionType "NoActionRequired" }
@@ -328,6 +315,5 @@ function Test-TmfRoleManagementPolicy {
             $result
         }        
     }
-
     end{}
 }
