@@ -37,9 +37,14 @@ function Compare-PolicyProperties {
                         }
                     }
                     else {
-                        if (-Not (Compare-PolicyProperties -ReferenceObject ($reference.Value | ConvertTo-PSFHashtable) -DifferenceObject ($DifferenceObject[$reference.Key] | ConvertTo-PSFHashtable))) {
+                        if ($null -eq ($DifferenceObject[$reference.Key] | ConvertTo-PSFHashtable)) {
                             $same = $false
                         }
+                        else {
+                            if (-Not (Compare-PolicyProperties -ReferenceObject ($reference.Value | ConvertTo-PSFHashtable) -DifferenceObject ($DifferenceObject[$reference.Key] | ConvertTo-PSFHashtable))) {
+                                $same = $false
+                            }
+                        }                        
                     }
                 }
                 else {
