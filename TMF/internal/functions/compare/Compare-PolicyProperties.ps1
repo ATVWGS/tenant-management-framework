@@ -37,7 +37,7 @@ function Compare-PolicyProperties {
                         }
                     }
                     else {
-                        if ($null -eq ($DifferenceObject[$reference.Key] | ConvertTo-PSFHashtable)) {
+                        if ($null -eq $DifferenceObject[$reference.Key]) {
                             $same = $false
                         }
                         else {
