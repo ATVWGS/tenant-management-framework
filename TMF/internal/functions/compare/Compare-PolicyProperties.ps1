@@ -41,6 +41,8 @@ function Compare-PolicyProperties {
                             $same = $false
                         }
                         else {
+                            Write-Host "RuleID: $ReferenceObject.id"
+                            Write-Host "Value: $($reference.Key)"
                             if (-Not (Compare-PolicyProperties -ReferenceObject ($reference.Value | ConvertTo-PSFHashtable) -DifferenceObject ($DifferenceObject[$reference.Key] | ConvertTo-PSFHashtable))) {
                                 $same = $false
                             }
