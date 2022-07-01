@@ -37,7 +37,7 @@ function Compare-PolicyProperties {
                         }
                     }
                     else {
-                        if ($null -eq $DifferenceObject[$reference.Key]) {
+                        if ($null -eq ($DifferenceObject[$reference.Key] | ConvertTo-PSFHashtable)) {
                             $same = $false
                         }
                         else {
@@ -53,9 +53,6 @@ function Compare-PolicyProperties {
                     }
                 }
             }
-            else {
-                Write-Host "Line 50: $($reference.Key)"
-            }            
         }
     }
     end {
