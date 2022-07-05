@@ -176,7 +176,7 @@ function Test-TmfRoleAssignment
                         switch ($definition.principalType) {
                             "group" {$principalId=Resolve-Group -InputReference $definition.principalReference -SearchInDesiredConfiguration}
                             "user"  {$principalId=Resolve-User -InputReference $definition.principalReference}
-                            "application"  {$principalId=Resolve-Application -InputReference $definition.principalReference}
+                            "servicePrincipal"  {$principalId=Resolve-ServicePrincipal -InputReference $definition.principalReference}
                         }
                         switch ($definition.directoryScopeType) {
                             "directory" {$directoryScopeId="/"}

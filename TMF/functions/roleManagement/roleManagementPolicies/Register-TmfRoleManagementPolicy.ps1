@@ -63,7 +63,6 @@ function Register-TmfRoleManagementPolicy {
                     scopeReference = $scopeReference
                     scopeType = $scopeType
                     ruleTemplate = $ruleTemplate
-                    activationApprover = $activationApprover
                     sourceConfig = $sourceConfig
                 }
             }
@@ -75,11 +74,17 @@ function Register-TmfRoleManagementPolicy {
                     scopeReference = $scopeReference
                     scopeType = $scopeType
                     ruleTemplate = $ruleTemplate
-                    activationApprover = $activationApprover
                     sourceConfig = $sourceConfig
                 }
             }
         }
+
+        "activationApprover" | ForEach-Object {
+            if ($PSBoundParameters.ContainsKey($_)) {
+                Add-Member -InputObject $object -MemberType NoteProperty -Name $_ -Value $PSBoundParameters[$_]
+            }
+        }
+
         Add-Member -InputObject $object -MemberType ScriptMethod -Name Properties -Value { ($this | Get-Member -MemberType NoteProperty).Name }
 
         if ($alreadyLoaded) {
