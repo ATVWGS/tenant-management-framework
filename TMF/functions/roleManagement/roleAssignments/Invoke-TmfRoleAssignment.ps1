@@ -278,7 +278,7 @@ function Invoke-TmfRoleAssignment {
                                             "action" = "AdminAssign"
                                             "justification" = "Assignment with TMF"
                                             "roleDefinitionId" = $roleDefinitionId
-                                            "directoryScopeId" = "/"
+                                            "directoryScopeId" = $directoryScopeId
                                             "principalId" = $principalId
                                             "scheduleInfo" = @{
                                               "startDateTime" = get-date ($result.DesiredConfiguration.startDateTime) -UFormat "%Y-%m-%dT%H:%M%:%SZ"

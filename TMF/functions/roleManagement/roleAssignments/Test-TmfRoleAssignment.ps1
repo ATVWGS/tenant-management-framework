@@ -179,9 +179,10 @@ function Test-TmfRoleAssignment
                         }
                         switch ($definition.directoryScopeType) {
                             "directory" {$directoryScopeId="/"}
-                            "administrativeUnit" {$directoryScopeId=Resolve-AdministrativeUnit -InputReference $definition.directoryScopeReference -SearchInDesiredConfiguration}
+                            "administrativeUnit" {$directoryScopeId="/administrativeUnits/"+$(Resolve-AdministrativeUnit -InputReference $definition.directoryScopeReference -SearchInDesiredConfiguration)}
+                            
                         }
-        
+
                         switch ($definition.type) {
                             "eligible" {
                                 try {
