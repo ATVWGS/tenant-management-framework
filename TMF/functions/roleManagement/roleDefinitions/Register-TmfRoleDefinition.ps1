@@ -1,5 +1,5 @@
-function Register-TmfRoleDefinition 
-{
+function Register-TmfRoleDefinition {
+    [CmdletBinding(DefaultParameterSetName = 'AzureAD')]
     Param (
         [Parameter(Mandatory = $true, ParameterSetName = "AzureAD")]
         [Parameter(Mandatory = $true, ParameterSetName = "AzureResources")]
