@@ -54,6 +54,9 @@ function Invoke-TmfRoleAssignment {
                                     "user" {
                                         $principalId = Resolve-User -InputReference $result.DesiredConfiguration.principalReference
                                     }
+                                    "servicePrincipal"  {
+                                        $principalId = Resolve-ServicePrincipal -InputReference $result.DesiredConfiguration.principalReference
+                                    }
                                 }
                                 $roleDefinitionId = Resolve-AzureRoleDefinition -InputReference $result.DesiredConfiguration.roleReference -SubscriptionId $subscriptionId
                                 switch ($result.DesiredConfiguration.expirationType) {
@@ -139,6 +142,9 @@ function Invoke-TmfRoleAssignment {
                                     "user" {
                                         $principalId = Resolve-User -InputReference $result.DesiredConfiguration.principalReference
                                     }
+                                    "servicePrincipal"  {
+                                        $principalId = Resolve-ServicePrincipal -InputReference $result.DesiredConfiguration.principalReference
+                                    }
                                 }
                                 $subscriptionId = Resolve-Subscription -InputReference $result.DesiredConfiguration.subscriptionReference
                                 $roleDefinitionId = Resolve-AzureRoleDefinition -InputReference $result.DesiredConfiguration.roleReference -SubscriptionId $subscriptionId.trimStart("/")
@@ -220,6 +226,9 @@ function Invoke-TmfRoleAssignment {
                                 "user" {
                                     $principalId = Resolve-User -InputReference $result.DesiredConfiguration.principalReference
                                 }
+                                "servicePrincipal"  {
+                                    $principalId = Resolve-ServicePrincipal -InputReference $result.DesiredConfiguration.principalReference
+                                }
                             }
                             $subscriptionId = Resolve-Subscription -InputReference $result.DesiredConfiguration.subscriptionReference
                             $roleDefinitionId = Resolve-AzureRoleDefinition -InputReference $result.DesiredConfiguration.roleReference -SubscriptionId $subscriptionId.trimStart("/")
@@ -270,6 +279,7 @@ function Invoke-TmfRoleAssignment {
                                 switch ($result.DesiredConfiguration.principalType) {
                                     "group" { $principalId = Resolve-Group -InputReference $result.DesiredConfiguration.principalReference}
                                     "user" { $principalId = Resolve-User -InputReference $result.DesiredConfiguration.principalReference}
+                                    "servicePrincipal"  { $principalId = Resolve-ServicePrincipal -InputReference $result.DesiredConfiguration.principalReference}
                                 }
                                 $roleDefinitionId = Resolve-DirectoryRoleDefinition -InputReference $result.DesiredConfiguration.roleReference
                                 switch ($result.DesiredConfiguration.expirationType) {
@@ -344,6 +354,7 @@ function Invoke-TmfRoleAssignment {
                                 switch ($result.DesiredConfiguration.principalType) {
                                     "group" {$principalId = Resolve-Group -InputReference $result.DesiredConfiguration.principalReference}
                                     "user" {$principalId = Resolve-User -InputReference $result.DesiredConfiguration.principalReference}
+                                    "servicePrincipal"  {$principalId = Resolve-ServicePrincipal -InputReference $result.DesiredConfiguration.principalReference}
                                 }
                                 switch ($result.DesiredConfiguration.directoryScopeType) {
                                     "directory" {$directoryScopeId="/"}
@@ -421,6 +432,7 @@ function Invoke-TmfRoleAssignment {
                             switch ($result.DesiredConfiguration.principalType) {
                                 "group" {$principalId = Resolve-Group -InputReference $result.DesiredConfiguration.principalReference}
                                 "user" {$principalId = Resolve-User -InputReference $result.DesiredConfiguration.principalReference}
+                                "servicePrincipal"  {$principalId = Resolve-ServicePrincipal -InputReference $result.DesiredConfiguration.principalReference}
                             }
                             switch ($result.DesiredConfiguration.directoryScopeType) {
                                 "directory" {$directoryScopeId="/"}
