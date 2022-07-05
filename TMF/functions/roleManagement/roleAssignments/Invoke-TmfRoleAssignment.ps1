@@ -265,7 +265,7 @@ function Invoke-TmfRoleAssignment {
                                 $requestMethod = "POST"
                                 switch ($result.DesiredConfiguration.directoryScopeType) {
                                     "directory" {$directoryScopeId="/"}
-                                    "administrativeUnit" {$directoryScopeId=Resolve-AdministrativeUnit -InputReference $definition.directoryScopeReference -SearchInDesiredConfiguration}
+                                    "administrativeUnit" {$directoryScopeId=Resolve-AdministrativeUnit -InputReference $result.DesiredConfiguration.directoryScopeReference -SearchInDesiredConfiguration}
                                 }
                                 switch ($result.DesiredConfiguration.principalType) {
                                     "group" { $principalId = Resolve-Group -InputReference $result.DesiredConfiguration.principalReference}
@@ -347,7 +347,7 @@ function Invoke-TmfRoleAssignment {
                                 }
                                 switch ($result.DesiredConfiguration.directoryScopeType) {
                                     "directory" {$directoryScopeId="/"}
-                                    "administrativeUnit" {$directoryScopeId=Resolve-AdministrativeUnit -InputReference $definition.directoryScopeReference -SearchInDesiredConfiguration}
+                                    "administrativeUnit" {$directoryScopeId=Resolve-AdministrativeUnit -InputReference $result.DesiredConfiguration.directoryScopeReference -SearchInDesiredConfiguration}
                                 }
                                 $roleDefinitionId = Resolve-DirectoryRoleDefinition -InputReference $result.DesiredConfiguration.roleReference
                                 switch ($result.DesiredConfiguration.expirationType) {
@@ -424,7 +424,7 @@ function Invoke-TmfRoleAssignment {
                             }
                             switch ($result.DesiredConfiguration.directoryScopeType) {
                                 "directory" {$directoryScopeId="/"}
-                                "administrativeUnit" {$directoryScopeId=Resolve-AdministrativeUnit -InputReference $definition.directoryScopeReference -SearchInDesiredConfiguration}
+                                "administrativeUnit" {$directoryScopeId=Resolve-AdministrativeUnit -InputReference $result.DesiredConfiguration.directoryScopeReference -SearchInDesiredConfiguration}
                             }
                             $roleDefinitionId = Resolve-DirectoryRoleDefinition -InputReference $result.DesiredConfiguration.roleReference
                             try {
