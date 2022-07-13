@@ -64,6 +64,7 @@ function Register-TmfRoleManagementPolicy {
                     scopeType = $scopeType
                     ruleTemplate = $ruleTemplate
                     sourceConfig = $sourceConfig
+                    activationApprover = $activationApprover
                 }
             }
 
@@ -75,13 +76,8 @@ function Register-TmfRoleManagementPolicy {
                     scopeType = $scopeType
                     ruleTemplate = $ruleTemplate
                     sourceConfig = $sourceConfig
+                    activationApprover = $activationApprover
                 }
-            }
-        }
-
-        "activationApprover" | ForEach-Object {
-            if ($PSBoundParameters.ContainsKey($_)) {
-                Add-Member -InputObject $object -MemberType NoteProperty -Name $_ -Value $PSBoundParameters[$_]
             }
         }
 
