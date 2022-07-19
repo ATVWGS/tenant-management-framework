@@ -4,6 +4,7 @@ function Register-TmfAccessPackageAssignmentPolicy
 	Param (
 		[Parameter(Mandatory = $true)]
 		[string] $displayName,
+		[string[]] $oldNames,
 		[string] $description = "Access Package Assignment Policy has been created with Tenant Management Framework",
 		[Parameter(Mandatory = $true)]
 		[string] $accessPackage,
@@ -46,6 +47,10 @@ function Register-TmfAccessPackageAssignmentPolicy
 			durationInDays = $durationInDays
 			present = $present
 			sourceConfig = $sourceConfig
+		}
+
+		if ($PSBoundParameters.ContainsKey("oldNames")) {
+			Add-Member -InputObject $object -MemberType NoteProperty -Name "oldNames" -Value @($oldNames | ForEach-Object {Resolve-String $_})
 		}
 
 		"accessReviewSettings", "requestApprovalSettings", "requestorSettings" | ForEach-Object {

@@ -4,6 +4,7 @@ function Register-TmfAccessPackage
 	Param (
 		[Parameter(Mandatory = $true)]
 		[string] $displayName,
+		[string[]] $oldNames,
 		[string] $description = "Access Package has been created with Tenant Management Framework",
 		[bool] $isHidden = $false,
 		[bool] $isRoleScopesVisible = $true,
@@ -45,6 +46,11 @@ function Register-TmfAccessPackage
 			present = $present
 			sourceConfig = $sourceConfig
 		}	
+
+		if ($PSBoundParameters.ContainsKey("oldNames")) {
+			Add-Member -InputObject $object -MemberType NoteProperty -Name "oldNames" -Value @($oldNames | ForEach-Object {Resolve-String $_})
+		}
+
 		Add-Member -InputObject $object -MemberType ScriptMethod -Name Properties -Value { ($this | Get-Member -MemberType NoteProperty).Name }
 
 		foreach ($policy in $assignmentPolicies) {
