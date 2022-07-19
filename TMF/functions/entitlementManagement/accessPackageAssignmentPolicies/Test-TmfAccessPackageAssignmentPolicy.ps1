@@ -36,15 +36,6 @@ function Test-TmfAccessPackageAssignmentPolicy
 				DesiredConfiguration = $definition
 			}
 
-			if ("oldNames" -in $definition.Properties()) {				
-				$filter = ($definition.oldNames + $definition.displayName | Foreach-Object {
-					"(displayName eq '{0}')" -f [System.Web.HttpUtility]::UrlEncode($_)
-				}) -join " or "
-			}
-			else {
-				$filter = "(displayName eq '{0}')" -f [System.Web.HttpUtility]::UrlEncode($definition.displayName)
-			}
-
 			$accessPackageId = $definition.accessPackageId()
 			if (-Not $accessPackageId) {
 				Write-PSFMessage -Level Host -String 'TMF.RelatedResourceDoesNotExist' -StringValues "Access Package", $accessPackage, $result.ResourceType, $result.ResourceName
@@ -53,7 +44,15 @@ function Test-TmfAccessPackageAssignmentPolicy
 			}
 
 			try {			
-				$resource = (Invoke-MgGraphRequest -Method GET -Uri ("$script:graphBaseUrl/identityGovernance/entitlementManagement/accessPackageAssignmentPolicies?`$filter={0} and (accessPackageId eq '{1}')" -f $filter, $accessPackageId)).Value
+
+				$resource = (Invoke-MgGraphRequest -Method GET -Uri ("$script:graphBaseUrl/identityGovernance/entitlementManagement/accessPackageAssignmentPolicies?`$filter=(displayname eq '{0}') and (accessPackageId eq '{1}')" -f [System.Web.HttpUtility]::UrlEncode($definition.displayName), $accessPackageId)).Value
+
+				if (("oldNames" -in $definition.Properties()) -and (-not($resource))) {
+					foreach ($oldName in $definition.oldNames) {
+						$resource = (Invoke-MgGraphRequest -Method GET -Uri ("$script:graphBaseUrl/identityGovernance/entitlementManagement/accessPackageAssignmentPolicies?`$filter=(displayname eq '{0}') and (accessPackageId eq '{1}')" -f [System.Web.HttpUtility]::UrlEncode($oldName), $accessPackageId)).Value
+						if ($resource) {break}
+					}
+				}
 			}
 			catch {
 				Write-PSFMessage -Level Warning -String 'TMF.Error.QueryWithFilterFailed' -StringValues $filter -Tag 'failed'
@@ -77,7 +76,7 @@ function Test-TmfAccessPackageAssignmentPolicy
 					$result["GraphResource"] = $resource
 					if ($definition.present) {
 						$changes = @()
-						foreach ($property in ($definition.Properties() | Where-Object {$_ -notin "displayName", "present", "sourceConfig", "accessPackage", "oldNames"})) {
+						foreach ($property in ($definition.Properties() | Where-Object {$_ -notin "present", "sourceConfig", "accessPackage", "oldNames"})) {
 							$change = [PSCustomObject] @{
 								Property = $property										
 								Actions = $null
