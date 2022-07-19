@@ -96,7 +96,18 @@
 		'Test-TmfRoleDefinition',
 		'Invoke-TmfRoleDefinition',
 		'Test-TmfRoleManagement',
-		'Invoke-TmfRoleManagement'
+		'Invoke-TmfRoleManagement',
+		'Register-TmfAuthenticationFlowsPolicy',
+		'Test-TmfAuthenticationFlowsPolicy',
+		'Invoke-TmfAuthenticationFlowsPolicy',
+		'Register-TmfAuthenticationMethodsPolicy',
+		'Test-TmfAuthenticationMethodsPolicy',
+		'Invoke-TmfAuthenticationMethodsPolicy',
+		'Register-TmfAuthorizationPolicy',
+		'Test-TmfAuthorizationPolicy',
+		'Invoke-TmfAuthorizationPolicy',
+		'Test-TmfPolicies',
+		'Invoke-TmfPolicies'
 	)
 	
 	# Cmdlets to export from this module

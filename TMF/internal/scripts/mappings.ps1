@@ -131,6 +131,27 @@ $script:supportedResources = @{
         "parentType" = "roleManagement"
         "weight" = 16
     }
+    "authenticationFlowsPolicies" = @{
+        "registerFunction" = (Get-Command Register-TmfAuthenticationFlowsPolicy)
+        "testFunction" = (Get-Command Test-TmfAuthenticationFlowsPolicy)
+        "invokeFunction" = (Get-Command Invoke-TmfAuthenticationFlowsPolicy)
+        "parentType" = "policies"
+        "weight" = 5
+    }
+    "authenticationMethodsPolicies" = @{
+        "registerFunction" = (Get-Command Register-TmfAuthenticationMethodsPolicy)
+        "testFunction" = (Get-Command Test-TmfAuthenticationMethodsPolicy)
+        "invokeFunction" = (Get-Command Invoke-TmfAuthenticationMethodsPolicy)
+        "parentType" = "policies"
+        "weight" = 6
+    }
+    "authorizationPolicies" = @{
+        "registerFunction" = (Get-Command Register-TmfAuthorizationPolicy)
+        "testFunction" = (Get-Command Test-TmfAuthorizationPolicy)
+        "invokeFunction" = (Get-Command Invoke-TmfAuthorizationPolicy)
+        "parentType" = "policies"
+        "weight" = 7
+    }
 
 } # All currently supported components.
 Set-Variable -Name supportedResources -Option ReadOnly
