@@ -109,14 +109,14 @@ $script:supportedResources = @{
         "testFunction" = (Get-Command Test-TmfRoleManagementPolicy)
         "invokeFunction" = (Get-Command Invoke-TmfRoleManagementPolicy)
         "parentType" = "roleManagement"
-        "weight" = 15
+        "weight" = 17
     }
     "roleAssignments" = @{
         "registerFunction" = (Get-Command Register-TmfRoleAssignment)
         "testFunction" = (Get-Command Test-TmfRoleAssignment)
         "invokeFunction" = (Get-Command Invoke-TmfRoleAssignment)
         "parentType" = "roleManagement"
-        "weight" = 15
+        "weight" = 18
     }
     "roleDefinitions" = @{
         "registerFunction" = (Get-Command Register-TmfRoleDefinition)
@@ -128,7 +128,7 @@ $script:supportedResources = @{
     "roleManagementPolicyRuleTemplates" = @{
         "registerFunction" = (Get-Command Register-TmfRoleManagementPolicyRuleTemplates)
         "parentType" = "roleManagement"
-        "weight" = 15
+        "weight" = 16
     }
 } # All currently supported components.
 Set-Variable -Name supportedResources -Option ReadOnly
