@@ -94,7 +94,9 @@
 		'Invoke-TmfRoleAssignment',
 		'Register-TmfRoleDefinition',
 		'Test-TmfRoleDefinition',
-		'Invoke-TmfRoleDefinition'
+		'Invoke-TmfRoleDefinition',
+		'Test-TmfRoleManagement',
+		'Invoke-TmfRoleManagement'
 	)
 	
 	# Cmdlets to export from this module
