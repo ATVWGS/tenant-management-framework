@@ -1,72 +1,62 @@
 function Compare-PolicyProperties {
-    param (
+    Param (
         [Parameter(Mandatory = $true)]
-        [object[]] $ReferenceObject,
+        [System.Collections.Hashtable] $ReferenceObject,
         [Parameter(Mandatory = $true)]
-        [object[]] $DifferenceObject,
+        [System.Collections.Hashtable] $DifferenceObject,
         [System.Management.Automation.PSCmdlet]
         $Cmdlet = $PSCmdlet
     )
 
-    $same = $true
-
-    foreach ($itemSet in $ReferenceObject) {
-        $itemSetProperties = ($itemSet | Get-Member -MemberType NoteProperty).Name
-        $compareProperties = $DifferenceObject | Where-Object {$_.id -eq $itemSet.id}
-
-        foreach ($property in $itemSetProperties) {
-            if ($null -ne $itemSet.$property) {
-                if ($itemSet.$property.GetType().Name -in @("PSCustomObject","Object[]","System.Object[]")) {
-                    if ($itemSet.$property -and $compareProperties.$property) {
-                        if (-not (Compare-PolicyProperties -ReferenceObject $itemSet.$property -DifferenceObject $compareProperties.$property)) {
+    begin {
+        $same = $true
+    }
+    process {
+        $properties = $ReferenceObject.GetEnumerator() | Where-Object {$_.Name -notin @('target','@odata.type')}
+        foreach ($reference in $properties) {            
+            if ($DifferenceObject.ContainsKey($reference.Key)) {     
+                if ($null -eq $reference.Value) {
+                    if ($null -ne $DifferenceObject[$reference.Key]) {
+                        $same = $false
+                    }
+                }
+                elseif ($reference.Value.GetType().Name -eq "Hashtable") {
+                    if ($DifferenceObject[$reference.Key]) {
+                        if (-Not (Compare-PolicyProperties -ReferenceObject $reference.Value -DifferenceObject ($DifferenceObject[$reference.Key] | ConvertTo-PSFHashtable))) {
                             $same = $false
                         }
                     }
                     else {
-                        if (($itemSet.$property -and (-not($compareProperties.$property))) -or ((-not($itemSet.$property) -and $compareProperties.$property))) {
+                        $same = $false
+                    }
+                }
+                elseif ($reference.Value.GetType() -in @("System.Object[]", "string[]")) {
+                    if ($null -eq ($reference.Value | ConvertTo-PSFHashtable)) {
+                        if ($null -ne ($DifferenceObject[$reference.Key] | ConvertTo-PSFHashtable)) {
                             $same = $false
                         }
                     }
+                    else {
+                        if ($null -eq ($DifferenceObject[$reference.Key] | ConvertTo-PSFHashtable)) {
+                            $same = $false
+                        }
+                        else {
+
+                            if (-Not (Compare-PolicyProperties -ReferenceObject ($reference.Value | ConvertTo-PSFHashtable) -DifferenceObject ($DifferenceObject[$reference.Key] -join ' '| ConvertTo-PSFHashtable))) {
+                                $same = $false
+                            }
+                        }                        
+                    }
                 }
                 else {
-                    if ($itemSet.$property -ne $compareProperties.$property) {
+                    if ($reference.Value -ne $DifferenceObject[$reference.Key]) {
                         $same = $false
                     }
                 }
             }
         }
     }
-    foreach ($itemSet in $DifferenceObject) {
-        $itemSetProperties = ($itemSet | Get-Member -MemberType NoteProperty).Name
-        $compareProperties = $ReferenceObject | Where-Object {$_.id -eq $itemSet.id}
-
-        foreach ($property in $itemSetProperties) {
-
-            if ($null -ne $itemSet.$property) {
-                if ($itemSet.$property.GetType().Name -in @("PSCustomObject","Object[]","System.Object[]")) {
-                    if ($itemSet.$property -and $compareProperties.$property) {
-                        if (-not (Compare-PolicyProperties -ReferenceObject $itemSet.$property -DifferenceObject $compareProperties.$property)) {
-                            $same = $false
-                        }
-                    }
-                    else {
-                        if (($itemSet.$property -and (-not($compareProperties.$property))) -or ((-not($itemSet.$property) -and $compareProperties.$property))) {
-                            $same = $false
-                        }
-                    }
-                }
-                else {
-                    if ($itemSet.$property -ne $compareProperties.$property) {
-                        $same = $false
-                    }
-                }
-            }
-            else {
-                if ($null -ne $compareProperties.$property) {
-                    $same = $false
-                }
-            }
-        }
+    end {
+        return $same
     }
-    return $same
 }
