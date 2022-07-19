@@ -1,10 +1,10 @@
-function Register-TmfAccessPackageAssignementPolicy
+function Register-TmfAccessPackageAssignmentPolicy
 {
 	[CmdletBinding()]
 	Param (
 		[Parameter(Mandatory = $true)]
 		[string] $displayName,
-		[string] $description = "Access Package Assignement Policy has been created with Tenant Management Framework",
+		[string] $description = "Access Package Assignment Policy has been created with Tenant Management Framework",
 		[Parameter(Mandatory = $true)]
 		[string] $accessPackage,
 
@@ -25,7 +25,7 @@ function Register-TmfAccessPackageAssignementPolicy
 	
 	begin
 	{
-		$resourceName = "accessPackageAssignementPolicies"
+		$resourceName = "accessPackageAssignmentPolicies"
 		if (!$script:desiredConfiguration[$resourceName]) {
 			$script:desiredConfiguration[$resourceName] = @()
 		}

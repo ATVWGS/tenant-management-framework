@@ -146,6 +146,13 @@
 									}									
 								}
 								"resourceBehaviorOptions" {<# Is only used while creation of a group. #>}
+								"privilegedAccess" {
+									if ($definition.$property) {
+										if (-not ((Invoke-MgGraphRequest -Method GET -Uri "$($script:graphBaseUrl)/privilegedAccess/aadGroups/resources?`$filter=id eq '$($resource.Id)'").value)) {
+											$change.Actions = @{"Set" = "Activate"}
+										}
+									}
+								}
 								default {
 									if ($definition.$property -ne $resource.$property) {
 										$change.Actions = @{"Set" = $definition.$property}

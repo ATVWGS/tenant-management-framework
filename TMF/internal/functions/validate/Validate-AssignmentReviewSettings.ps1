@@ -16,7 +16,7 @@
 	
 	begin
 	{
-		$parentResourceName = "accessPackageAssignementPolicies"
+		$parentResourceName = "accessPackageAssignmentPolicies"
 	}
 	process
 	{

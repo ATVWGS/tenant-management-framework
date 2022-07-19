@@ -1,4 +1,4 @@
-function Invoke-TmfAccessPackageAssignementPolicy
+function Invoke-TmfAccessPackageAssignmentPolicy
 {
 	<#
 		.SYNOPSIS
@@ -12,9 +12,9 @@ function Invoke-TmfAccessPackageAssignementPolicy
 	
 	begin
 	{
-		$resourceName = "accessPackageAssignementPolicies"
+		$resourceName = "accessPackageAssignmentPolicies"
 		if (!$script:desiredConfiguration[$resourceName]) {
-			Stop-PSFFunction -String "TMF.NoDefinitions" -StringValues "AccessPackageAssignementPolicies"
+			Stop-PSFFunction -String "TMF.NoDefinitions" -StringValues "AccessPackageAssignmentPolicies"
 			return
 		}
 		Test-GraphConnection -Cmdlet $Cmdlet
@@ -65,7 +65,7 @@ function Invoke-TmfAccessPackageAssignementPolicy
 	process
 	{
 		if (Test-PSFFunctionInterrupt) { return }
-		$testResults = Test-TmfAccessPackageAssignementPolicy -Cmdlet $Cmdlet
+		$testResults = Test-TmfAccessPackageAssignmentPolicy -Cmdlet $Cmdlet
 
 		foreach ($result in $testResults) {
 			Beautify-TmfTestResult -TestResult $result -FunctionName $MyInvocation.MyCommand
