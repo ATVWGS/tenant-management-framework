@@ -74,8 +74,17 @@ function Test-TmfAccessPackage
 				DesiredConfiguration = $definition
 			}
 			
+			if ("oldNames" -in $definition.Properties()) {				
+				$filter = ($definition.oldNames + $definition.displayName | Foreach-Object {
+					"(displayName eq '{0}')" -f [System.Web.HttpUtility]::UrlEncode($_)
+				}) -join " or "
+			}
+			else {
+				$filter = "(displayName eq '{0}')" -f [System.Web.HttpUtility]::UrlEncode($definition.displayName)
+			}
+
 			try {
-				$resource = (Invoke-MgGraphRequest -Method GET -Uri ("$script:graphBaseUrl/identityGovernance/entitlementManagement/accessPackages?`$filter=displayName eq '{0}'&`$expand=accessPackageResourceRoleScopes(`$expand=accessPackageResourceRole,accessPackageResourceScope)" -f [System.Web.HttpUtility]::UrlEncode($definition.displayName))).Value
+				$resource = (Invoke-MgGraphRequest -Method GET -Uri ("$script:graphBaseUrl/identityGovernance/entitlementManagement/accessPackages?`$filter={0}&`$expand=accessPackageResourceRoleScopes(`$expand=accessPackageResourceRole,accessPackageResourceScope)" -f $filter)).Value
 			}
 			catch {
 				Write-PSFMessage -Level Warning -String 'TMF.Error.QueryWithFilterFailed' -StringValues $filter -Tag 'failed'
@@ -99,7 +108,7 @@ function Test-TmfAccessPackage
 					$result["GraphResource"] = $resource
 					if ($definition.present) {
 						$changes = @()
-						foreach ($property in ($definition.Properties() | Where-Object {$_ -notin "displayName", "present", "sourceConfig"})) {
+						foreach ($property in ($definition.Properties() | Where-Object {$_ -notin "displayName", "present", "sourceConfig", "oldNames"})) {
 							$change = [PSCustomObject] @{
 								Property = $property										
 								Actions = $null
