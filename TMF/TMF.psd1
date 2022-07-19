@@ -88,7 +88,7 @@
 		'Register-TmfRoleManagementPolicy',
 		'Test-TmfRoleManagementPolicy',
 		'Invoke-TmfRoleManagementPolicy',
-		'Register-TmfRoleManagementPolicyRuleTemplates',
+		'Register-TmfRoleManagementPolicyRuleTemplate',
 		'Register-TmfRoleAssignment',
 		'Test-TmfRoleAssignment',
 		'Invoke-TmfRoleAssignment',

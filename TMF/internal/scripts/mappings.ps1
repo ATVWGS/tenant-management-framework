@@ -127,7 +127,7 @@ $script:supportedResources = @{
         "weight" = 15
     }
     "roleManagementPolicyRuleTemplates" = @{
-        "registerFunction" = (Get-Command Register-TmfRoleManagementPolicyRuleTemplates)
+        "registerFunction" = (Get-Command Register-TmfRoleManagementPolicyRuleTemplate)
         "parentType" = "roleManagement"
         "weight" = 16
     }
