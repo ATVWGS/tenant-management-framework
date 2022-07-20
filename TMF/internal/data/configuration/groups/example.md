@@ -16,6 +16,21 @@ Additional properties will be added in the future.
 }
 ```
 
+### A privileged access group which is assignableToRole
+```json
+{   
+    "displayName": "Some group",
+    "description": "This is a security group",
+    "groupTypes": [],        
+    "securityEnabled": true,
+    "mailEnabled": false,
+    "privilegedAccess": true,
+    "isAssignableToRole": true,
+    "mailNickname": "someGroupForMembers",
+    "present": true
+}
+```
+
 ### A security group with dynamic membership
 ```json
 {   
@@ -59,6 +74,30 @@ Additional properties will be added in the future.
     "mailNickname": "someDynamicGroup",
     "members": ["max.mustermann@volkswagen.de"],
     "owners": ["group.owner@volkswagen.de"],
+    "present": true
+}
+```
+
+### A security group with static membership and assignedLicenses
+```json
+{   
+    "displayName": "Some group",
+    "description": "This is a security group",
+    "groupTypes": [],        
+    "securityEnabled": true,
+    "mailEnabled": false,
+    "mailNickname": "someGroupForMembers",
+    "members": ["max.mustermann@volkswagen.de"],
+    "owners": ["group.owner@volkswagen.de"],
+    "assignedLicenses": [
+        {
+            "skuId": "licenseID",
+            "disabledPlans": [
+                "disabledPlan1ID",
+                "disabledPlan2ID"
+            ]
+        }
+    ],
     "present": true
 }
 ```

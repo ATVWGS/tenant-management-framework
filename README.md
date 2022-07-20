@@ -59,8 +59,11 @@ The required scopes depend on what components (resources) you want to configure.
 | Named Locations                                                  | Policy.ReadWrite.ConditionalAccess                                                                                           |
 | Agreements (Terms of Use)                                        | Agreement.ReadWrite.All                                                                                                      |
 | Conditional Access Policies                                      | Policy.ReadWrite.ConditionalAccess, Policy.Read.All, RoleManagement.Read.Directory, Application.Read.All, Agreement.Read.All |
-| Enitlement Management (Access Packages, Access Package Catalogs) | EntitlementManagement.ReadWrite.All                                                                                          |
+| Entitlement Management (Access Packages, Access Package Catalogs)| EntitlementManagement.ReadWrite.All                                                                                          |
 | Administrative Units                                             | AdministrativeUnit.ReadWrite.All, Directory.AccessAsUser.All, RoleManagement.ReadWrite.Directory                             |
+| Role Management (assignments, definitions, management policies)  | RoleManagement.ReadWrite.Directory, Directory.AccessAsUser.All, RoleEligibilitySchedule.ReadWrite.Directory,                 |
+|                                                                  | RoleAssignmentSchedule.ReadWrite.Directory", "RoleManagementPolicy.ReadWrite.Directory"                                      |
+| Policies (authentication/authorization policies)                 | Policy.ReadWrite.AuthenticationMethod, Policy.ReadWrite.Authorization, Policy.ReadWrite.AuthenticationFlows                  |
 
 
 You can also use *Get-TmfRequiredScope* to get the required scopes and combine it with *Connect-MgGraph*.
@@ -160,6 +163,36 @@ The *example.md* file contains example resource instances and further informatio
 ├───namedLocations
 │       example.md
 │       namedLocations.json
+│
+├───policies
+│   ├───authenticationFlowsPolicies
+│   │       authenticationFlowsPolicies.json
+│   │       example.md
+│   │
+│   ├───authenticationMethodsPolicies
+│   │       authenticationMethodsPolicies.json
+│   │       example.md
+│   │
+│   └───authorizationPolicies
+│           authorizationPolicies.json
+│           example.md
+│
+├───roleManagement
+│   ├───roleAssignments
+│   │       roleAssignments.json
+│   │       example.md
+│   │
+│   ├───roleDefinitions
+│   │       roleDefinitions.json
+│   │       example.md
+│   │
+│   ├───roleManagementPolicies
+│   │       roleManagementPolicies.json
+│   │       example.md
+│   │
+│   └───roleManagementPolicyRuleTemplates
+│           roleManagementPolicyRuleTemplates.json
+│           example.md
 │
 └────stringMappings
         stringMappings.json
@@ -497,6 +530,7 @@ Please check the [Access Package Catalogs example.md](./TMF/internal/data/config
 ```json
 {
     "displayName":"Access Package",
+    "oldNames": [],
     "description":"Access Package description",
     "isHidden":true,
     "isRoleScopesVisible":true,
@@ -512,6 +546,7 @@ Please check the [Access Package Catalogs example.md](./TMF/internal/data/config
     "assignmentPolicies":[
         {
             "displayName":"Initial policy",
+            "oldNames": [],
             "canExtend":false,
             "durationInDays":8,
             "accessReviewSettings":{
@@ -672,7 +707,541 @@ Please check the [Access Reviews example.md](./TMF/internal/data/configuration/a
 ```
 Please check the [Directory Roles example.md](./TMF/internal/data/configuration/directoryRoles/example.md) for further information.
 
-### 2.6.10. String mapping
+
+### 2.6.10. Policies
+
+### 2.6.10.1. authenticationFlowsPolicies
+
+```json
+[
+	{
+		"displayName": "Authentication flows policy",
+		"selfServiceSignUpEnabled": false
+	}
+]
+```
+Please check the [.... example.md](./TMF/internal/data/configuration/policies/authenticationFlowsPolicies/example.md) for further information.
+
+
+### 2.6.10.2. authenticationMethodsPolicies
+
+```json
+[
+	{
+		"displayName": "Authentication Methods Policy",
+		"registrationEnforcement": {
+			"authenticationMethodsRegistrationCampaign": {
+				"snoozeDurationInDays": 1,
+				"state": "default",
+				"excludeTargets": [],
+				"includeTargets": [
+					{
+						"id": "all_users",
+						"targetType": "group",
+						"targetedAuthenticationMethod": "microsoftAuthenticator"
+					}
+				]
+			}
+		},
+		"authenticationMethodConfigurations": [
+		
+			{
+				"id": "Fido2",
+				"state": "disabled",
+				"isSelfServiceRegistrationAllowed": true,
+				"isAttestationEnforced": true
+			},
+			{
+				"id": "MicrosoftAuthenticator",
+				"state": "disabled"
+			},
+			{
+				"id": "Sms",
+				"state": "disabled"
+			},
+			{
+				"id": "TemporaryAccessPass",
+				"state": "disabled",
+				"defaultLifetimeInMinutes": 60,
+				"defaultLength": 8,
+				"minimumLifetimeInMinutes": 60,
+				"maximumLifetimeInMinutes": 480,
+				"isUsableOnce": false
+			},
+			{
+				"id": "Email",
+				"state": "enabled",
+				"allowExternalIdToUseEmailOtp": "enabled"
+			},
+			{
+				"id": "X509Certificate",
+				"state": "disabled",
+				"certificateUserBindings": [
+					{
+						"x509CertificateField": "PrincipalName",
+						"userProperty": "onPremisesUserPrincipalName",
+						"priority": 1
+					},
+					{
+						"x509CertificateField": "RFC822Name",
+						"userProperty": "userPrincipalName",
+						"priority": 2
+					}
+				],
+				"authenticationModeConfiguration": {
+					"x509CertificateAuthenticationDefaultMode": "x509CertificateSingleFactor",
+					"rules": []
+				}
+			}
+		]
+	}
+]
+```
+Please check the [.... example.md](./TMF/internal/data/configuration/policies/authenticationMethodsPolicies/example.md) for further information.
+
+
+### 2.6.10.1. authorizationPolicies
+
+```json
+
+[
+	{
+		"displayName": "Authorization Policy",
+        "allowInvitesFrom": "adminsAndGuestInviters",
+        "allowedToSignUpEmailBasedSubscriptions": false,
+        "allowedToUseSSPR": true,
+        "allowEmailVerifiedUsersToJoinOrganization": false,
+        "blockMsolPowerShell": false,
+        "guestUserRole": "Guest User",
+        "allowedToCreateApps": false,
+        "allowedToCreateSecurityGroups": false,
+        "allowedToReadOtherUsers": true,
+		"allowedToReadBitlockerKeysForOwnedDevice": true,
+        "permissionGrantPolicyIdsAssignedToDefaultUserRole": []
+	}
+]
+
+```
+Please check the [.... example.md](./TMF/internal/data/configuration/policies/authorizationPolicies/example.md) for further information.
+
+
+### 2.6.11. roleManagement
+
+### 2.6.11.1. roleAssignments
+
+# Eligible role assignment for a group on a directory role with no expiration
+```json
+{
+    "present": true,
+    "type": "eligible",
+    "principalReference": "Group name",
+    "principalType": "group",
+    "roleReference": "directory role name",
+    "directoryScopeReference": "/",
+    "directoryScopeType": "directory",
+    "startDateTime": "2022-04-28T00:00:00.00Z",
+    "expirationType": "noExpiration"
+}
+```
+# Eligible role assignment for a group on an administrativeUnit with no expiration
+```json
+{
+    "present": true,
+    "type": "eligible",
+    "principalReference": "Group name",
+    "principalType": "group",
+    "roleReference": "directory role name",
+    "directoryScopeReference": "name of administrativeUnit",
+    "directoryScopeType": "administrativeUnit",
+    "startDateTime": "2022-04-28T00:00:00.00Z",
+    "expirationType": "noExpiration"
+}
+```
+# Eligible role assignment for a group on the owner role on subscription level with endTime
+```json
+{
+    "present": true,
+    "type": "eligible",
+    "principalReference": "Some group",
+    "principalType": "group",
+    "roleReference": "Owner",
+    "subscriptionReference": "Subscription name",
+    "scopeReference": "Subscription name",
+    "scopeType": "subscription",
+    "startDateTime": "2022-03-30T00:00:00.00Z",
+    "expirationType": "AfterDateTime",
+    "endDateTime": "2023-03-30T00:00:00.00Z"
+}
+```
+Please check the [.... example.md](./TMF/internal/data/configuration/roleManagement/roleAssignments/example.md) for further information.
+
+
+### 2.6.11.2. roleDefinitions
+
+# Custom role definition for Azure Resources
+```json
+
+{
+    "present": true,
+    "displayName": "Some role name",
+    "description": "Some description",
+    "subscriptionReference": "Subscription name",
+    "assignableScopes": [
+        "/subscriptions/subscriptionID",
+        "/subscriptions/subscriptionID/ResourceGroups/resourceGroupName"
+    ],
+    "permissions": [
+        {
+            "actions": [
+                "Microsoft.Resources/subscriptions/resourceGroups/write",
+                "Microsoft.Resources/subscriptions/resourceGroups/delete"
+            ],
+            "notActions": [],
+            "dataActions": [],
+            "notDataActions": []
+        }
+    ]
+}
+```
+# Custom role definition for AzureAD
+```json
+
+{
+    "present": true,
+    "displayName": "Some role name",
+    "description": "Some description",
+    "rolePermissions": [
+        {
+            "allowedResourceActions": [
+                "microsoft.directory/groups/standard/read",
+                "microsoft.directory/groups/memberOf/read",
+                "microsoft.directory/groups/members/read",
+                "microsoft.directory/groups/owners/read"
+            ],
+            "condition": null
+        }
+    ]
+}
+```
+Please check the [.... example.md](./TMF/internal/data/configuration/roleManagement/roleDefinitions/example.md) for further information.
+
+
+### 2.6.11.3. roleManagementPolicies
+
+# RoleManagementPolicy for directory role without approval
+```json
+{
+    "roleReference": "directory role name",
+    "activationApprover": [],
+    "scopeReference": "/",
+    "scopeType": "directory",
+    "ruleTemplate": "some rule template"
+}
+```
+
+# RoleManagementPolicy for AzureResource role on subscription level with approver
+```json
+{
+    "roleReference": "role name",
+    "subscriptionReference": "subscription name",
+    "scopeReference": "subscription name",
+    "scopeType": "subscription",
+    "activationApprover": [
+        {
+            "reference": "userPrincipalName",
+            "type": "user"
+        }
+    ],
+    "ruleTemplate": "some rule template"
+}
+```
+Please check the [.... example.md](./TMF/internal/data/configuration/roleManagement/roleManagementPolicies/example.md) for further information.
+
+
+### 2.6.11.4. roleManagementPolicyRuleTemplates
+
+roleManagementPolicyRuleTemplates include all rules but the "Approval_EndUser_Assignment". The approvers are set within the roleManagementPolicies configurations.
+
+# RoleManagementPolicy ruleset with maximum 9 months eligible assignment possible, permanent active assignment possible and activation duration of 12 hours
+```json
+{
+    "displayName": "AzureAD_Tier0",
+    "rules": [
+      {
+        "@odata.type": "#microsoft.graph.unifiedRoleManagementPolicyExpirationRule",
+        "id": "Expiration_Admin_Eligibility",
+        "isExpirationRequired": true,
+        "maximumDuration": "P270D",
+        "target": {
+            "caller": "Admin",
+            "operations": [
+                "All"
+            ],
+            "level": "Eligibility",
+            "inheritableSettings": [],
+            "enforcedSettings": []
+        }
+      },
+      {
+          "@odata.type": "#microsoft.graph.unifiedRoleManagementPolicyEnablementRule",
+          "id": "Enablement_Admin_Eligibility",
+          "enabledRules": [],
+          "target": {
+              "caller": "Admin",
+              "operations": [
+                  "All"
+              ],
+              "level": "Eligibility",
+              "inheritableSettings": [],
+              "enforcedSettings": []
+          }
+      },
+      {
+          "@odata.type": "#microsoft.graph.unifiedRoleManagementPolicyNotificationRule",
+          "id": "Notification_Admin_Admin_Eligibility",
+          "notificationType": "Email",
+          "recipientType": "Admin",
+          "notificationLevel": "All",
+          "isDefaultRecipientsEnabled": true,
+          "notificationRecipients": [],
+          "target": {
+              "caller": "Admin",
+              "operations": [
+                  "All"
+              ],
+              "level": "Eligibility",
+              "inheritableSettings": [],
+              "enforcedSettings": []
+          }
+      },
+      {
+          "@odata.type": "#microsoft.graph.unifiedRoleManagementPolicyNotificationRule",
+          "id": "Notification_Requestor_Admin_Eligibility",
+          "notificationType": "Email",
+          "recipientType": "Requestor",
+          "notificationLevel": "All",
+          "isDefaultRecipientsEnabled": true,
+          "notificationRecipients": [],
+          "target": {
+              "caller": "Admin",
+              "operations": [
+                  "All"
+              ],
+              "level": "Eligibility",
+              "inheritableSettings": [],
+              "enforcedSettings": []
+          }
+      },
+      {
+          "@odata.type": "#microsoft.graph.unifiedRoleManagementPolicyNotificationRule",
+          "id": "Notification_Approver_Admin_Eligibility",
+          "notificationType": "Email",
+          "recipientType": "Approver",
+          "notificationLevel": "All",
+          "isDefaultRecipientsEnabled": true,
+          "notificationRecipients": [],
+          "target": {
+              "caller": "Admin",
+              "operations": [
+                  "All"
+              ],
+              "level": "Eligibility",
+              "inheritableSettings": [],
+              "enforcedSettings": []
+          }
+      },
+      {
+          "@odata.type": "#microsoft.graph.unifiedRoleManagementPolicyExpirationRule",
+          "id": "Expiration_Admin_Assignment",
+          "isExpirationRequired": false,
+          "maximumDuration": "P270D",
+          "target": {
+              "caller": "Admin",
+              "operations": [
+                  "All"
+              ],
+              "level": "Assignment",
+              "inheritableSettings": [],
+              "enforcedSettings": []
+          }
+      },
+      {
+          "@odata.type": "#microsoft.graph.unifiedRoleManagementPolicyEnablementRule",
+          "id": "Enablement_Admin_Assignment",
+          "enabledRules": [
+              "Justification"
+          ],
+          "target": {
+              "caller": "Admin",
+              "operations": [
+                  "All"
+              ],
+              "level": "Assignment",
+              "inheritableSettings": [],
+              "enforcedSettings": []
+          }
+      },
+      {
+          "@odata.type": "#microsoft.graph.unifiedRoleManagementPolicyNotificationRule",
+          "id": "Notification_Admin_Admin_Assignment",
+          "notificationType": "Email",
+          "recipientType": "Admin",
+          "notificationLevel": "All",
+          "isDefaultRecipientsEnabled": true,
+          "notificationRecipients": [],
+          "target": {
+              "caller": "Admin",
+              "operations": [
+                  "All"
+              ],
+              "level": "Assignment",
+              "inheritableSettings": [],
+              "enforcedSettings": []
+          }
+      },
+      {
+          "@odata.type": "#microsoft.graph.unifiedRoleManagementPolicyNotificationRule",
+          "id": "Notification_Requestor_Admin_Assignment",
+          "notificationType": "Email",
+          "recipientType": "Requestor",
+          "notificationLevel": "All",
+          "isDefaultRecipientsEnabled": true,
+          "notificationRecipients": [],
+          "target": {
+              "caller": "Admin",
+              "operations": [
+                  "All"
+              ],
+              "level": "Assignment",
+              "inheritableSettings": [],
+              "enforcedSettings": []
+          }
+      },
+      {
+          "@odata.type": "#microsoft.graph.unifiedRoleManagementPolicyNotificationRule",
+          "id": "Notification_Approver_Admin_Assignment",
+          "notificationType": "Email",
+          "recipientType": "Approver",
+          "notificationLevel": "All",
+          "isDefaultRecipientsEnabled": true,
+          "notificationRecipients": [],
+          "target": {
+              "caller": "Admin",
+              "operations": [
+                  "All"
+              ],
+              "level": "Assignment",
+              "inheritableSettings": [],
+              "enforcedSettings": []
+          }
+      },
+      {
+          "@odata.type": "#microsoft.graph.unifiedRoleManagementPolicyExpirationRule",
+          "id": "Expiration_EndUser_Assignment",
+          "isExpirationRequired": true,
+          "maximumDuration": "PT12H",
+          "target": {
+              "caller": "EndUser",
+              "operations": [
+                  "All"
+              ],
+              "level": "Assignment",
+              "inheritableSettings": [],
+              "enforcedSettings": []
+          }
+      },
+      {
+          "@odata.type": "#microsoft.graph.unifiedRoleManagementPolicyEnablementRule",
+          "id": "Enablement_EndUser_Assignment",
+          "enabledRules": [
+              "Justification"
+          ],
+          "target": {
+              "caller": "EndUser",
+              "operations": [
+                  "All"
+              ],
+              "level": "Assignment",
+              "inheritableSettings": [],
+              "enforcedSettings": []
+          }
+      },
+      {
+          "@odata.type": "#microsoft.graph.unifiedRoleManagementPolicyAuthenticationContextRule",
+          "id": "AuthenticationContext_EndUser_Assignment",
+          "isEnabled": false,
+          "claimValue": null,
+          "target": {
+              "caller": "EndUser",
+              "operations": [
+                  "All"
+              ],
+              "level": "Assignment",
+              "inheritableSettings": [],
+              "enforcedSettings": []
+          }
+      },
+      {
+          "@odata.type": "#microsoft.graph.unifiedRoleManagementPolicyNotificationRule",
+          "id": "Notification_Admin_EndUser_Assignment",
+          "notificationType": "Email",
+          "recipientType": "Admin",
+          "notificationLevel": "All",
+          "isDefaultRecipientsEnabled": true,
+          "notificationRecipients": [],
+          "target": {
+              "caller": "EndUser",
+              "operations": [
+                  "All"
+              ],
+              "level": "Assignment",
+              "inheritableSettings": [],
+              "enforcedSettings": []
+          }
+      },
+      {
+          "@odata.type": "#microsoft.graph.unifiedRoleManagementPolicyNotificationRule",
+          "id": "Notification_Requestor_EndUser_Assignment",
+          "notificationType": "Email",
+          "recipientType": "Requestor",
+          "notificationLevel": "All",
+          "isDefaultRecipientsEnabled": true,
+          "notificationRecipients": [],
+          "target": {
+              "caller": "EndUser",
+              "operations": [
+                  "All"
+              ],
+              "level": "Assignment",
+              "inheritableSettings": [],
+              "enforcedSettings": []
+          }
+      },
+      {
+          "@odata.type": "#microsoft.graph.unifiedRoleManagementPolicyNotificationRule",
+          "id": "Notification_Approver_EndUser_Assignment",
+          "notificationType": "Email",
+          "recipientType": "Approver",
+          "notificationLevel": "All",
+          "isDefaultRecipientsEnabled": true,
+          "notificationRecipients": [],
+          "target": {
+              "caller": "EndUser",
+              "operations": [
+                  "All"
+              ],
+              "level": "Assignment",
+              "inheritableSettings": [],
+              "enforcedSettings": []
+          }
+      }
+    ]
+  }
+  ```
+Please check the [.... example.md](./TMF/internal/data/configuration/roleManagement/roleManagementPolicyRuleTemplates/example.md) for further information.
+
+
+### 2.6.12. String mapping
 String mappings can help you with parameterization of your TMF configurations.
 
 You can create mappings between strings and the values they should be replaced with. Place the mappings in the *stringMappings.json* file in the *stringMappings* folder of your configuration.
