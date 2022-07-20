@@ -44,7 +44,7 @@
 		[Parameter(ParameterSetName = "SpecifiedComponents")]
 		[switch] $AccessReviews,
 		[Parameter(ParameterSetName = "SpecifiedComponents")]
-		[switch] $RoleAssignments,
+		[switch] $RoleManagement,
 		[Parameter(ParameterSetName = "SpecifiedComponents")]
 		[switch] $Groups,
 		[Parameter(ParameterSetName = "SpecifiedComponents")]
@@ -59,6 +59,8 @@
 		[switch] $EntitlementManagement,
 		[Parameter(ParameterSetName = "SpecifiedComponents")]
 		[switch] $AdministrativeUnits,
+		[Parameter(ParameterSetName = "SpecifiedComponents")]
+		[switch] $Policies,
 		[Parameter(ParameterSetName = "All")]
 		[switch] $All
 	)
@@ -72,8 +74,8 @@
 		if($AccessReviews -or $All) {
 			$scopes += "Group.Read.All", "AccessReview.ReadWrite.All", "RoleManagement.Read.Directory", "Directory.Read.All", "Directory.AccessAsUser.All"
 		}
-		if($RoleAssignments -or $All) {
-			$scopes += "RoleManagement.ReadWrite.Directory", "Directory.AccessAsUser.All"
+		if($RoleManagement -or $All) {
+			$scopes += "RoleManagement.ReadWrite.Directory", "Directory.AccessAsUser.All", "RoleEligibilitySchedule.ReadWrite.Directory", "RoleAssignmentSchedule.ReadWrite.Directory", "RoleManagementPolicy.ReadWrite.Directory"
 		}
 		if ($Groups -or $All) {
 			$scopes += "Group.ReadWrite.All", "GroupMember.ReadWrite.All", "Directory.ReadWrite.All", "Directory.AccessAsUser.All"
@@ -95,6 +97,9 @@
 		}
 		if ($AdministrativeUnits -or $All) {
 			$scopes += "AdministrativeUnit.ReadWrite.All", "Directory.AccessAsUser.All", "RoleManagement.ReadWrite.Directory"
+		}
+		if ($Policies -or $All) {
+			$scopes += "Policy.ReadWrite.AuthenticationMethod", "Policy.ReadWrite.Authorization", "Policy.ReadWrite.AuthenticationFlows"
 		}
 		return ($scopes | Sort-Object -Unique)
 	}
