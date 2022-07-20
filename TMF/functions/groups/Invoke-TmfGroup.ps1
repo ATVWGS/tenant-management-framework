@@ -39,7 +39,7 @@
 					}
 
 					try {
-						@("mailNickname", "groupTypes", "mailEnabled", "isAssignableToRole", "securityEnabled", "hideFromAddressLists", "hideFromOutlookClients", "resourceBehaviorOptions") | ForEach-Object {
+						@("mailNickname", "groupTypes", "mailEnabled", "isAssignableToRole", "securityEnabled", "resourceBehaviorOptions") | ForEach-Object {
 							if ($result.DesiredConfiguration.Properties() -contains $_) {
 								$requestBody[$_] = $result.DesiredConfiguration.$_
 							}
@@ -62,20 +62,46 @@
 						
 						$requestBody = $requestBody | ConvertTo-Json -ErrorAction Stop
 						Write-PSFMessage -Level Verbose -String "TMF.Invoke.SendingRequestWithBody" -StringValues $requestMethod, $requestUrl, $requestBody
-						Invoke-MgGraphRequest -Method $requestMethod -Uri $requestUrl -Body $requestBody | Out-Null
+						$resource = Invoke-MgGraphRequest -Method $requestMethod -Uri $requestUrl -Body $requestBody
+
+						if ($result.DesiredConfiguration.Properties() -contains "hideFromOutlookClients" -or $result.DesiredConfiguration.Properties() -contains "hideFromAddressLists") {
+							$requestMethod = "PATCH"
+							$requestUrl = "$script:graphBaseUrl/groups/{0}" -f $resource.id
+							$requestBody = @{}
+							@("hideFromOutlookClients", "hideFromAddressLists") | Foreach-Object {
+								if ($result.DesiredConfiguration.Properties() -contains $_) {
+									$requestBody[$_] = $result.DesiredConfiguration.$_
+								}
+							}
+							$requestBody = $requestBody | ConvertTo-Json -ErrorAction Stop
+							Start-Sleep -Seconds 10 # Wait for group creation
+							Write-PSFMessage -Level Verbose -String "TMF.Invoke.SendingRequestWithBody" -StringValues $requestMethod, $requestUrl, $requestBody
+							Invoke-MgGraphRequest -Method $requestMethod -Uri $requestUrl -Body $requestBody | Out-Null
+						}						
 
 						if ($result.DesiredConfiguration.Properties() -contains "privilegedAccess") {
-							if ($result.DesiredConfiguration.privilegedAccess) {
-								$groupId = (Invoke-MgGraphRequest -Method "GET" -Uri "$script:graphBaseUrl/groups?`$filter=displayName eq '$($result.DesiredConfiguration.displayName)'").value.Id
+							if ($result.DesiredConfiguration.privilegedAccess) {								
 								$requestMethod = "POST"
 								$requestUrl = "$script:graphBaseUrl/privilegedAccess/aadGroups/resources/register"
 								$requestBody = @{
-									"externalId" = $groupId
+									"externalId" = $resource.id
 								}
 								$requestBody = $requestBody | ConvertTo-Json -ErrorAction Stop
 								Write-PSFMessage -Level Verbose -String "TMF.Invoke.SendingRequestWithBody" -StringValues $requestMethod, $requestUrl, $requestBody
 								Invoke-MgGraphRequest -Method $requestMethod -Uri $requestUrl -Body $requestBody | Out-Null
 							}
+						}
+
+						if ($result.DesiredConfiguration.Properties() -contains "assignedLicenses") {
+							$requestMethod = "POST"
+							$requestUrl = "$script:graphBaseUrl/groups/{0}/assignLicense" -f $resource.id
+							$requestBody = @{
+								"addLicenses" = @($result.DesiredConfiguration.assignedLicenses)
+								"removeLicenses" = @()
+							}
+							$requestBody = $requestBody | ConvertTo-Json -ErrorAction Stop -Depth 3
+							Write-PSFMessage -Level Verbose -String "TMF.Invoke.SendingRequestWithBody" -StringValues $requestMethod, $requestUrl, $requestBody
+							Invoke-MgGraphRequest -Method $requestMethod -Uri $requestUrl -Body $requestBody | Out-Null
 						}
 					}
 					catch {
@@ -148,6 +174,20 @@
 										}
 									}
 								}
+								"assignedLicenses" {
+									$requestMethod = "POST"
+									$requestUrl = "$script:graphBaseUrl/groups/{0}/assignLicense" -f $result.GraphResource.Id
+									$requestBody = @{
+										"addLicenses" = @()
+										"removeLicenses" = @()
+									}
+									if ($change.Actions["Add"]) {	$requestBody["addLicenses"] = @($change.Actions["Add"]) }
+									if ($change.Actions["Remove"]) {	$requestBody["removeLicenses"] = @($change.Actions["Remove"]) }
+
+									$requestBody = $requestBody | ConvertTo-Json -ErrorAction Stop -Depth 3
+									Write-PSFMessage -Level Verbose -String "TMF.Invoke.SendingRequestWithBody" -StringValues $requestMethod, $requestUrl, $requestBody
+									Invoke-MgGraphRequest -Method $requestMethod -Uri $requestUrl -Body $requestBody | Out-Null
+								}
 								"privilegedAccess" {
 									$requestMethod = "POST"
 									$requestUrl = "$script:graphBaseUrl/privilegedAccess/aadGroups/resources/register"
@@ -163,9 +203,9 @@
 										switch ($action) {
 											"Set" { $requestBody[$change.Property] = $change.Actions[$action] }
 										}
-									}									
+									}
 								}
-							}							
+							}
 						}
 
 						if ($requestBody.Keys -gt 0) {

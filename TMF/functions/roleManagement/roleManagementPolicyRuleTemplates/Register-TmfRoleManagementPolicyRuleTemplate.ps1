@@ -1,4 +1,4 @@
-function Register-TmfRoleManagementPolicyRuleTemplates {
+function Register-TmfRoleManagementPolicyRuleTemplate {
     Param (
         [Parameter(Mandatory = $true)]
         [string] $displayName,

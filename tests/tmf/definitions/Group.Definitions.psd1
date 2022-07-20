@@ -66,5 +66,38 @@
             "mailEnabled" = $false
             "present" = $true
         }
+        @{
+            "displayName" = "Test - {{ timestamp }} - Security Group - Assigned Licenses"
+            "description" = "This is a group with assigned licenses"
+            "groupTypes" = @()
+            "securityEnabled" = $true
+            "mailEnabled" = $false
+            "assignedLicenses" = @(
+                @{
+                    "skuId" = "FLOW_FREE"
+                    "disabledPlans" = @(
+                        "FLOW_P2_VIRAL",
+                        "DYN365_CDS_VIRAL"
+                    )
+                }
+            )
+            "present" = $true
+        }
+        @{
+            "displayName" = "Test - {{ timestamp }} - M365 Group - Hide Group"
+            "description" = "This is a M365 group"
+            "groupTypes" = @(
+                "Unified"
+            )
+            "resourceBehaviorOptions" = @(
+                "WelcomeEmailDisabled"
+            )
+            "hideFromAddressLists" = $true
+            "hideFromOutlookClients" = $true
+            "securityEnabled" = $false
+            "members"= @()
+            "mailEnabled" = $false
+            "present" = $true
+        }
     )
 }

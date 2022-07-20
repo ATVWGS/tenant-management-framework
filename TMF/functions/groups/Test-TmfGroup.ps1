@@ -81,8 +81,11 @@
 			else {
 				$filter = "(displayName eq '{0}')" -f [System.Web.HttpUtility]::UrlEncode($definition.displayName)
 			}
+
+			$select = ($definition.Properties() | Where-Object {$_ -notin "hideFromOutlookClients", "hideFromAddressLists", "privilegedAccess", "members", "oldNames", "present", "sourceConfig"})
+			$select += "id"
 			try {
-				$resource = (Invoke-MgGraphRequest -Method GET -Uri ("$script:graphBaseUrl/groups/?`$filter={0}" -f $filter)).Value
+				$resource = (Invoke-MgGraphRequest -Method GET -Uri ("$script:graphBaseUrl/groups/?`$filter={0}&`$select={1}" -f $filter, ($select -join ","))).Value
 			}
 			catch {
 				Write-PSFMessage -Level Warning -String 'TMF.Error.QueryWithFilterFailed' -StringValues $filter -Tag 'failed'
@@ -131,7 +134,7 @@
 											Property = "membershipRuleProcessingState"										
 											Actions = @{"Set" = "On"}
 										}
-									}								
+									}
 								}
 								"groupTypes" {
 									if ($resource.groupTypes) {
@@ -146,12 +149,21 @@
 									}									
 								}
 								"resourceBehaviorOptions" {<# Is only used while creation of a group. #>}
+								{$_ -in @("hideFromAddressLists", "hideFromOutlookClients")} {
+									$tempResource = Invoke-MgGraphRequest -Method GET -Uri ("$script:graphBaseUrl/groups/{0}" -f $resource.id)
+									if ($definition.$property -ne $tempResource.$property) {
+										$change.Actions = @{"Set" = $definition.$property}
+									}
+								}
 								"privilegedAccess" {
 									if ($definition.$property) {
-										if (-not ((Invoke-MgGraphRequest -Method GET -Uri "$($script:graphBaseUrl)/privilegedAccess/aadGroups/resources?`$filter=id eq '$($resource.Id)'").value)) {
+										if (-Not (Invoke-MgGraphRequest -Method GET -Uri "$($script:graphBaseUrl)/privilegedAccess/aadGroups/resources?`$filter=id eq '$($resource.Id)'").value) {
 											$change.Actions = @{"Set" = "Activate"}
 										}
 									}
+								}
+								"assignedLicenses" {
+									$change.Actions = Compare-AssignedLicenses -ReferenceList $resource.$property -DifferenceList $definition.$property -Cmdlet $PSCmdlet
 								}
 								default {
 									if ($definition.$property -ne $resource.$property) {

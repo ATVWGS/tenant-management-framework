@@ -19,7 +19,7 @@ else {
 #region Some test resource definitions
 $global:graphUris = @{
     "groups" = "https://graph.microsoft.com/beta/groups"
-    "namedLocations" = "https://graph.microsoft.com/beta/identity/conditionalAccess/namedLocations/"
+    "namedLocations" = "https://graph.microsoft.com/beta/identity/conditionalAccess/namedLocations"
 }
 $global:definitions = Get-Definitions -DataFilePath "$PSScriptRoot\definitions\General.Definitions.psd1"
 #endregion

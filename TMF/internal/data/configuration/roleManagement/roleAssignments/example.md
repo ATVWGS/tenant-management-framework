@@ -81,3 +81,18 @@
     "endDateTime": "2023-03-30T00:00:00.00Z"
 }
 ```
+
+# Eligible role assignment for a group on an administrativeUnit with no expiration
+```json
+{
+    "present": true,
+    "type": "eligible",
+    "principalReference": "Group name",
+    "principalType": "group",
+    "roleReference": "directory role name",
+    "directoryScopeReference": "name of administrativeUnit",
+    "directoryScopeType": "administrativeUnit",
+    "startDateTime": "2022-04-28T00:00:00.00Z",
+    "expirationType": "noExpiration"
+}
+```
