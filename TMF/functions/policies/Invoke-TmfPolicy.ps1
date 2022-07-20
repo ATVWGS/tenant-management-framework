@@ -1,4 +1,4 @@
-function Invoke-TmfPolicies
+function Invoke-TmfPolicy
 {
 	<#
 		.SYNOPSIS

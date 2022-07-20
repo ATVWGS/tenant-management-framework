@@ -106,8 +106,8 @@
 		'Register-TmfAuthorizationPolicy',
 		'Test-TmfAuthorizationPolicy',
 		'Invoke-TmfAuthorizationPolicy',
-		'Test-TmfPolicies',
-		'Invoke-TmfPolicies'
+		'Test-TmfPolicy',
+		'Invoke-TmfPolicy'
 	)
 	
 	# Cmdlets to export from this module
