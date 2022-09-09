@@ -3,7 +3,7 @@
 	[CmdletBinding()]
 	Param (
 		[bool] $isEnabled,
-		[ValidateSet("monthly", "quarterly")]
+		[ValidateSet("onetime", "weekly", "monthly", "quarterly", "halfyearly", "annual")]
 		[string] $recurrenceType,
 		[ValidateSet("Self", "Reviewers")]
 		[string] $reviewerType,
