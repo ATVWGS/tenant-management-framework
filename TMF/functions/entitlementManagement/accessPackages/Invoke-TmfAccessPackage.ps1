@@ -55,10 +55,18 @@ function Invoke-TmfAccessPackage
 
 					<# Create accessPackageResourceRoleScopes #>
 					$requestUrl = "$script:graphBaseUrl/identityGovernance/entitlementManagement/accessPackages/{0}/accessPackageResourceRoleScopes" -f $accessPackage.Id
-					foreach ($roleScope in $result.DesiredConfiguration.accessPackageResourceRoleScopes) {						
+					foreach ($roleScope in $result.DesiredConfiguration.accessPackageResourceRoleScopes) {		
+						switch ($roleScope.resourceType) {
+							"AadGroup" {$roleOriginId = $roleScope.roleOriginId()}
+							"Application" {
+								$catalogID = Resolve-AccessPackageCatalog -InputReference $result.DesiredConfiguration.catalog
+								$accessPackageResourceId = Resolve-AccessPackageResource -InputReference $roleScope.resourceIdentifier -CatalogId $catalogID
+								$roleOriginId = (Invoke-MgGraphRequest -Method GET -Uri ("$script:graphBaseUrl/identityGovernance/entitlementManagement/accessPackageCatalogs/{0}/accessPackageResourceRoles?`$filter=(originSystem eq 'AadApplication' and accessPackageResource/id eq '{1}' and displayname eq '{2}')" -f $catalogID,$accessPackageResourceId,$roleScope.resourceRole)).value.originId
+							}
+						}
 						$requestBody = @{
 							"accessPackageResourceRole" = @{
-								"originId" = $roleScope.roleOriginId()
+								"originId" = $roleOriginId #$roleScope.roleOriginId()
 								"displayName" = $roleScope.resourceRole
 								"originSystem" = $roleScope.originSystem
 								"accessPackageResource" = @{
@@ -76,7 +84,7 @@ function Invoke-TmfAccessPackage
 						try {
 							$requestBody = $requestBody | ConvertTo-Json -ErrorAction Stop -Depth 8
 							Write-PSFMessage -Level Verbose -String "TMF.Invoke.SendingRequestWithBody" -StringValues $requestMethod, $requestUrl, $requestBody
-							Invoke-MgGraphRequest -Method $requestMethod -Uri $requestUrl -Body $requestBody
+							Invoke-MgGraphRequest -Method $requestMethod -Uri $requestUrl -Body $requestBody | Out-Null
 						}
 						catch {
 							Write-PSFMessage -Level Error -String "TMF.Invoke.ActionFailed" -StringValues $result.Tenant, $result.ResourceType, $result.ResourceName, $result.ActionType
@@ -89,7 +97,7 @@ function Invoke-TmfAccessPackage
 					$requestMethod = "DELETE"
 					try {
 						Write-PSFMessage -Level Verbose -String "TMF.Invoke.SendingRequest" -StringValues $requestMethod, $requestUrl
-						Invoke-MgGraphRequest -Method $requestMethod -Uri $requestUrl
+						Invoke-MgGraphRequest -Method $requestMethod -Uri $requestUrl | Out-Null
 					}
 					catch {
 						Write-PSFMessage -Level Error -String "TMF.Invoke.ActionFailed" -StringValues $result.Tenant, $result.ResourceType, $result.ResourceName, $result.ActionType
@@ -111,11 +119,22 @@ function Invoke-TmfAccessPackage
 										"Add" {											
 											$method = "POST"
 											$change.Actions[$action] | Foreach-Object {
-												$roleOriginId = $_
-												$roleScope = $result.DesiredConfiguration.accessPackageResourceRoleScopes | Where-Object {$_.roleOriginId() -eq $roleOriginId}
+												$roleOriginId = $_.id
+												$roleDisplayName = $_.roleDisplayName
+												switch ($_.resourceType) {
+													"AadGroup" {
+														$roleScope = $result.DesiredConfiguration.accessPackageResourceRoleScopes | Where-Object {$_.roleOriginId() -eq $roleOriginId}
+														$roleScopeOriginId = $roleScope.roleOriginId()
+													}
+													"Application" {
+														$roleScope = $result.DesiredConfiguration.accessPackageResourceRoleScopes | Where-Object {$_.displayName -eq $roleDisplayName}
+														$roleScopeOriginId = $roleOriginId
+													}
+												}
+												
 												$body = @{
 													"accessPackageResourceRole" = @{
-														"originId" = $roleScope.roleOriginId()
+														"originId" = $roleScopeOriginId
 														"displayName" = $roleScope.resourceRole
 														"originSystem" = $roleScope.originSystem
 														"accessPackageResource" = @{
@@ -167,7 +186,7 @@ function Invoke-TmfAccessPackage
 					if ($requestBody.Keys -gt 0) {
 						$requestBody = $requestBody | ConvertTo-Json -ErrorAction Stop
 						Write-PSFMessage -Level Verbose -String "TMF.Invoke.SendingRequestWithBody" -StringValues $requestMethod, $requestUrl, $requestBody
-						Invoke-MgGraphRequest -Method $requestMethod -Uri $requestUrl -Body $requestBody
+						Invoke-MgGraphRequest -Method $requestMethod -Uri $requestUrl -Body $requestBody | Out-Null
 					}
 				}
 				"NoActionRequired" { }
