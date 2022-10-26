@@ -129,12 +129,22 @@ function Test-TmfAccessPackage
 											}
 											"Application" {
 												$catalogID = Resolve-AccessPackageCatalog -InputReference $definition.catalog
-												$accessPackageResourceId = Resolve-AccessPackageResource -InputReference $roleScope.resourceIdentifier -CatalogId $catalogID
-												$roleOriginIds += [pscustomObject]@{
-																				"id" = (Invoke-MgGraphRequest -Method GET -Uri ("$script:graphBaseUrl/identityGovernance/entitlementManagement/accessPackageCatalogs/{0}/accessPackageResourceRoles?`$filter=(originSystem eq 'AadApplication' and accessPackageResource/id eq '{1}' and displayname eq '{2}')" -f $catalogID,$accessPackageResourceId,$roleScope.resourceRole)).value.originId
-																				"roleDisplayName" = $roleScope.displayName
-																				"resourceType" = $roleScope.resourceType
-												}																					
+												$accessPackageResourceId = Resolve-AccessPackageResource -InputReference $roleScope.resourceIdentifier -CatalogId $catalogID -SearchInDesiredConfiguration
+												
+												if ($accessPackageResourceId -match $script:guidRegex) {
+													$roleOriginIds += [pscustomObject]@{
+																					"id" = (Invoke-MgGraphRequest -Method GET -Uri ("$script:graphBaseUrl/identityGovernance/entitlementManagement/accessPackageCatalogs/{0}/accessPackageResourceRoles?`$filter=(originSystem eq 'AadApplication' and accessPackageResource/id eq '{1}' and displayname eq '{2}')" -f $catalogID,$accessPackageResourceId,$roleScope.resourceRole)).value.originId
+																					"roleDisplayName" = $roleScope.displayName
+																					"resourceType" = $roleScope.resourceType
+													}																					
+												}
+												else {
+													$roleOriginIds += [pscustomObject]@{
+														"id" = $accessPackageResourceId
+														"roleDisplayName" = $roleScope.displayName
+														"resourceType" = $roleScope.resourceType
+													}
+												}
 											}
 										}
 									}
