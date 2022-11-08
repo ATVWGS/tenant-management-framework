@@ -43,15 +43,24 @@ function Test-TmfRoleManagementPolicy {
                         Tenant = $tenant.Name
                         TenantId = $tenant.Id
                         ResourceType = 'roleManagementPolicy'
-                        ResourceName = "Policy for $($definition.roleReference) role in $($definition.subscriptionReference)"
+                        ResourceName = "Policy for $($definition.roleReference) role in $($definition.scopeReference)"
                         DesiredConfiguration = $definition
                     }
 
                     $subscriptionId = Resolve-Subscription -InputReference $definition.subscriptionReference
                     $roleId = Resolve-AzureRoleDefinition -InputReference $definition.roleReference -SubscriptionId $subscriptionId
-                    $policyId = (Invoke-RestMethod -Method "GET" -Uri "https://management.azure.com/providers/Microsoft.Subscription$($subscriptionId)/providers/Microsoft.Authorization/roleManagementPolicyAssignments?`$filter=roleDefinitionId eq '$($roleId)'&api-version=2020-10-01-preview" -Headers @{"Authorization" = "Bearer $($token)"}).value.properties.policyId
-                    $resource = @()
-                    $resource += Invoke-RestMethod -Method "GET" -Uri "https://management.azure.com/providers/Microsoft.Subscription$($policyId)?api-version=2020-10-01-preview" -Headers @{"Authorization" = "Bearer $($token)"}
+                    switch ($definition.scopeType) {
+                        "subscription" {
+                            $policyId = (Invoke-RestMethod -Method "GET" -Uri "https://management.azure.com/providers/Microsoft.Subscription$($subscriptionId)/providers/Microsoft.Authorization/roleManagementPolicyAssignments?`$filter=roleDefinitionId eq '$($roleId)'&api-version=2020-10-01-preview" -Headers @{"Authorization" = "Bearer $($token)"}).value.properties.policyId
+                            $resource = @()
+                            $resource += Invoke-RestMethod -Method "GET" -Uri "https://management.azure.com/providers/Microsoft.Subscription$($policyId)?api-version=2020-10-01-preview" -Headers @{"Authorization" = "Bearer $($token)"}
+                        }
+                        "resourceGroup" {
+                            $policyId = (Invoke-RestMethod -Method "GET" -Uri "https://management.azure.com/providers/Microsoft.Subscription$($subscriptionId)/ResourceGroups/$($definition.scopeReference)/providers/Microsoft.Authorization/roleManagementPolicyAssignments?`$filter=roleDefinitionId eq '$($roleId)'&api-version=2020-10-01-preview" -Headers @{"Authorization" = "Bearer $($token)"}).value.properties.policyId
+                            $resource = @()
+                            $resource += Invoke-RestMethod -Method "GET" -Uri "https://management.azure.com/providers/Microsoft.Subscription$($policyId)?api-version=2020-10-01-preview" -Headers @{"Authorization" = "Bearer $($token)"}
+                        }
+                    }
 
                     $result["GraphResource"] = $resource
                 }
