@@ -332,7 +332,7 @@ function Invoke-TmfRoleAssignment {
                                     }
                                 }
                                 $requestBody = $requestBody | ConvertTo-Json -Depth 5
-                                $requestBody
+
                                 switch ($result.DesiredConfiguration.type) {
                                     "eligible" {
                                         Invoke-MgGraphRequest -Method $requestMethod -Uri "$($script:graphBaseUrl)/roleManagement/directory/roleEligibilityScheduleRequests" -Body $requestBody -ContentType "application/json"  | Out-Null
