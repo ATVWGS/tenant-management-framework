@@ -33,7 +33,7 @@
 			return $StringMappingName
 		}
 
-		[regex] $functionRegex = "(?<pre_comma>,?)\n?\s*`"?(?<to_replace>{% (?<function>for|if) (?<statement>[\w\s\'\-_]*) %}\s?(?<output>[\w\s\-_!§`$&\/\(\)=\?\\`"\[\]:,{}]*)\s?{% (endfor|endif) %})`"?"
+		[regex] $functionRegex = "(?<pre_comma>,?)\n?\s*`"?(?<to_replace>{% (?<function>for|if) (?<statement>[\w\s\'\-_]*) %}\s?(?<output>[\w\s\-_!§`$&\/\(\)=\?\\`"\[\]@.:,{}]*)\s?{% (endfor|endif) %})`"?"
 		[regex] $ifStatementRegex = "\'?(?<left>[\w\-_]+)\'? (?<operator>eq|ne) \'?(?<right>[\w\-_]+)\'?"
 	}
 	process
