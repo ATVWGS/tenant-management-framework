@@ -25,7 +25,7 @@
         @{
             "type" = "ipNamedLocation"
             "displayName" = "Test - {{ timestamp }} - Trusted Named Location"
-            "isTrusted" = $true
+            "isTrusted" = $false
             "ipRanges" = @(
                 @{
                     "@odata.type" = "#microsoft.graph.iPv4CidrRange"
