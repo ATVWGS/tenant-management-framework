@@ -20,12 +20,14 @@
     'TMF.Test.RelatedResourceDoesNotExist' = 'The related {0} {0} for the {0} {1} does not exist at the moment. Cannot test {0}.'
     'TMF.Test.MultipleResourcesError' = 'There are multiple {0} with displayName {1} already created. Please clean your Tenant.'
     'TMF.Test.MissingPolicyRuleTemplate' = 'Referenced policy rule template {1} for {0} not found.'
+    'TMF.Test.DeleteNotPossible' = 'Not possible to delete resources of type {0}. Please change parameter present of {1} from false to true.'
 
     'TMF.Invoke.ActionTypeUnknown' = 'Action type (<c="yellow">{0}</c>) is unknown!'
     'TMF.Invoke.ActionFailed' = '[Tenant: <c="gray">{0}</c>][{1} Resource: <c="gray">{2}</c>] Action ({3}) failed! Stopping actions.'
     'TMF.Invoke.SendingRequestWithBody' = '[{0} {1}] Sending request with body {2}'
     'TMF.Invoke.SendingRequest' = '[{0} {1}] Sending request'
     'TMF.Invoke.ActionCompleted' = '[Tenant: <c="gray">{0}</c>][{1} Resource: <c="gray">{2}</c>] <c="green">Completed</c>.'
+    'TMF.Invoke.DeleteNotPossible' = 'Not possible to delete resources of type {0}. Please change parameter present of {1} from false to true.'
 
     'New-TMFConfiguration.OutPath.PathDoesNotExist' = 'The path {0} does not exist. You can use -Force to create the configuration anyway!'
     'New-TMFConfiguration.OutPath.AlreadyExists' = 'There is already a Tenant configuration in the target directory ({0}). You can use -Force to create the configuration anyway!'

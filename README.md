@@ -27,8 +27,7 @@ configurations
 ## 1.2. Benefits
 - Reproducable configuration
 - Easy readable, storable and shareable configurations
-- Enforced change documentation and versioning by
-adding a source control
+- Enforced change documentation and versioning by adding a source control
 - Enables staging concept
 - Less prone to human error
 - Increased efficiency
@@ -64,6 +63,7 @@ The required scopes depend on what components (resources) you want to configure.
 | Role Management (assignments, definitions, management policies)  | RoleManagement.ReadWrite.Directory, Directory.AccessAsUser.All, RoleEligibilitySchedule.ReadWrite.Directory,                 |
 |                                                                  | RoleAssignmentSchedule.ReadWrite.Directory", "RoleManagementPolicy.ReadWrite.Directory"                                      |
 | Policies (authentication/authorization policies)                 | Policy.ReadWrite.AuthenticationMethod, Policy.ReadWrite.Authorization, Policy.ReadWrite.AuthenticationFlows                  |
+| Custom Security Attributes                                       | CustomSecAttributeDefinition.ReadWrite.All                                                                                   |
 
 
 You can also use *Get-TmfRequiredScope* to get the required scopes and combine it with *Connect-MgGraph*.
@@ -143,6 +143,15 @@ The *example.md* file contains example resource instances and further informatio
 │       example.md
 │       policies.json
 │
+├───customSecurityAttributes
+│   ├───attributeSets
+│   │       attributeSets.json
+│   │       example.md
+│   │
+│   └───customSecurityAttributeDefinitions
+│           customSecurityAttributeDefinitions.json
+│           example.md
+|
 ├───directoryRoles
 │       directoryRoles.json
 │       example.md
@@ -1240,8 +1249,48 @@ roleManagementPolicyRuleTemplates include all rules but the "Approval_EndUser_As
   ```
 Please check the [.... example.md](./TMF/internal/data/configuration/roleManagement/roleManagementPolicyRuleTemplates/example.md) for further information.
 
+### 2.6.12 Custom security attributes
 
-### 2.6.12. String mapping
+#### 2.6.12.1 attributeSets
+
+```json
+    {
+		"displayName": "TestSet",
+		"description": "Attribute set for testing",
+		"maxAttributesPerSet": 3,
+		"present": true
+	}
+```
+Please check the [.... example.md](./TMF/internal/data/configuration/customSecurityAttributes/attributeSets/example.md) for further information.
+
+#### 2.6.12.2 customSecurityAttributeDefinitions
+
+```json
+    {
+        "attributeSet": "AttributeSetForTest",
+        "displayName": "TestAttribute1",
+        "description": "Test attribute 1",
+        "isCollection": false,
+        "isSearchable": true,
+        "present": true,
+        "status": "Available",
+        "type": "String",
+        "usePreDefinedValuesOnly": true,
+        "allowedValues": [
+            {
+                "displayName": "Value1",
+                "isActive": true
+            },
+            {
+                "displayName": "Value2",
+                "isActive": false
+            }
+        ]
+    }
+```
+Please check the [.... example.md](./TMF/internal/data/configuration/customSecurityAttributes/customSecurityAttributDefinitions/example.md) for further information.
+
+### 2.6.13. String mapping
 String mappings can help you with parameterization of your TMF configurations.
 
 You can create mappings between strings and the values they should be replaced with. Place the mappings in the *stringMappings.json* file in the *stringMappings* folder of your configuration.

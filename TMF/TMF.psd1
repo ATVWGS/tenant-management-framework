@@ -107,7 +107,18 @@
 		'Test-TmfAuthorizationPolicy',
 		'Invoke-TmfAuthorizationPolicy',
 		'Test-TmfPolicy',
-		'Invoke-TmfPolicy'
+		'Invoke-TmfPolicy',
+		'Invoke-TmfAttributeSet',
+        'Register-TmfAttributeSet',
+		'Test-TmfAttributeSet',
+		'Invoke-TmfCustomSecurityAttributeAllowedValue',
+		'Register-TmfCustomSecurityAttributeAllowedValue',
+		'Test-TmfCustomSecurityAttributeAllowedValue',
+		'Invoke-TmfCustomSecurityAttributeDefinition',
+		'Register-TmfCustomSecurityAttributeDefinition',
+		'Test-TmfCustomSecurityAttributeDefinition',
+		'Invoke-TmfCustomSecurityAttribute',
+		'Test-TmfCustomSecurityAttribute'
 	)
 	
 	# Cmdlets to export from this module

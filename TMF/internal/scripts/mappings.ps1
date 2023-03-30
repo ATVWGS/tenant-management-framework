@@ -152,6 +152,27 @@ $script:supportedResources = @{
         "parentType" = "policies"
         "weight" = 7
     }
+    "attributeSets" = @{
+        "registerFunction" = (Get-Command Register-TmfAttributeSet)
+        "testFunction" = (Get-Command Test-TmfAttributeSet)
+        "invokeFunction" = (Get-Command Invoke-TmfAttributeSet)
+        "parentType" = "customSecurityAttributes"
+        "weight" = 40
+    }
+    "customSecurityAttributeDefinitions" = @{
+        "registerFunction" = (Get-Command Register-TmfCustomSecurityAttributeDefinition)
+        "testFunction" = (Get-Command Test-TmfCustomSecurityAttributeDefinition)
+        "invokeFunction" = (Get-Command Invoke-TmfCustomSecurityAttributeDefinition)
+        "parentType" = "customSecurityAttributes"
+        "weight" = 41
+    }
+    "customSecurityAttributeAllowedValues" = @{
+        "registerFunction" = (Get-Command Register-TmfCustomSecurityAttributeAllowedValue)
+        "testFunction" = (Get-Command Test-TmfCustomSecurityAttributeAllowedValue)
+        "invokeFunction" = (Get-Command Invoke-TmfCustomSecurityAttributeAllowedValue)
+        "parentType" = "customSecurityAttributes"
+        "weight" = 42
+    }
 
 } # All currently supported components.
 Set-Variable -Name supportedResources -Option ReadOnly
