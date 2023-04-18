@@ -11,7 +11,7 @@
 	Param (
 		[Parameter(ParameterSetName = "Default")]
 		[string] $reference,
-		[ValidateSet("singleUser", "groupMembers", "connectedOrganizationMembers", "requestorManager", "internalSponsors", "externalSponsors")]
+		[ValidateSet("singleUser","groupMembers", "connectedOrganizationMembers", "requestorManager", "internalSponsors", "externalSponsors")]
 		[string] $type = "singleUser",
 		[bool] $isBackup = $false,
 		[Parameter(Mandatory = $true, ParameterSetName = "RequestorManager")]

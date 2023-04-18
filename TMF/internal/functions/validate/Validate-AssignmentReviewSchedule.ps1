@@ -1,15 +1,10 @@
-﻿function Validate-ApprovalStage
+function Validate-AssignmentReviewSchedule
 {
 	[CmdletBinding()]
 	Param (
-		[string] $durationBeforeAutomaticDenial,
-		[bool] $isApproverJustificationRequired,
-		[bool] $isEscalationEnabled,
-		[string] $durationBeforeEscalation,
-		[object[]] $primaryApprovers,
-		[object[]] $escalationApprovers,
-		[object[]] $fallbackPrimaryApprovers,
-		[object[]] $fallbackEscalationApprovers,
+        [string] $startDateTime,
+		[object] $expiration,
+		[object] $recurrence,
 		[System.Management.Automation.PSCmdlet]
 		$Cmdlet = $PSCmdlet
 	)
@@ -38,7 +33,12 @@
 				}				
 			}
 			else {
-				$validated = $property.Value
+				if ($property.Key -eq "startDateTime") {
+					$validated = $property.Value
+				}
+				else {
+					$validated = $property.Value | ConvertTo-PSFHashtable
+				}				
 			}
 			$hashtable[$property.Key] = $validated
 		}

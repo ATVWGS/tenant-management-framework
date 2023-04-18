@@ -2,14 +2,16 @@
 {
 	[CmdletBinding()]
 	Param (
+		[Parameter (Mandatory = $true)]
+		[ValidateSet("keepAccess", "removeAccess", "acceptAccessRecommendation")]
+		[string] $expirationBehavior,
 		[bool] $isEnabled,
-		[ValidateSet("onetime","weekly","monthly","quarterly","halfyearly","annual")]
-		[string] $recurrenceType,
-		[ValidateSet("Self", "Reviewers")]
-		[string] $reviewerType,
-		[datetime] $startDateTime,
-		[int] $durationInDays,
-		[object[]] $reviewers,
+		[bool] $isRecommendationEnabled,
+		[bool] $isReviewerJustificationRequired,
+		[bool] $isSelfReview,
+		[object[]] $primaryReviewers,
+		[object[]] $fallbackReviewers,
+		[object] $schedule,
 		[System.Management.Automation.PSCmdlet]
 		$Cmdlet = $PSCmdlet
 	)
@@ -25,7 +27,7 @@
 		$hashtable = @{}
 		foreach ($property in ($PSBoundParameters.GetEnumerator() | Where-Object {$_.Key -ne "Cmdlet"})) {
 			if ($script:supportedResources[$parentResourceName]["validateFunctions"].ContainsKey($property.Key)) {
-				if ($property.Value.GetType().BaseType -eq "System.Array") {
+				if ($property.Value.GetType().Name -eq "Object[]") {
 					$validated = @()
 					foreach ($value in $property.Value) {
 						$dummy = $value | ConvertTo-PSFHashtable -Include $($script:supportedResources[$parentResourceName]["validateFunctions"][$property.Key].Parameters.Keys)
@@ -33,8 +35,13 @@
 					}					
 				}
 				else {
-					$validated = $property.Value | ConvertTo-PSFHashtable -Include $($script:supportedResources[$parentResourceName]["validateFunctions"][$property.Key].Parameters.Keys)
-					$validated = & $script:supportedResources[$parentResourceName]["validateFunctions"][$property.Key] @validated -Cmdlet $Cmdlet
+					if ($property.Value) {
+						$validated = $property.Value | ConvertTo-PSFHashtable -Include $($script:supportedResources[$parentResourceName]["validateFunctions"][$property.Key].Parameters.Keys)
+						$validated = & $script:supportedResources[$parentResourceName]["validateFunctions"][$property.Key] @validated -Cmdlet $Cmdlet
+					}
+					else {
+						$validated = @()
+					}
 				}				
 			}
 			else {

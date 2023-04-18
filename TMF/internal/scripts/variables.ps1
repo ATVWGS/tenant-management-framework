@@ -1,6 +1,7 @@
 # All required runtime variables.
 $graphVersionRequired = "beta"
 $script:graphBaseUrl = "https://graph.microsoft.com/{0}" -f $graphVersionRequired
+$script:graphBaseUrl1 = "https://graph.microsoft.com/v1.0"
 $script:apiBaseUrl = "https://management.azure.com/"
 $script:apiVersion = "api-version=2022-01-01"
 

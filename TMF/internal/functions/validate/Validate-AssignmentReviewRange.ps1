@@ -1,15 +1,13 @@
-﻿function Validate-ApprovalStage
+function Validate-AssignmentReviewRange
 {
 	[CmdletBinding()]
 	Param (
-		[string] $durationBeforeAutomaticDenial,
-		[bool] $isApproverJustificationRequired,
-		[bool] $isEscalationEnabled,
-		[string] $durationBeforeEscalation,
-		[object[]] $primaryApprovers,
-		[object[]] $escalationApprovers,
-		[object[]] $fallbackPrimaryApprovers,
-		[object[]] $fallbackEscalationApprovers,
+		[ValidateSet("noEnd","endDate","numbered")]
+        [string] $type,
+        [int] $numberOfOccurrences,
+		[string] $recurrenceTimeZone = $null,
+		[string] $startDate,
+        [string] $endDate,
 		[System.Management.Automation.PSCmdlet]
 		$Cmdlet = $PSCmdlet
 	)
@@ -38,7 +36,13 @@
 				}				
 			}
 			else {
-				$validated = $property.Value
+				if ($property.Value -or $property.Value -eq 0) {
+					$validated = $property.Value
+				}
+				else {
+					$validated = $null
+				}
+				
 			}
 			$hashtable[$property.Key] = $validated
 		}

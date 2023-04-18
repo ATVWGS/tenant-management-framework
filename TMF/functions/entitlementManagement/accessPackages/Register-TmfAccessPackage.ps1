@@ -10,13 +10,10 @@ function Register-TmfAccessPackage
 		[bool] $isRoleScopesVisible = $true,
 		[Parameter(Mandatory = $true)]
 		[string] $catalog,
-
 		[object[]] $accessPackageResources,
 		[object[]] $assignmentPolicies,
-
 		[bool] $present = $true,		
 		[string] $sourceConfig = "<Custom>",
-
 		[System.Management.Automation.PSCmdlet]
 		$Cmdlet = $PSCmdlet
 	)
@@ -54,7 +51,7 @@ function Register-TmfAccessPackage
 		Add-Member -InputObject $object -MemberType ScriptMethod -Name Properties -Value { ($this | Get-Member -MemberType NoteProperty).Name }
 
 		foreach ($policy in $assignmentPolicies) {
-			$resource = $policy | Add-Member -NotePropertyMembers @{sourceConfig = $sourceConfig; accessPackage = $displayName; catalog = $catalog; present = $present} -PassThru | ConvertTo-PSFHashtable -Include $((Get-Command Register-TmfAccessPackageAssignmentPolicy).Parameters.Keys)			
+			$resource = $policy | Add-Member -NotePropertyMembers @{sourceConfig = $sourceConfig; accessPackage = $displayName; catalog = $catalog} -PassThru | ConvertTo-PSFHashtable -Include $((Get-Command Register-TmfAccessPackageAssignmentPolicy).Parameters.Keys)			
 			Register-TmfAccessPackageAssignmentPolicy @resource -Cmdlet $PSCmdlet
 		}
 

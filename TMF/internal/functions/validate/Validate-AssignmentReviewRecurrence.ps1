@@ -1,15 +1,9 @@
-﻿function Validate-ApprovalStage
+function Validate-AssignmentReviewRecurrence
 {
 	[CmdletBinding()]
 	Param (
-		[string] $durationBeforeAutomaticDenial,
-		[bool] $isApproverJustificationRequired,
-		[bool] $isEscalationEnabled,
-		[string] $durationBeforeEscalation,
-		[object[]] $primaryApprovers,
-		[object[]] $escalationApprovers,
-		[object[]] $fallbackPrimaryApprovers,
-		[object[]] $fallbackEscalationApprovers,
+		[object] $pattern,
+		[object] $range,
 		[System.Management.Automation.PSCmdlet]
 		$Cmdlet = $PSCmdlet
 	)
