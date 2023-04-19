@@ -88,14 +88,21 @@ function Test-TmfAccessPackageAssignmentPolicy
 									foreach ($key in $definition.$property.Keys) {
 										switch ($key) {
 											"stages" {
-												"primaryApprovers", "escalationApprovers", "fallbackPrimaryApprovers", "fallbackEscalationApprovers" | Where-Object { $_ -in $definition.$property.$key.Keys } | Foreach-Object {								
-													if (Check-SubjectSetRequiresUpdate -Reference $resource.$property.$key.$_ -Difference $definition.$property.$key.$_ -Cmdlet $Cmdlet) {
-														$needUpdate = $true
-													}
+												if ($definition.$property.$key.count -ne $resource.$property.$key.count) {
+													$needUpdate = $true
 												}
-												"durationBeforeAutomaticDenial", "isApproverJustificationRequired", "isEscalationEnabled", "durationBeforeEscalation" | Where-Object { $_ -in $definition.$property.$key.Keys } | Foreach-Object {
-													if ($definition.$property.$key.$_ -ne $resource.$property.$key.$_) {
-														$needUpdate = $true
+												else {
+													for ($i=0;$i -lt $definition.$property.$key.count;$i++) {
+														"primaryApprovers", "escalationApprovers", "fallbackPrimaryApprovers", "fallbackEscalationApprovers" | Where-Object { $_ -in $definition.$property.$key[$i].Keys } | Foreach-Object {								
+															if (Check-SubjectSetRequiresUpdate -Reference $resource.$property.$key[$i].$_ -Difference $definition.$property.$key[$i].$_ -Cmdlet $Cmdlet) {
+																$needUpdate = $true
+															}
+														}
+														"durationBeforeAutomaticDenial", "isApproverJustificationRequired", "isEscalationEnabled", "durationBeforeEscalation" | Where-Object { $_ -in $definition.$property.$key[$i].Keys } | Foreach-Object {
+															if ($definition.$property.$key[$i].$_ -ne $resource.$property.$key[$i].$_) {
+																$needUpdate = $true
+															}
+														}
 													}
 												}
 											}
