@@ -1,15 +1,11 @@
-﻿function Validate-ApprovalStage
+function Validate-AssignmentReviewPattern
 {
 	[CmdletBinding()]
 	Param (
-		[string] $durationBeforeAutomaticDenial,
-		[bool] $isApproverJustificationRequired,
-		[bool] $isEscalationEnabled,
-		[string] $durationBeforeEscalation,
-		[object[]] $primaryApprovers,
-		[object[]] $escalationApprovers,
-		[object[]] $fallbackPrimaryApprovers,
-		[object[]] $fallbackEscalationApprovers,
+		[int] $interval,
+		[int] $dayOfMonth,
+        [ValidateSet("absoluteMonthly","weekly")] 
+        [string] $type,
 		[System.Management.Automation.PSCmdlet]
 		$Cmdlet = $PSCmdlet
 	)

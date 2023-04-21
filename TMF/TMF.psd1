@@ -9,7 +9,7 @@
 	GUID = 'f1f44bfb-f67c-4595-a18f-ae4565ac0728'
 	
 	# Author of this module
-	Author = 'Johannes Seitle'
+	Author = 'Azure Team VWGS'
 	
 	# Company or vendor of this module
 	CompanyName = 'Volkswagen Group Services GmbH'

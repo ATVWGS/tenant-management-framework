@@ -45,11 +45,11 @@ function Test-TmfAccessPackageAssignmentPolicy
 
 			try {			
 
-				$resource = (Invoke-MgGraphRequest -Method GET -Uri ("$script:graphBaseUrl/identityGovernance/entitlementManagement/accessPackageAssignmentPolicies?`$filter=(displayname eq '{0}') and (accessPackageId eq '{1}')" -f [System.Web.HttpUtility]::UrlEncode($definition.displayName), $accessPackageId)).Value
+				$resource = (Invoke-MgGraphRequest -Method GET -Uri ("$script:graphBaseUrl1/identityGovernance/entitlementManagement/assignmentPolicies?`$expand=accessPackage&`$filter=(displayname eq '{0}') and (accessPackage/id eq '{1}')" -f [System.Web.HttpUtility]::UrlEncode($definition.displayName), $accessPackageId)).Value
 
 				if (("oldNames" -in $definition.Properties()) -and (-not($resource))) {
 					foreach ($oldName in $definition.oldNames) {
-						$resource = (Invoke-MgGraphRequest -Method GET -Uri ("$script:graphBaseUrl/identityGovernance/entitlementManagement/accessPackageAssignmentPolicies?`$filter=(displayname eq '{0}') and (accessPackageId eq '{1}')" -f [System.Web.HttpUtility]::UrlEncode($oldName), $accessPackageId)).Value
+						$resource = (Invoke-MgGraphRequest -Method GET -Uri ("$script:graphBaseUrl1/identityGovernance/entitlementManagement/assignmentPolicies?`$expand=accessPackage&`$filter=(displayname eq '{0}') and (accessPackage/id eq '{1}')" -f [System.Web.HttpUtility]::UrlEncode($oldName), $accessPackageId)).Value
 						if ($resource) {break}
 					}
 				}
@@ -83,30 +83,84 @@ function Test-TmfAccessPackageAssignmentPolicy
 							}
 
 							switch ($property) {
-								{$_ -in "accessReviewSettings", "requestApprovalSettings", "requestorSettings"} {
+								{$_ -in "reviewSettings", "requestApprovalSettings", "requestorSettings", "expiration", "automaticRequestSettings"} {
 									$needUpdate = $false
 									foreach ($key in $definition.$property.Keys) {
 										switch ($key) {
-											"approvalStages" {
-												"primaryApprovers", "escalationApprovers" | Where-Object { $_ -in $definition.$property.$key.Keys } | Foreach-Object {								
-													if (Check-UserSetRequiresUpdate -Reference $resource.$property.$key.$_ -Difference $definition.$property.$key.$_ -Cmdlet $Cmdlet) {
-														$needUpdate = $true
+											"stages" {
+												if ($definition.$property.$key.count -ne $resource.$property.$key.count) {
+													$needUpdate = $true
+												}
+												else {
+													for ($i=0;$i -lt $definition.$property.$key.count;$i++) {
+														"primaryApprovers", "escalationApprovers", "fallbackPrimaryApprovers", "fallbackEscalationApprovers" | Where-Object { $_ -in $definition.$property.$key[$i].Keys } | Foreach-Object {								
+															if (Check-SubjectSetRequiresUpdate -Reference $resource.$property.$key[$i].$_ -Difference $definition.$property.$key[$i].$_ -Cmdlet $Cmdlet) {
+																$needUpdate = $true
+															}
+														}
+														"durationBeforeAutomaticDenial", "isApproverJustificationRequired", "isEscalationEnabled", "durationBeforeEscalation" | Where-Object { $_ -in $definition.$property.$key[$i].Keys } | Foreach-Object {
+															if ($definition.$property.$key[$i].$_ -ne $resource.$property.$key[$i].$_) {
+																$needUpdate = $true
+															}
+														}
 													}
 												}
 											}
-											{$_ -in "reviewers", "allowedRequestors"} {
-												if (Check-UserSetRequiresUpdate -Reference $resource.$property.$key -Difference $definition.$property.$key -Cmdlet $Cmdlet) {
+											"schedule" {
+												foreach ($item in $definition.$property.$key.recurrence.pattern.GetEnumerator().Name) {
+													if ($definition.$property.$key.recurrence.pattern.$item -ne $resource.$property.$key.recurrence.pattern.$item){
+														$change.Actions = @{"Set" = $definition.$property.$key.recurrence.pattern}
+													}
+												}
+												foreach ($item in $definition.$property.$key.recurrence.range.GetEnumerator().Name) {
+													if ($definition.$property.$key.recurrence.range.$item -ne $resource.$property.$key.recurrence.range.$item){
+														$change.Actions = @{"Set" = $definition.$property.$key.recurrence.range}
+													}
+												}
+												foreach ($item in $definition.$property.$key.expiration.GetEnumerator().Name) {
+													switch ($item) {
+														"endDateTime" {
+															if ($definition.$property.$key.$item) {
+																if (([datetime]$definition.$property.$key.$item).ToUniversalTime().ToString() -ne $resource.$property.$key.$item.toString()) {
+																	$change.Actions = @{"Set" = $definition.$property.$key.$item}
+																}
+															}															
+														}
+														default {
+															if ($definition.$property.$key.$item -ne $resource.$property.$key.$item) {
+																$change.Actions = @{"Set" = $definition.$property.$key.$item}
+															}
+														}
+													}
+												}
+											}
+											{$_ -in "primaryReviewers", "fallbackReviewers", "onBehalfRequestors"} {
+												if (Check-SubjectSetRequiresUpdate -Reference $resource.$property.$key -Difference $definition.$property.$key -Cmdlet $Cmdlet) {
 													$needUpdate = $true
 												}
 											}
 											default {
-												if ($definition.$property[$key] -ne $resource.$property.$key) {
-													$needUpdate = $true
+												if ($key -eq "endDateTime") {
+													if ($definition.$property.$key) {
+														if (([datetime]$definition.$property.$key).touniversaltime().tostring() -ne $resource.$property.$key.tostring()) {
+															$needUpdate = $true
+														}
+													}
+												}
+												else {
+													if ($definition.$property.$key -ne $resource.$property.$key) {
+														$needUpdate = $true
+													}
 												}
 											}
 										}
 									}
 									if ($needUpdate) { $change.Actions = @{"Set" = $definition.$property} }
+								}
+								"specificAllowedTargets" {
+									if (Check-SubjectSetRequiresUpdate -Reference $resource.$property -Difference $definition.$property -Cmdlet $Cmdlet) {
+										$change.Actions = @{"Set" = $definition.$property}
+									}
 								}
 								default {
 									if ($definition.$property -ne $resource.$property) {

@@ -2,12 +2,9 @@
 {
 	[CmdletBinding()]
 	Param (
-		[ValidateSet("NoApproval", "SingleStage", "Serial")]
-		[string] $approvalMode,
-		[bool] $isApprovalRequired,
-		[bool] $isApprovalRequiredForExtension,
-		[bool] $isRequestorJustificationRequired,		
-		[object[]] $approvalStages,
+		[bool] $isApprovalRequiredForAdd,
+		[bool] $isApprovalRequiredForUpdate,
+		[object[]] $stages,
 		[System.Management.Automation.PSCmdlet]
 		$Cmdlet = $PSCmdlet
 	)
@@ -23,7 +20,7 @@
 		$hashtable = @{}
 		foreach ($property in ($PSBoundParameters.GetEnumerator() | Where-Object {$_.Key -ne "Cmdlet"})) {
 			if ($script:supportedResources[$parentResourceName]["validateFunctions"].ContainsKey($property.Key)) {
-				if ($property.Value.GetType().BaseType -eq "System.Array") {
+				if ($property.Value.GetType().Name -eq "Object[]") {
 					$validated = @()
 					foreach ($value in $property.Value) {
 						$dummy = $value | ConvertTo-PSFHashtable -Include $($script:supportedResources[$parentResourceName]["validateFunctions"][$property.Key].Parameters.Keys)

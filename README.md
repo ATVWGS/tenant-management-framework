@@ -537,76 +537,116 @@ Please check the [Access Package Catalogs example.md](./TMF/internal/data/config
 #### 2.6.6.2. Access Packages
 
 ```json
-{
-    "displayName":"Access Package",
+{	
+    "displayName":  "Sample package",
     "oldNames": [],
-    "description":"Access Package description",
-    "isHidden":true,
-    "isRoleScopesVisible":true,
-    "catalog":"General",
-    "present":true,
-    "accessPackageResources":[
+    "description":  "This is a sample access package.",
+    "isHidden":  false,
+    "isRoleScopesVisible":  true,
+    "catalog":  "Sample catalog",
+    "present":  true,
+    "accessPackageResources":  [
         {
-            "resourceIdentifier":"Some group",
-            "resourceRole":"Member",
-            "originSystem":"AadGroup"
+            "originSystem":  "AadGroup",
+            "resourceRole":  "Member",
+            "resourceIdentifier":  "Some group"
         }
     ],
-    "assignmentPolicies":[
+    "assignmentPolicies": [
         {
-            "displayName":"Initial policy",
-            "oldNames": [],
-            "canExtend":false,
-            "durationInDays":8,
-            "accessReviewSettings":{
-                "isEnabled":false,
-                "recurrenceType":"monthly",
-                "reviewerType":"Reviewers",
-                "durationInDays":14,
-                "reviewers":[
-                    {
-                        "type":"singleUser",
-                        "reference":"max.mustermann@tmacdev.onmicrosoft.com",
-                        "isBackup":false
-                    },
-                    {
-                        "type":"requestorManager",
-                        "managerLevel":1,
-                        "isBackup":false
-                    }
-                ]
+            "displayName": "Sample assignment policy",
+            "description": "Access Package Assignment Policy has been created with Tenant Management Framework",
+            "allowedTargetScope": "specificDirectoryUsers",
+            "present": true,
+            "specificAllowedTargets": [
+                {
+                    "reference": "Some group",
+                    "type": "groupMembers",
+                    "description": "Some group"
+                }
+            ],
+            "expiration": {
+                "endDateTime": null,
+                "duration": "P90D",
+                "type": "afterDuration"
             },
-            "requestApprovalSettings":{
-                "isApprovalRequired":true,
-                "isApprovalRequiredForExtension":false,
-                "isRequestorJustificationRequired":true,
-                "approvalMode":"SingleStage",
-                "approvalStages":[
+            "requestorSettings": {
+                "enableTargetsToSelfAddAccess": true,
+                "enableTargetsToSelfUpdateAccess": false,
+                "enableTargetsToSelfRemoveAccess": true,
+                "allowCustomAssignmentSchedule": true,
+                "enableOnBehalfRequestorsToAddAccess": true,
+                "enableOnBehalfRequestorsToUpdateAccess": false,
+                "enableOnBehalfRequestorsToRemoveAccess": false,
+                "onBehalfRequestors": []
+            },
+            "requestApprovalSettings": {
+                "isApprovalRequiredForAdd": true,
+                "isApprovalRequiredForUpdate": true,
+                "stages": [
                     {
-                        "approvalStageTimeOutInDays":14,
-                        "isApproverJustificationRequired":true,
-                        "isEscalationEnabled":false,
-                        "escalationTimeInMinutes":11520,
-                        "primaryApprovers":[
+                        "durationBeforeAutomaticDenial": "P14D",
+                        "isApproverJustificationRequired": true,
+                        "isEscalationEnabled": false,
+                        "durationBeforeEscalation": "P5D",
+                        "primaryApprovers": [
                             {
-                                "type":"singleUser",
-                                "reference":"max.mustermann@tmacdev.onmicrosoft.com",
-                                "isBackup":false
+                                "reference": "Some group",
+                                "type": "groupMembers",
+                                "description": "Some group"
                             }
-                        ]
+                        ],
+                        "fallbackPrimaryApprovers": [],
+                        "escalationApprovers": [
+                            {
+                                "reference": "foo.bar@tenant.onmicrosoft.com",
+                                "type": "singleUser"
+                            }
+                        ],
+                        "fallbackEscalationApprovers": []
                     }
                 ]
             },
-            "requestorSettings":{
-                "scopeType":"SpecificDirectorySubjects",
-                "acceptRequests":true,
-                "allowedRequestors":[
-                    {
-                        "type":"singleUser",
-                        "reference":"max.mustermann@tmacdev.onmicrosoft.com",
-                        "isBackup":false
+            "reviewSettings": {
+                "isEnabled": true,
+                "expirationBehavior": "keepAccess",
+                "isRecommendationEnabled": true,
+                "isReviewerJustificationRequired": true,
+                "isSelfReview": true,
+                "schedule": {
+                    "startDateTime": "2023-04-18T09:34:49.4485321Z",
+                    "expiration": {
+                        "endDateTime": null,
+                        "duration": "P7D",
+                        "type": "afterDuration"
+                    },
+                    "recurrence": {
+                        "pattern": {
+                            "type": "absoluteMonthly",
+                            "interval": 1,
+                            "month": 0,
+                            "dayOfMonth": 0,
+                            "daysOfWeek": [],
+                            "firstDayOfWeek": null,
+                            "index": null
+                        },
+                        "range": {
+                            "type": "noEnd",
+                            "numberOfOccurrences": 0,
+                            "recurrenceTimeZone": null,
+                            "startDate": null,
+                            "endDate": null
+                        }
                     }
-                ]
+                },
+                "primaryReviewers": [
+                    {
+                        "reference": "Some group",
+                        "type": "groupMembers",
+                        "description": "Some group"
+                    }                    
+                ],
+                "fallbackReviewers": []
             }
         }
     ]

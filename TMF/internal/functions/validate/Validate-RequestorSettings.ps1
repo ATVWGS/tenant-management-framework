@@ -2,10 +2,14 @@
 {
 	[CmdletBinding()]
 	Param (
-		[ValidateSet("NoSubjects", "SpecificDirectorySubjects", "SpecificConnectedOrganizationSubjects", "AllConfiguredConnectedOrganizationSubjects", "AllExistingConnectedOrganizationSubjects", "AllExistingDirectoryMemberUsers", "AllExistingDirectorySubjects", "AllExternalSubjects")]
-		[string] $scopeType,
-		[bool] $acceptRequests,
-		[object[]] $allowedRequestors,
+		[bool] $allowCustomAssignmentSchedule,
+		[bool] $enableOnBehalfRequestorsToAddAccess,
+		[bool] $enableOnBehalfRequestorsToRemoveAccess,
+		[bool] $enableOnBehalfRequestorsToUpdateAccess,
+		[bool] $enableTargetsToSelfAddAccess,
+		[bool] $enableTargetsToSelfRemoveAccess,
+		[bool] $enableTargetsToSelfUpdateAccess,
+  		[object[]] $onBehalfRequestors,
 		[System.Management.Automation.PSCmdlet]
 		$Cmdlet = $PSCmdlet
 	)
@@ -20,8 +24,8 @@
 
 		$hashtable = @{}
 		foreach ($property in ($PSBoundParameters.GetEnumerator() | Where-Object {$_.Key -ne "Cmdlet"})) {
-			if ($script:supportedResources[$parentResourceName]["validateFunctions"].ContainsKey($property.Key)) {
-				if ($property.Value.GetType().BaseType -eq "System.Array") {
+			if ($script:supportedResources[$parentResourceName]["validateFunctions"].ContainsKey($property.Key) -and $property.Value) {
+				if ($property.Value.GetType().Name -eq "Object[]") {
 					$validated = @()
 					foreach ($value in $property.Value) {
 						$dummy = $value | ConvertTo-PSFHashtable -Include $($script:supportedResources[$parentResourceName]["validateFunctions"][$property.Key].Parameters.Keys)

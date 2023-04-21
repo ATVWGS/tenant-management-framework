@@ -2,24 +2,43 @@ function Register-TmfAccessPackageAssignmentPolicy
 {
 	[CmdletBinding()]
 	Param (
-		[Parameter(Mandatory = $true)]
+		[Parameter(Mandatory = $true, ParameterSetName = "autoAssigned")]
+		[Parameter(Mandatory = $true, ParameterSetName = "assigned")]
 		[string] $displayName,
+		[Parameter(ParameterSetName = "autoAssigned")]
+		[Parameter(ParameterSetName = "assigned")]
 		[string[]] $oldNames,
+		[Parameter(ParameterSetName = "autoAssigned")]
+		[Parameter(ParameterSetName = "assigned")]
 		[string] $description = "Access Package Assignment Policy has been created with Tenant Management Framework",
-		[Parameter(Mandatory = $true)]
+		[Parameter(Mandatory = $true, ParameterSetName = "autoAssigned")]
+		[Parameter(Mandatory = $true, ParameterSetName = "assigned")]
 		[string] $accessPackage,
-
-		[bool] $canExtend = $false,
-		[Parameter(Mandatory = $true)]
-		[int] $durationInDays = 7,
-
-		[object] $accessReviewSettings,
+		[Parameter(Mandatory = $true, ParameterSetName = "autoAssigned")]
+		[Parameter(Mandatory = $true, ParameterSetName = "assigned")]
+		[ValidateSet("specificDirectoryUsers","specificConnectedOrganizationUsers","specificDirectoryServicePrincipals","allMemberUsers","allDirectoryUsers","allDirectoryServicePrincipals","allConfiguredConnectedOrganizationUsers","allExternalUsers")]
+		[string] $allowedTargetScope,
+		[Parameter(Mandatory = $true, ParameterSetName = "autoAssigned")]
+		[Parameter(ParameterSetName = "assigned")]
+		[object[]] $specificAllowedTargets,
+        [Parameter(Mandatory = $true, ParameterSetName = "assigned")]
+        [object] $expiration,
+		[Parameter(ParameterSetName = "assigned")]
+		[object] $reviewSettings,
+		[Parameter(ParameterSetName = "assigned")]
 		[object] $requestApprovalSettings,
+		[Parameter(ParameterSetName = "assigned")]
 		[object] $requestorSettings,
-		
-		[bool] $present = $true,		
+		[Parameter(Mandatory = $true, ParameterSetName = "autoAssigned")]
+		[object] $automaticRequestSettings, 
+		[Parameter(ParameterSetName = "autoAssigned")]
+		[Parameter(ParameterSetName = "assigned")]
+		[bool] $present = $true,
+		[Parameter(ParameterSetName = "autoAssigned")]
+		[Parameter(ParameterSetName = "assigned")]
 		[string] $sourceConfig = "<Custom>",
-
+		[Parameter(ParameterSetName = "autoAssigned")]
+		[Parameter(ParameterSetName = "assigned")]
 		[System.Management.Automation.PSCmdlet]
 		$Cmdlet = $PSCmdlet
 	)
@@ -43,8 +62,7 @@ function Register-TmfAccessPackageAssignmentPolicy
 			displayName = $displayName
 			accessPackage = $accessPackage
 			description = $description
-			canExtend = $canExtend
-			durationInDays = $durationInDays
+			allowedTargetScope = $allowedTargetScope
 			present = $present
 			sourceConfig = $sourceConfig
 		}
@@ -53,14 +71,14 @@ function Register-TmfAccessPackageAssignmentPolicy
 			Add-Member -InputObject $object -MemberType NoteProperty -Name "oldNames" -Value @($oldNames | ForEach-Object {Resolve-String $_})
 		}
 
-		"accessReviewSettings", "requestApprovalSettings", "requestorSettings" | ForEach-Object {
+		"reviewSettings", "requestApprovalSettings", "requestorSettings", "specificAllowedTargets", "expiration", "automaticRequestSettings" | ForEach-Object {
 			if ($PSBoundParameters.ContainsKey($_)) {
 				if ($script:supportedResources[$resourceName]["validateFunctions"].ContainsKey($_)) {
 					$validated = $PSBoundParameters[$_] | ConvertTo-PSFHashtable -Include $($script:supportedResources[$resourceName]["validateFunctions"][$_].Parameters.Keys)
 					$validated = & $script:supportedResources[$resourceName]["validateFunctions"][$_] @validated -Cmdlet $Cmdlet
 				}
 				else {
-					$validated = $PSBoundParameters[$_]
+					$validated = $PSBoundParameters[$_] | ConvertTo-PSFHashtable
 				}
 				Add-Member -InputObject $object -MemberType NoteProperty -Name $_ -Value $validated
 			}			

@@ -27,36 +27,62 @@ function Invoke-TmfAccessPackageAssignmentPolicy
 			$requestBody = @{						
 				"displayName" = $TestResult.DesiredConfiguration.displayName
 				"description" = $TestResult.DesiredConfiguration.description
-				"accessPackageId" = $TestResult.DesiredConfiguration.accessPackageId()
-				"canExtend" = $TestResult.DesiredConfiguration.canExtend
-				"durationInDays" = $TestResult.DesiredConfiguration.durationInDays
+				"allowedTargetScope" = $TestResult.DesiredConfiguration.allowedTargetScope
+				"accessPackage" = @{
+					"id" = $TestResult.DesiredConfiguration.accessPackageId()
+				}
 			}
 
-			foreach ($property in @("accessReviewSettings", "requestorSettings", "requestApprovalSettings")) {
-				if ($property -in $TestResult.DesiredConfiguration.Properties()) {
-					$requestBody[$property] = $TestResult.DesiredConfiguration.$property.PSObject.Copy()
-					if ($property -eq "requestApprovalSettings") {
-						if ($requestBody[$property]["approvalStages"]) {
-							$requestBody[$property]["approvalStages"] = @($requestBody[$property]["approvalStages"].PSObject.Copy() | Foreach-Object {							
-								$stage = $_
-								"primaryApprovers", "escalationApprovers" | Where-Object { $_ -in $requestBody[$property]["approvalStages"].Keys } | Foreach-Object {								
-									$stage[$_] = @($stage[$_] | Foreach-Object { $_.prepareBody() })
-								}
-								$stage
-							})
+			foreach ($property in @("expiration","reviewSettings", "requestorSettings", "requestApprovalSettings", "specificAllowedTargets", "automaticRequestSettings")) {
+				switch ($property) {
+					"specificAllowedTargets" {
+						$requestBody[$property] = @($TestResult.DesiredConfiguration.$property | Foreach-Object { $_.prepareBody()	})
+					}
+					"requestApprovalSettings" {
+						if ((Get-Member -InputObject $TestResult.DesiredConfiguration).Name -contains $property) {
+							$requestBody[$property] = $TestResult.DesiredConfiguration.$property.PSObject.Copy()
+							if ($requestBody[$property]["stages"]) {
+								$requestBody[$property]["stages"] = @($requestBody[$property]["stages"].PSObject.Copy() | Foreach-Object {							
+									$stage = $_
+									"primaryApprovers", "escalationApprovers", "fallbackPrimaryApprovers", "fallbackEscalationApprovers" | Where-Object { $_ -in $requestBody[$property]["stages"].Keys } | Foreach-Object {								
+										$stage[$_] = @($stage[$_] | Foreach-Object { $_.prepareBody() })
+									}
+									$stage
+								})
+							}
 						}
 					}
-					else {
-						switch ($property) {
-							"accessReviewSettings" { $userSetProperty = "reviewers" }
-							"requestorSettings" { $userSetProperty = "allowedRequestors" }
-						}
-
-						if ($requestBody[$property].Keys -contains $userSetProperty) {
-							$requestBody[$property][$userSetProperty] = @($requestBody[$property][$userSetProperty] | Foreach-Object { $_.prepareBody()	})
+					"reviewSettings" {
+						if ((Get-Member -InputObject $TestResult.DesiredConfiguration).Name -contains $property) {
+							$requestBody[$property] = $TestResult.DesiredConfiguration.$property.PSObject.Copy()
+							if ($TestResult.DesiredConfiguration.$property.primaryReviewers) {
+								$requestBody[$property]["primaryReviewers"] = @($TestResult.DesiredConfiguration.$property.primaryReviewers | Foreach-Object {
+									$_.prepareBody()
+								})
+							}
+							if ($TestResult.DesiredConfiguration.$property.fallbackReviewers) {
+								$requestBody[$property]["fallbackReviewers"] = @($TestResult.DesiredConfiguration.$property.fallbackReviewers | Foreach-Object {
+									$_.prepareBody()
+								})
+							}
 						}
 					}
-				}				
+					"requestorSettings" {
+						if ((Get-Member -InputObject $TestResult.DesiredConfiguration).Name -contains $property) {
+							$requestBody[$property] = $TestResult.DesiredConfiguration.$property.PSObject.Copy()
+							if ($TestResult.DesiredConfiguration.$property.onBehalfRequestors) {
+								$requestBody[$property]["onBehalfRequestors"] = @($TestResult.DesiredConfiguration.$property.onBehalfRequestors | ForEach-Object {
+									$_.prepareBody()
+								})
+							}
+						}
+					}
+					default {
+						if ((Get-Member -InputObject $TestResult.DesiredConfiguration).Name -contains $property) {
+							$requestBody[$property] = $TestResult.DesiredConfiguration.$property.PSObject.Copy()
+						}						
+					}
+				}
 			}
 
 			return $requestBody
@@ -71,7 +97,7 @@ function Invoke-TmfAccessPackageAssignmentPolicy
 			Beautify-TmfTestResult -TestResult $result -FunctionName $MyInvocation.MyCommand
 			switch ($result.ActionType) {
 				"Create" {
-					$requestUrl = "$script:graphBaseUrl/identityGovernance/entitlementManagement/accessPackageAssignmentPolicies"
+					$requestUrl = "$script:graphBaseUrl1/identityGovernance/entitlementManagement/assignmentPolicies"
 					$requestMethod = "POST"
 					$requestBody = ConvertTo-RequestBody -TestResult $result					
 
@@ -86,7 +112,7 @@ function Invoke-TmfAccessPackageAssignmentPolicy
 					}
 				}
 				"Delete" {
-					$requestUrl = "$script:graphBaseUrl/identityGovernance/entitlementManagement/accessPackageAssignmentPolicies/{0}" -f $result.GraphResource.Id
+					$requestUrl = "$script:graphBaseUrl1/identityGovernance/entitlementManagement/assignmentPolicies/{0}" -f $result.GraphResource.Id
 					$requestMethod = "DELETE"
 					try {
 						Write-PSFMessage -Level Verbose -String "TMF.Invoke.SendingRequest" -StringValues $requestMethod, $requestUrl
@@ -98,11 +124,11 @@ function Invoke-TmfAccessPackageAssignmentPolicy
 					}
 				}
 				"Update" {
-					$requestUrl = "$script:graphBaseUrl/identityGovernance/entitlementManagement/accessPackageAssignmentPolicies/{0}" -f $result.GraphResource.Id
+					$requestUrl = "$script:graphBaseUrl1/identityGovernance/entitlementManagement/assignmentPolicies/{0}" -f $result.GraphResource.Id
 					$requestMethod = "PUT"
 					if ($result.Changes.count -gt 0) {
 						$requestBody = ConvertTo-RequestBody -TestResult $result
-	
+						
 						try {
 							$requestBody = $requestBody | ConvertTo-Json -ErrorAction Stop -Depth 8
 							Write-PSFMessage -Level Verbose -String "TMF.Invoke.SendingRequestWithBody" -StringValues $requestMethod, $requestUrl, $requestBody
