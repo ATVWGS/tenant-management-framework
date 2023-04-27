@@ -35,6 +35,7 @@ $script:supportedResources = @{
             "deviceFilter" = (Get-Command Validate-ConditionalAccessFilter)
             "conditions" = (Get-Command Validate-ConditionalAccessConditionSet)
             "applications" = (Get-Command Validate-ConditionalAccessApplications)
+            "applicationFilter" = (Get-Command Validate-ConditionalAccessApplicationFilter)
             "users" = (Get-Command Validate-ConditionalAccessUsers)
             "devices" = (Get-Command Validate-ConditionalAccessDevices)
             "locations" = (Get-Command Validate-ConditionalAccessLocations)
