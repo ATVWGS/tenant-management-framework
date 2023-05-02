@@ -21,6 +21,8 @@
     'TMF.Test.MultipleResourcesError' = 'There are multiple {0} with displayName {1} already created. Please clean your Tenant.'
     'TMF.Test.MissingPolicyRuleTemplate' = 'Referenced policy rule template {1} for {0} not found.'
     'TMF.Test.DeleteNotPossible' = 'Not possible to delete resources of type {0}. Please change parameter present of {1} from false to true.'
+    'TMF.Test.UpdateNotPossibleForBuiltInResources' = 'It is not possible to update built-in resources of type ''{0}''. Please remove ''{1}'' from configuration.'
+    'TMF.Test.DeleteNotPossibleForBuiltInResources' = 'It is not possible to delete built-in resources of type ''{0}''. Please remove ''{1}'' from configuration.'
 
     'TMF.Invoke.ActionTypeUnknown' = 'Action type (<c="yellow">{0}</c>) is unknown!'
     'TMF.Invoke.ActionFailed' = '[Tenant: <c="gray">{0}</c>][{1} Resource: <c="gray">{2}</c>] Action ({3}) failed! Stopping actions.'
