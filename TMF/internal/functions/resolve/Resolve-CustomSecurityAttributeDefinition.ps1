@@ -20,15 +20,17 @@ function Resolve-CustomSecurityAttributeDefinition
 
 			if ($customSecurityAttributeDefinition.count -gt 1) { throw "Got multiple customSecurityAttributeDefinitions for $InputReference" }
 		}
-		catch {}
+		catch {
+			$failed = $true
+		}
 		finally {
-			if ($SearchInDesiredConfiguration) {
+			if ($failed -and $SearchInDesiredConfiguration) {
 				if ($InputReference -in $script:desiredConfiguration["customSecurityAttributeDefinitions"].displayName) {
 					$customSecurityAttributeDefinition = $InputReference
 				}
 			}
 			else {
-				if (-Not $DontFailIfNotExisting) { 
+				if ($failed -and (-Not $DontFailIfNotExisting)) { 
 					Write-PSFMessage -Level Warning -String 'TMF.CannotResolveResource' -StringValues "customSecurityAttributeDefinition" -Tag 'failed' -ErrorRecord $_
 					$Cmdlet.ThrowTerminatingError($_)
 				}				
