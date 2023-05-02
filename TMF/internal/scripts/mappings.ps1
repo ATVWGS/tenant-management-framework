@@ -36,6 +36,7 @@ $script:supportedResources = @{
             "conditions" = (Get-Command Validate-ConditionalAccessConditionSet)
             "applications" = (Get-Command Validate-ConditionalAccessApplications)
             "applicationFilter" = (Get-Command Validate-ConditionalAccessApplicationFilter)
+            "authenticationStrength" = (Get-Command Validate-ConditionalAccessAuthenticationStrength)
             "users" = (Get-Command Validate-ConditionalAccessUsers)
             "devices" = (Get-Command Validate-ConditionalAccessDevices)
             "locations" = (Get-Command Validate-ConditionalAccessLocations)
@@ -161,6 +162,13 @@ $script:supportedResources = @{
         "invokeFunction" = (Get-Command Invoke-TmfAuthorizationPolicy)
         "parentType" = "policies"
         "weight" = 7
+    }
+    "authenticationStrengthPolicies" = @{
+        "registerFunction" = (Get-Command Register-TmfAuthenticationStrengthPolicy)
+        "testFunction" = (Get-Command Test-TmfAuthenticationStrengthPolicy)
+        "invokeFunction" = (Get-Command Invoke-TmfAuthenticationStrengthPolicy)
+        "parentType" = "policies"
+        "weight" = 8
     }
     "attributeSets" = @{
         "registerFunction" = (Get-Command Register-TmfAttributeSet)
