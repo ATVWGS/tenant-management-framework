@@ -21,6 +21,7 @@ Additional properties will be added in the future.
     "userRiskLevels": [""],
     "grantControls": {
         "builtInControls": [],
+        "authenticationStrength": "",
         "customAuthenticationFactors": [],
         "operator": "",
         "termsOfUse": []

@@ -182,6 +182,10 @@ The *example.md* file contains example resource instances and further informatio
 │   │       authenticationMethodsPolicies.json
 │   │       example.md
 │   │
+│   ├───authenticationStrengthPolicies
+│   │       authenticationStrengthPolicies.json
+│   │       example.md
+│   │
 │   └───authorizationPolicies
 │           authorizationPolicies.json
 │           example.md
@@ -457,6 +461,30 @@ An example policy definition that would affect all members of a group to accept 
         "builtInControls": ["mfa"],
         "operator": "AND",
         "termsOfUse": ["ToU for Some group"]
+    },
+    "state" : "enabledForReportingButNotEnforced",
+    "present" : true
+}
+```
+
+An example policy definition that would enable an authenticationStrengthPolicy for filtered apps.
+
+```json
+{
+    "displayName" : "Require authentication strength for filtered apps",
+    "excludeGroups": ["Some group for CA"],
+    "excludeUsers": ["max.mustermann@TENANT_NAME.onmicrosoft.com"],        
+    "includeLocations": ["All"],
+    "applicationFilter": {
+        "mode": "include",
+        "rule": "CustomSecurityAttribute.TestSet2_TestAttribute2 -contains \"Value4\" -or CustomSecurityAttribute.TestSet2_TestAttribute3 -contains \"Value1\""
+    },
+    "clientAppTypes": ["All"],
+    "includePlatforms": ["All"],
+    "grantControls": {
+        "authenticationStrength": "TestASP",
+        "builtInControls": [],
+        "operator": "OR"
     },
     "state" : "enabledForReportingButNotEnforced",
     "present" : true
@@ -849,7 +877,24 @@ Please check the [.... example.md](./TMF/internal/data/configuration/policies/au
 Please check the [.... example.md](./TMF/internal/data/configuration/policies/authenticationMethodsPolicies/example.md) for further information.
 
 
-### 2.6.10.1. authorizationPolicies
+### 2.6.10.3. authenticationStrengthPolicies
+
+```json
+[
+    {
+        "present": true,
+        "displayName": "TestASP",
+        "description": "Test Authentication Strength Policies",
+        "allowedCombinations": [
+            "deviceBasedPush"
+        ]
+    }
+]
+```
+
+Please check the [.... example.md](./TMF/internal/data/configuration/policies/authenticationStrengthPolicies/example.md) for further information.
+
+### 2.6.10.4. authorizationPolicies
 
 ```json
 
