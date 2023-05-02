@@ -24,13 +24,13 @@ function Resolve-CustomSecurityAttributeDefinition
 			$failed = $true
 		}
 		finally {
-			if ($failed -and $SearchInDesiredConfiguration) {
+			if ($SearchInDesiredConfiguration) {
 				if ($InputReference -in $script:desiredConfiguration["customSecurityAttributeDefinitions"].displayName) {
 					$customSecurityAttributeDefinition = $InputReference
 				}
 			}
 			else {
-				if ($failed -and (-Not $DontFailIfNotExisting)) { 
+				if (-Not $DontFailIfNotExisting) { 
 					Write-PSFMessage -Level Warning -String 'TMF.CannotResolveResource' -StringValues "customSecurityAttributeDefinition" -Tag 'failed' -ErrorRecord $_
 					$Cmdlet.ThrowTerminatingError($_)
 				}				
