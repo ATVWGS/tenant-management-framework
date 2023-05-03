@@ -37,6 +37,13 @@ function Invoke-TmfAdministrativeUnit
                             "displayName" = $result.DesiredConfiguration.displayName
                             "description" = $result.DesiredConfiguration.description
                             "visibility"  = $result.DesiredConfiguration.visibilty
+                            "membershipType" = $result.DesiredConfiguration.membershipType
+                        }
+
+                        @("membershipRule","membershipRuleProcessingState") | ForEach-Object {
+                            if ($result.DesiredConfiguration.Properties() -contains $_) {
+                                $requestBody[$_] = $result.DesiredConfiguration.$_
+                            }
                         }
 
                         $membersToAdd = @()
