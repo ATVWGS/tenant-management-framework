@@ -142,6 +142,13 @@ $script:supportedResources = @{
         "parentType" = "roleManagement"
         "weight" = 16
     }
+    "appManagementPolicies" = @{
+        "registerFunction" = (Get-Command Register-TmfAppManagementPolicy)
+        "testFunction" = (Get-Command Test-TmfAppManagementPolicy)
+        "invokeFunction" = (Get-Command Invoke-TmfAppManagementPolicy)
+        "parentType" = "policies"
+        "weight" = 6
+    }
     "authenticationFlowsPolicies" = @{
         "registerFunction" = (Get-Command Register-TmfAuthenticationFlowsPolicy)
         "testFunction" = (Get-Command Test-TmfAuthenticationFlowsPolicy)
@@ -169,6 +176,13 @@ $script:supportedResources = @{
         "invokeFunction" = (Get-Command Invoke-TmfAuthenticationStrengthPolicy)
         "parentType" = "policies"
         "weight" = 8
+    }
+    "tenantAppManagementPolicy" = @{
+        "registerFunction" = (Get-Command Register-TmfTenantAppManagementPolicy)
+        "testFunction" = (Get-Command Test-TmfTenantAppManagementPolicy)
+        "invokeFunction" = (Get-Command Invoke-TmfTenantAppManagementPolicy)
+        "parentType" = "policies"
+        "weight" = 5
     }
     "attributeSets" = @{
         "registerFunction" = (Get-Command Register-TmfAttributeSet)
