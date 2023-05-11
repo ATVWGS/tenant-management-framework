@@ -44,7 +44,6 @@ function Invoke-TmfAppManagementPolicy {
 					}
 					try {						
 						$requestBody = $requestBody | ConvertTo-Json -ErrorAction Stop -Depth 8
-                        Write-Host $requestBody
 						Write-PSFMessage -Level Verbose -String "TMF.Invoke.SendingRequestWithBody" -StringValues $requestMethod, $requestUrl, $requestBody
 						$policy = Invoke-MgGraphRequest -Method $requestMethod -Uri $requestUrl -Body $requestBody
 					}
