@@ -32,7 +32,7 @@ function Test-TmfAccessPackageAssignmentPolicy
 				Tenant = $tenant.displayName
 				TenantId = $tenant.Id
 				ResourceType = 'AccessPackageAssignmentPolicy'
-				ResourceName = (Resolve-String -Text $definition.displayName)
+				ResourceName = (Resolve-String -Text $definition.displayName) + " (AP: $($definition.accessPackage))"
 				DesiredConfiguration = $definition
 			}
 
