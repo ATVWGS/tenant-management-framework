@@ -35,6 +35,8 @@ $script:supportedResources = @{
             "deviceFilter" = (Get-Command Validate-ConditionalAccessFilter)
             "conditions" = (Get-Command Validate-ConditionalAccessConditionSet)
             "applications" = (Get-Command Validate-ConditionalAccessApplications)
+            "applicationFilter" = (Get-Command Validate-ConditionalAccessApplicationFilter)
+            "authenticationStrength" = (Get-Command Validate-ConditionalAccessAuthenticationStrength)
             "users" = (Get-Command Validate-ConditionalAccessUsers)
             "devices" = (Get-Command Validate-ConditionalAccessDevices)
             "locations" = (Get-Command Validate-ConditionalAccessLocations)
@@ -72,14 +74,23 @@ $script:supportedResources = @{
         "testFunction" = (Get-Command Test-TmfAccessPackageAssignmentPolicy)
         "invokeFunction" = (Get-Command Invoke-TmfAccessPackageAssignmentPolicy)
         "validateFunctions" = @{
-            "accessReviewSettings" = (Get-Command Validate-AssignmentReviewSettings)
+            "reviewSettings" = (Get-Command Validate-AssignmentReviewSettings)
             "requestApprovalSettings" = (Get-Command Validate-RequestApprovalSettings)
             "requestorSettings" = (Get-Command Validate-RequestorSettings)
-            "approvalStages" = (Get-Command Validate-ApprovalStage)    
-            "allowedRequestors" = (Get-Command Validate-UserSet)
-            "reviewers" = (Get-Command Validate-UserSet)
-            "primaryApprovers" = (Get-Command Validate-UserSet)
-            "escalationApprovers" = (Get-Command Validate-UserSet)
+            "stages" = (Get-Command Validate-ApprovalStage)    
+            "allowedRequestors" = (Get-Command Validate-SubjectSet)
+            "primaryApprovers" = (Get-Command Validate-SubjectSet)
+            "escalationApprovers" = (Get-Command Validate-SubjectSet)
+            "fallbackPrimaryApprovers" = (Get-Command Validate-SubjectSet)
+            "fallbackEscalationApprovers" = (Get-Command Validate-SubjectSet)
+            "primaryReviewers" = (Get-Command Validate-SubjectSet)
+            "fallbackReviewers" = (Get-Command Validate-SubjectSet)
+            "schedule" = (Get-Command Validate-AssignmentReviewSchedule)
+            "onBehalfRequestors" = (Get-Command Validate-SubjectSet)
+            "specificAllowedTargets" = (Get-Command Validate-SubjectSet)
+            "recurrence" = (Get-Command Validate-AssignmentReviewRecurrence)
+            "pattern" = (Get-Command Validate-AssignmentReviewPattern)
+            "range" = (Get-Command Validate-AssignmentReviewRange)
         }
         "parentType" = "entitlementManagement"
         "weight" = 57
@@ -131,6 +142,13 @@ $script:supportedResources = @{
         "parentType" = "roleManagement"
         "weight" = 16
     }
+    "appManagementPolicies" = @{
+        "registerFunction" = (Get-Command Register-TmfAppManagementPolicy)
+        "testFunction" = (Get-Command Test-TmfAppManagementPolicy)
+        "invokeFunction" = (Get-Command Invoke-TmfAppManagementPolicy)
+        "parentType" = "policies"
+        "weight" = 6
+    }
     "authenticationFlowsPolicies" = @{
         "registerFunction" = (Get-Command Register-TmfAuthenticationFlowsPolicy)
         "testFunction" = (Get-Command Test-TmfAuthenticationFlowsPolicy)
@@ -151,6 +169,41 @@ $script:supportedResources = @{
         "invokeFunction" = (Get-Command Invoke-TmfAuthorizationPolicy)
         "parentType" = "policies"
         "weight" = 7
+    }
+    "authenticationStrengthPolicies" = @{
+        "registerFunction" = (Get-Command Register-TmfAuthenticationStrengthPolicy)
+        "testFunction" = (Get-Command Test-TmfAuthenticationStrengthPolicy)
+        "invokeFunction" = (Get-Command Invoke-TmfAuthenticationStrengthPolicy)
+        "parentType" = "policies"
+        "weight" = 8
+    }
+    "tenantAppManagementPolicy" = @{
+        "registerFunction" = (Get-Command Register-TmfTenantAppManagementPolicy)
+        "testFunction" = (Get-Command Test-TmfTenantAppManagementPolicy)
+        "invokeFunction" = (Get-Command Invoke-TmfTenantAppManagementPolicy)
+        "parentType" = "policies"
+        "weight" = 5
+    }
+    "attributeSets" = @{
+        "registerFunction" = (Get-Command Register-TmfAttributeSet)
+        "testFunction" = (Get-Command Test-TmfAttributeSet)
+        "invokeFunction" = (Get-Command Invoke-TmfAttributeSet)
+        "parentType" = "customSecurityAttributes"
+        "weight" = 40
+    }
+    "customSecurityAttributeDefinitions" = @{
+        "registerFunction" = (Get-Command Register-TmfCustomSecurityAttributeDefinition)
+        "testFunction" = (Get-Command Test-TmfCustomSecurityAttributeDefinition)
+        "invokeFunction" = (Get-Command Invoke-TmfCustomSecurityAttributeDefinition)
+        "parentType" = "customSecurityAttributes"
+        "weight" = 41
+    }
+    "customSecurityAttributeAllowedValues" = @{
+        "registerFunction" = (Get-Command Register-TmfCustomSecurityAttributeAllowedValue)
+        "testFunction" = (Get-Command Test-TmfCustomSecurityAttributeAllowedValue)
+        "invokeFunction" = (Get-Command Invoke-TmfCustomSecurityAttributeAllowedValue)
+        "parentType" = "customSecurityAttributes"
+        "weight" = 42
     }
 
 } # All currently supported components.

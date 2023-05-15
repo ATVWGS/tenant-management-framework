@@ -27,8 +27,7 @@ configurations
 ## 1.2. Benefits
 - Reproducable configuration
 - Easy readable, storable and shareable configurations
-- Enforced change documentation and versioning by
-adding a source control
+- Enforced change documentation and versioning by adding a source control
 - Enables staging concept
 - Less prone to human error
 - Increased efficiency
@@ -64,6 +63,7 @@ The required scopes depend on what components (resources) you want to configure.
 | Role Management (assignments, definitions, management policies)  | RoleManagement.ReadWrite.Directory, Directory.AccessAsUser.All, RoleEligibilitySchedule.ReadWrite.Directory,                 |
 |                                                                  | RoleAssignmentSchedule.ReadWrite.Directory", "RoleManagementPolicy.ReadWrite.Directory"                                      |
 | Policies (authentication/authorization policies)                 | Policy.ReadWrite.AuthenticationMethod, Policy.ReadWrite.Authorization, Policy.ReadWrite.AuthenticationFlows                  |
+| Custom Security Attributes                                       | CustomSecAttributeDefinition.ReadWrite.All                                                                                   |
 
 
 You can also use *Get-TmfRequiredScope* to get the required scopes and combine it with *Connect-MgGraph*.
@@ -143,6 +143,15 @@ The *example.md* file contains example resource instances and further informatio
 │       example.md
 │       policies.json
 │
+├───customSecurityAttributes
+│   ├───attributeSets
+│   │       attributeSets.json
+│   │       example.md
+│   │
+│   └───customSecurityAttributeDefinitions
+│           customSecurityAttributeDefinitions.json
+│           example.md
+|
 ├───directoryRoles
 │       directoryRoles.json
 │       example.md
@@ -171,6 +180,10 @@ The *example.md* file contains example resource instances and further informatio
 │   │
 │   ├───authenticationMethodsPolicies
 │   │       authenticationMethodsPolicies.json
+│   │       example.md
+│   │
+│   ├───authenticationStrengthPolicies
+│   │       authenticationStrengthPolicies.json
 │   │       example.md
 │   │
 │   └───authorizationPolicies
@@ -454,6 +467,30 @@ An example policy definition that would affect all members of a group to accept 
 }
 ```
 
+An example policy definition that would enable an authenticationStrengthPolicy for filtered apps.
+
+```json
+{
+    "displayName" : "Require authentication strength for filtered apps",
+    "excludeGroups": ["Some group for CA"],
+    "excludeUsers": ["max.mustermann@TENANT_NAME.onmicrosoft.com"],        
+    "includeLocations": ["All"],
+    "applicationFilter": {
+        "mode": "include",
+        "rule": "CustomSecurityAttribute.TestSet2_TestAttribute2 -contains \"Value4\" -or CustomSecurityAttribute.TestSet2_TestAttribute3 -contains \"Value1\""
+    },
+    "clientAppTypes": ["All"],
+    "includePlatforms": ["All"],
+    "grantControls": {
+        "authenticationStrength": "TestASP",
+        "builtInControls": [],
+        "operator": "OR"
+    },
+    "state" : "enabledForReportingButNotEnforced",
+    "present" : true
+}
+```
+
 Please check the [Conditional Access Policy example.md](./TMF/internal/data/configuration/conditionalAccessPolicies/example.md) for further information.
 
 ### 2.6.4. Named Locations
@@ -528,76 +565,116 @@ Please check the [Access Package Catalogs example.md](./TMF/internal/data/config
 #### 2.6.6.2. Access Packages
 
 ```json
-{
-    "displayName":"Access Package",
+{	
+    "displayName":  "Sample package",
     "oldNames": [],
-    "description":"Access Package description",
-    "isHidden":true,
-    "isRoleScopesVisible":true,
-    "catalog":"General",
-    "present":true,
-    "accessPackageResources":[
+    "description":  "This is a sample access package.",
+    "isHidden":  false,
+    "isRoleScopesVisible":  true,
+    "catalog":  "Sample catalog",
+    "present":  true,
+    "accessPackageResources":  [
         {
-            "resourceIdentifier":"Some group",
-            "resourceRole":"Member",
-            "originSystem":"AadGroup"
+            "originSystem":  "AadGroup",
+            "resourceRole":  "Member",
+            "resourceIdentifier":  "Some group"
         }
     ],
-    "assignmentPolicies":[
+    "assignmentPolicies": [
         {
-            "displayName":"Initial policy",
-            "oldNames": [],
-            "canExtend":false,
-            "durationInDays":8,
-            "accessReviewSettings":{
-                "isEnabled":false,
-                "recurrenceType":"monthly",
-                "reviewerType":"Reviewers",
-                "durationInDays":14,
-                "reviewers":[
-                    {
-                        "type":"singleUser",
-                        "reference":"max.mustermann@tmacdev.onmicrosoft.com",
-                        "isBackup":false
-                    },
-                    {
-                        "type":"requestorManager",
-                        "managerLevel":1,
-                        "isBackup":false
-                    }
-                ]
+            "displayName": "Sample assignment policy",
+            "description": "Access Package Assignment Policy has been created with Tenant Management Framework",
+            "allowedTargetScope": "specificDirectoryUsers",
+            "present": true,
+            "specificAllowedTargets": [
+                {
+                    "reference": "Some group",
+                    "type": "groupMembers",
+                    "description": "Some group"
+                }
+            ],
+            "expiration": {
+                "endDateTime": null,
+                "duration": "P90D",
+                "type": "afterDuration"
             },
-            "requestApprovalSettings":{
-                "isApprovalRequired":true,
-                "isApprovalRequiredForExtension":false,
-                "isRequestorJustificationRequired":true,
-                "approvalMode":"SingleStage",
-                "approvalStages":[
+            "requestorSettings": {
+                "enableTargetsToSelfAddAccess": true,
+                "enableTargetsToSelfUpdateAccess": false,
+                "enableTargetsToSelfRemoveAccess": true,
+                "allowCustomAssignmentSchedule": true,
+                "enableOnBehalfRequestorsToAddAccess": true,
+                "enableOnBehalfRequestorsToUpdateAccess": false,
+                "enableOnBehalfRequestorsToRemoveAccess": false,
+                "onBehalfRequestors": []
+            },
+            "requestApprovalSettings": {
+                "isApprovalRequiredForAdd": true,
+                "isApprovalRequiredForUpdate": true,
+                "stages": [
                     {
-                        "approvalStageTimeOutInDays":14,
-                        "isApproverJustificationRequired":true,
-                        "isEscalationEnabled":false,
-                        "escalationTimeInMinutes":11520,
-                        "primaryApprovers":[
+                        "durationBeforeAutomaticDenial": "P14D",
+                        "isApproverJustificationRequired": true,
+                        "isEscalationEnabled": false,
+                        "durationBeforeEscalation": "P5D",
+                        "primaryApprovers": [
                             {
-                                "type":"singleUser",
-                                "reference":"max.mustermann@tmacdev.onmicrosoft.com",
-                                "isBackup":false
+                                "reference": "Some group",
+                                "type": "groupMembers",
+                                "description": "Some group"
                             }
-                        ]
+                        ],
+                        "fallbackPrimaryApprovers": [],
+                        "escalationApprovers": [
+                            {
+                                "reference": "foo.bar@tenant.onmicrosoft.com",
+                                "type": "singleUser"
+                            }
+                        ],
+                        "fallbackEscalationApprovers": []
                     }
                 ]
             },
-            "requestorSettings":{
-                "scopeType":"SpecificDirectorySubjects",
-                "acceptRequests":true,
-                "allowedRequestors":[
-                    {
-                        "type":"singleUser",
-                        "reference":"max.mustermann@tmacdev.onmicrosoft.com",
-                        "isBackup":false
+            "reviewSettings": {
+                "isEnabled": true,
+                "expirationBehavior": "keepAccess",
+                "isRecommendationEnabled": true,
+                "isReviewerJustificationRequired": true,
+                "isSelfReview": true,
+                "schedule": {
+                    "startDateTime": "2023-04-18T09:34:49.4485321Z",
+                    "expiration": {
+                        "endDateTime": null,
+                        "duration": "P7D",
+                        "type": "afterDuration"
+                    },
+                    "recurrence": {
+                        "pattern": {
+                            "type": "absoluteMonthly",
+                            "interval": 1,
+                            "month": 0,
+                            "dayOfMonth": 0,
+                            "daysOfWeek": [],
+                            "firstDayOfWeek": null,
+                            "index": null
+                        },
+                        "range": {
+                            "type": "noEnd",
+                            "numberOfOccurrences": 0,
+                            "recurrenceTimeZone": null,
+                            "startDate": null,
+                            "endDate": null
+                        }
                     }
-                ]
+                },
+                "primaryReviewers": [
+                    {
+                        "reference": "Some group",
+                        "type": "groupMembers",
+                        "description": "Some group"
+                    }                    
+                ],
+                "fallbackReviewers": []
             }
         }
     ]
@@ -800,7 +877,24 @@ Please check the [.... example.md](./TMF/internal/data/configuration/policies/au
 Please check the [.... example.md](./TMF/internal/data/configuration/policies/authenticationMethodsPolicies/example.md) for further information.
 
 
-### 2.6.10.1. authorizationPolicies
+### 2.6.10.3. authenticationStrengthPolicies
+
+```json
+[
+    {
+        "present": true,
+        "displayName": "TestASP",
+        "description": "Test Authentication Strength Policies",
+        "allowedCombinations": [
+            "deviceBasedPush"
+        ]
+    }
+]
+```
+
+Please check the [.... example.md](./TMF/internal/data/configuration/policies/authenticationStrengthPolicies/example.md) for further information.
+
+### 2.6.10.4. authorizationPolicies
 
 ```json
 
@@ -1240,8 +1334,48 @@ roleManagementPolicyRuleTemplates include all rules but the "Approval_EndUser_As
   ```
 Please check the [.... example.md](./TMF/internal/data/configuration/roleManagement/roleManagementPolicyRuleTemplates/example.md) for further information.
 
+### 2.6.12 Custom security attributes
 
-### 2.6.12. String mapping
+#### 2.6.12.1 attributeSets
+
+```json
+    {
+		"displayName": "TestSet",
+		"description": "Attribute set for testing",
+		"maxAttributesPerSet": 3,
+		"present": true
+	}
+```
+Please check the [.... example.md](./TMF/internal/data/configuration/customSecurityAttributes/attributeSets/example.md) for further information.
+
+#### 2.6.12.2 customSecurityAttributeDefinitions
+
+```json
+    {
+        "attributeSet": "AttributeSetForTest",
+        "displayName": "TestAttribute1",
+        "description": "Test attribute 1",
+        "isCollection": false,
+        "isSearchable": true,
+        "present": true,
+        "status": "Available",
+        "type": "String",
+        "usePreDefinedValuesOnly": true,
+        "allowedValues": [
+            {
+                "displayName": "Value1",
+                "isActive": true
+            },
+            {
+                "displayName": "Value2",
+                "isActive": false
+            }
+        ]
+    }
+```
+Please check the [.... example.md](./TMF/internal/data/configuration/customSecurityAttributes/customSecurityAttributDefinitions/example.md) for further information.
+
+### 2.6.13. String mapping
 String mappings can help you with parameterization of your TMF configurations.
 
 You can create mappings between strings and the values they should be replaced with. Place the mappings in the *stringMappings.json* file in the *stringMappings* folder of your configuration.

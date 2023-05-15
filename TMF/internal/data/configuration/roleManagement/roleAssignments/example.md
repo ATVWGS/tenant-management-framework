@@ -51,6 +51,24 @@
 }
 ```
 
+### Add an eligible role assignment on subscription level with expiration by duration
+```json
+{
+    "present": "true",
+    "type": "eligible",
+    "principalReference": "some name",
+    "principalType": "group",
+    "roleReference": "some role name",
+    "subscriptionReference": "subscription name",
+    "scopeReference": "subscription name",
+    "scopeType": "subscription",
+    "startDateTime": "2022-03-24T00:00:00.00Z",
+    "expirationType": "AfterDuration",
+    "endDateTime": null,
+    "duration": "P365D"
+}
+```
+
 # Eligible role assignment for a group on a directory role with no expiration
 ```json
 {

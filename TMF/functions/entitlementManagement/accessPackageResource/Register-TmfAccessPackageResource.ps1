@@ -13,7 +13,6 @@ function Register-TmfAccessPackageResource
 		[string] $catalog = "General",
 		[ValidateSet("AadGroup", "Application", "Sharepoint Online Site")]
 		[string] $resourceType = "AadGroup",
-		[ValidateSet("Member", "Owner")]
 		[string] $resourceRole = "Member",
 
 		[bool] $present = $true,
@@ -66,13 +65,27 @@ function Register-TmfAccessPackageResource
 				"AadGroup" {
 					 $originId = Resolve-Group -InputReference $this.resourceIdentifier -DontFailIfNotExisting
 				}
+				"Application" {
+					$appID = Resolve-Application -InputReference $this.resourceIdentifier -DontFailIfNotExisting
+					$originId = (Invoke-MgGraphRequest -Method GET -Uri ("$script:graphBaseUrl/servicePrincipals/?`$filter=(appID eq '{0}')" -f $appID)).Value.Id
+				}
 				default {
 					$originId = $this.resourceIdentifier
 				}
 			}
 			$originId
 		}
-		Add-Member -InputObject $object -MemberType ScriptMethod -Name "roleOriginId" -Value { $originId = $this.originId(); if ($originId) { "{0}_{1}" -f $this.resourceRole, $originId }}
+		Add-Member -InputObject $object -MemberType ScriptMethod -Name "roleOriginId" -Value { 
+			
+			switch ($this.resourceType) {
+				"AadGroup" {
+					$originId = $this.originId(); if ($originId) { "{0}_{1}" -f $this.resourceRole, $originId }
+				}
+				"Application" {
+					$originId = $this.originId(); if ($originId) { "{0}" -f $this.resourceRole}
+				}
+			}
+		}
 		Add-Member -InputObject $object -MemberType ScriptMethod -Name Properties -Value { ($this | Get-Member -MemberType NoteProperty).Name }
 
 		if ($alreadyLoaded) {

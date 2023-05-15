@@ -9,7 +9,7 @@
 	GUID = 'f1f44bfb-f67c-4595-a18f-ae4565ac0728'
 	
 	# Author of this module
-	Author = 'Johannes Seitle'
+	Author = 'Azure Team VWGS'
 	
 	# Company or vendor of this module
 	CompanyName = 'Volkswagen Group Services GmbH'
@@ -103,11 +103,31 @@
 		'Register-TmfAuthenticationMethodsPolicy',
 		'Test-TmfAuthenticationMethodsPolicy',
 		'Invoke-TmfAuthenticationMethodsPolicy',
+		'Register-TmfAuthenticationStrengthPolicy',
+		'Test-TmfAuthenticationStrengthPolicy',
+		'Invoke-TmfAuthenticationStrengthPolicy',
 		'Register-TmfAuthorizationPolicy',
 		'Test-TmfAuthorizationPolicy',
 		'Invoke-TmfAuthorizationPolicy',
+		'Register-TmfAppManagementPolicy',
+		'Test-TmfAppManagementPolicy',
+		'Invoke-TmfAppManagementPolicy',
+		'Register-TmfTenantAppManagementPolicy',
+		'Test-TmfTenantAppManagementPolicy',
+		'Invoke-TmfTenantAppManagementPolicy',
 		'Test-TmfPolicy',
-		'Invoke-TmfPolicy'
+		'Invoke-TmfPolicy',
+		'Invoke-TmfAttributeSet',
+        'Register-TmfAttributeSet',
+		'Test-TmfAttributeSet',
+		'Invoke-TmfCustomSecurityAttributeAllowedValue',
+		'Register-TmfCustomSecurityAttributeAllowedValue',
+		'Test-TmfCustomSecurityAttributeAllowedValue',
+		'Invoke-TmfCustomSecurityAttributeDefinition',
+		'Register-TmfCustomSecurityAttributeDefinition',
+		'Test-TmfCustomSecurityAttributeDefinition',
+		'Invoke-TmfCustomSecurityAttribute',
+		'Test-TmfCustomSecurityAttribute'
 	)
 	
 	# Cmdlets to export from this module

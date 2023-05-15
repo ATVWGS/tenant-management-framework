@@ -15,6 +15,7 @@
 		[string[]] $excludeRoles,
 		[string[]] $includeApplications,
 		[string[]] $excludeApplications,
+		[object] $applicationFilter,
 		[string[]] $includeLocations,
 		[string[]] $excludeLocations,
 		[ValidateSet("android", "iOS", "windows", "windowsPhone", "macOS", "linux", "all")]
@@ -42,6 +43,7 @@
 		[string[]] $customAuthenticationFactors,		
 		[ValidateSet("AND", "OR")]
 		[string] $operator,
+		[string] $authenticationStrength,
 		[string[]] $termsOfUse,
 		
 		# Session Controls
@@ -71,9 +73,9 @@
 		}
 
 		try {
-			if ($grantControls -and ($builtInControls -or $customAuthenticationFactors -or $operator -or $termsOfUse)) {
+			if ($grantControls -and ($builtInControls -or $customAuthenticationFactors -or $operator -or $termsOfUse -or $authenticationStrength)) {
 				<# Workaround to support old conditionalAccessPolicy definition structure... #>
-				throw "It is not allowed to specify grantControls and grantControl child properties (builtInControls, operator, customAuthenticationFactors, termsOfUse) at the same time."
+				throw "It is not allowed to specify grantControls and grantControl child properties (authenticationStrength, builtInControls, operator, customAuthenticationFactors, termsOfUse) at the same time."
 			}
 			if (($buildInControls -and -not $operator) -or ($termsOfUse -and -not $operator)) {
 				throw "You need to provide an operator (AND or OR) if you want to use buildInControls or termsofUse."
@@ -90,7 +92,7 @@
 		$childPropertyToParentMapping = @{
 			<# Workaround to support legacy conditionalAccessPolicy definition structure... #>
 			"Users" = @("includeUsers", "excludeUsers", "includeGroups", "excludeGroups", "includeRoles", "excludeRoles")
-			"Applications" = @("includeApplications", "excludeApplications")
+			"Applications" = @("includeApplications", "excludeApplications", "applicationFilter")
 			"Locations" = @("includeLocations", "excludeLocations")
 			"Devices" = @("includeDevices", "excludeDevices", "deviceFilter")
 			"Platforms" = @("includePlatforms", "excludePlatforms")
@@ -130,10 +132,10 @@
 				}
 			}
 
-			if (-Not $grantControls -and ($builtInControls -or $customAuthenticationFactors -or $operator -or $termsOfUse)) {
+			if (-Not $grantControls -and ($builtInControls -or $customAuthenticationFactors -or $operator -or $termsOfUse -or $authenticationStrength)) {
 				<# Workaround to support legacy conditionalAccessPolicy definition structure... #>
 				$PSBoundParameters["grantControls"]	= @{}
-				"builtInControls", "customAuthenticationFactors", "operator", "termsOfUse" | ForEach-Object {
+				"builtInControls", "customAuthenticationFactors", "operator", "termsOfUse", "authenticationStrength" | ForEach-Object {
 					if ($PSBoundParameters.ContainsKey($_)) {
 						$PSBoundParameters["grantControls"][$_] = $PSBoundParameters[$_]
 					}

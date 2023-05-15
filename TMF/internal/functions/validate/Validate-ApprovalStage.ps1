@@ -2,12 +2,14 @@
 {
 	[CmdletBinding()]
 	Param (
-		[int] $approvalStageTimeOutInDays = 14,
+		[string] $durationBeforeAutomaticDenial,
 		[bool] $isApproverJustificationRequired,
 		[bool] $isEscalationEnabled,
-		[int] $escalationTimeInMinutes,
+		[string] $durationBeforeEscalation,
 		[object[]] $primaryApprovers,
 		[object[]] $escalationApprovers,
+		[object[]] $fallbackPrimaryApprovers,
+		[object[]] $fallbackEscalationApprovers,
 		[System.Management.Automation.PSCmdlet]
 		$Cmdlet = $PSCmdlet
 	)
@@ -23,7 +25,7 @@
 		$hashtable = @{}
 		foreach ($property in ($PSBoundParameters.GetEnumerator() | Where-Object {$_.Key -ne "Cmdlet"})) {
 			if ($script:supportedResources[$parentResourceName]["validateFunctions"].ContainsKey($property.Key)) {
-				if ($property.Value.GetType().BaseType -eq "System.Array") {
+				if ($property.Value.GetType().Name -eq "Object[]") {
 					$validated = @()
 					foreach ($value in $property.Value) {
 						$dummy = $value | ConvertTo-PSFHashtable -Include $($script:supportedResources[$parentResourceName]["validateFunctions"][$property.Key].Parameters.Keys)

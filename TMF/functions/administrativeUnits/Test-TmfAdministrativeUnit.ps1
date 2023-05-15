@@ -150,6 +150,11 @@ function Test-TmfAdministrativeUnit
 										}								
 									}							
 								}
+								{$_ -in @("membershipType","membershipRule","membershipRuleProcessingState") } {
+									if ($definition.$property -ne $resource.$property) {
+										$change.Actions = @{"Set" = $definition.$property};
+									}
+								}
 								default {
 									if ($definition.$property -ne $resource.$property) {
 										if(!( ($property -eq "visibility") -and !($resource.$property) -and ($definition.$property -eq "Public") )){

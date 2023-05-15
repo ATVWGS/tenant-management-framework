@@ -26,7 +26,9 @@ function Resolve-AccessPackageResource
 			}
 
 			if (-Not $resource -and $SearchInDesiredConfiguration) {
-				if ($InputReference -in $script:desiredConfiguration["accessPackageResources"].displayName) {
+				$catalog = (Invoke-MgGraphRequest -Method GET -Uri ("$script:graphBaseUrl/identityGovernance/entitlementManagement/accessPackageCatalogs/{0}" -f $CatalogId)).displayname
+				$displayname = "$($catalog) - $($InputReference)"
+				if ($displayname -in $script:desiredConfiguration["accessPackageResources"].displayName) {
 					$resource = $InputReference
 				}
 			}

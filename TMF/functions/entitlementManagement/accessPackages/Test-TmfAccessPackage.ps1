@@ -118,13 +118,49 @@ function Test-TmfAccessPackage
 								"accessPackageResourceRoleScopes" {
 									$existingRoleScopes = @()
 									if ($resource.accessPackageResourceRoleScopes.accessPackageResourceRole.originId) { $existingRoleScopes = $resource.accessPackageResourceRoleScopes.accessPackageResourceRole.originId }									
-									$roleOriginIds = @($definition.accessPackageResourceRoleScopes.roleOriginId())
-									$compare = Compare-Object -ReferenceObject  $existingRoleScopes -DifferenceObject $roleOriginIds
+									$roleOriginIds = @()
+									foreach ($roleScope in $definition.accessPackageResourceRoleScopes) {
+										switch ($roleScope.resourceType) {
+											"AadGroup" {$roleOriginIds += [pscustomObject]@{
+																				"id" =	$roleScope.roleOriginId()
+																				"roleDisplayName" = $roleScope.displayName
+																				"resourceType" = $roleScope.resourceType
+																		  }
+											}
+											"Application" {
+												$catalogID = Resolve-AccessPackageCatalog -InputReference $definition.catalog
+												$accessPackageResourceId = Resolve-AccessPackageResource -InputReference $roleScope.resourceIdentifier -CatalogId $catalogID -SearchInDesiredConfiguration
+												
+												if ($accessPackageResourceId -match $script:guidRegex) {
+													$roleOriginIds += [pscustomObject]@{
+																					"id" = (Invoke-MgGraphRequest -Method GET -Uri ("$script:graphBaseUrl/identityGovernance/entitlementManagement/accessPackageCatalogs/{0}/accessPackageResourceRoles?`$filter=(originSystem eq 'AadApplication' and accessPackageResource/id eq '{1}' and displayname eq '{2}')" -f $catalogID,$accessPackageResourceId,$roleScope.resourceRole)).value.originId
+																					"roleDisplayName" = $roleScope.displayName
+																					"resourceType" = $roleScope.resourceType
+													}																					
+												}
+												else {
+													$roleOriginIds += [pscustomObject]@{
+														"id" = $accessPackageResourceId
+														"roleDisplayName" = $roleScope.displayName
+														"resourceType" = $roleScope.resourceType
+													}
+												}
+											}
+										}
+									}
+
+									$compare = Compare-Object -ReferenceObject  $existingRoleScopes -DifferenceObject $roleOriginIds.id
 
 									if ($compare) {
 										$change.Actions = @{}
 										if ($compare.SideIndicator -contains "=>" -and -not $ReturnSetAction) {
-											$change.Actions["Add"] = ($compare | Where-Object {$_.SideIndicator -eq "=>"}).InputObject
+											$change.Actions["Add"] = @()
+											foreach ($difference in ($compare | Where-Object {$_.SideIndicator -eq "=>"}).InputObject) {
+												$roleToAdd = $roleOriginIds | Where-Object {$_.id -eq $difference}
+												$change.Actions["Add"] += $roleToAdd
+											}
+											
+											#$change.Actions["Add"] = ($compare | Where-Object {$_.SideIndicator -eq "=>"}).InputObject
 										}
 										if ($compare.SideIndicator -contains "<=" -and -not $ReturnSetAction) {
 											$change.Actions["Remove"] = ($compare | Where-Object {$_.SideIndicator -eq "<="}).InputObject

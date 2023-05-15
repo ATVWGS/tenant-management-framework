@@ -13,5 +13,5 @@ pool:
 steps:
 - bash: |
     git remote add --mirror=fetch target https://$(githubPAT)@github.com/ATVWGS/tenant-management-framework.git
-    git push --tags target HEAD:$(Build.SourceBranch)
+    git push -f --tags target HEAD:$(Build.SourceBranch)
   displayName: 'Push to github'

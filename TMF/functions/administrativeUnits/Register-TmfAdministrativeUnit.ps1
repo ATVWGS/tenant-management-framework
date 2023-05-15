@@ -9,7 +9,15 @@ function Register-TmfAdministrativeUnit
 		[string] $description,
         [string] $visibility,
         
+		[string] $membershipType = "assigned",
+		[Parameter(ParameterSetName="dynamic")]
+		[string] $membershipRule,
+		[Parameter(ParameterSetName="dynamic")]
+		[string] $membershipRuleProcessingState,
+
+		[Parameter(ParameterSetName="assigned")]
         [string[]] $members,
+		[Parameter(ParameterSetName="assigned")]
         [string[]] $groups,
 
         [object[]] $scopedRoleMembers,
@@ -40,14 +48,20 @@ function Register-TmfAdministrativeUnit
 			displayName = Resolve-String -Text $displayName
 			description = $description
 			visibility = $visibility
+			membershipType = $membershipType
 			present = $present
+		}
+
+		if (($membershipType -eq "dynamic" -and (-not $PSBoundParameters.ContainsKey("membershipRule"))) -or ($membershipType -eq "assigned" -and ($PSBoundParameters.ContainsKey("membershipRule") -or $PSBoundParameters.ContainsKey("membershipRuleProcessingState")))) {
+			Write-PSFMessage -Level Error -String 'TMF.Register.PropertySetNotPossible' -StringValues $displayName, "admininstrativeUnit" -Tag "failed" -ErrorRecord $_ -FunctionName $Cmdlet.CommandRuntime			
+			$cmdlet.ThrowTerminatingError($_)
 		}
 
 		if ($PSBoundParameters.ContainsKey("oldNames")) {
 			Add-Member -InputObject $object -MemberType NoteProperty -Name "oldNames" -Value @($oldNames | ForEach-Object {Resolve-String $_})
 		}
 
-		"members", "groups", "scopedRoleMembers" | ForEach-Object {
+		"members", "groups", "scopedRoleMembers", "membershipRule", "membershipRuleProcessingState" | ForEach-Object {
 			if ($PSBoundParameters.ContainsKey($_)) {
 				Add-Member -InputObject $object -MemberType NoteProperty -Name $_ -Value $PSBoundParameters[$_];
 			}

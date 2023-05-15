@@ -5,7 +5,7 @@ function Validate-AccessReviewRange
         [ValidateSet("noEnd","endDate","numbered")]
         [string] $type,
         [int] $numberOfOccurrences,
-		$recurrenceTimeZone = $null,
+		[string] $recurrenceTimeZone = $null,
 		[string] $startDate,
         [string] $endDate,
 		[System.Management.Automation.PSCmdlet]

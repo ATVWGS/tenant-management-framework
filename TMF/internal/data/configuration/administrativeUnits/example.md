@@ -58,6 +58,25 @@ When set to "HiddenMembership", only members of the administrative unit can list
   "present": true
 }
 ```
+## Create administrative unit with dynamic membershiprule
+
+```json
+{
+  "displayName": "provide displayName",
+  "description": "provide description",
+  "visibiliy": "Public or HiddenMembership",
+  "membershipType": "dynamic",
+  "membershipRule": "(user.department -eq departmentName)",
+  "membershipRuleProcessingState": "ON",
+  "scopedRoleMembers": [
+    {
+      "role": "User Administrator",
+      "identity": "Max Mustermann"
+    }
+  ],
+  "present": true
+}
+
 ## Microsoft Graph resource types and documents
 https://docs.microsoft.com/de-de/graph/api/resources/administrativeunit?view=graph-rest-1.0
 https://4sysops.com/archives/an-introduction-to-azure-ad-administrative-units/
