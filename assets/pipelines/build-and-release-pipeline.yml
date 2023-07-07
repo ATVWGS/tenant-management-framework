@@ -38,13 +38,13 @@ stages:
       inputs:
         key: powershell-modules
         path: C:\Users\VssAdministrator\Documents\WindowsPowerShell\Modules
-        cacheHitVar: MODULES_RESTORED
+        cacheHitVar: MODULES_RESTORED1
     - task: PowerShell@2
       displayName: Run install-dependencies.ps1
       inputs:      
         filePath: 'build/install-dependencies.ps1'
         arguments: '-SystemAccessToken $(System.AccessToken) -FeedName $(feedName) -FeedUrl $(feedUrl) -UsePrivatePackageFeed'
-      condition: ne(variables.MODULES_RESTORED, 'true')
+      condition: ne(variables.MODULES_RESTORED1, 'true')
 - stage: build
   jobs:
   - job: build
@@ -54,7 +54,7 @@ stages:
       inputs:
         key: powershell-modules
         path: C:\Users\VssAdministrator\Documents\WindowsPowerShell\Modules
-        cacheHitVar: MODULES_RESTORED
+        cacheHitVar: MODULES_RESTORED1
     - task: PowerShell@2
       displayName: Updating module manifest
       inputs:
@@ -111,7 +111,7 @@ stages:
         inputs:
           key: powershell-modules
           path: C:\Users\VssAdministrator\Documents\WindowsPowerShell\Modules
-          cacheHitVar: MODULES_RESTORED
+          cacheHitVar: MODULES_RESTORED1
       - task: PowerShell@2
         inputs:
           targetType: 'inline'
@@ -143,7 +143,7 @@ stages:
         inputs:
           key: powershell-modules
           path: C:\Program Files\WindowsPowerShell\Modules\
-          cacheHitVar: MODULES_RESTORED
+          cacheHitVar: MODULES_RESTORED1
       - task: PowerShell@2
         inputs:
           targetType: 'inline'
@@ -171,7 +171,7 @@ stages:
         inputs:
           key: powershell-modules
           path: C:\Program Files\WindowsPowerShell\Modules\
-          cacheHitVar: MODULES_RESTORED
+          cacheHitVar: MODULES_RESTORED1
       - task: DownloadPipelineArtifact@2
         inputs:
           buildType: 'current'
