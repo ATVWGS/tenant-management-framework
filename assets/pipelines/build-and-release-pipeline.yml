@@ -36,15 +36,15 @@ stages:
     - task: Cache@2
       displayName: Restore required Powershell modules
       inputs:
-        key: powershell-modules
+        key: powershell-modules1
         path: C:\Users\VssAdministrator\Documents\WindowsPowerShell\Modules
-        cacheHitVar: MODULES_RESTORED1
+        cacheHitVar: MODULES_RESTORED
     - task: PowerShell@2
       displayName: Run install-dependencies.ps1
       inputs:      
         filePath: 'build/install-dependencies.ps1'
         arguments: '-SystemAccessToken $(System.AccessToken) -FeedName $(feedName) -FeedUrl $(feedUrl) -UsePrivatePackageFeed'
-      condition: ne(variables.MODULES_RESTORED1, 'true')
+      condition: ne(variables.MODULES_RESTORED, 'true')
 - stage: build
   jobs:
   - job: build
@@ -52,9 +52,9 @@ stages:
     - task: Cache@2
       displayName: Restore required Powershell modules
       inputs:
-        key: powershell-modules
+        key: powershell-modules1
         path: C:\Users\VssAdministrator\Documents\WindowsPowerShell\Modules
-        cacheHitVar: MODULES_RESTORED1
+        cacheHitVar: MODULES_RESTORED
     - task: PowerShell@2
       displayName: Updating module manifest
       inputs:
@@ -109,9 +109,9 @@ stages:
       - task: Cache@2
         displayName: Restore required Powershell modules
         inputs:
-          key: powershell-modules
+          key: powershell-modules1
           path: C:\Users\VssAdministrator\Documents\WindowsPowerShell\Modules
-          cacheHitVar: MODULES_RESTORED1
+          cacheHitVar: MODULES_RESTORED
       - task: PowerShell@2
         inputs:
           targetType: 'inline'
@@ -141,9 +141,9 @@ stages:
       - task: Cache@2
         displayName: Restore required Powershell modules
         inputs:
-          key: powershell-modules
+          key: powershell-modules1
           path: C:\Program Files\WindowsPowerShell\Modules\
-          cacheHitVar: MODULES_RESTORED1
+          cacheHitVar: MODULES_RESTORED
       - task: PowerShell@2
         inputs:
           targetType: 'inline'
@@ -169,9 +169,9 @@ stages:
       - task: Cache@2
         displayName: Restore required Powershell modules
         inputs:
-          key: powershell-modules
+          key: powershell-modules1
           path: C:\Program Files\WindowsPowerShell\Modules\
-          cacheHitVar: MODULES_RESTORED1
+          cacheHitVar: MODULES_RESTORED
       - task: DownloadPipelineArtifact@2
         inputs:
           buildType: 'current'
