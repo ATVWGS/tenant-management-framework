@@ -16,7 +16,7 @@ function Register-TmfAccessPackageAssignmentPolicy
 		[string] $accessPackage,
 		[Parameter(Mandatory = $true, ParameterSetName = "autoAssigned")]
 		[Parameter(Mandatory = $true, ParameterSetName = "assigned")]
-		[ValidateSet("specificDirectoryUsers","specificConnectedOrganizationUsers","specificDirectoryServicePrincipals","allMemberUsers","allDirectoryUsers","allDirectoryServicePrincipals","allConfiguredConnectedOrganizationUsers","allExternalUsers")]
+		[ValidateSet("notSpecified","specificDirectoryUsers","specificConnectedOrganizationUsers","specificDirectoryServicePrincipals","allMemberUsers","allDirectoryUsers","allDirectoryServicePrincipals","allConfiguredConnectedOrganizationUsers","allExternalUsers","unknownFutureValue")]
 		[string] $allowedTargetScope,
 		[Parameter(Mandatory = $true, ParameterSetName = "autoAssigned")]
 		[Parameter(ParameterSetName = "assigned")]
