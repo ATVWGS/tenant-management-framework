@@ -7,7 +7,7 @@ Param (
 
 begin {
     $buildAndTestDeps = @(
-        @{ ModuleName = "PSFramework"; RequiredVersion = "1.7.270" },
+        @{ ModuleName = "PSFramework"; RequiredVersion = "1.7.245" },
         "Microsoft.Graph.Authentication",
         "Microsoft.Graph.Identity.DirectoryManagement",
         "Microsoft.Graph.Identity.Governance",
