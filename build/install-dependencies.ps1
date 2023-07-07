@@ -51,7 +51,7 @@ process {
         if ($PSBoundParameters.ContainsKey("UsePrivatePackageFeed")) {
             $installParameters["Credential"] = $feedCredential
         }
-        Install-Module @installParameters
+        Install-Module @installParameters -AllowClobber
     }    
     #endregion    
 }
