@@ -8,10 +8,10 @@ Param (
 begin {
     $buildAndTestDeps = @(
         @{ ModuleName = "PSFramework"; RequiredVersion = "1.7.245" },
-        "Microsoft.Graph.Authentication",
-        "Microsoft.Graph.Identity.DirectoryManagement",
-        "Microsoft.Graph.Identity.Governance",
-        @{ ModuleName = "Pester"; ModuleVersion = "5.3.1" }
+        @{ ModuleName = "Microsoft.Graph.Authentication"; RequiredVersion = "1.27.0"},
+        @{ ModuleName = "Microsoft.Graph.Identity.DirectoryManagement"; RequiredVersion = "1.27.0"},
+        @{ ModuleName = "Microsoft.Graph.Identity.Governance"; RequiredVersion = "1.27.0"},
+        @{ ModuleName = "Pester"; RequiredVersion = "5.4.0" }
     )
 
     if ($PSBoundParameters.ContainsKey("UsePrivatePackageFeed")) {
