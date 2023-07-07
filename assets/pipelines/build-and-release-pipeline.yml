@@ -36,7 +36,7 @@ stages:
     - task: Cache@2
       displayName: Restore required Powershell modules
       inputs:
-        key: powershell-modules2
+        key: powershell-modules3
         path: C:\Users\VssAdministrator\Documents\WindowsPowerShell\Modules
         cacheHitVar: MODULES_RESTORED
     - task: PowerShell@2
@@ -52,7 +52,7 @@ stages:
     - task: Cache@2
       displayName: Restore required Powershell modules
       inputs:
-        key: powershell-modules2
+        key: powershell-modules3
         path: C:\Users\VssAdministrator\Documents\WindowsPowerShell\Modules
         cacheHitVar: MODULES_RESTORED
     - task: PowerShell@2
@@ -109,7 +109,7 @@ stages:
       - task: Cache@2
         displayName: Restore required Powershell modules
         inputs:
-          key: powershell-modules2
+          key: powershell-modules3
           path: C:\Users\VssAdministrator\Documents\WindowsPowerShell\Modules
           cacheHitVar: MODULES_RESTORED
       - task: PowerShell@2
@@ -141,7 +141,7 @@ stages:
       - task: Cache@2
         displayName: Restore required Powershell modules
         inputs:
-          key: powershell-modules2
+          key: powershell-modules3
           path: C:\Program Files\WindowsPowerShell\Modules\
           cacheHitVar: MODULES_RESTORED
       - task: PowerShell@2
@@ -169,7 +169,7 @@ stages:
       - task: Cache@2
         displayName: Restore required Powershell modules
         inputs:
-          key: powershell-modules2
+          key: powershell-modules3
           path: C:\Program Files\WindowsPowerShell\Modules\
           cacheHitVar: MODULES_RESTORED
       - task: DownloadPipelineArtifact@2
