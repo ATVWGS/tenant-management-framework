@@ -21,6 +21,8 @@ function Register-TmfAuthorizationPolicy {
         [Parameter(Mandatory = $true)]
         [bool] $allowedToCreateSecurityGroups,
         [Parameter(Mandatory = $true)]
+        [bool] $allowedToCreateTenants,
+        [Parameter(Mandatory = $true)]
         [bool] $allowedToReadOtherUsers,
         [Parameter(Mandatory = $true)]
         [bool] $allowedToReadBitlockerKeysForOwnedDevice,
@@ -57,6 +59,7 @@ function Register-TmfAuthorizationPolicy {
             defaultUserRolePermissions = @{
                 allowedToCreateApps = $allowedToCreateApps
                 allowedToCreateSecurityGroups = $allowedToCreateSecurityGroups
+                allowedToCreateTenants = $allowedToCreateTenants
                 allowedToReadOtherUsers = $allowedToReadOtherUsers
                 allowedToReadBitlockerKeysForOwnedDevice = $allowedToReadBitlockerKeysForOwnedDevice
             }
