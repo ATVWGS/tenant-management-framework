@@ -127,7 +127,10 @@
 		'Register-TmfCustomSecurityAttributeDefinition',
 		'Test-TmfCustomSecurityAttributeDefinition',
 		'Invoke-TmfCustomSecurityAttribute',
-		'Test-TmfCustomSecurityAttribute'
+		'Test-TmfCustomSecurityAttribute',
+		'Register-TmfAuthenticationContextClassReference',
+		'Test-TmfAuthenticationContextClassReference',
+		'Invoke-TmfAuthenticationContextClassReference'
 	)
 	
 	# Cmdlets to export from this module
