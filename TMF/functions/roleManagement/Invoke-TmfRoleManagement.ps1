@@ -8,6 +8,8 @@ function Invoke-TmfRoleManagement
 			roleAssignments, roleDefinitions, roleManagementPolicies
 	#>
 	Param (
+		[ValidateSet('AzureResource', 'AzureAD')]
+        [string] $scope,
 		[switch] $DoNotRequireTenantConfirm
 	)
 	
@@ -29,8 +31,14 @@ function Invoke-TmfRoleManagement
 		
 		foreach ($resourceType in ($script:supportedResources.GetEnumerator() | Where-Object {$_.Value.invokeFunction -and $_.Name -in $roleManagementResources} | Sort-Object {$_.Value.weight})) {			
 			if ($script:desiredConfiguration[$resourceType.Name]) {
-				Write-PSFMessage -Level Host -FunctionName "Invoke-TmfRoleManagement" -String "TMF.StartingInvokeForResource" -StringValues $resourceType.Name					
-				& $resourceType.Value["invokeFunction"] -Cmdlet $PSCmdlet
+				if ($scope) {
+					Write-PSFMessage -Level Host -FunctionName "Invoke-TmfRoleManagement" -String "TMF.StartingInvokeForScopedResource" -StringValues $resourceType.Name, $scope
+					& $resourceType.Value["invokeFunction"] -scope $scope -Cmdlet $PSCmdlet
+				}
+				else {
+					Write-PSFMessage -Level Host -FunctionName "Invoke-TmfRoleManagement" -String "TMF.StartingInvokeForResource" -StringValues $resourceType.Name					
+					& $resourceType.Value["invokeFunction"] -Cmdlet $PSCmdlet
+				}				
 			}						
 		}
 	}

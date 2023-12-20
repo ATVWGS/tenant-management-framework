@@ -2,7 +2,8 @@ function Invoke-TmfRoleDefinition
 {
     [CmdletBinding()]
 	Param (
-		[string[]] $SpecificResources,
+        [ValidateSet('AzureResource', 'AzureAD')]
+		[string] $scope,
 		[System.Management.Automation.PSCmdlet]
 		$Cmdlet = $PSCmdlet
 	)
@@ -18,7 +19,13 @@ function Invoke-TmfRoleDefinition
 
     process {
         if (Test-PSFFunctionInterrupt) { return }
-        $testResults = Test-TmfRoleDefinition -Cmdlet $Cmdlet
+        if ($scope) {
+            $testResults = Test-TmfRoleDefinition -scope $scope -Cmdlet $Cmdlet
+        }
+        else {
+            $testResults = Test-TmfRoleDefinition -Cmdlet $Cmdlet
+        }
+        
 
         foreach ($result in $testResults) {
 			Beautify-TmfTestResult -TestResult $result -FunctionName $MyInvocation.MyCommand

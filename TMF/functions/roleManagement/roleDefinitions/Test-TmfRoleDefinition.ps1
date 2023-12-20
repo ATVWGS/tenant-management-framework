@@ -9,6 +9,8 @@ function Test-TmfRoleDefinition
 	#>
 	[CmdletBinding()]
 	Param (
+        [ValidateSet('AzureResource', 'AzureAD')]
+        [string] $scope,
 		[System.Management.Automation.PSCmdlet]
 		$Cmdlet = $PSCmdlet
 	)
@@ -21,7 +23,11 @@ function Test-TmfRoleDefinition
 	}
 	process 
     {
-        $definitions = $script:desiredConfiguration[$resourceName]
+        switch ($scope) {
+            "AzureAD" {$definitions = $script:desiredConfiguration[$resourceName] | Where-Object {($_ |get-member -MemberType noteproperty).Name -notcontains "subscriptionReference"}}
+            "AzureResources" {$definitions = $script:desiredConfiguration[$resourceName] | Where-Object {($_ |get-member -MemberType noteproperty).Name -contains "subscriptionReference"}}
+            default {$definitions = $script:desiredConfiguration[$resourceName]}
+        }        
 
 		foreach ($definition in $definitions) {
 			foreach ($property in $definition.Properties()) {
