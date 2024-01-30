@@ -25,7 +25,7 @@ $script:supportedResources = @{
         "registerFunction" = (Get-Command Register-TmfAdministrativeUnit)
         "testFunction" = (Get-Command Test-TmfAdministrativeUnit)
         "invokeFunction" = (Get-Command Invoke-TmfAdministrativeUnit)
-        "weight" = 20
+        "weight" = 9
     }
     "conditionalAccessPolicies" = @{
         "registerFunction" = (Get-Command Register-TmfConditionalAccessPolicy)

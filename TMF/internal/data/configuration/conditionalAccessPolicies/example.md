@@ -7,7 +7,7 @@ Additional properties will be added in the future.
     "displayName" : "Require MFA and ToU for all members of Some group",
     "excludeGroups": ["Some group"],
     "excludeRoles": [],
-    "excludeUsers": ["max.mustermann@volkswagen.de"],
+    "excludeUsers": ["max.mustermann@domain.com"],
     "includeGroups": [],
     "includeRoles": [],
     "includeUsers": ["All"],
@@ -49,7 +49,7 @@ Additional properties will be added in the future.
 {
     "displayName" : "Require MFA and ToU for all members of Some group",
     "excludeGroups": ["Some group for CA"],
-    "excludeUsers": ["johannes.seitle@tmacdev.onmicrosoft.com"],        
+    "excludeUsers": ["max.mustermann@domain.com"],        
     "includeApplications": ["All"],        
     "includeLocations": ["All"],
     "clientAppTypes": ["browser", "mobileAppsAndDesktopClients"],
@@ -61,6 +61,25 @@ Additional properties will be added in the future.
     },
     "state" : "enabledForReportingButNotEnforced",
     "present" : false
+}
+```
+
+# Policy that blocks access to Microsoft Admin Portals for all users except for one group
+```json
+{
+    "displayName" : "Block Acces to Microsoft Admin Portals",
+    "excludeGroups": ["Some group for CA"],
+    "includeApplications": ["Microsoft Admin Portals"],
+    "includeUsers": ["All"],     
+    "includeLocations": ["All"],
+    "clientAppTypes": ["browser", "mobileAppsAndDesktopClients"],
+    "includePlatforms": ["All"],
+    "grantControls": {
+        "builtInControls": ["block"],
+        "operator": "OR"
+    },
+    "state" : "enabled",
+    "present" : true
 }
 ```
 

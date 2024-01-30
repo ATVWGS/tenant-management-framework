@@ -60,9 +60,20 @@
 							$requestBody["membershipRuleProcessingState"] = "On"
 						}
 						
-						$requestBody = $requestBody | ConvertTo-Json -ErrorAction Stop
-						Write-PSFMessage -Level Verbose -String "TMF.Invoke.SendingRequestWithBody" -StringValues $requestMethod, $requestUrl, $requestBody
-						$resource = Invoke-MgGraphRequest -Method $requestMethod -Uri $requestUrl -Body $requestBody
+						if ($result.DesiredConfiguration.Properties() -contains "administrativeUnit") {
+							
+							$AUrequestUrl = "$script:graphBaseUrl/directory/administrativeUnits/{0}/members/" -f (Resolve-AdministrativeUnit -InputReference $result.DesiredConfiguration.administrativeUnit -Cmdlet $Cmdlet)
+							$requestBody["@odata.type"] = "#Microsoft.Graph.Group"
+							
+							$requestBody = $requestBody | ConvertTo-Json -ErrorAction Stop
+							Write-PSFMessage -Level Verbose -String "TMF.Invoke.SendingRequestWithBody" -StringValues $requestMethod, $requestUrl, $requestBody
+							$resource = Invoke-MgGraphRequest -Method $requestMethod -Uri $AUrequestUrl -Body $requestBody
+						}
+						else {
+							$requestBody = $requestBody | ConvertTo-Json -ErrorAction Stop
+							Write-PSFMessage -Level Verbose -String "TMF.Invoke.SendingRequestWithBody" -StringValues $requestMethod, $requestUrl, $requestBody
+							$resource = Invoke-MgGraphRequest -Method $requestMethod -Uri $requestUrl -Body $requestBody
+						}						
 
 						if ($result.DesiredConfiguration.Properties() -contains "hideFromOutlookClients" -or $result.DesiredConfiguration.Properties() -contains "hideFromAddressLists") {
 							$requestMethod = "PATCH"
