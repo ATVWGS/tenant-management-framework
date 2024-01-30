@@ -10,11 +10,28 @@ Additional properties will be added in the future.
     "securityEnabled": true,
     "mailEnabled": false,
     "mailNickname": "someGroupForMembers",
-    "members": ["max.mustermann@volkswagen.de"],
-    "owners": ["group.owner@volkswagen.de"],
+    "members": ["max.mustermann@domain.com"],
+    "owners": ["group.owner@domain.com"],
     "present": true
 }
 ```
+
+### A security group with static membership to be created in an administrative unit
+```json
+{   
+    "displayName": "Some group",
+    "description": "This is a security group",
+    "groupTypes": [],        
+    "securityEnabled": true,
+    "mailEnabled": false,
+    "mailNickname": "someGroupForMembers",
+    "members": ["max.mustermann@domain.com"],
+    "owners": ["group.owner@domain.com"],
+    "administrativeUnit": "TestAU",
+    "present": true
+}
+```
+
 
 ### A privileged access group which is assignableToRole
 ```json
@@ -40,8 +57,8 @@ Additional properties will be added in the future.
     "securityEnabled": true,
     "mailEnabled": false,
     "mailNickname": "someDynamicGroup",
-    "membershipRule" : "(user.userPrincipalName -match \".*@volkswagen.de$\"",
-    "owners": ["group.owner@volkswagen.de"],
+    "membershipRule" : "(user.userPrincipalName -match \".*@domain.com$\"",
+    "owners": ["group.owner@domain.com"],
     "present": true
 }
 ```
@@ -56,8 +73,8 @@ Additional properties will be added in the future.
     "mailEnabled": true,
     "visibility": "Public",
     "mailNickname": "someDynamicGroup",
-    "members": ["max.mustermann@volkswagen.de"],
-    "owners": ["group.owner@volkswagen.de"],
+    "members": ["max.mustermann@domain.com"],
+    "owners": ["group.owner@domain.com"],
     "present": true
 }
 ```
@@ -72,8 +89,8 @@ Additional properties will be added in the future.
     "mailEnabled": true,
     "visibility": "HiddenMembership",
     "mailNickname": "someDynamicGroup",
-    "members": ["max.mustermann@volkswagen.de"],
-    "owners": ["group.owner@volkswagen.de"],
+    "members": ["max.mustermann@domain.com"],
+    "owners": ["group.owner@domain.com"],
     "present": true
 }
 ```
@@ -87,8 +104,8 @@ Additional properties will be added in the future.
     "securityEnabled": true,
     "mailEnabled": false,
     "mailNickname": "someGroupForMembers",
-    "members": ["max.mustermann@volkswagen.de"],
-    "owners": ["group.owner@volkswagen.de"],
+    "members": ["max.mustermann@domain.com"],
+    "owners": ["group.owner@domain.com"],
     "assignedLicenses": [
         {
             "skuId": "licenseID",
