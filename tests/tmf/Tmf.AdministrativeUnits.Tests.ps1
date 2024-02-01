@@ -10,9 +10,8 @@ Param (
 Import-Module "$PSScriptRoot\..\helpers.psm1"
 
 #region Some test resource definitions
-$global:graphUri = "https://graph.microsoft.com/beta/groups"
-$global:definitions = Get-Definitions -DataFilePath "$PSScriptRoot\definitions\Group.Definitions.psd1"
-$global:definitions["groups"] | Foreach-Object { $_["mailNickname"] = $_["displayName"].replace(" ","").replace("-","") }
+$global:graphUri = "https://graph.microsoft.com/beta/administrativeUnits"
+$global:definitions = Get-Definitions -DataFilePath "$PSScriptRoot\definitions\AdministrativeUnit.Definitions.psd1"
 #endregion
 
 BeforeAll {
@@ -20,42 +19,41 @@ BeforeAll {
     Connect-MgGraph -AccessToken ($AccessToken | ConvertTo-SecureString -AsPlainText -Force)
 }
 
-Describe 'Tmf.Groups.Register' {
-    It "should successfully register group definitions" {
-        foreach ($group in $global:definitions["groups"]) {
-            Write-Host ($group | ConvertTo-Json -Depth 10)
-            { Register-TmfGroup @group -Verbose } | Should -Not -Throw
+Describe 'Tmf.AdministrativeUnits.Register' {
+    It "should successfully register administrativeUnit definitions" {
+        foreach ($AU in $global:definitions["administrativeUnits"]) {
+            Write-Host ($AU | ConvertTo-Json -Depth 10)
+            { Register-TmfAdministrativeUnit @AU -Verbose } | Should -Not -Throw
         }
         Get-TmfDesiredConfiguration | Should -Not -BeNullOrEmpty        
     }
 
     $testCases = @(
         @{
-            "because" = "membershipRule requires groupType DynamicMembership"
+            "because" = "membershipRule requires membershipType dynamic"
             "definition" = @{
-                "displayName" = "Security Group"
-                "groupTypes" = @()
+                "displayName" = "Dynamic AU"
                 "membershipRule" = "does not matter"
             }
         }
         @{
-            "because" = "membershipRule requires groupType DynamicMembership"
+            "because" = "members requires membershipType assigned"
             "definition" = @{
                 "displayName" = "Security Group"
-                "groupTypes" = @()
-                "resourceBehaviorOptions" = @("WelcomeEmailDisabled")
+                "membershipType" = "dynamic"
+                "members" = @("does not matter")
             }
         }
     )
     It "should throw an exception" -TestCases $testCases {
         Param ($because, $definition)
-        { Register-TmfGroup @definition -Verbose } | Should -Throw -Because $because
+        { Register-TmfAdministrativeUnit @definition -Verbose } | Should -Throw -Because $because
     }
 }
 
-Describe 'Tmf.Groups.Invoke.Creation' {
+Describe 'Tmf.AdministrativeUnit.Invoke.Creation' {
     It "should successfully test the TMF configuration" {
-        { Test-TmfGroup -Verbose } | Should -Not -Throw
+        { Test-TmfAdministrativeUnit -Verbose } | Should -Not -Throw
     }
 
     It "should successfully invoke the TMF configuration" {
@@ -63,7 +61,7 @@ Describe 'Tmf.Groups.Invoke.Creation' {
     }
 
     
-    $testCases = $global:definitions["groups"] | Foreach-Object {
+    $testCases = $global:definitions["administrativeUnits"] | Foreach-Object {
         return @{
             "displayName" = $_["displayName"]
             "uri" = $global:graphUri
@@ -79,28 +77,28 @@ Describe 'Tmf.Groups.Invoke.Creation' {
 Describe 'Tmf.General.Invoke.Deletion' {
     BeforeAll {
         #region Set present to false for each definition
-        $global:definitions["groups"] | Where-Object { -Not $_["assignedLicenses"] -and -Not $_["privilegedAccess"] } | Foreach-Object {
+        $global:definitions["administrativeUnits"] | Foreach-Object {
             $_["present"] = $false
         }
         #endregion
     }
 
-    It "should successfully register group definitions" {
-        foreach ($group in $global:definitions["groups"]) {
-            Register-TmfGroup @group -Verbose
+    It "should successfully register administrativeUnit definitions" {
+        foreach ($AU in $global:definitions["administrativeUnits"]) {
+            Register-TmfAdministrativeUnit @AU -Verbose
         }
         Get-TmfDesiredConfiguration -Verbose | Should -Not -BeNullOrEmpty        
     }
 
     It "should successfully test the TMF configuration" {
-        { Test-TmfGroup -Verbose } | Should -Not -Throw
+        { Test-TmfAdministrativeUnit -Verbose } | Should -Not -Throw
     }
 
     It "should successfully invoke the TMF configuration" {
-        { Invoke-TmfGroup -Verbose } | Should -Not -Throw
+        { Invoke-TmfAdministrative -Verbose } | Should -Not -Throw
     }
 
-    $testCases = $global:definitions["groups"] | Where-Object { -Not $_["assignedLicenses"] -and -Not $_["privilegedAccess"] } | Foreach-Object {
+    $testCases = $global:definitions["administrativeUnits"] | Foreach-Object {
         return @{
             "displayName" = $_["displayName"]
             "uri" = $global:graphUri
