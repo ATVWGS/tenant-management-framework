@@ -55,7 +55,7 @@
                     "range"= @{
                         "type"= "noEnd"
                         "numberOfOccurrences"= 0
-                        "recurrenceTimeZone"= null
+                        "recurrenceTimeZone"= $null
                         "startDate"= "2022-03-01"
                         "endDate"= "9999-12-31"
                     }
@@ -98,7 +98,7 @@
                     "range" = @{
                         "type" = "noEnd"
                         "numberOfOccurrences" = 0
-                        "recurrenceTimeZone" = null
+                        "recurrenceTimeZone" = $null
                         "startDate" = "2022-03-01"
                         "endDate" = "9999-12-31"
                     }
