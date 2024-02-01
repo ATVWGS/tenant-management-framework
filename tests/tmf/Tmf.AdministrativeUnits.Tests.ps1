@@ -16,7 +16,7 @@ $global:definitions = Get-Definitions -DataFilePath "$PSScriptRoot\definitions\A
 
 BeforeAll {
     Import-Module "$ModuleRoot\$ModuleName.psd1" -Force
-    Connect-MgGraph -AccessToken ($AccessToken | ConvertTo-SecureString -AsPlainText -Force)
+    Connect-MgGraph -AccessToken $AccessToken
 }
 
 Describe 'Tmf.AdministrativeUnits.Register' {

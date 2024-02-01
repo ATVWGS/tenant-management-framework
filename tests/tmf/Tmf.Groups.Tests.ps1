@@ -17,7 +17,7 @@ $global:definitions["groups"] | Foreach-Object { $_["mailNickname"] = $_["displa
 
 BeforeAll {
     Import-Module "$ModuleRoot\$ModuleName.psd1" -Force
-    Connect-MgGraph -AccessToken ($AccessToken | ConvertTo-SecureString -AsPlainText -Force)
+    Connect-MgGraph -AccessToken $AccessToken
 }
 
 Describe 'Tmf.Groups.Register' {
