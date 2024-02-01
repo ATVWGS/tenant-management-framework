@@ -95,7 +95,7 @@ Describe 'Tmf.General.Invoke.Deletion' {
     }
 
     It "should successfully invoke the TMF configuration" {
-        { Invoke-TmfAdministrative -Verbose } | Should -Not -Throw
+        { Invoke-TmfAdministrativeUnit -Verbose } | Should -Not -Throw
     }
 
     $testCases = $global:definitions["administrativeUnits"] | Foreach-Object {

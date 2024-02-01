@@ -9,7 +9,7 @@
         @{
             "displayName" = "Test - {{ timestamp }} - Dynamic administrativeUnit"
             "description" = "This is a dynamic administrative unit"
-            "visibiliy" = "Public"
+            "visibility" = "Public"
             "membershipType" = "dynamic"
             "membershipRule" = "(user.accountenabled -eq true)"
             "membershipRuleProcessingState" = "ON"

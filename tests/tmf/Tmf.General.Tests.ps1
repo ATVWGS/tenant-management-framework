@@ -37,7 +37,7 @@ Describe 'Tmf.General.Config.Creation' {
 
 Describe 'Tmf.General.Config.Processing' {
     Import-Module "$ModuleRoot\$ModuleName.psd1" -Force
-    Connect-MgGraph -AccessToken $AccessToken
+    Connect-MgGraph -AccessToken ($AccessToken | ConvertTo-SecureString -AsPlainText -Force)
 
     BeforeAll {
         $global:definitions.GetEnumerator() | Foreach-Object {
