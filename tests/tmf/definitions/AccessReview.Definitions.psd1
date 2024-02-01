@@ -1,7 +1,7 @@
 @{
     groups = @(
         @{
-            "displayName" = "Test - {{ timestamp }} - Security Group for Access Review"
+            "displayName" = "Test - TMF - Security Group for Access Review"
             "description" = "This is a security group to be used in an Access Review"
             "groupTypes" = @()
             "securityEnabled" = $true
@@ -10,7 +10,7 @@
             "present" = $true
         }
         @{
-            "displayName" = "Test - {{ timestamp }} - Security Group for Reviewer"
+            "displayName" = "Test - TMF - Security Group for Reviewer"
             "description" = "This is a security group to be used as Reviewer"
             "groupTypes" = @()
             "securityEnabled" = $true
@@ -25,12 +25,12 @@
             "present"= $true
             "scope"= @{
               "type"= "group"
-              "reference"= "Test - {{ timestamp }} - Security Group for Access Review"
+              "reference"= "Test - TMF - Security Group for Access Review"
             }
             "reviewers"= @(
                 @{
                     "type"= "groupMembers"
-                    "reference"="Test - {{ timestamp }} - Security Group for Reviewer"
+                    "reference"="Test - TMF - Security Group for Reviewer"
                 }
             )
             "settings"= @{
@@ -73,7 +73,7 @@
             "reviewers" = @(
                 @{
                     "type"= "groupMembers"
-                    "reference"="Test - {{ timestamp }} - Security Group for Reviewer"
+                    "reference"="Test - TMF - Security Group for Reviewer"
                 }
             )
             "settings" = @{
