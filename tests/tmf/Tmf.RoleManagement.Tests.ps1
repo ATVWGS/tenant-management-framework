@@ -84,6 +84,17 @@ Describe 'Tmf.RoleManagement.RoleAssignments.Register' {
 
 
 Describe 'Tmf.RoleManagement.Invoke.Creation' {
+
+    #First invoke roleDefinitions to be able to deploy the rest
+    It "should successfully test the roleDefinitions configuration" {
+        { Test-TmfRoleDefinition -Verbose } | Should -Not -Throw
+    }
+
+    It "should successfully invoke the roleDefinitions configuration" {
+        { Invoke-TmfRoleDefinition -Verbose } | Should -Not -Throw
+    }
+
+    #Now test and invoke all roleManagement configuration types
     It "should successfully test the TMF configuration" {
         { Test-TmfRoleManagement -Verbose } | Should -Not -Throw
     }
@@ -98,7 +109,7 @@ Describe 'Tmf.RoleManagement.Invoke.Creation' {
             "uri" = $global:graphUri
         }
     }
-    It "should have deleted <displayName> (uri: <uri>)" -TestCases $testCases {
+    It "should have created <displayName> (uri: <uri>)" -TestCases $testCases {
         Param ($displayName, $uri)
         $uri = "$uri/directory/roleDefinitions?`$filter=displayName eq '$displayname'"
         (Invoke-MgGraphRequest -Method GET -Uri $uri -Verbose).Value | Should -Not -HaveCount 0
