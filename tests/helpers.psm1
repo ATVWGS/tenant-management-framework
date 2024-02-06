@@ -36,7 +36,9 @@ function Get-Definitions {
     process {
         $definitions.GetEnumerator() | Foreach-Object {
             $_.Value | Foreach-Object {
-                $_["displayName"] = $_["displayName"] -replace "{{ timestamp }}", $timestamp
+                if ($_["displayName"]) {
+                    $_["displayName"] = $_["displayName"] -replace "{{ timestamp }}", $timestamp
+                }
             }
         }
     }
