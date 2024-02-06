@@ -15,8 +15,6 @@ function Invoke-TmfRoleAssignment {
 			Stop-PSFFunction -String "TMF.NoDefinitions" -StringValues "roleAssignment"
 			return
 		}
-        Test-AzureConnection
-        $azureToken = (Get-AzAccessToken -ResourceUrl $script:apiBaseUrl).Token
 	}
 
     process {
