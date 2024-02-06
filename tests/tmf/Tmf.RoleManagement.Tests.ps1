@@ -72,6 +72,11 @@ Describe 'Tmf.RoleManagement.RoleManagementPolicies.Register' {
     }
 }
 
+#Set current date time as startdatetime for roleAssignments
+$global:definitions["roleAssignments"] | Foreach-Object {
+    $_["startDateTime"] = Get-Date -uformat "%Y-%m-%dT00:00:00Z"
+}
+
 Describe 'Tmf.RoleManagement.RoleAssignments.Register' {
     It "should successfully register roleAssignments definitions" {
         foreach ($assignment in $global:definitions["roleAssignments"]) {
