@@ -62,48 +62,5 @@
                 }
             }
         }
-        @{
-            "displayName" = "Test  - {{ timestamp }} - AccessReview directoryRole"
-            "present" = $true
-            "scope" = @{
-              "type" = "directoryRole"
-              "subScope" = "users_groups"
-              "reference" = "Directory Readers"
-            }
-            "reviewers" = @(
-                @{
-                    "type"= "groupMembers"
-                    "reference"="Test - TMF - Security Group for Reviewer"
-                }
-            )
-            "settings" = @{
-                "mailNotificationsEnabled" = $true
-                "reminderNotificationsEnabled" = $true
-                "justificationRequiredOnApproval" = $true
-                "defaultDecisionEnabled" = $false
-                "defaultDecision" = "None"
-                "instanceDurationInDays" = 21
-                "autoApplyDecisionsEnabled" = $false
-                "recommendationsEnabled" = $true
-                "recurrence" = @{
-                    "pattern" = @{
-                        "type" = "absoluteMonthly"
-                        "interval" = 12
-                        "month" = 0
-                        "dayOfMonth" = 0
-                        "daysOfWeek" = @()
-                        "firstDayOfWeek" = "sunday"
-                        "index" = "first"
-                    }
-                    "range" = @{
-                        "type" = "noEnd"
-                        "numberOfOccurrences" = 0
-                        "recurrenceTimeZone" = $null
-                        "startDate" = "2030-01-01"
-                        "endDate" = "9999-12-31"
-                    }
-                }
-            }
-        }
     )
 }

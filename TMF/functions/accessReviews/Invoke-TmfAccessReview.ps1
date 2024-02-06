@@ -35,6 +35,9 @@ function Invoke-TmfAccessReview {
                 "Create" {
                     $requestUrl = "$script:graphBaseUrl/identityGovernance/accessReviews/definitions"
 					$requestMethod = "POST"
+					if ($result.DesiredConfiguration.scope.query -match "transitiveMembers/microsoft.graph.user") {
+						$result.DesiredConfiguration.scope.query = $result.DesiredConfiguration.scope.query -replace "/microsoft.graph.user", ""
+					}
 					$requestBody = @{						
 						"displayName" = $result.DesiredConfiguration.displayName
 						"scope" = $result.DesiredConfiguration.scope
