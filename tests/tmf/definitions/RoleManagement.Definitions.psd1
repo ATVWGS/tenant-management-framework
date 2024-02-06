@@ -56,7 +56,6 @@
             "scopeType" = "directory"
             "ruleTemplate" = "AzureAD_Tier1"
             "activationApprover" = @()
-            "present" = $true
         }
     )
     "roleManagementPolicyRuleTemplates" = @(

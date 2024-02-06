@@ -92,16 +92,15 @@ Describe 'Tmf.RoleManagement.Invoke.Creation' {
         { Invoke-TmfRoleManagement -DoNotRequireTenantConfirm -Verbose } | Should -Not -Throw
     }
 
-    
-    $testCases = $global:definitions["accessReviews"] | Foreach-Object {
+    $testCases = $global:definitions["roleDefinitions"] | Foreach-Object {
         return @{
             "displayName" = $_["displayName"]
             "uri" = $global:graphUri
         }
     }
-    It "should have created <displayName> (uri: <uri>)" -TestCases $testCases {
+    It "should have deleted <displayName> (uri: <uri>)" -TestCases $testCases {
         Param ($displayName, $uri)
-        $uri = "$uri/?`$filter=displayName eq '$displayName'"
+        $uri = "$uri/directory/roleDefinitions?`$filter=displayName eq '$displayname'"
         (Invoke-MgGraphRequest -Method GET -Uri $uri -Verbose).Value | Should -Not -HaveCount 0
     }
 }
