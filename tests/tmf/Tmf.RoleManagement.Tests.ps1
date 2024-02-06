@@ -94,6 +94,9 @@ Describe 'Tmf.RoleManagement.Invoke.Creation' {
         { Invoke-TmfRoleDefinition -Verbose } | Should -Not -Throw
     }
 
+    #Let's wait until roleDefinition can be queried after creation
+    Start-Sleep 10
+
     #Now test and invoke all roleManagement configuration types
     It "should successfully test the TMF configuration" {
         { Test-TmfRoleManagement -Verbose } | Should -Not -Throw
@@ -142,12 +145,22 @@ Describe 'Tmf.RoleManagement.Invoke.Deletion' {
         (Get-TmfDesiredConfiguration).roleAssignments | Should -Not -BeNullOrEmpty        
     }
 
-    It "should successfully test the TMF configuration" {
-        { Test-TmfRoleManagement -Verbose } | Should -Not -Throw
+    #First remove roleAssignments
+    It "should successfully test the roleAssignments configuration" {
+        { Test-TmfRoleAssignment -Verbose } | Should -Not -Throw
     }
 
-    It "should successfully invoke the TMF configuration" {
-        { Invoke-TmfRoleManagement -DoNotRequireTenantConfirm -Verbose } | Should -Not -Throw
+    It "should successfully invoke the roleAssignments configuration" {
+        { Invoke-TmfRoleAssignment -Verbose } | Should -Not -Throw
+    }
+
+    #Second remove roleDefinitions
+    It "should successfully test the roleDefinitions configuration" {
+        { Test-TmfRoleDefinition -Verbose } | Should -Not -Throw
+    }
+
+    It "should successfully invoke the roleDefinitions configuration" {
+        { Invoke-TmfRoleDefinition -Verbose } | Should -Not -Throw
     }
 
     $testCases = $global:definitions["roleDefinitions"] | Foreach-Object {
