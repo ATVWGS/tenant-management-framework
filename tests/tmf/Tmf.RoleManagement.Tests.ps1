@@ -85,19 +85,6 @@ Describe 'Tmf.RoleManagement.RoleAssignments.Register' {
 
 Describe 'Tmf.RoleManagement.Invoke.Creation' {
 
-    #First invoke roleDefinitions to be able to deploy the rest
-    It "should successfully test the roleDefinitions configuration" {
-        { Test-TmfRoleDefinition -Verbose } | Should -Not -Throw
-    }
-
-    It "should successfully invoke the roleDefinitions configuration" {
-        { Invoke-TmfRoleDefinition -Verbose } | Should -Not -Throw
-    }
-
-    #Let's wait until roleDefinition can be queried after creation
-    Start-Sleep 10
-
-    #Now test and invoke all roleManagement configuration types
     It "should successfully test the TMF configuration" {
         { Test-TmfRoleManagement -Verbose } | Should -Not -Throw
     }
@@ -106,6 +93,9 @@ Describe 'Tmf.RoleManagement.Invoke.Creation' {
         { Invoke-TmfRoleManagement -DoNotRequireTenantConfirm -Verbose } | Should -Not -Throw
     }
 
+    #Let's wait until resources can be queried after creation
+    Start-Sleep 10
+    
     $testCases = $global:definitions["roleDefinitions"] | Foreach-Object {
         return @{
             "displayName" = $_["displayName"]
@@ -118,6 +108,9 @@ Describe 'Tmf.RoleManagement.Invoke.Creation' {
         (Invoke-MgGraphRequest -Method GET -Uri $uri -Verbose).Value | Should -Not -HaveCount 0
     }
 }
+
+#Let's wait until resources can be queried after creation
+Start-Sleep 10
 
 Describe 'Tmf.RoleManagement.Invoke.Deletion' {
     BeforeAll {

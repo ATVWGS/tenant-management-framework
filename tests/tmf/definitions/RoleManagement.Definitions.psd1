@@ -15,17 +15,6 @@
             "type" = "eligible"
             "principalReference" = "Test - roleManagement - Security Group"
             "principalType" = "group"
-            "roleReference" = "Cloud Device Deleter"
-            "directoryScopeType" = "directory"
-            "directoryScopeReference" = "/"
-            "startDateTime" = "2022-09-06T16:26:49Z"
-            "expirationType" = "noExpiration"
-            "present" = $true
-        }
-        @{
-            "type" = "active"
-            "principalReference" = "Test - roleManagement - Security Group"
-            "principalType" = "group"
             "roleReference" = "Directory Readers"
             "directoryScopeType" = "directory"
             "directoryScopeReference" = "/"
@@ -51,7 +40,7 @@
     )
     "roleManagementPolicies" = @(
         @{
-            "roleReference" = "Cloud Device Deleter"
+            "roleReference" = "Directory Readers"
             "scopeReference" = "/"
             "scopeType" = "directory"
             "ruleTemplate" = "AzureAD_Tier1"
