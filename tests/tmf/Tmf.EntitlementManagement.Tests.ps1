@@ -10,7 +10,7 @@ Param (
 Import-Module "$PSScriptRoot\..\helpers.psm1"
 
 #region Some test resource definitions
-$global:graphUri = "https://graph.microsoft.com/beta/roleManagement"
+$global:graphUri = "https://graph.microsoft.com/beta/identityGovernance/entitlementManagement"
 $global:definitions = Get-Definitions -DataFilePath "$PSScriptRoot\definitions\EntitlementManagement.Definitions.psd1"
 #endregion
 
@@ -83,7 +83,7 @@ Describe 'Tmf.EntitlementManagement.Invoke.Creation' {
     }
     It "should have created <displayName> (uri: <uri>)" -TestCases $testCases {
         Param ($displayName, $uri)
-        $uri = "$uri/identityGovernance/entitlementManagement/accessPackageCatalogs?`$filter=displayName eq '$displayname'"
+        $uri = "$uri/accessPackageCatalogs?`$filter=displayName eq '$displayname'"
         (Invoke-MgGraphRequest -Method GET -Uri $uri -Verbose).Value | Should -Not -HaveCount 0
     }
 
@@ -95,7 +95,7 @@ Describe 'Tmf.EntitlementManagement.Invoke.Creation' {
     }
     It "should have created <displayName> (uri: <uri>)" -TestCases $testCases {
         Param ($displayName, $uri)
-        $uri = "$uri/identityGovernance/entitlementManagement/accessPackages?`$filter=displayName eq '$displayname'"
+        $uri = "$uri/accessPackages?`$filter=displayName eq '$displayname'"
         (Invoke-MgGraphRequest -Method GET -Uri $uri -Verbose).Value | Should -Not -HaveCount 0
     }
 }
@@ -158,7 +158,7 @@ Describe 'Tmf.EntitlementManagement.Invoke.Deletion' {
     }
     It "should have deleted <displayName> (uri: <uri>)" -TestCases $testCases {
         Param ($displayName, $uri)
-        $uri = "$uri/identityGovernance/entitlementManagement/accessPackages?`$filter=displayName eq '$displayname'"
+        $uri = "$uri/accessPackages?`$filter=displayName eq '$displayname'"
         (Invoke-MgGraphRequest -Method GET -Uri $uri -Verbose).Value | Should -Not -HaveCount 1
     }
 }
