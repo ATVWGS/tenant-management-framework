@@ -11,73 +11,86 @@ Import-Module "$PSScriptRoot\..\helpers.psm1"
 
 #region Some test resource definitions
 $global:graphUri = "https://graph.microsoft.com/beta/identityGovernance/entitlementManagement"
+$global:testAPconfigPath = "$env:TMP\test-ap-config"
 $global:definitions = Get-Definitions -DataFilePath "$PSScriptRoot\definitions\EntitlementManagement.Definitions.psd1"
 #endregion
 
 BeforeAll {
     Import-Module "$ModuleRoot\$ModuleName.psd1" -Force
     Connect-MgGraph -AccessToken ($AccessToken | ConvertTo-SecureString -AsPlainText -Force)
-}
 
-Describe 'Tmf.EntitlementManagement.Groups.Register' {
-    It "should successfully register groups definitions" {
-        foreach ($group in $global:definitions["groups"]) {
-            Write-Host ($group | ConvertTo-Json -Depth 10)
-            { Register-TmfGroup @group -Verbose } | Should -Not -Throw
+    New-TmfConfiguration -OutPath $global:testAPconfigPath -DoNotAutoActivate -Name "test-ap-config" -Author "Pester Tester" -Weight 0 -Force
+
+    $global:definitions.GetEnumerator() | Foreach-Object {
+        if ($_.Name -in ("accessPackages","accessPackageCatalogs")) {
+            $targetFilePath = Get-ChildItem -Path "$global:testAPconfigPath\entitlementManagement\$($_.Name)" -Depth 0 -Filter "*.json" | Select-Object -First 1 -ExpandProperty FullName
         }
-        (Get-TmfDesiredConfiguration).groups | Should -Not -BeNullOrEmpty        
+        else {
+            $targetFilePath = Get-ChildItem -Path "$global:testAPconfigPath\$($_.Name)" -Depth 0 -Filter "*.json" | Select-Object -First 1 -ExpandProperty FullName
+        }
+        $_.Value | ConvertTo-Json -Depth 10 | Out-File -FilePath $targetFilePath -Encoding utf8
     }
 }
 
+Describe 'Tmf.Activate.Configuration' {
+    It "should successfully activate TMF configuration" {
+        { Activate-TmfConfiguration -ConfigurationPaths $global:testAPconfigPath -Force } | Should -Not -Throw
+        { Get-TmfDesiredConfiguration } | Should -Not -BeNullOrEmpty
+    }
+}    
+
 Describe 'Tmf.EntitlementManagement.Groups.Invoke.Creation' {
-    It "should successfully test the TMF configuration" {
+    It "should successfully test the TMF group configuration" {
         { Test-TmfGroup -Verbose } | Should -Not -Throw
     }
 
-    It "should successfully invoke the TMF configuration" {
+    It "should successfully invoke the TMF group configuration" {
         { Invoke-TmfGroup -Verbose } | Should -Not -Throw
-    }
-}
-
-#Let's wait until groups can be queried after creation
-Start-Sleep 10
-
-Describe 'Tmf.EntitlementManagement.AccessPackageCatalogs.Register' {
-    It "should successfully register AccessPackageCatalogs definitions" {
-        foreach ($accessPackageCatalog in $global:definitions["accessPackageCatalogs"]) {
-            Write-Host ($accessPackageCatalog | ConvertTo-Json -Depth 10)
-            { Register-TmfAccessPackageCatalog @accessPackageCatalog -Verbose } | Should -Not -Throw
-        }
-        (Get-TmfDesiredConfiguration).accessPackageCatalogs | Should -Not -BeNullOrEmpty        
-    }
-}
-
-Describe 'Tmf.EntitlementManagement.AccessPackage.Register' {
-    It "should successfully register accessPackages definitions" {
-        foreach ($accessPackage in $global:definitions["accessPackages"]) {
-            Write-Host ($accessPackage | ConvertTo-Json -Depth 10)
-            { Register-TmfAccessPackage @accessPackage  -Verbose } | Should -Not -Throw
-        }
-        (Get-TmfDesiredConfiguration).accessPackages | Should -Not -BeNullOrEmpty        
     }
 }
 
 Describe 'Tmf.EntitlementManagement.Invoke.Creation' {
 
+    BeforeAll {
+        #Let's wait until groups can be queried after creation
+        Start-Sleep 10
+    }
+
+    It "should successfully invoke the Access Package Catalog configuration" {
+        { Invoke-TmfAccessPackageCatalog -Verbose } | Should -Not -Throw
+    }
+
     It "should successfully test the TMF configuration" {
         { Test-TmfEntitlementManagement -Verbose } | Should -Not -Throw
     }
 
-    It "should successfully invoke the TMF configuration" {
-        { Invoke-TmfEntitlementManagement -DoNotRequireTenantConfirm -Verbose } | Should -Not -Throw
+    It "should successfully invoke the Access Package Resource configuration" {
+        { Invoke-TmfAccessPackageResource -Verbose } | Should -Not -Throw
     }
 
-    #Let's wait until resources can be queried after creation
+    #Let's wait until access package resource can be queried after creation
+    Start-Sleep 5
+
+    It "should successfully invoke the Access Package configuration" {
+        { Invoke-TmfAccessPackage -Verbose } | Should -Not -Throw
+    }
+
     Start-Sleep 10
+
+    It "should successfully invoke the Access Package Assignment Policy configuration" {
+        { Invoke-TmfAccessPackageAssignmentPolicy -Verbose } | Should -Not -Throw
+    }
+}
+Describe 'Tmf.EntitlementManagement.Validate.Creation' {
+
+    BeforeAll {
+        #Let's wait until resources can be queried after creation
+        Start-Sleep 10
+    }    
     
-    $testCases = $global:definitions["accessPackageCatalogs"] | Foreach-Object {
+    $testCases = (Get-TmfDesiredConfiguration).accessPackageCatalogs | Foreach-Object {
         return @{
-            "displayName" = $_["displayName"]
+            "displayName" = $_.displayName
             "uri" = $global:graphUri
         }
     }
@@ -87,9 +100,9 @@ Describe 'Tmf.EntitlementManagement.Invoke.Creation' {
         (Invoke-MgGraphRequest -Method GET -Uri $uri -Verbose).Value | Should -Not -HaveCount 0
     }
 
-    $testCases = $global:definitions["accessPackages"] | Foreach-Object {
+    $testCases = (Get-TmfDesiredConfiguration).accessPackages | Foreach-Object {
         return @{
-            "displayName" = $_["displayName"]
+            "displayName" = $_.displayName
             "uri" = $global:graphUri
         }
     }
@@ -100,36 +113,16 @@ Describe 'Tmf.EntitlementManagement.Invoke.Creation' {
     }
 }
 
-#Let's wait until resources can be queried after creation
-Start-Sleep 10
-
 Describe 'Tmf.EntitlementManagement.Invoke.Deletion' {
     BeforeAll {
         #region Set present to false for each definition
-        $global:definitions["accessPackageAssignmentPolicies"] | Foreach-Object {
-            $_["present"] = $false
+        (Get-TmfDesiredConfiguration).accessPackageCatalogs | Foreach-Object {
+            $_.present = $false
         }
-        $global:definitions["accessPackageCatalogs"] | Foreach-Object {
-            $_["present"] = $false
-        }
-        $global:definitions["accessPackages"] | Foreach-Object {
-            $_["present"] = $false
+        (Get-TmfDesiredConfiguration).accessPackages | Foreach-Object {
+            $_.present = $false
         }
         #endregion
-    }
-
-    It "should successfully register accessPackages definitions" {
-        foreach ($accessPackage in $global:definitions["accessPackages"]) {
-            Register-TmfAccessPackage @accessPackage -Verbose
-        }
-        (Get-TmfDesiredConfiguration).accessPackages | Should -Not -BeNullOrEmpty        
-    }
-    
-    It "should successfully register accessPackageCatalogs definitions" {
-        foreach ($accessPackageCatalog in $global:definitions["accessPackageCatalogs"]) {
-            Register-TmfAccessPackageCatalog @accessPackageCatalog -Verbose
-        }
-        (Get-TmfDesiredConfiguration).accessPackageCatalogs | Should -Not -BeNullOrEmpty        
     }
 
     #First remove accessPackages
@@ -149,10 +142,12 @@ Describe 'Tmf.EntitlementManagement.Invoke.Deletion' {
     It "should successfully invoke the accessPackageCatalogs configuration" {
         { Invoke-TmfAccessPackageCatalog -Verbose } | Should -Not -Throw
     }
+}
 
-    $testCases = $global:definitions["accessPackages"] | Foreach-Object {
+Describe 'Tmf.EntitlementManagement.Valideate.Deletion' {
+    $testCases = (Get-TmfDesiredConfiguration).accessPackages | Foreach-Object {
         return @{
-            "displayName" = $_["displayName"]
+            "displayName" = $_.displayName
             "uri" = $global:graphUri
         }
     }
@@ -166,17 +161,10 @@ Describe 'Tmf.EntitlementManagement.Invoke.Deletion' {
 Describe 'Tmf.EntitlementManagement.Groups.Invoke.Deletion' {
     BeforeAll {
         #region Set present to false for each definition
-        $global:definitions["groups"] | Foreach-Object {
-            $_["present"] = $false
+        (Get-TmfDesiredConfiguration).groups | Foreach-Object {
+            $_.present = $false
         }
         #endregion
-    }
-
-    It "should successfully register groups definitions" {
-        foreach ($group in $global:definitions["groups"]) {
-            Register-TmfGroup @group -Verbose
-        }
-        Get-TmfDesiredConfiguration -Verbose | Should -Not -BeNullOrEmpty        
     }
 
     It "should successfully test the TMF configuration" {
@@ -186,10 +174,12 @@ Describe 'Tmf.EntitlementManagement.Groups.Invoke.Deletion' {
     It "should successfully invoke the TMF configuration" {
         { Invoke-TmfGroup -Verbose } | Should -Not -Throw
     }
+}
 
-    $testCases = $global:definitions["groups"] | Foreach-Object {
+Describe 'Tmf.EntitlementManagement.Groups.Validate.Deletion' {
+    $testCases = (Get-TmfDesiredConfiguration).groups | Foreach-Object {
         return @{
-            "displayName" = $_["displayName"]
+            "displayName" = $_.displayName
             "uri" = "https://graph.microsoft.com/beta/groups"
         }
     }
@@ -198,4 +188,8 @@ Describe 'Tmf.EntitlementManagement.Groups.Invoke.Deletion' {
         $uri = "$uri/?`$filter=displayName eq '$displayName'"
         (Invoke-MgGraphRequest -Method GET -Uri $uri -Verbose).Value | Should -Not -HaveCount 1
     }
+}
+
+AfterAll {
+   # Remove-Item -Path $global:testAPconfigPath -Recurse -Force
 }
