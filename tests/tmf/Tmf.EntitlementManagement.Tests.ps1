@@ -96,7 +96,7 @@ Describe 'Tmf.EntitlementManagement.Validate.Creation' {
     }
     It "should have created <displayName> (uri: <uri>)" -TestCases $testCases {
         Param ($displayName, $uri)
-        $uri = "$($uri)/accessPackageCatalogs?`$filter=displayName eq '$displayname'"
+        $uri = "$($uri)/accessPackageCatalogs?`$filter=displayName eq '$($displayname)'"
         (Invoke-MgGraphRequest -Method GET -Uri $uri -Verbose).Value | Should -Not -HaveCount 0
     }
 
@@ -108,7 +108,7 @@ Describe 'Tmf.EntitlementManagement.Validate.Creation' {
     }
     It "should have created <displayName> (uri: <uri>)" -TestCases $testCases {
         Param ($displayName, $uri)
-        $uri = "$($uri)/accessPackages?`$filter=displayName eq '$displayname'"
+        $uri = "$($uri)/accessPackages?`$filter=displayName eq '$($displayname)'"
         (Invoke-MgGraphRequest -Method GET -Uri $uri -Verbose).Value | Should -Not -HaveCount 0
     }
 }
@@ -153,7 +153,7 @@ Describe 'Tmf.EntitlementManagement.Valideate.Deletion' {
     }
     It "should have deleted <displayName> (uri: <uri>)" -TestCases $testCases {
         Param ($displayName, $uri)
-        $uri = "$($uri)/accessPackages?`$filter=displayName eq '$displayname'"
+        $uri = "$($uri)/accessPackages?`$filter=displayName eq '$($displayname)'"
         (Invoke-MgGraphRequest -Method GET -Uri $uri -Verbose).Value | Should -Not -HaveCount 1
     }
 }
@@ -185,7 +185,7 @@ Describe 'Tmf.EntitlementManagement.Groups.Validate.Deletion' {
     }
     It "should have deleted <displayName> (uri: <uri>)" -TestCases $testCases {
         Param ($displayName, $uri)
-        $uri = "$($uri)?`$filter=displayName eq '$displayName'"
+        $uri = "$($uri)?`$filter=displayName eq '$($displayName)'"
         (Invoke-MgGraphRequest -Method GET -Uri $uri -Verbose).Value | Should -Not -HaveCount 1
     }
 }
