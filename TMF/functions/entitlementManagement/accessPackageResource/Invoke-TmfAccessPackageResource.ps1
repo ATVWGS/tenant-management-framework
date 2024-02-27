@@ -14,7 +14,7 @@ function Invoke-TmfAccessPackageResource
 	{
 		$resourceName = "accessPackageResources"
 		if (!$script:desiredConfiguration[$resourceName]) {
-			Stop-PSFFunction -String "TMF.NoDefinitions" -StringValues "AccessPackageResouce"
+			Stop-PSFFunction -String "TMF.NoDefinitions" -StringValues "AccessPackageResource"
 			return
 		}
 		Test-GraphConnection -Cmdlet $Cmdlet
