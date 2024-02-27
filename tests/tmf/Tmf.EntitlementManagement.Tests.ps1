@@ -115,12 +115,9 @@ Describe 'Tmf.EntitlementManagement.Validate.Creation' {
     }
 }
 
-Describe 'Tmf.EntitlementManagement.Invoke.Deletion' {
+Describe 'Tmf.EntitlementManagement.AccessPackages.Invoke.Deletion' {
     BeforeAll {
         #region Set present to false for each definition
-        (Get-TmfDesiredConfiguration).accessPackageCatalogs | Foreach-Object {
-            $_.present = $false
-        }
         (Get-TmfDesiredConfiguration).accessPackages | Foreach-Object {
             $_.present = $false
         }
@@ -135,7 +132,16 @@ Describe 'Tmf.EntitlementManagement.Invoke.Deletion' {
     It "should successfully invoke the accessPackages configuration" {
         { Invoke-TmfAccessPackage -Verbose } | Should -Not -Throw
     }
+}
 
+Describe 'Tmf.EntitlementManagement.AccessPackageCatalogs.Invoke.Deletion' {
+    BeforeAll {
+        #region Set present to false for each definition
+        (Get-TmfDesiredConfiguration).accessPackageCatalogs | Foreach-Object {
+            $_.present = $false
+        }
+        #endregion
+    }
     #Second remove accessPackageCatalogs
     It "should successfully test the accessPackageCatalogs configuration" {
         { Test-TmfAccessPackageCatalog -Verbose } | Should -Not -Throw
@@ -146,7 +152,7 @@ Describe 'Tmf.EntitlementManagement.Invoke.Deletion' {
     }
 }
 
-Describe 'Tmf.EntitlementManagement.Valideate.Deletion' {
+Describe 'Tmf.EntitlementManagement.AccessPackages.Validate.Deletion' {
     $testCases = $global:definitions["accessPackages"] | Foreach-Object {
         return @{
             "displayName" = $_["displayName"]
@@ -156,6 +162,20 @@ Describe 'Tmf.EntitlementManagement.Valideate.Deletion' {
     It "should have deleted <displayName> (uri: <uri>)" -TestCases $testCases {
         Param ($displayName, $uri)
         $uri = "$($uri)/accessPackages?`$filter=displayName eq '$($displayname)'"
+        (Invoke-MgGraphRequest -Method GET -Uri $uri -Verbose).Value | Should -Not -HaveCount 1
+    }
+}
+
+Describe 'Tmf.EntitlementManagement.AccessPackageCatalogs.Validate.Deletion' {
+    $testCases = $global:definitions["accessPackageCatalogs"] | Foreach-Object {
+        return @{
+            "displayName" = $_["displayName"]
+            "uri" = $global:graphUri
+        }
+    }
+    It "should have deleted <displayName> (uri: <uri>)" -TestCases $testCases {
+        Param ($displayName, $uri)
+        $uri = "$($uri)/accessPackageCatalogs?`$filter=displayName eq '$($displayname)'"
         (Invoke-MgGraphRequest -Method GET -Uri $uri -Verbose).Value | Should -Not -HaveCount 1
     }
 }
