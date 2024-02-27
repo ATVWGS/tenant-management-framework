@@ -39,10 +39,13 @@ Describe 'Tmf.RoleManagement.Groups.Invoke.Creation' {
     }
 }
 
-#Let's wait until groups can be queried after creation
-Start-Sleep 10
+
 
 Describe 'Tmf.RoleManagement.RoleDefinitions.Register' {
+    BeforeAll {
+        #Let's wait until groups can be queried after creation
+        Start-Sleep 10
+    }
     It "should successfully register roleDefinition definitions" {
         foreach ($roleDefinition in $global:definitions["roleDefinitions"]) {
             Write-Host ($roleDefinition | ConvertTo-Json -Depth 10)
@@ -97,25 +100,26 @@ Describe 'Tmf.RoleManagement.Invoke.Creation' {
     It "should successfully invoke the TMF configuration" {
         { Invoke-TmfRoleManagement -DoNotRequireTenantConfirm -Verbose } | Should -Not -Throw
     }
-
-    #Let's wait until resources can be queried after creation
-    Start-Sleep 10
-    
-    $testCases = $global:definitions["roleDefinitions"] | Foreach-Object {
-        return @{
-            "displayName" = $_["displayName"]
-            "uri" = $global:graphUri
-        }
-    }
-    It "should have created <displayName> (uri: <uri>)" -TestCases $testCases {
-        Param ($displayName, $uri)
-        $uri = "$uri/directory/roleDefinitions?`$filter=displayName eq '$displayname'"
-        (Invoke-MgGraphRequest -Method GET -Uri $uri -Verbose).Value | Should -Not -HaveCount 0
-    }
 }
 
-#Let's wait until resources can be queried after creation
-Start-Sleep 10
+Describe 'Tmf.RoleManagement.Validate.Creation' {
+     BeforeAll {
+        #Let's wait until resources can be queried after creation
+        Start-Sleep 10
+     }
+    
+     $testCases = $global:definitions["roleDefinitions"] | Foreach-Object {
+         return @{
+             "displayName" = $_["displayName"]
+             "uri" = $global:graphUri
+         }
+     }
+     It "should have created <displayName> (uri: <uri>)" -TestCases $testCases {
+         Param ($displayName, $uri)
+         $uri = "$uri/directory/roleDefinitions?`$filter=displayName eq '$displayname'"
+         (Invoke-MgGraphRequest -Method GET -Uri $uri -Verbose).Value | Should -Not -HaveCount 0
+     }
+}
 
 Describe 'Tmf.RoleManagement.Invoke.Deletion' {
     BeforeAll {
@@ -160,7 +164,12 @@ Describe 'Tmf.RoleManagement.Invoke.Deletion' {
     It "should successfully invoke the roleDefinitions configuration" {
         { Invoke-TmfRoleDefinition -Verbose } | Should -Not -Throw
     }
+}
 
+Describe 'Tmf.RoleManagement.Validate.Deletion' {
+    BeforeAll {
+        Start-Sleep 5
+    }
     $testCases = $global:definitions["roleDefinitions"] | Foreach-Object {
         return @{
             "displayName" = $_["displayName"]

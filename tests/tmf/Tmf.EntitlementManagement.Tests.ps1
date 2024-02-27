@@ -51,38 +51,31 @@ Describe 'Tmf.EntitlementManagement.Groups.Invoke.Creation' {
     }
 }
 
-Describe 'Tmf.EntitlementManagement.Invoke.Creation' {
-
-    BeforeAll {
-        #Let's wait until groups can be queried after creation
-        Start-Sleep 10
-    }
+Describe 'Tmf.EntitlementManagement.AccessPackageCatalogs.Invoke.Creation' {
 
     It "should successfully invoke the Access Package Catalog configuration" {
         { Invoke-TmfAccessPackageCatalog -Verbose } | Should -Not -Throw
     }
 
+}
+
+Describe 'Tmf.EntitlementManagement.Test.Configuration' {
     It "should successfully test the TMF configuration" {
         { Test-TmfEntitlementManagement -Verbose } | Should -Not -Throw
     }
+}
 
-    It "should successfully invoke the Access Package Resource configuration" {
-        { Invoke-TmfAccessPackageResource -Verbose } | Should -Not -Throw
+Describe 'Tmf.EntitlementManagement.Invoke.Creation' {
+
+    BeforeAll {
+        Start-Sleep 10
     }
 
-    #Let's wait until access package resource can be queried after creation
-    Start-Sleep 5
-
-    It "should successfully invoke the Access Package configuration" {
-        { Invoke-TmfAccessPackage -Verbose } | Should -Not -Throw
-    }
-
-    Start-Sleep 10
-
-    It "should successfully invoke the Access Package Assignment Policy configuration" {
-        { Invoke-TmfAccessPackageAssignmentPolicy -Verbose } | Should -Not -Throw
+    It "should successfully invoke the EntitlementManagement configuration" {
+        { Invoke-TmfEntitlementManagement -DoNotRequireTenantConfirm -Verbose } | Should -Not -Throw
     }
 }
+
 Describe 'Tmf.EntitlementManagement.Validate.Creation' {
 
     BeforeAll {
