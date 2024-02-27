@@ -35,6 +35,8 @@ BeforeAll {
 Describe 'Tmf.Activate.Configuration' {
     It "should successfully activate TMF configuration" {
         { Activate-TmfConfiguration -ConfigurationPaths $global:testAPconfigPath -Force } | Should -Not -Throw
+    }
+    It "should have activated TMF configuration" {
         { Get-TmfDesiredConfiguration } | Should -Not -BeNullOrEmpty
     }
 }    
@@ -88,9 +90,9 @@ Describe 'Tmf.EntitlementManagement.Validate.Creation' {
         Start-Sleep 10
     }    
     
-    $testCases = (Get-TmfDesiredConfiguration).accessPackageCatalogs | Foreach-Object {
+    $testCases = $global:definitions["accessPackageCatalogs"] | Foreach-Object {
         return @{
-            "displayName" = $_.displayName
+            "displayName" = $_["displayName"]
             "uri" = $global:graphUri
         }
     }
@@ -100,9 +102,9 @@ Describe 'Tmf.EntitlementManagement.Validate.Creation' {
         (Invoke-MgGraphRequest -Method GET -Uri $uri -Verbose).Value | Should -Not -HaveCount 0
     }
 
-    $testCases = (Get-TmfDesiredConfiguration).accessPackages | Foreach-Object {
+    $testCases = $global:definitions["accessPackages"] | Foreach-Object {
         return @{
-            "displayName" = $_.displayName
+            "displayName" = $_["displayName"]
             "uri" = $global:graphUri
         }
     }
@@ -145,9 +147,9 @@ Describe 'Tmf.EntitlementManagement.Invoke.Deletion' {
 }
 
 Describe 'Tmf.EntitlementManagement.Valideate.Deletion' {
-    $testCases = (Get-TmfDesiredConfiguration).accessPackages | Foreach-Object {
+    $testCases = $global:definitions["accessPackages"] | Foreach-Object {
         return @{
-            "displayName" = $_.displayName
+            "displayName" = $_["displayName"]
             "uri" = $global:graphUri
         }
     }
@@ -177,9 +179,9 @@ Describe 'Tmf.EntitlementManagement.Groups.Invoke.Deletion' {
 }
 
 Describe 'Tmf.EntitlementManagement.Groups.Validate.Deletion' {
-    $testCases = (Get-TmfDesiredConfiguration).groups | Foreach-Object {
+    $testCases = $global:definitions["groups"] | Foreach-Object {
         return @{
-            "displayName" = $_.displayName
+            "displayName" = $_["displayName"]
             "uri" = "https://graph.microsoft.com/beta/groups"
         }
     }
