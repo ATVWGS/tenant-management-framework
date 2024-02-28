@@ -71,7 +71,7 @@ process {
         $testData = @{
             ModuleName = $ModuleName
             ModuleRoot = $ModuleRoot
-            AccessToken = (Get-GraphAccessToken -TenantId $TenantId -TenantClientSecret $TenantClientSecret -TenantClientId $TenantClientId)
+            AccessToken = Get-GraphAccessToken -TenantId $TenantId -TenantClientSecret $TenantClientSecret -TenantClientId $TenantClientId
         }
     
         Get-ChildItem "$PSScriptRoot\$($ModuleName.toLower())\" -Filter "*.ps1" | Foreach-Object {

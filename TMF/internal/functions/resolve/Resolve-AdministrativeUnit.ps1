@@ -17,26 +17,26 @@ function Resolve-AdministrativeUnit
 	{			
 		try {
 			if ($InputReference -match $script:guidRegex) {
-				$role = (Invoke-MgGraphRequest -Method GET -Uri ("$script:graphBaseUrl/administrativeUnits?`$filter=id eq '{0}'" -f $InputReference)).Value.Id
+				$administrativeUnit = (Invoke-MgGraphRequest -Method GET -Uri ("$script:graphBaseUrl/administrativeUnits?`$filter=id eq '{0}'" -f $InputReference)).Value.Id
 			}
 			elseif ($InputReference -in @("All")) {
 				return $InputReference
 			}
 			else {
-				$role = (Invoke-MgGraphRequest -Method GET -Uri ("$script:graphBaseUrl/administrativeUnits/?`$filter=displayName eq '{0}'" -f $InputReference)).Value.Id
+				$administrativeUnit = (Invoke-MgGraphRequest -Method GET -Uri ("$script:graphBaseUrl/administrativeUnits/?`$filter=displayName eq '{0}'" -f $InputReference)).Value.Id
 			}
 
-			if (-Not $role -and $SearchInDesiredConfiguration) {
+			if (-Not $administrativeUnit -and $SearchInDesiredConfiguration) {
 				if ($InputReference -in $script:desiredConfiguration["administrativeUnits"].displayName) {
-					$role = $InputReference
+					$administrativeUnit = $InputReference
 				}
 			}
 
-			if (-Not $role -and -Not $DontFailIfNotExisting) { throw "Cannot find administrativeUnit $InputReference." } 
-			elseif (-Not $role -and $DontFailIfNotExisting) { return }
+			if (-Not $administrativeUnit -and -Not $DontFailIfNotExisting) { throw "Cannot find administrativeUnit $InputReference." } 
+			elseif (-Not $administrativeUnit -and $DontFailIfNotExisting) { return }
 
-			if ($role.count -gt 1) { throw "Got multiple administrativeUnits for $InputReference" }
-			return $role
+			if ($administrativeUnit.count -gt 1) { throw "Got multiple administrativeUnits for $InputReference" }
+			return $administrativeUnit
 		}
 		catch {
 			Write-PSFMessage -Level Warning -String 'TMF.CannotResolveResource' -StringValues "AdministrativeUnit" -Tag 'failed' -ErrorRecord $_

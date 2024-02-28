@@ -7,11 +7,11 @@ Param (
 
 begin {
     $buildAndTestDeps = @(
-        @{ ModuleName = "PSFramework"; ModuleVersion = "1.5.171" },
+        "PSFramework",
         "Microsoft.Graph.Authentication",
         "Microsoft.Graph.Identity.DirectoryManagement",
         "Microsoft.Graph.Identity.Governance",
-        @{ ModuleName = "Pester"; ModuleVersion = "5.3.1" }
+        "Pester"
     )
 
     if ($PSBoundParameters.ContainsKey("UsePrivatePackageFeed")) {
@@ -51,7 +51,7 @@ process {
         if ($PSBoundParameters.ContainsKey("UsePrivatePackageFeed")) {
             $installParameters["Credential"] = $feedCredential
         }
-        Install-Module @installParameters
+        Install-Module @installParameters -AllowClobber
     }    
     #endregion    
 }

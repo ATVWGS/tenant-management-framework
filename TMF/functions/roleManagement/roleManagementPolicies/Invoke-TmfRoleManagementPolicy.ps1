@@ -1,7 +1,7 @@
 function Invoke-TmfRoleManagementPolicy {
     [CmdletBinding()]
 	Param (
-		[string[]] $SpecificResources,
+		[string] $scope,
 		[System.Management.Automation.PSCmdlet]
 		$Cmdlet = $PSCmdlet
 	)
@@ -17,7 +17,13 @@ function Invoke-TmfRoleManagementPolicy {
 
     process {
         if (Test-PSFFunctionInterrupt) { return }
-        $testResults = Test-TmfRoleManagementPolicy -Cmdlet $Cmdlet
+
+        if ($scope) {
+            $testResults = Test-TmfRoleManagementPolicy -scope $scope -Cmdlet $Cmdlet
+        }
+        else {
+            $testResults = Test-TmfRoleManagementPolicy -Cmdlet $Cmdlet
+        }
 
         foreach ($result in $testResults) {
 			Beautify-TmfTestResult -TestResult $result -FunctionName $MyInvocation.MyCommand

@@ -37,7 +37,7 @@ function Register-TmfAuthenticationStrengthPolicy {
         }
 
 		#Verify that only allowed authentication combinations are used
-		$allowedAuthenticationCombinations = (Invoke-MgGraphRequest -Method GET -Uri "https://$graphBaseUrl/identity/conditionalAccess/authenticationStrength/combinations").value
+		$allowedAuthenticationCombinations = (Invoke-MgGraphRequest -Method GET -Uri "$graphBaseUrl/identity/conditionalAccess/authenticationStrength/combinations").value
 
 		foreach ($allowedCombination in $allowedCombinations) {
 			if ($allowedAuthenticationCombinations -notcontains $allowedCombination) {

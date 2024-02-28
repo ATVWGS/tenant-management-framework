@@ -25,7 +25,7 @@ $script:supportedResources = @{
         "registerFunction" = (Get-Command Register-TmfAdministrativeUnit)
         "testFunction" = (Get-Command Test-TmfAdministrativeUnit)
         "invokeFunction" = (Get-Command Invoke-TmfAdministrativeUnit)
-        "weight" = 20
+        "weight" = 9
     }
     "conditionalAccessPolicies" = @{
         "registerFunction" = (Get-Command Register-TmfConditionalAccessPolicy)
@@ -204,6 +204,12 @@ $script:supportedResources = @{
         "invokeFunction" = (Get-Command Invoke-TmfCustomSecurityAttributeAllowedValue)
         "parentType" = "customSecurityAttributes"
         "weight" = 42
+    }
+    "authenticationContextClassReferences" = @{
+        "registerFunction" = (Get-Command Register-TmfAuthenticationContextClassReference)
+        "testFunction" = (Get-Command Test-TmfAuthenticationContextClassReference)
+        "invokeFunction" = (Get-Command Invoke-TmfAuthenticationContextClassReference)
+        "weight" = 49
     }
 
 } # All currently supported components.

@@ -22,6 +22,7 @@ function Register-TmfGroup
 		[bool] $hideFromAddressLists,
 		[bool] $hideFromOutlookClients,
 		[object[]] $assignedLicenses,
+		[string] $administrativeUnit,
 		[bool] $present = $true,
 		[string] $sourceConfig = "<Custom>",
 
@@ -80,6 +81,11 @@ function Register-TmfGroup
 			if ($PSBoundParameters.ContainsKey($_)) {			
 				Add-Member -InputObject $object -MemberType NoteProperty -Name $_ -Value $PSBoundParameters[$_]
 			}
+		}
+
+		if ($PSBoundParameters.ContainsKey("administrativeUnit")) { 
+			Resolve-AdministrativeUnit -InputReference $administrativeUnit -SearchInDesiredConfiguration | Out-Null
+			Add-Member -InputObject $object -MemberType NoteProperty -Name "administrativeUnit" -Value $administrativeUnit
 		}
 
 		if ($PSBoundParameters.ContainsKey("assignedLicenses")) {

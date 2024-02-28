@@ -1,7 +1,8 @@
 function Invoke-TmfRoleAssignment {
     [CmdletBinding()]
 	Param (
-		[string[]] $SpecificResources,
+		[ValidateSet('AzureResource', 'AzureAD')]
+        [string] $scope,
 		[System.Management.Automation.PSCmdlet]
 		$Cmdlet = $PSCmdlet
 	)
@@ -14,13 +15,17 @@ function Invoke-TmfRoleAssignment {
 			Stop-PSFFunction -String "TMF.NoDefinitions" -StringValues "roleAssignment"
 			return
 		}
-        Test-AzureConnection
-        $azureToken = (Get-AzAccessToken -ResourceUrl $script:apiBaseUrl).Token
 	}
 
     process {
         if (Test-PSFFunctionInterrupt) { return }
-        $testResults = Test-TmfRoleAssignment -Cmdlet $Cmdlet
+        if ($scope) {
+            $testResults = Test-TmfRoleAssignment -scope $scope -Cmdlet $Cmdlet
+        }
+        else {
+            $testResults = Test-TmfRoleAssignment -Cmdlet $Cmdlet
+        }
+        
 
         foreach ($result in $testResults) {
 			Beautify-TmfTestResult -TestResult $result -FunctionName $MyInvocation.MyCommand
