@@ -62,7 +62,7 @@ Describe 'Tmf.EntitlementManagement.AccessPackageCatalogs.Invoke.Creation' {
 Describe 'Tmf.EntitlementManagement.AccessPackageResources.Invoke.Creation' {
 
     BeforeAll {
-        Start-Sleep 10
+        Start-Sleep 20
     }
 
     It "should successfully invoke the Access Package Resource configuration" {
