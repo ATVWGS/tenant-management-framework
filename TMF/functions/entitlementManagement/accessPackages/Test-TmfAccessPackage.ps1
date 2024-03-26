@@ -18,7 +18,7 @@ function Test-TmfAccessPackage
 	{
 		Test-GraphConnection -Cmdlet $Cmdlet
 		$resourceName = "accessPackages"
-		$tenant = Get-MgOrganization -Property displayName, Id
+		$tenant = (Invoke-MgGraphRequest -Method GET -Uri ("$script:graphBaseUrl/organization?`$select=displayname,id")).value
 	}
 	process
 	{

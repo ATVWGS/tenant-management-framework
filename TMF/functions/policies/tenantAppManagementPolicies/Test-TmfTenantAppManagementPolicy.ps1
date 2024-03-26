@@ -17,7 +17,7 @@ function Test-TmfTenantAppManagementPolicy {
 	{
 		Test-GraphConnection -Cmdlet $Cmdlet
 		$resourceName = "tenantAppManagementPolicy"
-		$tenant = Get-MgOrganization -Property displayName, Id
+		$tenant = (Invoke-MgGraphRequest -Method GET -Uri ("$script:graphBaseUrl/organization?`$select=displayname,id")).value
 	}
 	process
 	{

@@ -6,7 +6,7 @@ function Test-TmfCustomSecurityAttribute
 	begin
 	{
 		Test-GraphConnection -Cmdlet $PSCmdlet
-		$tenant = Get-MgOrganization -Property displayName, Id
+		$tenant = (Invoke-MgGraphRequest -Method GET -Uri ("$script:graphBaseUrl/organization?`$select=displayname,id")).value
 		$customSecurityAttributeResources = @("attributeSets", "customSecurityAttributeDefinitions", "customSecurityAttributeAllowedValues")
 	}
 	process

@@ -16,7 +16,7 @@ function Test-TmfAuthenticationMethodsPolicy {
 	{
 		Test-GraphConnection -Cmdlet $Cmdlet
 		$resourceName = "authenticationMethodsPolicies"
-		$tenant = Get-MgOrganization -Property displayName, Id
+		$tenant = (Invoke-MgGraphRequest -Method GET -Uri ("$script:graphBaseUrl/organization?`$select=displayname,id")).value
 	}
 	process
 	{

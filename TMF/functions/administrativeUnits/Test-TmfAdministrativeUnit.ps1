@@ -10,7 +10,7 @@ function Test-TmfAdministrativeUnit
 	{
 		Test-GraphConnection -Cmdlet $Cmdlet
 		$resourceName = "administrativeUnits"
-		$tenant = Get-MgOrganization -Property displayName, Id		
+		$tenant = (Invoke-MgGraphRequest -Method GET -Uri ("$script:graphBaseUrl/organization?`$select=displayname,id")).value		
 	}
 	process
 	{

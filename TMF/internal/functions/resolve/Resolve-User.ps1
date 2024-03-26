@@ -17,16 +17,16 @@
 	{			
 		try {
 			if ($InputReference -match $script:guidRegex) {
-				$user = Get-MgUser -UserId $InputReference | Select-Object -ExpandProperty Id
+				$user = (Invoke-MgGraphRequest -Method GET -Uri ("$script:graphBaseUrl/users/{0}" -f $InputReference)).Value.Id
 			}
 			elseif ($InputReference -match $script:upnRegex) {
-				$user = Get-MgUser -Filter "userPrincipalName eq '$InputReference'" | Select-Object -ExpandProperty Id
+				$user = (Invoke-MgGraphRequest -Method GET -Uri ("$script:graphBaseUrl/users?`$filter=userPrincipalName eq '{0}'" -f $InputReference)).Value.Id
 			}
 			elseif ($InputReference -in @("None", "All", "GuestsOrExternalUsers")) {
 				return $InputReference
 			}
 			else {
-				$user = Get-MgUser -Filter "displayName eq '$InputReference'" | Select-Object -ExpandProperty Id
+				$user = (Invoke-MgGraphRequest -Method GET -Uri ("$script:graphBaseUrl/users?`$filter=displayName eq '{0}'" -f $InputReference)).Value.Id
 			}
 
 			if (-Not $user -and $SearchInDesiredConfiguration) {

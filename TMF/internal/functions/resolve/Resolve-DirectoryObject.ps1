@@ -16,7 +16,7 @@
 	{			
 		try {
 			if ($InputReference -match $script:guidRegex) {
-				$directoryObject = (Get-MgDirectoryObject -DirectoryObjectId $InputReference).Id
+				$directoryObject = (Invoke-MgGraphRequest -Method GET -Uri ("$script:graphBaseUrl/directoryObjects/{0}" -f $InputReference)).Id
 			}
 
 			if (-Not $directoryObject -and -Not $DontFailIfNotExisting) { throw "Cannot find directoryObject $InputReference" } 

@@ -17,7 +17,7 @@ function Test-TmfDirectoryRole {
 	{
 		Test-GraphConnection -Cmdlet $Cmdlet
 		$resourceName = "DirectoryRoles"
-		$tenant = Get-MgOrganization -Property displayName, Id
+		$tenant = (Invoke-MgGraphRequest -Method GET -Uri ("$script:graphBaseUrl/organization?`$select=displayname,id")).value
 	}
 	process
 	{

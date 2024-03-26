@@ -16,7 +16,7 @@ function Invoke-TmfRoleManagement
 	begin
 	{
 		Test-GraphConnection -Cmdlet $PSCmdlet
-		$tenant = Get-MgOrganization -Property displayName, Id
+		$tenant = (Invoke-MgGraphRequest -Method GET -Uri ("$script:graphBaseUrl/organization?`$select=displayname,id")).value
 		$roleManagementResources = @("roleAssignments", "roleDefinitions", "roleManagementPolicies")
 	}
 	process

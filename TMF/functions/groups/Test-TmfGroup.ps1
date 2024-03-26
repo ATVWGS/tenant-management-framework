@@ -18,7 +18,7 @@
 	{
 		Test-GraphConnection -Cmdlet $Cmdlet
 		$resourceName = "groups"
-		$tenant = Get-MgOrganization -Property displayName, Id
+		$tenant = (Invoke-MgGraphRequest -Method GET -Uri ("$script:graphBaseUrl/organization?`$select=displayname,id")).value
 	}
 	process
 	{
