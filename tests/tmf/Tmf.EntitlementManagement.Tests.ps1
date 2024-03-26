@@ -59,6 +59,18 @@ Describe 'Tmf.EntitlementManagement.AccessPackageCatalogs.Invoke.Creation' {
 
 }
 
+Describe 'Tmf.EntitlementManagement.AccessPackageResources.Invoke.Creation' {
+
+    BeforeAll {
+        Start-Sleep 10
+    }
+
+    It "should successfully invoke the Access Package Resource configuration" {
+        { Invoke-TmfAccessPackageResource -Verbose } | Should -Not -Throw
+    }
+
+}
+
 Describe 'Tmf.EntitlementManagement.Test.Configuration' {
     It "should successfully test the TMF configuration" {
         { Test-TmfEntitlementManagement -Verbose } | Should -Not -Throw

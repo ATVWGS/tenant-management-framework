@@ -38,7 +38,7 @@
             "present" = $true
             "accessPackageResources" = @(
               @{
-                "displayName" = "Test - TMF - Access Package Catalog - Test - TMF - AP Group"
+                "displayName" = "Test - TMF - AP Group"
                 "originSystem" = "AadGroup"
                 "resourceRole" = "Member"
                 "resourceIdentifier" = "Test - TMF - AP Group"
@@ -144,7 +144,7 @@
           "present" = $true
           "accessPackageResources" = @(
             @{
-              "displayName" = "Test - TMF - Access Package Catalog 2 - Test - TMF - AP Group"
+              "displayName" = "Test - TMF - AP Group"
               "originSystem" = "AadGroup"
               "resourceRole" = "Member"
               "resourceIdentifier" = "Test - TMF - AP Group"
