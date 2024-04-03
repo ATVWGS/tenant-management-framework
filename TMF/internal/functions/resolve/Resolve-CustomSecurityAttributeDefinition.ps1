@@ -16,7 +16,7 @@ function Resolve-CustomSecurityAttributeDefinition
 	process
 	{			
 		try {
-			$customSecurityAttributeDefinition = (Invoke-MgGraphRequest -Method GET -Uri ("$script:graphBaseUrl/directory/customSecurityAttributeDefinitions/{0}" -f $InputReference)).Value.Id
+			$customSecurityAttributeDefinition = (Invoke-MgGraphRequest -Method GET -Uri ("$script:graphBaseUrl/directory/customSecurityAttributeDefinitions/{0}" -f $InputReference)).Id
 
 			if ($customSecurityAttributeDefinition.count -gt 1) { throw "Got multiple customSecurityAttributeDefinitions for $InputReference" }
 		}

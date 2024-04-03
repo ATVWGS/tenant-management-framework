@@ -17,7 +17,7 @@
 	{			
 		try {
 			if ($InputReference -match $script:guidRegex) {
-				$agreement = (Invoke-MgGraphRequest -Method GET -Uri ("$script:graphBaseUrl/agreements/{0}" -f $InputReference)).Value.Id
+				$agreement = (Invoke-MgGraphRequest -Method GET -Uri ("$script:graphBaseUrl/agreements/{0}" -f $InputReference)).Id
 			}
 			else {
 				$agreement = (Invoke-MgGraphRequest -Method GET -Uri ("$script:graphBaseUrl/agreements/?`$filter=displayName eq '{0}'" -f $InputReference)).Value.Id

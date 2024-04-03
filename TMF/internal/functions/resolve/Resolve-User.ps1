@@ -17,7 +17,7 @@
 	{			
 		try {
 			if ($InputReference -match $script:guidRegex) {
-				$user = (Invoke-MgGraphRequest -Method GET -Uri ("$script:graphBaseUrl/users/{0}" -f $InputReference)).Value.Id
+				$user = (Invoke-MgGraphRequest -Method GET -Uri ("$script:graphBaseUrl/users/{0}" -f $InputReference)).Id
 			}
 			elseif ($InputReference -match $script:upnRegex) {
 				$user = (Invoke-MgGraphRequest -Method GET -Uri ("$script:graphBaseUrl/users?`$filter=userPrincipalName eq '{0}'" -f $InputReference)).Value.Id

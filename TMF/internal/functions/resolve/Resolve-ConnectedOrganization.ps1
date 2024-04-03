@@ -17,7 +17,7 @@ function Resolve-ConnectedOrganization
 	{			
 		try {
 			if ($InputReference -match $script:guidRegex) {
-				$org = (Invoke-MgGraphRequest -Method GET -Uri ("$script:graphBaseUrl/identityGovernance/entitlementManagement/connectedOrganizations/{0}" -f $InputReference)).Value.Id
+				$org = (Invoke-MgGraphRequest -Method GET -Uri ("$script:graphBaseUrl/identityGovernance/entitlementManagement/connectedOrganizations/{0}" -f $InputReference)).Id
 			}
 			else {
 				$org = (Invoke-MgGraphRequest -Method GET -Uri ("$script:graphBaseUrl/identityGovernance/entitlementManagement/connectedOrganizations/?`$filter=displayName eq '{0}'" -f $InputReference)).Value.Id
