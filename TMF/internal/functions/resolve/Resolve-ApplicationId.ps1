@@ -17,7 +17,7 @@ function Resolve-ApplicationId
 	{
 		try {
 			if ($InputReference -match $script:guidRegex) {
-				$application = (Invoke-MgGraphRequest -Method GET -Uri ("$script:graphBaseUrl/applications/{0}" -f $InputReference)).Value.id
+				$application = (Invoke-MgGraphRequest -Method GET -Uri ("$script:graphBaseUrl/applications/{0}" -f $InputReference)).id
 			}
 			elseif ($InputReference -in @("All", "Office365")) {
 				return $InputReference

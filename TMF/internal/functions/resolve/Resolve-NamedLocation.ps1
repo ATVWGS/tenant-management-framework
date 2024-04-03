@@ -17,7 +17,7 @@
 	{			
 		try {
 			if ($InputReference -match $script:guidRegex) {
-				$location = (Invoke-MgGraphRequest -Method GET -Uri ("$script:graphBaseUrl/identity/conditionalAccess/namedLocations/{0}" -f $InputReference)).Value.Id
+				$location = (Invoke-MgGraphRequest -Method GET -Uri ("$script:graphBaseUrl/identity/conditionalAccess/namedLocations/{0}" -f $InputReference)).Id
 			}
 			elseif ($InputReference -in @("All", "AllTrusted")) {
 				return $InputReference

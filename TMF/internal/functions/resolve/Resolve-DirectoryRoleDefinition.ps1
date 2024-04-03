@@ -17,7 +17,7 @@
 	{			
 		try {
 			if ($InputReference -match $script:guidRegex) {
-				$roleDefinition = (Invoke-MgGraphRequest -Method GET -Uri ("$script:graphBaseUrl/roleManagement/directory/roleDefinitions/{0}" -f $InputReference)).Value.Id
+				$roleDefinition = (Invoke-MgGraphRequest -Method GET -Uri ("$script:graphBaseUrl/roleManagement/directory/roleDefinitions/{0}" -f $InputReference)).Id
 			}
 			else {
 				$roleDefinition = (Invoke-MgGraphRequest -Method GET -Uri ("$script:graphBaseUrl/roleManagement/directory/roleDefinitions/?`$filter=displayName eq '{0}'" -f $InputReference)).Value.Id

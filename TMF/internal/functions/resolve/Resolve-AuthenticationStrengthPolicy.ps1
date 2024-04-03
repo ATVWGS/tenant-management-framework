@@ -18,7 +18,7 @@ function Resolve-AuthenticationStrengthPolicy
 	{
 		try {
 			if ($InputReference -match $script:guidRegex) {
-				$authenticationStrengthPolicy = (Invoke-MgGraphRequest -Method GET -Uri ("$script:graphBaseUrl/policies/authenticationStrengthPolicies/{0}" -f $InputReference)).value.id
+				$authenticationStrengthPolicy = (Invoke-MgGraphRequest -Method GET -Uri ("$script:graphBaseUrl/policies/authenticationStrengthPolicies/{0}" -f $InputReference)).id
 			}
 			else {
 				$authenticationStrengthPolicy = (Invoke-MgGraphRequest -Method GET -Uri ("$script:graphBaseUrl/policies/authenticationStrengthPolicies/?`$filter=displayName eq '{0}'" -f $InputReference)).value.id
