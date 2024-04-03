@@ -80,7 +80,7 @@ Describe 'Tmf.EntitlementManagement.Test.Configuration' {
 Describe 'Tmf.EntitlementManagement.Invoke.Creation' {
 
     BeforeAll {
-        Start-Sleep 10
+        Start-Sleep 20
     }
 
     It "should successfully invoke the EntitlementManagement configuration" {
