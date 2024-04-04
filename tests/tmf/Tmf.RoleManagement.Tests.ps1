@@ -93,6 +93,10 @@ Describe 'Tmf.RoleManagement.RoleAssignments.Register' {
 
 Describe 'Tmf.RoleManagement.Invoke.Creation' {
 
+    BeforeAll {
+        Start-Sleep 10
+    }
+
     It "should successfully test the TMF configuration" {
         { Test-TmfRoleManagement -Verbose } | Should -Not -Throw
     }
