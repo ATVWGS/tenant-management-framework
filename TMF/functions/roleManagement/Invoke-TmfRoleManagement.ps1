@@ -8,7 +8,7 @@ function Invoke-TmfRoleManagement
 			roleAssignments, roleDefinitions, roleManagementPolicies
 	#>
 	Param (
-		[ValidateSet('AzureResource', 'AzureAD')]
+		[ValidateSet('AzureResources', 'AzureAD')]
         [string] $scope,
 		[switch] $DoNotRequireTenantConfirm
 	)

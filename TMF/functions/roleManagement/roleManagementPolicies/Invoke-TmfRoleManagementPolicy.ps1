@@ -1,6 +1,7 @@
 function Invoke-TmfRoleManagementPolicy {
     [CmdletBinding()]
 	Param (
+        [ValidateSet('AzureResources', 'AzureAD')]
 		[string] $scope,
 		[System.Management.Automation.PSCmdlet]
 		$Cmdlet = $PSCmdlet

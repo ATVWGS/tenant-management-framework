@@ -14,6 +14,11 @@
 	#>
 	[CmdletBinding()]
 	Param (
+		[ValidateScript({
+			if ($_ -in $script:supportedResources.Keys) { return $true}
+			throw "'$_' is not in the set of the supported values: $($script:supportedResources.Keys -join ', ')"
+
+		})]
 		[string[]] $Exclude
 	)
 	
@@ -25,6 +30,7 @@
 	process
 	{
 		Write-PSFMessage -Level Host -FunctionName "Test-TmfTenant" -String "TMF.TenantInformation" -StringValues $tenant.displayName, $tenant.Id		
+		$script:supportedResources.GetEnumerator()
 		foreach ($resourceType in ($script:supportedResources.GetEnumerator() | Where-Object {$_.Value.testFunction -and $_.Name -notin $Exclude} | Sort-Object {$_.Value.weight})) {
 			if ($script:desiredConfiguration[$resourceType.Name]) {
 				Write-PSFMessage -Level Host -FunctionName "Test-TmfTenant" -String "TMF.StartingTestForResource" -StringValues $resourceType.Name

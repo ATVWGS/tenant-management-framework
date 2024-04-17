@@ -9,7 +9,7 @@ function Test-TmfRoleDefinition
 	#>
 	[CmdletBinding()]
 	Param (
-        [ValidateSet('AzureResource', 'AzureAD')]
+        [ValidateSet('AzureResources', 'AzureAD')]
         [string] $scope,
 		[System.Management.Automation.PSCmdlet]
 		$Cmdlet = $PSCmdlet

@@ -16,7 +16,11 @@
 			Do not ask for confirmation when invoking configurations.
 	#>
 	Param (
-		[ValidateSet({$script:supportedResources.Keys()})]
+		[ValidateScript({
+			if ($_ -in $script:supportedResources.Keys) { return $true}
+			throw "'$_' is not in the set of the supported values: $($script:supportedResources.Keys -join ', ')"
+
+		})]
 		[string[]] $Exclude,
 		[switch] $DoNotRequireTenantConfirm
 	)
