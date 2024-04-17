@@ -36,7 +36,9 @@ function Invoke-TmfAccessPackageAssignmentPolicy
 			foreach ($property in @("expiration","reviewSettings", "requestorSettings", "requestApprovalSettings", "specificAllowedTargets", "automaticRequestSettings")) {
 				switch ($property) {
 					"specificAllowedTargets" {
-						$requestBody[$property] = @($TestResult.DesiredConfiguration.$property | Foreach-Object { $_.prepareBody()	})
+						if (($Testresult.DesiredConfiguration | Get-Member).name -contains $property) {
+							$requestBody[$property] = @($TestResult.DesiredConfiguration.$property | Foreach-Object { $_.prepareBody()	})
+						}						
 					}
 					"requestApprovalSettings" {
 						if ((Get-Member -InputObject $TestResult.DesiredConfiguration).Name -contains $property) {

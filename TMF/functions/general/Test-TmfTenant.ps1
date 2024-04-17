@@ -14,6 +14,11 @@
 	#>
 	[CmdletBinding()]
 	Param (
+		[ValidateScript({
+			if ($_ -in $script:supportedResources.Keys) { return $true}
+			throw "'$_' is not in the set of the supported values: $($script:supportedResources.Keys -join ', ')"
+
+		})]
 		[string[]] $Exclude
 	)
 	

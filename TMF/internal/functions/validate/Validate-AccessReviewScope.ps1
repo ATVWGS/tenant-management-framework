@@ -25,7 +25,7 @@ function Validate-AccessReviewScope
 					"queryType" = "MicrosoftGraph"
 					"queryRoot" = $null
 				}
-				$id = Resolve-Group -InputReference $reference -Cmdlet $PSCmdlet
+				$id = Resolve-Group -InputReference $reference -Cmdlet $PSCmdlet -SearchInDesiredConfiguration
 				$hashtable["query"] = "/v1.0/groups/$($id)/transitiveMembers/microsoft.graph.user"
 			}
 			"directoryRole" {
