@@ -51,6 +51,7 @@ function Invoke-TmfRoleAssignment {
                                 switch ($result.DesiredConfiguration.scopeType) {
                                     "subscription" {$scopeId = $subscriptionId}
                                     "resourceGroup" {$scopeId = Resolve-ResourceGroup -InputReference $result.DesiredConfiguration.scopeReference -SubscriptionId $subscriptionId}
+                                    "resource" {$scopeId = $subscriptionId + $definition.scopeReference}
                                 }
                                 switch ($result.DesiredConfiguration.principalType) {
                                     "group" {
