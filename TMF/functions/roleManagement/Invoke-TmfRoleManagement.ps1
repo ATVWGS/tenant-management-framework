@@ -38,7 +38,8 @@ function Invoke-TmfRoleManagement
 				else {
 					Write-PSFMessage -Level Host -FunctionName "Invoke-TmfRoleManagement" -String "TMF.StartingInvokeForResource" -StringValues $resourceType.Name					
 					& $resourceType.Value["invokeFunction"] -Cmdlet $PSCmdlet
-				}				
+				}
+				Start-Sleep 5			
 			}						
 		}
 	}
