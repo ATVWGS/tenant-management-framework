@@ -15,7 +15,7 @@
             "type" = "eligible"
             "principalReference" = "Test - roleManagement - Security Group"
             "principalType" = "group"
-            "roleReference" = "Directory Readers"
+            "roleReference" = "Usage Summary Reports Reader"
             "directoryScopeType" = "directory"
             "directoryScopeReference" = "/"
             "startDateTime" = "2030-12-31T16:26:49Z"
@@ -40,7 +40,7 @@
     )
     "roleManagementPolicies" = @(
         @{
-            "roleReference" = "Directory Readers"
+            "roleReference" = "Usage Summary Reports Reader"
             "scopeReference" = "/"
             "scopeType" = "directory"
             "ruleTemplate" = "AzureAD_Tier1"
