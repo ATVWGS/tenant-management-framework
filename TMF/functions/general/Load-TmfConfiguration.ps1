@@ -68,7 +68,7 @@
 				if (-Not (Test-Path $resourceDirectory)) { continue; Write-Progress -Id 1 -Activity "Loading $resourceTypeName" -Completed }
 
 				$counter = 0
-				$definitionFiles = Get-ChildItem -Path $resourceDirectory -File -Filter "*.json"
+				$definitionFiles = Get-ChildItem -Path $resourceDirectory -File -Filter "*.json" -Recurse
 				$definitionFiles | ForEach-Object {
 					Write-Progress -Id 1 -Activity "Loading $resourceTypeName" -CurrentOperation "Reading file $($_.Name)" -PercentComplete (($counter / $definitionFiles.count) * 100)
 					$content = Get-Content $_.FullName -Encoding UTF8 | Out-String
