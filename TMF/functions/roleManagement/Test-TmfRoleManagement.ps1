@@ -25,7 +25,6 @@ function Test-TmfRoleManagement
 					Write-PSFMessage -Level Host -FunctionName "Test-TmfRoleManagement" -String "TMF.StartingTestForResource" -StringValues $resourceType.Name
 					& $resourceType.Value["testFunction"] -Cmdlet $PSCmdlet | Beautify-TmfTestResult
 				}
-				Start-Sleep 5			
 			}			
 		}
 	}

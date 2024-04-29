@@ -89,7 +89,7 @@ function Test-TmfRoleManagementPolicy {
                     $policyId = (Invoke-MgGraphRequest -Method "GET" -Uri "$($script:graphBaseUrl)/policies/roleManagementPolicyAssignments?`$filter=scopeId eq '/' and scopeType eq 'Directory' and roleDefinitionId eq '$($roleId)'").value.policyId
                     $resource = @()
                     $resource += Invoke-MgGraphRequest -Method "GET" -Uri "$($script:graphBaseUrl)/policies/roleManagementPolicies/$($policyId)/rules"
-                    
+
                     $result["GraphResource"] = $resource
                 }
             }
