@@ -20,7 +20,7 @@ function Register-TmfRoleAssignment {
         [Parameter(Mandatory = $true, ParameterSetName = "AzureResources")]
         [string] $scopeReference,
         [Parameter(Mandatory = $true, ParameterSetName = "AzureResources")]
-        [ValidateSet('subscription', 'resourceGroup')]
+        [ValidateSet('subscription', 'resourceGroup', 'resource')]
         [string] $scopeType,
         [Parameter(Mandatory = $true, ParameterSetName = "AzureAD")]
         [string] $directoryScopeReference,
