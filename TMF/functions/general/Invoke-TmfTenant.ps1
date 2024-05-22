@@ -12,16 +12,28 @@
 			Exclude resources from invoking.
 			For example: -Exclude groups, users
 
+		.PARAMETER resourceTypes
+			Perform invoking for entered resource types only.
+			For example: -resourceTypes groups,roleAssignments
+
 		.PARAMETER DoNotRequireTenantConfirm
 			Do not ask for confirmation when invoking configurations.
 	#>
 	Param (
+		[Parameter(ParameterSetName = 'Exclude')]
 		[ValidateScript({
 			if ($_ -in $script:supportedResources.Keys) { return $true}
 			throw "'$_' is not in the set of the supported values: $($script:supportedResources.Keys -join ', ')"
 
 		})]
 		[string[]] $Exclude,
+		[Parameter(ParameterSetName = 'resourceTypes')]
+		[ValidateScript({
+			if ($_ -in $script:supportedResources.Keys) { return $true}
+			throw "'$_' is not in the set of the supported values: $($script:supportedResources.Keys -join ', ')"
+
+		})]
+		[string[]] $resourceTypes,
 		[switch] $DoNotRequireTenantConfirm
 	)
 	
@@ -40,12 +52,22 @@
 			}
 		}		
 		
-		foreach ($resourceType in ($script:supportedResources.GetEnumerator() | Where-Object {$_.Value.invokeFunction -and $_.Name -notin $Exclude} | Sort-Object {$_.Value.weight})) {			
-			if ($script:desiredConfiguration[$resourceType.Name]) {
-				Write-PSFMessage -Level Host -FunctionName "Invoke-TmfTenant" -String "TMF.StartingInvokeForResource" -StringValues $resourceType.Name					
-				& $resourceType.Value["invokeFunction"] -Cmdlet $PSCmdlet
-			}						
+		if ($resourceTypes) {
+			foreach ($resourceType in ($script:supportedResources.GetEnumerator() | Where-Object {$_.Value.invokeFunction -and $_.Name -in $resourceTypes} | Sort-Object {$_.Value.weight})) {			
+				if ($script:desiredConfiguration[$resourceType.Name]) {
+					Write-PSFMessage -Level Host -FunctionName "Invoke-TmfTenant" -String "TMF.StartingInvokeForResource" -StringValues $resourceType.Name					
+					& $resourceType.Value["invokeFunction"] -Cmdlet $PSCmdlet
+				}						
+			}
 		}
+		else {
+			foreach ($resourceType in ($script:supportedResources.GetEnumerator() | Where-Object {$_.Value.invokeFunction -and $_.Name -notin $Exclude} | Sort-Object {$_.Value.weight})) {			
+				if ($script:desiredConfiguration[$resourceType.Name]) {
+					Write-PSFMessage -Level Host -FunctionName "Invoke-TmfTenant" -String "TMF.StartingInvokeForResource" -StringValues $resourceType.Name					
+					& $resourceType.Value["invokeFunction"] -Cmdlet $PSCmdlet
+				}						
+			}
+		}		
 	}
 	end
 	{
