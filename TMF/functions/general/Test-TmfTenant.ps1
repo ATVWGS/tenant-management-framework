@@ -16,7 +16,7 @@
 			Perform testing for entered resource types only.
 			For example: -resourceTypes groups,roleAssignments
 	#>
-	[CmdletBinding()]
+	[CmdletBinding(DefaultParameterSetName = 'Exclude')]
 	Param (
 		[Parameter(ParameterSetName = 'Exclude')]
 		[ValidateScript({

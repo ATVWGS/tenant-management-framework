@@ -19,6 +19,7 @@
 		.PARAMETER DoNotRequireTenantConfirm
 			Do not ask for confirmation when invoking configurations.
 	#>
+	[CmdletBinding(DefaultParameterSetName = 'Exclude')]
 	Param (
 		[Parameter(ParameterSetName = 'Exclude')]
 		[ValidateScript({
@@ -34,6 +35,8 @@
 
 		})]
 		[string[]] $resourceTypes,
+		[Parameter(ParameterSetName = 'Exclude')]
+		[Parameter(ParameterSetName = 'resourceTypes')]
 		[switch] $DoNotRequireTenantConfirm
 	)
 	
