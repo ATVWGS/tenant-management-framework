@@ -15,6 +15,8 @@
 		[string[]] $excludeRoles,
 		[string[]] $includeApplications,
 		[string[]] $excludeApplications,
+		[ValidateSet("urn:user:registerdevice","urn:user:registersecurityinfo")]
+		[string[]] $includeUserActions,
 		[object] $applicationFilter,
 		[string[]] $includeLocations,
 		[string[]] $excludeLocations,
@@ -92,7 +94,7 @@
 		$childPropertyToParentMapping = @{
 			<# Workaround to support legacy conditionalAccessPolicy definition structure... #>
 			"Users" = @("includeUsers", "excludeUsers", "includeGroups", "excludeGroups", "includeRoles", "excludeRoles")
-			"Applications" = @("includeApplications", "excludeApplications", "applicationFilter")
+			"Applications" = @("includeApplications", "excludeApplications", "includeUserActions", "applicationFilter")
 			"Locations" = @("includeLocations", "excludeLocations")
 			"Devices" = @("includeDevices", "excludeDevices", "deviceFilter")
 			"Platforms" = @("includePlatforms", "excludePlatforms")

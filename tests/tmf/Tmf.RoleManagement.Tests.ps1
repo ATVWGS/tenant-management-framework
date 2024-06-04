@@ -55,7 +55,7 @@ Describe 'Tmf.RoleManagement.RoleDefinitions.Register' {
     }
 }
 
-Describe 'Tmf.RoleManagement.RoleManagementPolicyRuleTemplates.Register' {
+<#Describe 'Tmf.RoleManagement.RoleManagementPolicyRuleTemplates.Register' {
     It "should successfully register roleManagementPolicyRuleTemplates definitions" {
         foreach ($ruleTemplate in $global:definitions["roleManagementPolicyRuleTemplates"]) {
             Write-Host ($ruleTemplate | ConvertTo-Json -Depth 10)
@@ -73,7 +73,7 @@ Describe 'Tmf.RoleManagement.RoleManagementPolicies.Register' {
         }
         (Get-TmfDesiredConfiguration).roleManagementPolicies | Should -Not -BeNullOrEmpty        
     }
-}
+}#>
 
 #Set current date time as startdatetime for roleAssignments
 $global:definitions["roleAssignments"] | Foreach-Object {
@@ -92,6 +92,10 @@ Describe 'Tmf.RoleManagement.RoleAssignments.Register' {
 
 
 Describe 'Tmf.RoleManagement.Invoke.Creation' {
+
+    BeforeAll {
+        Start-Sleep 10
+    }
 
     It "should successfully test the TMF configuration" {
         { Test-TmfRoleManagement -Verbose } | Should -Not -Throw

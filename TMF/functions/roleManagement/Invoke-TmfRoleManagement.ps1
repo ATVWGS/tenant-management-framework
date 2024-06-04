@@ -8,7 +8,7 @@ function Invoke-TmfRoleManagement
 			roleAssignments, roleDefinitions, roleManagementPolicies
 	#>
 	Param (
-		[ValidateSet('AzureResource', 'AzureAD')]
+		[ValidateSet('AzureResources', 'AzureAD')]
         [string] $scope,
 		[switch] $DoNotRequireTenantConfirm
 	)
@@ -16,7 +16,7 @@ function Invoke-TmfRoleManagement
 	begin
 	{
 		Test-GraphConnection -Cmdlet $PSCmdlet
-		$tenant = Get-MgOrganization -Property displayName, Id
+		$tenant = (Invoke-MgGraphRequest -Method GET -Uri ("$script:graphBaseUrl/organization?`$select=displayname,id")).value
 		$roleManagementResources = @("roleAssignments", "roleDefinitions", "roleManagementPolicies")
 	}
 	process
@@ -38,7 +38,8 @@ function Invoke-TmfRoleManagement
 				else {
 					Write-PSFMessage -Level Host -FunctionName "Invoke-TmfRoleManagement" -String "TMF.StartingInvokeForResource" -StringValues $resourceType.Name					
 					& $resourceType.Value["invokeFunction"] -Cmdlet $PSCmdlet
-				}				
+				}
+				Start-Sleep 5			
 			}						
 		}
 	}

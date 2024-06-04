@@ -1,7 +1,7 @@
 function Invoke-TmfRoleAssignment {
     [CmdletBinding()]
 	Param (
-		[ValidateSet('AzureResource', 'AzureAD')]
+		[ValidateSet('AzureResources', 'AzureAD')]
         [string] $scope,
 		[System.Management.Automation.PSCmdlet]
 		$Cmdlet = $PSCmdlet
@@ -51,6 +51,7 @@ function Invoke-TmfRoleAssignment {
                                 switch ($result.DesiredConfiguration.scopeType) {
                                     "subscription" {$scopeId = $subscriptionId}
                                     "resourceGroup" {$scopeId = Resolve-ResourceGroup -InputReference $result.DesiredConfiguration.scopeReference -SubscriptionId $subscriptionId}
+                                    "resource" {$scopeId = $subscriptionId + $definition.scopeReference}
                                 }
                                 switch ($result.DesiredConfiguration.principalType) {
                                     "group" {
@@ -350,7 +351,8 @@ function Invoke-TmfRoleAssignment {
                             }
                             catch {
                                 Write-PSFMessage -Level Error -String "TMF.Invoke.ActionFailed" -StringValues $result.Tenant, $result.ResourceType, $result.ResourceName, $result.ActionType
-                                throw $_
+                                Write-Error $_
+                                #throw $_
                             }
                          }
                         "Update" {

@@ -17,7 +17,7 @@ function Resolve-AdministrativeUnit
 	{			
 		try {
 			if ($InputReference -match $script:guidRegex) {
-				$administrativeUnit = (Invoke-MgGraphRequest -Method GET -Uri ("$script:graphBaseUrl/administrativeUnits?`$filter=id eq '{0}'" -f $InputReference)).Value.Id
+				$administrativeUnit = (Invoke-MgGraphRequest -Method GET -Uri ("$script:graphBaseUrl/administrativeUnits?`$filter=id eq '{0}'" -f $InputReference)).Id
 			}
 			elseif ($InputReference -in @("All")) {
 				return $InputReference

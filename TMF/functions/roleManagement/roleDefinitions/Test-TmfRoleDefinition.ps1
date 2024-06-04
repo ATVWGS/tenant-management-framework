@@ -9,7 +9,7 @@ function Test-TmfRoleDefinition
 	#>
 	[CmdletBinding()]
 	Param (
-        [ValidateSet('AzureResource', 'AzureAD')]
+        [ValidateSet('AzureResources', 'AzureAD')]
         [string] $scope,
 		[System.Management.Automation.PSCmdlet]
 		$Cmdlet = $PSCmdlet
@@ -19,7 +19,7 @@ function Test-TmfRoleDefinition
 	{
         Test-GraphConnection -Cmdlet $Cmdlet
 		$resourceName = "roleDefinitions"
-        $tenant = Get-MgOrganization -Property displayName, Id
+        $tenant = (Invoke-MgGraphRequest -Method GET -Uri ("$script:graphBaseUrl/organization?`$select=displayname,id")).value
 	}
 	process 
     {

@@ -14,7 +14,12 @@ function Resolve-Subscription {
 	process
 	{			
 		try { 
-            $subscriptionId = ((Invoke-RestMethod -Method GET -uri "$($script:apiBaseUrl)subscriptions?$($script:apiVersion)" -Headers @{"Authorization"="Bearer $($token)"}).value | Where-Object {$_.displayname -eq $InputReference}).id
+			if ($InputReference -match $script:guidRegex) {
+				$subscriptionId = ((Invoke-RestMethod -Method GET -uri "$($script:apiBaseUrl)subscriptions?$($script:apiVersion)" -Headers @{"Authorization"="Bearer $($token)"}).value | Where-Object {$_.subscriptionId -eq $InputReference}).id
+			}
+			else {
+				$subscriptionId = ((Invoke-RestMethod -Method GET -uri "$($script:apiBaseUrl)subscriptions?$($script:apiVersion)" -Headers @{"Authorization"="Bearer $($token)"}).value | Where-Object {$_.displayname -eq $InputReference}).id
+			}
             if ($subscriptionId.count -ne 1) {throw "Can not find subscription $($InputReference)"}
             return $subscriptionId
         }

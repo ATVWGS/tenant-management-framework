@@ -2,14 +2,14 @@ function Test-TmfRoleManagement
 {
 	[CmdletBinding()]
 	Param (
-		[ValidateSet('AzureResource', 'AzureAD')]
+		[ValidateSet('AzureResources', 'AzureAD')]
         [string] $scope
 	)
 	
 	begin
 	{
 		Test-GraphConnection -Cmdlet $PSCmdlet
-		$tenant = Get-MgOrganization -Property displayName, Id
+		$tenant = (Invoke-MgGraphRequest -Method GET -Uri ("$script:graphBaseUrl/organization?`$select=displayname,id")).value
 		$roleManagementResources = @("roleAssignments", "roleDefinitions", "roleManagementPolicies")
 	}
 	process
@@ -24,7 +24,7 @@ function Test-TmfRoleManagement
 				else {
 					Write-PSFMessage -Level Host -FunctionName "Test-TmfRoleManagement" -String "TMF.StartingTestForResource" -StringValues $resourceType.Name
 					& $resourceType.Value["testFunction"] -Cmdlet $PSCmdlet | Beautify-TmfTestResult
-				}				
+				}
 			}			
 		}
 	}

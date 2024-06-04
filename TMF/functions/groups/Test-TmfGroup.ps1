@@ -18,7 +18,7 @@
 	{
 		Test-GraphConnection -Cmdlet $Cmdlet
 		$resourceName = "groups"
-		$tenant = Get-MgOrganization -Property displayName, Id
+		$tenant = (Invoke-MgGraphRequest -Method GET -Uri ("$script:graphBaseUrl/organization?`$select=displayname,id")).value
 	}
 	process
 	{
@@ -81,9 +81,10 @@
 			else {
 				$filter = "(displayName eq '{0}')" -f [System.Web.HttpUtility]::UrlEncode($definition.displayName)
 			}
-
-			$select = ($definition.Properties() | Where-Object {$_ -notin "hideFromOutlookClients", "hideFromAddressLists", "privilegedAccess", "members", "oldNames", "present", "sourceConfig"})
+	
+			$select = ($definition.Properties() | Where-Object {$_ -notin "hideFromOutlookClients", "hideFromAddressLists","privilegedAccess", "members", "oldNames", "present", "sourceConfig"})
 			$select += "id"
+
 			try {
 				$resource = (Invoke-MgGraphRequest -Method GET -Uri ("$script:graphBaseUrl/groups/?`$filter={0}&`$select={1}" -f $filter, ($select -join ","))).Value
 			}
@@ -150,7 +151,7 @@
 								}
 								"resourceBehaviorOptions" {<# Is only used while creation of a group. #>}
 								{$_ -in @("hideFromAddressLists", "hideFromOutlookClients")} {
-									$tempResource = Invoke-MgGraphRequest -Method GET -Uri ("$script:graphBaseUrl/groups/{0}" -f $resource.id)
+									$tempResource = Invoke-MgGraphRequest -Method GET -Uri ("$script:graphBaseUrl/groups/{0}?`$select={1}" -f $resource.id,$_)
 									if ($definition.$property -ne $tempResource.$property) {
 										$change.Actions = @{"Set" = $definition.$property}
 									}

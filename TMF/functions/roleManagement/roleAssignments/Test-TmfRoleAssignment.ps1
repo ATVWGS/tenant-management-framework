@@ -9,7 +9,7 @@ function Test-TmfRoleAssignment
 	#>
 	[CmdletBinding()]
 	Param (
-        [ValidateSet('AzureResource', 'AzureAD')]
+        [ValidateSet('AzureResources', 'AzureAD')]
         [string] $scope,
 		[System.Management.Automation.PSCmdlet]
 		$Cmdlet = $PSCmdlet
@@ -19,7 +19,7 @@ function Test-TmfRoleAssignment
 	{
         Test-GraphConnection -Cmdlet $Cmdlet
 		$resourceName = "roleAssignments"
-        $tenant = Get-MgOrganization -Property displayName, Id
+        $tenant = (Invoke-MgGraphRequest -Method GET -Uri ("$script:graphBaseUrl/organization?`$select=displayname,id")).value
 	}
 	process
 	{
@@ -68,13 +68,14 @@ function Test-TmfRoleAssignment
                         switch ($definition.scopeType) {
                             "subscription" {$scopeId = $subscriptionId}
                             "resourceGroup" {$scopeId = Resolve-ResourceGroup -InputReference $definition.scopeReference -SubscriptionId $subscriptionId}
+                            "resource" {$scopeId = $subscriptionId + $definition.scopeReference}
                         }
         
                         switch ($definition.type) {
                             "eligible" {
                                 try {
                                     $resource = @()
-                                    $resource += (Invoke-RestMethod -Method GET -Uri ("$($script:apiBaseUrl)providers/Microsoft.Subscription$($scopeId)/providers/Microsoft.Authorization/roleEligibilitySchedules?`$filter=principalId eq '{0}'&api-version=2020-10-01-preview" -f $principalId) -Headers @{"Authorization"="Bearer $($token)"}).value | Where-Object {$_.properties.roleDefinitionId -eq $roleDefinitionId}
+                                    $resource += (Invoke-RestMethod -Method GET -Uri ("$($script:apiBaseUrl)providers/Microsoft.Subscription$($scopeId)/providers/Microsoft.Authorization/roleEligibilitySchedules?`$filter=principalId eq '{0}'&api-version=2020-10-01-preview" -f $principalId) -Headers @{"Authorization"="Bearer $($token)"}).value | Where-Object {$_.properties.roleDefinitionId -eq $roleDefinitionId -and $_.properties.scope -eq $scopeId}
                                 }
                                 catch {
                                     $resource = @()
@@ -84,7 +85,7 @@ function Test-TmfRoleAssignment
                             "active" {
                                 try {
                                     $resource = @()
-                                    $resource += (Invoke-RestMethod -Method GET -Uri ("$($script:apiBaseUrl)$($scopeId.TrimStart("/"))/providers/Microsoft.Authorization/roleAssignments?`$filter=principalId eq '{0}'&api-version=2020-10-01-preview" -f $principalId) -Headers @{"Authorization"="Bearer $($token)"}).value | Where-Object {$_.properties.roleDefinitionId -eq $roleDefinitionId}
+                                    $resource += (Invoke-RestMethod -Method GET -Uri ("$($script:apiBaseUrl)$($scopeId.TrimStart("/"))/providers/Microsoft.Authorization/roleAssignments?`$filter=principalId eq '{0}'&api-version=2020-10-01-preview" -f $principalId) -Headers @{"Authorization"="Bearer $($token)"}).value | Where-Object {$_.properties.roleDefinitionId -eq $roleDefinitionId -and $_.properties.scope -eq $scopeId}
                                 }
                                 catch {
                                     $resource = @()
