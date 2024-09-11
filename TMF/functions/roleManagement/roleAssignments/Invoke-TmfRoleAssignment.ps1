@@ -1,7 +1,7 @@
 function Invoke-TmfRoleAssignment {
     [CmdletBinding()]
 	Param (
-		[ValidateSet('AzureResources', 'AzureAD')]
+		[ValidateSet('AzureResources', 'AzureAD', 'AADGroup')]
         [string] $scope,
 		[System.Management.Automation.PSCmdlet]
 		$Cmdlet = $PSCmdlet
@@ -36,7 +36,12 @@ function Invoke-TmfRoleAssignment {
                 $azureToken = (Get-AzAccessToken -ResourceUrl $script:apiBaseUrl).Token
             }
             else {
-                $assignmentScope = "AzureAD"
+                if ($result.DesiredConfiguration.groupReference) {
+                    $assignmentScope = "AADGroup"
+                }
+                else {
+                    $assignmentScope = "AzureAD"
+                }
                 Test-GraphConnection
             }
 
@@ -418,7 +423,7 @@ function Invoke-TmfRoleAssignment {
                                 }
                                 
                                 $requestBody = $requestBody | ConvertTo-Json -Depth 5
-                                $requestBody
+
                                 switch ($result.DesiredConfiguration.type) {
                                     "eligible" {
                                         Invoke-MgGraphRequest -Method $requestMethod -Uri "$($script:graphBaseUrl)/roleManagement/directory/roleEligibilityScheduleRequests" -Body $requestBody -ContentType "application/json"  | Out-Null
@@ -464,6 +469,204 @@ function Invoke-TmfRoleAssignment {
                                     }
                                     "active" {
                                         Invoke-MgGraphRequest -Method $requestMethod -Uri "$($script:graphBaseUrl)/roleManagement/directory/roleAssignmentScheduleRequests" -Body $requestBody -ContentType "application/json" | Out-Null
+                                    }
+                                }
+                                Write-PSFMessage -Level Host -String "TMF.Invoke.ActionCompleted" -StringValues $result.Tenant, $result.ResourceType, $result.ResourceName, (Get-ActionColor -Action $result.ActionType), $result.ActionType                        
+                            }
+                            catch {
+                                Write-PSFMessage -Level Error -String "TMF.Invoke.ActionFailed" -StringValues $result.Tenant, $result.ResourceType, $result.ResourceName, $result.ActionType
+                                throw $_
+                            }
+        
+                        }
+                        "NoActionRequired" {}
+                        default {
+                            Write-PSFMessage -Level Warning -String "TMF.Invoke.ActionTypeUnknown" -StringValues $result.ActionType
+                        }		
+                    }
+                }
+                "AADGroup" {
+                    switch ($result.ActionType) {
+                        "Create" {
+                            try {
+                                $requestMethod = "POST"
+                                switch ($result.DesiredConfiguration.principalType) {
+                                    "group" { $principalId = Resolve-Group -InputReference $result.DesiredConfiguration.principalReference}
+                                    "user" { $principalId = Resolve-User -InputReference $result.DesiredConfiguration.principalReference}
+                                    "servicePrincipal"  { $principalId = Resolve-ServicePrincipal -InputReference $result.DesiredConfiguration.principalReference}
+                                }
+                                $groupId = Resolve-Group -InputReference $result.DesiredConfiguration.groupReference
+                                $accessId = $result.DesiredConfiguration.roleReference
+                                switch ($result.DesiredConfiguration.expirationType) {
+                                    "noExpiration" {
+                                        $requestBody = @{
+                                            "action" = "AdminAssign"
+                                            "justification" = "Assignment with TMF"
+                                            "accessId" = $accessId
+                                            "groupId" = $groupId
+                                            "principalId" = $principalId
+                                            "scheduleInfo" = @{
+                                              "startDateTime" = get-date ($result.DesiredConfiguration.startDateTime) -UFormat "%Y-%m-%dT%H:%M%:%SZ"
+                                              "expiration" = @{
+                                                "type" = "noExpiration"
+                                              }
+                                            }
+                                        }
+                                    }
+                                    "AfterDateTime" {
+                                        $requestBody = [ordered]@{
+                                            "action" = "AdminAssign"
+                                            "justification" = "Assignment with TMF"
+                                            "accessId" = $accessId
+                                            "groupId" = $groupId
+                                            "principalId" = $principalId
+                                            "scheduleInfo" = @{
+                                                "startDateTime" = get-date ($result.DesiredConfiguration.startDateTime) -UFormat "%Y-%m-%dT%H:%M%:%SZ"
+                                                "expiration" = @{
+                                                    "type" = "AfterDateTime"
+                                                    "endDateTime" = get-date ($result.DesiredConfiguration.endDateTime) -UFormat "%Y-%m-%dT%H:%M%:%SZ"
+                                                }
+                                            }
+                                        }
+                                    }
+                                    "AfterDuration" {
+                                        $requestBody = [ordered]@{
+                                            "action" = "AdminAssign"
+                                            "justification" = "Assignment with TMF"
+                                            "accessId" = $accessId
+                                            "groupId" = $groupId
+                                            "principalId" = $principalId
+                                            "scheduleInfo" = @{
+                                                "startDateTime" = get-date ($result.DesiredConfiguration.startDateTime) -UFormat "%Y-%m-%dT%H:%M%:%SZ"
+                                                "expiration" = @{
+                                                    "type" = "AfterDuration"
+                                                    "duration" = $result.DesiredConfiguration.duration
+                                                }
+                                            }
+                                        }
+                                    }
+                                }
+                                $requestBody = $requestBody | ConvertTo-Json -Depth 5
+
+                                switch ($result.DesiredConfiguration.type) {
+                                    "eligible" {
+                                        Invoke-MgGraphRequest -Method $requestMethod -Uri "$($script:graphBaseUrl)/identityGovernance/privilegedAccess/group/eligibilityScheduleRequests" -Body $requestBody -ContentType "application/json"  | Out-Null
+                                    }
+                                    "active" {
+                                        Invoke-MgGraphRequest -Method $requestMethod -Uri "$($script:graphBaseUrl)/identityGovernance/privilegedAccess/group/assignmentScheduleRequests" -Body $requestBody -ContentType "application/json"  | Out-Null
+                                    }
+                                }
+                                Write-PSFMessage -Level Host -String "TMF.Invoke.ActionCompleted" -StringValues $result.Tenant, $result.ResourceType, $result.ResourceName, (Get-ActionColor -Action $result.ActionType), $result.ActionType
+                            }
+                            catch {
+                                Write-PSFMessage -Level Error -String "TMF.Invoke.ActionFailed" -StringValues $result.Tenant, $result.ResourceType, $result.ResourceName, $result.ActionType
+                                Write-Error $_
+                                #throw $_
+                            }
+                         }
+                        "Update" {
+                            try {
+                                $requestMethod = "POST"
+                                switch ($result.DesiredConfiguration.principalType) {
+                                    "group" {$principalId = Resolve-Group -InputReference $result.DesiredConfiguration.principalReference}
+                                    "user" {$principalId = Resolve-User -InputReference $result.DesiredConfiguration.principalReference}
+                                    "servicePrincipal"  {$principalId = Resolve-ServicePrincipal -InputReference $result.DesiredConfiguration.principalReference}
+                                }
+                                $groupId = Resolve-Group -InputReference $result.DesiredConfiguration.groupReference
+                                $accessId = $result.DesiredConfiguration.roleReference
+                                switch ($result.DesiredConfiguration.expirationType) {
+                                    "noExpiration" {
+                                        $requestBody = [ordered]@{
+                                            "action" = "AdminUpdate"
+                                            "accessId" = $accessId
+                                            "groupId" = $groupId
+                                            "principalId" = $principalId
+                                            "scheduleInfo" = @{
+                                                "startDateTime" = get-date ($result.DesiredConfiguration.startDateTime) -UFormat "%Y-%m-%dT%H:%M%:%SZ"
+                                                "expiration" = @{
+                                                    "endDateTime" = $null
+                                                    "type" = "noExpiration"
+                                                }
+                                            }
+                                        }
+                                    }
+                                    "AfterDateTime" {
+                                        $requestBody = [ordered]@{
+                                            "action" = "AdminUpdate"
+                                            "accessId" = $accessId
+                                            "groupId" = $groupId
+                                            "principalId" = $principalId
+                                            "scheduleInfo" = @{
+                                                "startDateTime" = get-date ($result.DesiredConfiguration.startDateTime) -UFormat "%Y-%m-%dT%H:%M%:%SZ"
+                                                "expiration" = @{
+                                                    "type" = "AfterDateTime"
+                                                    "endDateTime" = get-date ($result.DesiredConfiguration.endDateTime) -UFormat "%Y-%m-%dT%H:%M%:%SZ"
+                                                }
+                                            }
+                                        }
+                                    }
+                                    "AfterDuration" {
+                                        $requestBody = [ordered]@{
+                                            "action" = "AdminUpdate"
+                                            "accessId" = $accessId
+                                            "groupId" = $groupId
+                                            "principalId" = $principalId
+                                            "scheduleInfo" = @{
+                                                "startDateTime" = get-date ($result.DesiredConfiguration.startDateTime) -UFormat "%Y-%m-%dT%H:%M%:%SZ"
+                                                "expiration" = @{
+                                                    "type" = "AfterDuration"
+                                                    "duration" = $result.DesiredConfiguration.duration
+                                                    "endDateTIme" = $null
+                                                }
+                                            }
+                                        }
+                                    }
+                                }
+                                
+                                $requestBody = $requestBody | ConvertTo-Json -Depth 5
+
+                                switch ($result.DesiredConfiguration.type) {
+                                    "eligible" {
+                                        Invoke-MgGraphRequest -Method $requestMethod -Uri "$($script:graphBaseUrl)/identityGovernance/privilegedAccess/group/eligibilityScheduleRequests" -Body $requestBody -ContentType "application/json"  | Out-Null
+                                    }
+                                    "active" {
+                                        Invoke-MgGraphRequest -Method $requestMethod -Uri "$($script:graphBaseUrl)/identityGovernance/privilegedAccess/group/assignmentScheduleRequests" -Body $requestBody -ContentType "application/json"  | Out-Null
+                                    }
+                                }
+                                Write-PSFMessage -Level Host -String "TMF.Invoke.ActionCompleted" -StringValues $result.Tenant, $result.ResourceType, $result.ResourceName, (Get-ActionColor -Action $result.ActionType), $result.ActionType
+                            }
+                            catch {
+                                Write-PSFMessage -Level Error -String "TMF.Invoke.ActionFailed" -StringValues $result.Tenant, $result.ResourceType, $result.ResourceName, $result.ActionType
+                                throw $_
+                            }
+                        }
+                        "Delete" {
+                            $requestMethod = "POST"
+                            switch ($result.DesiredConfiguration.principalType) {
+                                "group" {$principalId = Resolve-Group -InputReference $result.DesiredConfiguration.principalReference}
+                                "user" {$principalId = Resolve-User -InputReference $result.DesiredConfiguration.principalReference}
+                                "servicePrincipal"  {$principalId = Resolve-ServicePrincipal -InputReference $result.DesiredConfiguration.principalReference}
+                            }
+                            $groupId = Resolve-Group -InputReference $result.DesiredConfiguration.groupReference
+                            $accessId = $result.DesiredConfiguration.roleReference
+                            try {
+        
+                                $requestBody = [ordered]@{
+                                    "action" = "AdminRemove"
+                                    "justification" = "Remove assignment with TMF"
+                                    "accessId" = $accessId                                 
+                                    "groupId" = $groupId
+                                    "principalId" = $principalId
+                                }
+        
+                                $requestBody = $requestBody | ConvertTo-Json -Depth 5
+
+                                switch ($result.DesiredConfiguration.type) {
+                                    "eligible" {
+                                        Invoke-MgGraphRequest -Method $requestMethod -Uri "$($script:graphBaseUrl)/identityGovernance/privilegedAccess/group/eligibilityScheduleRequests" -Body $requestBody -ContentType "application/json" | Out-Null
+                                    }
+                                    "active" {
+                                        Invoke-MgGraphRequest -Method $requestMethod -Uri "$($script:graphBaseUrl)/identityGovernance/privilegedAccess/group/assignmentScheduleRequests" -Body $requestBody -ContentType "application/json" | Out-Null
                                     }
                                 }
                                 Write-PSFMessage -Level Host -String "TMF.Invoke.ActionCompleted" -StringValues $result.Tenant, $result.ResourceType, $result.ResourceName, (Get-ActionColor -Action $result.ActionType), $result.ActionType                        

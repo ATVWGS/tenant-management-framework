@@ -1,7 +1,7 @@
 function Invoke-TmfRoleManagementPolicy {
     [CmdletBinding()]
 	Param (
-        [ValidateSet('AzureResources', 'AzureAD')]
+        [ValidateSet('AzureResources', 'AzureAD', 'AADGroup')]
 		[string] $scope,
 		[System.Management.Automation.PSCmdlet]
 		$Cmdlet = $PSCmdlet
@@ -35,12 +35,39 @@ function Invoke-TmfRoleManagementPolicy {
                 $token = (Get-AzAccessToken -ResourceUrl $script:apiBaseUrl).Token
             }
             else {
-                $assignmentScope = "AzureAD"
+                if ($result.DesiredConfiguration.scopeType -eq "group") {
+                    $assignmentScope = "AADGroup"
+                }
+                else {
+                    $assignmentScope = "AzureAD"
+                }
                 Test-GraphConnection
             }
 
             switch ($assignmentScope) {
                 "AzureAD" {
+                    switch ($result.ActionType) {
+                        "Update" {
+                            try {
+                                $requestMethod = "PATCH"
+                                $policyID = $result.GraphResource."@odata.context".split("'")[1]
+                                foreach ($ruleToChange in $result.changes.actions.values) {
+                                    $item = $result.DesiredConfiguration.rules | Where-Object {$_.id -eq $ruleToChange}
+                                    $requestBody = $item | ConvertTo-Json -Depth 8
+                                    Invoke-MgGraphRequest -Method $requestMethod -Uri "$($script:graphBaseUrl)/policies/roleManagementPolicies/$($policyID)/rules/$($item.id)" -Body $requestBody -ContentType "application/json" | Out-Null
+                                }
+                                
+                                Write-PSFMessage -Level Host -String "TMF.Invoke.ActionCompleted" -StringValues $result.Tenant, $result.ResourceType, $result.ResourceName, (Get-ActionColor -Action $result.ActionType), $result.ActionType
+                            }
+                            catch {
+                                Write-PSFMessage -Level Error -String "TMF.Invoke.ActionFailed" -StringValues $result.Tenant, $result.ResourceType, $result.ResourceName, $result.ActionType
+                                throw $_
+                            }
+                        }
+                        "NoActionRequired" {}
+                    }
+                }
+                "AADGroup" {
                     switch ($result.ActionType) {
                         "Update" {
                             try {

@@ -9,7 +9,7 @@ function Test-TmfRoleAssignment
 	#>
 	[CmdletBinding()]
 	Param (
-        [ValidateSet('AzureResources', 'AzureAD')]
+        [ValidateSet('AzureResources', 'AzureAD', 'AADGroup')]
         [string] $scope,
 		[System.Management.Automation.PSCmdlet]
 		$Cmdlet = $PSCmdlet
@@ -24,7 +24,8 @@ function Test-TmfRoleAssignment
 	process
 	{
         switch($scope) {
-            "AzureAD" {$definitions = $script:desiredConfiguration[$resourceName] | Where-Object {($_ |get-member -MemberType noteproperty).Name -notcontains "subscriptionReference"}}
+            "AzureAD" {$definitions = $script:desiredConfiguration[$resourceName] | Where-Object {(($_ |get-member -MemberType noteproperty).Name -notcontains "subscriptionReference") -and (($_ |get-member -MemberType noteproperty).Name -notcontains "groupReference")}}
+            "AADGroup" {$definitions = $script:desiredConfiguration[$resourceName] | Where-Object {($_ |get-member -MemberType noteproperty).Name -contains "groupReference"}}
             "AzureResources" {$definitions = $script:desiredConfiguration[$resourceName] | Where-Object {($_ |get-member -MemberType noteproperty).Name -contains "subscriptionReference"}}
             default {$definitions = $script:desiredConfiguration[$resourceName]}
         }
@@ -42,7 +43,12 @@ function Test-TmfRoleAssignment
                 $token = (Get-AzAccessToken -ResourceUrl $script:apiBaseUrl).Token
             }
             else {
-                $assignmentScope = "AzureAD"
+                if ($definition.groupReference) {
+                    $assignmentScope = "AADGroup"
+                }
+                else {
+                    $assignmentScope = "AzureAD"
+                }                
             }
 
             switch ($assignmentScope) {
@@ -207,6 +213,115 @@ function Test-TmfRoleAssignment
                                 try {
                                     $resource = @()
                                     $resource += (Invoke-MgGraphRequest -Method GET -Uri ("$($script:graphBaseUrl)/roleManagement/directory/roleAssignmentSchedules?`$filter=principalId eq '{0}' and roleDefinitionId eq '{1}' and directoryScopeId eq '{2}'" -f $principalId,$roleDefinitionId,$directoryScopeId)).value
+                                }
+                                catch {
+                                    $resource = @()
+                                }
+                            }
+                        }
+                    }
+                    catch {
+                        Write-PSFMessage -Level Warning -String 'Tmf.Error.QueryWithFilterFailed' -StringValues $filter -Tag 'failed'
+                        $exception = New-Object System.Data.DataException("Query with filter $filter against Microsoft Graph failed. Error: $_")
+                        $errorID = 'QueryWithFilterFailed'
+                        $category = [System.Management.Automation.ErrorCategory]::NotSpecified
+                        $recordObject = New-Object System.Management.Automation.ErrorRecord($exception, $errorID, $category, $Cmdlet)
+                        $cmdlet.ThrowTerminatingError($recordObject)
+                    }
+                    
+                    switch ($resource.Count) {
+                        0 {
+                            if ($definition.present) {					
+                                $result = New-TestResult @result -ActionType "Create"
+                            }
+                            else {					
+                                $result = New-TestResult @result -ActionType "NoActionRequired"
+                            }
+                        }
+                        1 {
+                            $result["GraphResource"] = $resource
+                            if ($definition.present) {
+                                $changes = @()
+
+                                foreach ($property in ($definition.Properties() | Where-Object {$_ -notin "displayName", "present", "startDateTime"})) {
+                                    $change = [PSCustomObject] @{
+                                        Property = $property										
+                                        Actions = $null
+                                    }
+                                    switch ($property) {
+                                        "endDateTime" {
+                                            if ($definition.expirationType -eq "AfterDateTime") {
+                                                if ($definition.endDateTime -ne $resource.scheduleInfo.expiration.endDateTime) {
+                                                    $change.Actions = @{"Set" = $definition.$property}
+                                                }
+                                            }
+                                        }
+    
+                                        "expirationType" {
+                                            if ($definition.expirationType -eq "noExpiration" -and $resource.scheduleInfo.expiration.endDateTime) {
+                                                $change.Actions = @{"Set" = $definition.$property}
+                                            }
+                                            if ($definition.expirationType -ne "noExpiration" -and -not ($resource.scheduleInfo.expiration.endDateTime)) {
+                                                $change.Actions = @{"Set" = $definition.$property}
+                                            }
+                                        }
+                                    }
+                                    
+                                    if ($change.Actions) {$changes += $change}
+                                }	
+                                
+                                if ($changes.count -gt 0) { $result = New-TestResult @result -Changes $changes -ActionType "Update"}
+                                else { $result = New-TestResult @result -ActionType "NoActionRequired" }
+                            }
+                            else {
+                                $result = New-TestResult @result -ActionType "Delete"
+                            }
+                        }
+                        default {
+                            Write-PSFMessage -Level Warning -String 'Tmf.Test.MultipleResourcesError' -StringValues $resourceName, $definition.displayName -Tag 'failed'
+                            $exception = New-Object System.Data.DataException("Query returned multiple results. Cannot decide which resource to test.")
+                            $errorID = 'MultipleResourcesError'
+                            $category = [System.Management.Automation.ErrorCategory]::NotSpecified
+                            $recordObject = New-Object System.Management.Automation.ErrorRecord($exception, $errorID, $category, $Cmdlet)
+                            $cmdlet.ThrowTerminatingError($recordObject)
+                        }
+                    }
+                    
+                    $result
+                }
+                "AADGroup" {
+                    $result = @{
+                        Tenant = $tenant.Name
+                        TenantId = $tenant.Id
+                        ResourceType = 'roleAssignment'
+                        ResourceName = "$($definition.principalReference)_$($definition.roleReference)_$($definition.groupReference)"
+                        DesiredConfiguration = $definition
+                    }
+                    
+                    try {
+                        $groupId = Resolve-Group -InputReference $definition.groupReference
+                        $accessId = $definition.roleReference
+                        switch ($definition.principalType) {
+                            "group" {$principalId=Resolve-Group -InputReference $definition.principalReference -SearchInDesiredConfiguration}
+                            "user"  {$principalId=Resolve-User -InputReference $definition.principalReference}
+                            "servicePrincipal"  {$principalId=Resolve-ServicePrincipal -InputReference $definition.principalReference}
+                        }
+
+                        switch ($definition.type) {
+                            "eligible" {
+                                try {
+                                    $resource = @()
+                                    $resource += (Invoke-MgGraphRequest -Method GET -Uri ("$($script:graphBaseUrl)/identityGovernance/privilegedAccess/group/eligibilitySchedules?`$filter=principalId eq '{0}' and accessId eq '{1}' and groupId eq '{2}'" -f $principalId,$accessId,$groupId)).value
+                                }
+                                catch {
+                                    $resource = @()
+                                }
+                            }
+                            
+                            "active" {
+                                try {
+                                    $resource = @()
+                                    $resource += (Invoke-MgGraphRequest -Method GET -Uri ("$($script:graphBaseUrl)/identityGovernance/privilegedAccess/group/assignmentSchedules?`$filter=principalId eq '{0}' and accessId eq '{1}' and groupId eq '{2}'" -f $principalId,$accessId,$groupId)).value
                                 }
                                 catch {
                                     $resource = @()
