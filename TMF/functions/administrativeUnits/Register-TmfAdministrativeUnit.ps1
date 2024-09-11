@@ -53,8 +53,9 @@ function Register-TmfAdministrativeUnit
 		}
 
 		if (($membershipType -eq "dynamic" -and (-not $PSBoundParameters.ContainsKey("membershipRule"))) -or ($membershipType -eq "assigned" -and ($PSBoundParameters.ContainsKey("membershipRule") -or $PSBoundParameters.ContainsKey("membershipRuleProcessingState")))) {
-			Write-PSFMessage -Level Error -String 'TMF.Register.PropertySetNotPossible' -StringValues $displayName, "admininstrativeUnit" -Tag "failed" -ErrorRecord $_ -FunctionName $Cmdlet.CommandRuntime			
-			$cmdlet.ThrowTerminatingError($_)
+			Write-PSFMessage -Level Error -String 'TMF.Register.PropertySetNotPossible' -StringValues $displayName, "admininstrativeUnit" -Tag "failed" -FunctionName $Cmdlet.CommandRuntime
+			$ErrorObject = New-Object Management.Automation.ErrorRecord "The provided property set for `"$($displayName)`" (Type: administrativeUnit) is not applicable.", "1", 'InvalidData', $object
+			$cmdlet.ThrowTerminatingError($ErrorObject)
 		}
 
 		if ($PSBoundParameters.ContainsKey("oldNames")) {

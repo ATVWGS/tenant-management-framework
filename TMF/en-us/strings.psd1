@@ -18,6 +18,7 @@
 
     'TMF.Register.PropertySetNotPossible' = 'The provided property set for "{0}" (Type: {1}) is not applicable.'
     'TMF.Register.PropertyWrongType' = 'The provided property set for "{0}" (Type: {1}) is not applicable. The child property {2} has the wrong type. Must be {3} and is {4}.'
+    'TMF.Register.UnsupportedPropertyValue' = 'The provided value for property "{0}" is not supported. Possible values are: {1}'
 
     'TMF.Test.RelatedResourceDoesNotExist' = 'The related {0} {0} for the {0} {1} does not exist at the moment. Cannot test {0}.'
     'TMF.Test.MultipleResourcesError' = 'There are multiple {0} with displayName {1} already created. Please clean your Tenant.'

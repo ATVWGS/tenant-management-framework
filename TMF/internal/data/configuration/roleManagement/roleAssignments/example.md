@@ -114,3 +114,50 @@
     "expirationType": "noExpiration"
 }
 ```
+
+# Eligible member role assignment on a privileged access group for a group with no expiration
+```json
+{
+    "present": true,
+    "type": "eligible",
+    "principalReference": "Group name",
+    "principalType": "group",
+    "roleReference": "member",
+    "groupReference": "name of privileged access group",
+    "directoryScopeType": "group",
+    "startDateTime": "2022-04-28T00:00:00.00Z",
+    "expirationType": "noExpiration"
+}
+```
+
+# Eligible owner role assignment on a privileged access group for a user with AfterDuration expiration of 180 days
+```json
+{
+    "present": true,
+    "type": "eligible",
+    "principalReference": "userprincipalname",
+    "principalType": "user",
+    "roleReference": "owner",
+    "groupReference": "name of privileged access group",
+    "directoryScopeType": "group",
+    "startDateTime": "2022-04-28T00:00:00.00Z",
+    "duration": "P180D",
+    "expirationType": "AfterDuration"
+}
+```
+
+# Active member role assignment on a privileged access group for a serviceprincipal with AfterDateTime expiration
+```json
+{
+    "present": true,
+    "type": "active",
+    "principalReference": "serviceprincipalname",
+    "principalType": "servicePrincipal",
+    "roleReference": "member",
+    "groupReference": "name of privileged access group",
+    "directoryScopeType": "group",
+    "startDateTime": "2022-04-28T00:00:00.00Z",
+    "endDateTime": "2022-12-31T00:00:00.00Z",
+    "expirationType": "AfterDateTime"
+}
+```

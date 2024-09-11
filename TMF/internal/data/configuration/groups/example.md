@@ -89,6 +89,7 @@ Additional properties will be added in the future.
     "mailEnabled": true,
     "visibility": "HiddenMembership",
     "mailNickname": "someDynamicGroup",
+    "membershipRule" : "(user.userPrincipalName -match \".*@domain.com$\"",
     "members": ["max.mustermann@domain.com"],
     "owners": ["group.owner@domain.com"],
     "present": true
