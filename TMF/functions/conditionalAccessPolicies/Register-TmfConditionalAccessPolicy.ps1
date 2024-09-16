@@ -15,6 +15,8 @@
 		[string[]] $excludeRoles,
 		[string[]] $includeApplications,
 		[string[]] $excludeApplications,
+		[object] $excludeGuestsOrExternalUsers,
+		[object] $includeGuestsOrExternalUsers,
 		[ValidateSet("urn:user:registerdevice","urn:user:registersecurityinfo")]
 		[string[]] $includeUserActions,
 		[object] $applicationFilter,
@@ -85,6 +87,9 @@
 			if (($includeDevices -or $excludeDevices) -and $deviceFilter) {
 				throw "It is not allowed to provide includeDevices/excludeDevices and a deviceFilter."
 			}
+			if ($includeUsers -and $includeGuestsOrExternalUsers) {
+				throw "You cannot combine includeUsers with includeGuestsOrExternalUsers."
+			}
 		}
 		catch {
 			Write-PSFMessage -Level Error -String 'TMF.Register.PropertySetNotPossible' -StringValues $displayName, "ConditionalAccess" -Tag "failed" -ErrorRecord $_ -FunctionName $Cmdlet.CommandRuntime			
@@ -93,7 +98,7 @@
 
 		$childPropertyToParentMapping = @{
 			<# Workaround to support legacy conditionalAccessPolicy definition structure... #>
-			"Users" = @("includeUsers", "excludeUsers", "includeGroups", "excludeGroups", "includeRoles", "excludeRoles")
+			"Users" = @("includeUsers", "excludeUsers", "includeGroups", "excludeGroups", "includeRoles", "excludeRoles", "includeGuestsOrExternalUsers", "excludeGuestsOrExternalUsers")
 			"Applications" = @("includeApplications", "excludeApplications", "includeUserActions", "applicationFilter")
 			"Locations" = @("includeLocations", "excludeLocations")
 			"Devices" = @("includeDevices", "excludeDevices", "deviceFilter")
