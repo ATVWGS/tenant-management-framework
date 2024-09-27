@@ -2,7 +2,7 @@ function Register-TmfOrganizationalBranding
 {
     [System.Diagnostics.CodeAnalysis.SuppressMessageAttribute("PSAvoidUsingPlainTextForPassword", "customAccountResetCredentialsUrl")]
     [System.Diagnostics.CodeAnalysis.SuppressMessageAttribute("PSAvoidUsingPlainTextForPassword", "customForgotMyPasswordText")]
-    [System.Diagnostics.CodeAnalysis.SuppressMessageAttribute("PSAvoidUsingUsernameAndPasswordParams", "customForgotMyPasswordText")]
+    [System.Diagnostics.CodeAnalysis.SuppressMessageAttribute("PSAvoidUsingUsernameAndPasswordParams", "")]
 	Param (
 		[Parameter(Mandatory = $true)]
         [ValidatePattern('^(?:[a-z]{2}-[A-Z]{2}|default)$')]
