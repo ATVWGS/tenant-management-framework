@@ -130,7 +130,10 @@
 		'Test-TmfCustomSecurityAttribute',
 		'Register-TmfAuthenticationContextClassReference',
 		'Test-TmfAuthenticationContextClassReference',
-		'Invoke-TmfAuthenticationContextClassReference'
+		'Invoke-TmfAuthenticationContextClassReference',
+		'Register-TmfOrganizationalBranding',
+		'Test-TmfOrganizationalBranding',
+		'Invoke-TmfOrganizationalBranding'
 	)
 	
 	# Cmdlets to export from this module

@@ -211,6 +211,12 @@ $script:supportedResources = @{
         "invokeFunction" = (Get-Command Invoke-TmfAuthenticationContextClassReference)
         "weight" = 49
     }
+    "organizationalBrandings" = @{
+        "registerFunction" = (Get-Command Register-TmfOrganizationalBranding)
+        "testFunction" = (Get-Command Test-TmfOrganizationalBranding)
+        "invokeFunction" = (Get-Command Invoke-TmfOrganizationalBranding)
+        "weight" = 100
+    }
 
 } # All currently supported components.
 Set-Variable -Name supportedResources -Option ReadOnly
