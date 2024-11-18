@@ -133,7 +133,18 @@
 		'Invoke-TmfAuthenticationContextClassReference',
 		'Register-TmfOrganizationalBranding',
 		'Test-TmfOrganizationalBranding',
-		'Invoke-TmfOrganizationalBranding'
+		'Invoke-TmfOrganizationalBranding',
+		'Register-TmfCrossTenantAccessPolicy',
+		'Test-TmfCrossTenantAccessPolicy',
+		'Invoke-TmfCrossTenantAccessPolicy',
+		'Register-TmfCrossTenantAccessDefaultSetting',
+		'Test-TmfCrossTenantAccessDefaultSetting',
+		'Invoke-TmfCrossTenantAccessDefaultSetting',
+		'Register-TmfCrossTenantAccessPartnerSetting',
+		'Test-TmfCrossTenantAccessPartnerSetting',
+		'Invoke-TmfCrossTenantAccessPartnerSetting',
+		'Test-TmfCrossTenantAccess',
+		'Invoke-TmfCrossTenantAccess'
 	)
 	
 	# Cmdlets to export from this module
