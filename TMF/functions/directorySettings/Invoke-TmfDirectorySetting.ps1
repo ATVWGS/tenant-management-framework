@@ -48,8 +48,8 @@ function Invoke-TmfDirectorySetting {
                     }
 
                     $requestBody = $requestBody | ConvertTo-Json -ErrorAction Stop
-					$requestBody
-                    Write-PSFMessage -Level Verbose -String "TMF.Invoke.SendingRequestWithBody" -StringValues $requestMethod, $requestUrl, $requestBody
+
+					Write-PSFMessage -Level Verbose -String "TMF.Invoke.SendingRequestWithBody" -StringValues $requestMethod, $requestUrl, $requestBody
                     try {
                         Invoke-MgGraphRequest -Method $requestMethod -Uri $requestUrl -Body $requestBody | Out-Null
                     }
