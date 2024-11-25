@@ -144,7 +144,10 @@
 		'Test-TmfCrossTenantAccessPartnerSetting',
 		'Invoke-TmfCrossTenantAccessPartnerSetting',
 		'Test-TmfCrossTenantAccess',
-		'Invoke-TmfCrossTenantAccess'
+		'Invoke-TmfCrossTenantAccess',
+		'Register-TmfDirectorySetting',
+		'Test-TmfDirectorySetting',
+		'Invoke-TmfDirectorySetting'
 	)
 	
 	# Cmdlets to export from this module
