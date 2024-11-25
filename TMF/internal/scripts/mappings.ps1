@@ -238,6 +238,12 @@ $script:supportedResources = @{
         "parentType" = "crossTenantAccess"
         "weight" = 92
     }
+    "directorySettings" = @{
+        "registerFunction" = (Get-Command Register-TmfDirectorySetting)
+        "testFunction" = (Get-Command Test-TmfDirectorySetting)
+        "invokeFunction" = (Get-Command Invoke-TmfDirectorySetting)
+        "weight" = 4
+    }
 
 } # All currently supported components.
 Set-Variable -Name supportedResources -Option ReadOnly
