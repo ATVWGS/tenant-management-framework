@@ -53,22 +53,29 @@ The required scopes depend on what components (resources) you want to configure.
 
 | Resource                                                         | Required scopes                                                                                                              |
 |------------------------------------------------------------------|------------------------------------------------------------------------------------------------------------------------------|
-| Groups                                                           | Group.ReadWrite.All, GroupMember.ReadWrite.All                                                                               |
-| Users                                                            | User.ReadWrite.All                                                                                                           |
-| Named Locations                                                  | Policy.ReadWrite.ConditionalAccess                                                                                           |
+| AccessReviews													   | AccessReview.ReadWrite.All																									  |
+| AdministrativeUnits                                             | AdministrativeUnit.ReadWrite.All, Directory.AccessAsUser.All, RoleManagement.ReadWrite.Directory                             |
 | Agreements (Terms of Use)                                        | Agreement.ReadWrite.All                                                                                                      |
-| Conditional Access Policies                                      | Policy.ReadWrite.ConditionalAccess, Policy.Read.All, RoleManagement.Read.Directory, Application.Read.All, Agreement.Read.All |
-| Entitlement Management (Access Packages, Access Package Catalogs)| EntitlementManagement.ReadWrite.All                                                                                          |
-| Administrative Units                                             | AdministrativeUnit.ReadWrite.All, Directory.AccessAsUser.All, RoleManagement.ReadWrite.Directory                             |
-| Role Management (assignments, definitions, management policies)  | RoleManagement.ReadWrite.Directory, Directory.AccessAsUser.All, RoleEligibilitySchedule.ReadWrite.Directory,                 |
-|                                                                  | RoleAssignmentSchedule.ReadWrite.Directory", "RoleManagementPolicy.ReadWrite.Directory"                                      |
+| AuthenticationContextClassReferences                             | AuthenticationContext.ReadWrite.All, Policy.ReadWrite.ConditionalAccess													  |
+| ConditionalAccessPolicies                                      | Policy.ReadWrite.ConditionalAccess, Policy.Read.All, RoleManagement.Read.Directory, Application.Read.All, Agreement.Read.All |
+| CrossTenantAccess (policy, defaultSettings, partnerSettings)     | Policy.ReadWrite.CrossTenantAccess   																						  |
+| CustomSecurityAttributes                                       | CustomSecAttributeDefinition.ReadWrite.All                                                                                   |
+| DirectoryRoles												   | RoleManagement.ReadWrite.Directory                                                                                           |
+| DirectorySettings											   | Directory.ReadWrite.All																									  |
+| EntitlementManagement (Access Packages, Access Package Catalogs)| EntitlementManagement.ReadWrite.All                                                                                          |
+| Groups                                                           | Group.ReadWrite.All, GroupMember.ReadWrite.All                                                                               |
+| NamedLocations                                                  | Policy.ReadWrite.ConditionalAccess                                                                                           |
+| OrganizationalBrandings										   | OrganizationalBranding.ReadWrite.All, Organization.ReadWrite.All															  |
 | Policies (authentication/authorization policies)                 | Policy.ReadWrite.AuthenticationMethod, Policy.ReadWrite.Authorization, Policy.ReadWrite.AuthenticationFlows                  |
-| Custom Security Attributes                                       | CustomSecAttributeDefinition.ReadWrite.All                                                                                   |
+| RoleManagement (assignments, definitions, management policies)  | RoleManagement.ReadWrite.Directory, Directory.AccessAsUser.All, RoleEligibilitySchedule.ReadWrite.Directory,                 |
+|                                                                  | RoleAssignmentSchedule.ReadWrite.Directory, RoleManagementPolicy.ReadWrite.Directory                                      |
+| Users                                                            | User.ReadWrite.All                                                                                                           |
 
 
 You can also use *Get-TmfRequiredScope* to get the required scopes and combine it with *Connect-MgGraph*.
 ```powershell
 PS> Connect-MgGraph -Scopes (Get-TmfRequiredScope -All)
+PS> Connect-MgGraph -Scopes (Get-TmfRequiredScope -Groups -RoleManagement)
 ```
 
 ## 2.4. Configurations
@@ -139,9 +146,26 @@ The *example.md* file contains example resource instances and further informatio
 │   └───files
 │           Example Terms of Use.pdf
 │
+├───authenticationContextClassReferences
+│       authenticationContextClassReferences.json
+│       example.md
+│
 ├───conditionalAccessPolicies
 │       example.md
 │       policies.json
+│
+├───crossTenantAccess
+│   ├───crossTenantAccessDefaultSettings
+│   │       crossTenantAccessDefaultSettings.json
+│   │       example.md
+│   │       
+│   ├───crossTenantAccessPartnerSettings
+│   │       crossTenantAccessPartnerSettings.json
+│   │       example.md
+│   │       
+│   └───crossTenantAccessPolicy
+│           crossTenantAccessPolicy.json
+│           example.md
 │
 ├───customSecurityAttributes
 │   ├───attributeSets
@@ -154,6 +178,10 @@ The *example.md* file contains example resource instances and further informatio
 |
 ├───directoryRoles
 │       directoryRoles.json
+│       example.md
+│
+├───directorySettings
+│       directorySettings.json
 │       example.md
 │
 ├───entitlementManagement
@@ -173,7 +201,15 @@ The *example.md* file contains example resource instances and further informatio
 │       example.md
 │       namedLocations.json
 │
+├───organizationalBrandings
+│       example.md
+│       organizationalBrandings.json
+│
 ├───policies
+│   ├───appManagementPolicies
+│   │       appManagementPolicies.json
+│   │       example.md
+│   │
 │   ├───authenticationFlowsPolicies
 │   │       authenticationFlowsPolicies.json
 │   │       example.md
@@ -186,8 +222,12 @@ The *example.md* file contains example resource instances and further informatio
 │   │       authenticationStrengthPolicies.json
 │   │       example.md
 │   │
-│   └───authorizationPolicies
-│           authorizationPolicies.json
+│   ├───authorizationPolicies
+│   │       authorizationPolicies.json
+│   │       example.md
+│   │
+│   └───tenantAppManagementPolicy
+│           tenantAppManagementPolicy.json
 │           example.md
 │
 ├───roleManagement
@@ -207,8 +247,12 @@ The *example.md* file contains example resource instances and further informatio
 │           roleManagementPolicyRuleTemplates.json
 │           example.md
 │
-└────stringMappings
-        stringMappings.json
+├───stringMappings
+│       stringMappings.json
+│
+└───users
+        example.md
+        users.json
 ```
 
 ### 2.4.3. How can I create a configuration?
@@ -787,7 +831,7 @@ Please check the [Directory Roles example.md](./TMF/internal/data/configuration/
 
 ### 2.6.10. Policies
 
-### 2.6.10.1. authenticationFlowsPolicies
+#### 2.6.10.1. authenticationFlowsPolicies
 
 ```json
 [
@@ -800,7 +844,7 @@ Please check the [Directory Roles example.md](./TMF/internal/data/configuration/
 Please check the [.... example.md](./TMF/internal/data/configuration/policies/authenticationFlowsPolicies/example.md) for further information.
 
 
-### 2.6.10.2. authenticationMethodsPolicies
+#### 2.6.10.2. authenticationMethodsPolicies
 
 ```json
 [
@@ -877,7 +921,7 @@ Please check the [.... example.md](./TMF/internal/data/configuration/policies/au
 Please check the [.... example.md](./TMF/internal/data/configuration/policies/authenticationMethodsPolicies/example.md) for further information.
 
 
-### 2.6.10.3. authenticationStrengthPolicies
+#### 2.6.10.3. authenticationStrengthPolicies
 
 ```json
 [
@@ -894,7 +938,7 @@ Please check the [.... example.md](./TMF/internal/data/configuration/policies/au
 
 Please check the [.... example.md](./TMF/internal/data/configuration/policies/authenticationStrengthPolicies/example.md) for further information.
 
-### 2.6.10.4. authorizationPolicies
+#### 2.6.10.4. authorizationPolicies
 
 ```json
 
@@ -918,12 +962,138 @@ Please check the [.... example.md](./TMF/internal/data/configuration/policies/au
 ```
 Please check the [.... example.md](./TMF/internal/data/configuration/policies/authorizationPolicies/example.md) for further information.
 
+#### 2.6.10.5. appManagementPolicies
+
+```json
+
+[
+	{
+        "displayName": "appManagementPolicyTest",
+        "description": "Test policy for appManagement",
+        "isEnabled": true,
+        "restrictions": {
+            "passwordCredentials": [
+                {
+                    "restrictionType": "passwordAddition",
+                    "maxLifetime": null,
+                    "restrictForAppsCreatedAfterDateTime": "2023-01-01T10:37:00Z"
+                },
+                {
+                    "restrictionType": "passwordLifetime",
+                    "maxLifetime": "P365D",
+                    "restrictForAppsCreatedAfterDateTime": "2023-01-01T10:37:00Z"
+                }
+            ],
+            "keyCredentials": [
+                {
+                    "restrictionType": "asymmetricKeyLifetime",
+                    "maxLifetime": "P90D",
+                    "restrictForAppsCreatedAfterDateTime": "2023-01-01T10:37:00Z"
+                }
+            ]
+        },
+        "appliesTo": [
+            "application1",
+            "application2"
+        ],
+        "present": true		
+    }
+]
+
+```
+Please check the [.... example.md](./TMF/internal/data/configuration/policies/appManagementPolicies/example.md) for further information.
+
+#### 2.6.10.6. tenantAppManagementPolicies
+
+```json
+[
+    {
+        "displayname": "Default app management tenant policy",
+        "description": "Default tenant policy that enforces app management restrictions on applications and service principals. To apply policy to targeted resources, create a new policy under appManagementPolicies collection.",
+        "isEnabled": true,
+        "applicationRestrictions": {
+            "passwordCredentials": [
+                {
+                    "restrictionType": "passwordAddition",
+                    "maxLifetime": null,
+                    "restrictForAppsCreatedAfterDateTime": "2021-01-01T10:37:00Z"
+                },
+                {
+                    "restrictionType": "passwordLifetime",
+                    "maxLifetime": "P4DT12H30M5S",
+                    "restrictForAppsCreatedAfterDateTime": "2017-01-01T10:37:00Z"
+                },
+                {
+                    "restrictionType": "symmetricKeyAddition",
+                    "maxLifetime": null,
+                    "restrictForAppsCreatedAfterDateTime": "2021-01-01T10:37:00Z"
+                },
+                {
+                    "restrictionType": "customPasswordAddition",
+                    "maxLifetime": null,
+                    "restrictForAppsCreatedAfterDateTime": "2015-01-01T10:37:00Z"
+                },
+                {
+                    "restrictionType": "symmetricKeyLifetime",
+                    "maxLifetime": "P40D",
+                    "restrictForAppsCreatedAfterDateTime": "2015-01-01T10:37:00Z"
+                }
+            ],
+            "keyCredentials":[
+                {
+                    "restrictionType": "asymmetricKeyLifetime",
+                    "maxLifetime": "P30D",
+                    "restrictForAppsCreatedAfterDateTime": "2015-01-01T10:37:00Z"
+                },
+            ]
+        },
+        "servicePrincpialRestrictions": {
+            "passwordCredentials": [
+                {
+                    "restrictionType": "passwordAddition",
+                    "maxLifetime": null,
+                    "restrictForAppsCreatedAfterDateTime": "2021-01-01T10:37:00Z"
+                },
+                {
+                    "restrictionType": "passwordLifetime",
+                    "maxLifetime": "P4DT12H30M5S",
+                    "restrictForAppsCreatedAfterDateTime": "2017-01-01T10:37:00Z"
+                },
+                {
+                    "restrictionType": "symmetricKeyAddition",
+                    "maxLifetime": null,
+                    "restrictForAppsCreatedAfterDateTime": "2021-01-01T10:37:00Z"
+                },
+                {
+                    "restrictionType": "customPasswordAddition",
+                    "maxLifetime": null,
+                    "restrictForAppsCreatedAfterDateTime": "2015-01-01T10:37:00Z"
+                },
+                {
+                    "restrictionType": "symmetricKeyLifetime",
+                    "maxLifetime": "P40D",
+                    "restrictForAppsCreatedAfterDateTime": "2015-01-01T10:37:00Z"
+                }
+            ],
+            "keyCredentials":[
+                {
+                    "restrictionType": "asymmetricKeyLifetime",
+                    "maxLifetime": "P30D",
+                    "restrictForAppsCreatedAfterDateTime": "2015-01-01T10:37:00Z"
+                },
+            ]
+        }
+    }
+]
+
+
+```
 
 ### 2.6.11. roleManagement
 
-### 2.6.11.1. roleAssignments
+#### 2.6.11.1. roleAssignments
 
-# Eligible role assignment for a group on a directory role with no expiration
+##### Eligible role assignment for a group on a directory role with no expiration
 ```json
 {
     "present": true,
@@ -937,7 +1107,7 @@ Please check the [.... example.md](./TMF/internal/data/configuration/policies/au
     "expirationType": "noExpiration"
 }
 ```
-# Eligible role assignment for a group on an administrativeUnit with no expiration
+##### Eligible role assignment for a group on an administrativeUnit with no expiration
 ```json
 {
     "present": true,
@@ -951,7 +1121,7 @@ Please check the [.... example.md](./TMF/internal/data/configuration/policies/au
     "expirationType": "noExpiration"
 }
 ```
-# Eligible role assignment for a group on the owner role on subscription level with endTime
+##### Eligible role assignment for a group on the owner role on subscription level with endTime
 ```json
 {
     "present": true,
@@ -970,9 +1140,9 @@ Please check the [.... example.md](./TMF/internal/data/configuration/policies/au
 Please check the [.... example.md](./TMF/internal/data/configuration/roleManagement/roleAssignments/example.md) for further information.
 
 
-### 2.6.11.2. roleDefinitions
+#### 2.6.11.2. roleDefinitions
 
-# Custom role definition for Azure Resources
+##### Custom role definition for Azure Resources
 ```json
 
 {
@@ -997,7 +1167,7 @@ Please check the [.... example.md](./TMF/internal/data/configuration/roleManagem
     ]
 }
 ```
-# Custom role definition for AzureAD
+##### Custom role definition for EntraID
 ```json
 
 {
@@ -1020,9 +1190,9 @@ Please check the [.... example.md](./TMF/internal/data/configuration/roleManagem
 Please check the [.... example.md](./TMF/internal/data/configuration/roleManagement/roleDefinitions/example.md) for further information.
 
 
-### 2.6.11.3. roleManagementPolicies
+#### 2.6.11.3. roleManagementPolicies
 
-# RoleManagementPolicy for directory role without approval
+##### RoleManagementPolicy for directory role without approval
 ```json
 {
     "roleReference": "directory role name",
@@ -1033,7 +1203,7 @@ Please check the [.... example.md](./TMF/internal/data/configuration/roleManagem
 }
 ```
 
-# RoleManagementPolicy for AzureResource role on subscription level with approver
+##### RoleManagementPolicy for AzureResource role on subscription level with approver
 ```json
 {
     "roleReference": "role name",
@@ -1052,11 +1222,11 @@ Please check the [.... example.md](./TMF/internal/data/configuration/roleManagem
 Please check the [.... example.md](./TMF/internal/data/configuration/roleManagement/roleManagementPolicies/example.md) for further information.
 
 
-### 2.6.11.4. roleManagementPolicyRuleTemplates
+#### 2.6.11.4. roleManagementPolicyRuleTemplates
 
 roleManagementPolicyRuleTemplates include all rules but the "Approval_EndUser_Assignment". The approvers are set within the roleManagementPolicies configurations.
 
-# RoleManagementPolicy ruleset with maximum 9 months eligible assignment possible, permanent active assignment possible and activation duration of 12 hours
+##### RoleManagementPolicy ruleset with maximum 9 months eligible assignment possible, permanent active assignment possible and activation duration of 12 hours
 ```json
 {
     "displayName": "AzureAD_Tier0",
@@ -1375,7 +1545,358 @@ Please check the [.... example.md](./TMF/internal/data/configuration/customSecur
 ```
 Please check the [.... example.md](./TMF/internal/data/configuration/customSecurityAttributes/customSecurityAttributDefinitions/example.md) for further information.
 
-### 2.6.13. String mapping
+### 2.6.13. AuthenticationContextClassReferences
+
+```json
+[
+    {
+        "displayName": "authenticationContext example",
+        "id": "c1",
+        "description": "authenticationContext example",
+        "isAvailable": true,
+        "present": true
+    }
+]
+
+```
+
+Please check the [.... example.md](./TMF/internal/data/configuration/authenticationContextClassReferences/example.md) for further information.
+
+### 2.6.14. CrossTenantAccess
+
+#### 2.6.14.1 CrossTenantAccessDefaultSettings
+
+```json
+[
+    {
+        "displayName": "CrossTenantAccessDefaultSettings",
+        "inboundTrust": {
+            "isMfaAccepted": false,
+            "isCompliantDeviceAccepted": false,
+            "isHybridAzureADJoinedDeviceAccepted": false
+        },
+        "b2bCollaborationOutbound": {
+            "usersAndGroups": {
+                "accessType": "allowed",
+                "targets": [
+                    {
+                        "target": "AllUsers",
+                        "targetType": "user"
+                    }
+                ]
+            },
+            "applications": {
+                "accessType": "allowed",
+                "targets": [
+                    {
+                        "target": "AllApplications",
+                        "targetType": "application"
+                    }
+                ]
+            }
+        },
+        "b2bCollaborationInbound": {
+            "usersAndGroups": {
+                "accessType": "allowed",
+                "targets": [
+                    {
+                        "target": "AllUsers",
+                        "targetType": "user"
+                    }
+                ]
+            },
+            "applications": {
+                "accessType": "allowed",
+                "targets": [
+                    {
+                        "target": "AllApplications",
+                        "targetType": "application"
+                    }
+                ]
+            }
+        },
+        "b2bDirectConnectOutbound": {
+            "usersAndGroups": {
+                "accessType": "blocked",
+                "targets": [
+                    {
+                        "target": "AllUsers",
+                        "targetType": "user"
+                    }
+                ]
+            },
+            "applications": {
+                "accessType": "blocked",
+                "targets": [
+                    {
+                        "target": "AllApplications",
+                        "targetType": "application"
+                    }
+                ]
+            }
+        },
+        "b2bDirectConnectInbound": {
+            "usersAndGroups": {
+                "accessType": "blocked",
+                "targets": [
+                    {
+                        "target": "AllUsers",
+                        "targetType": "user"
+                    }
+                ]
+            },
+            "applications": {
+                "accessType": "blocked",
+                "targets": [
+                    {
+                        "target": "AllApplications",
+                        "targetType": "application"
+                    }
+                ]
+            }
+        },
+        "automaticUserConsentSettings": {
+            "inboundAllowed": false,
+            "outboundAllowed": false
+        },
+        "tenantRestrictions": {
+            "devices": null,
+            "usersAndGroups": {
+                "accessType": "blocked",
+                "targets": [
+                    {
+                        "target": "AllUsers",
+                        "targetType": "user"
+                    }
+                ]
+            },
+            "applications": {
+                "accessType": "blocked",
+                "targets": [
+                    {
+                        "target": "AllApplications",
+                        "targetType": "application"
+                    }
+                ]
+            }
+        },
+        "invitationRedemptionIdentityProviderConfiguration": {
+            "primaryIdentityProviderPrecedenceOrder": [
+                "azureActiveDirectory",
+                "externalFederation",
+                "socialIdentityProviders"
+            ],
+            "fallbackIdentityProvider": "defaultConfiguredIdp"
+        }
+    }
+]
+
+```
+
+Please check the [.... example.md](./TMF/internal/data/configuration/crossTenantAccess/crossTenantAccessDefaultSettings/example.md) for further information.
+
+#### 2.6.14.2 CrossTenantAccessPartnerSettings
+
+```json
+[
+    {
+        "displayName": "tenantName",
+        "tenantId": "tenantId",
+        "present": true,
+        "inboundTrust": {
+            "isMfaAccepted": false,
+            "isCompliantDeviceAccepted": true,
+            "isHybridAzureADJoinedDeviceAccepted": false
+        },
+        "b2bCollaborationOutbound": null,
+        "b2bCollaborationInbound": {
+            "usersAndGroups": {
+                "accessType": "allowed",
+                "targets": [
+                    {
+                        "target": "some GroupID",
+                        "targetType": "group"
+                    }
+                ]
+            },
+            "applications": {
+                "accessType": "allowed",
+                "targets": [
+                    {
+                        "target": "some ApplicationId",
+                        "targetType": "application"
+                    }
+                ]
+            }
+        },
+        "b2bDirectConnectOutbound": null,
+        "b2bDirectConnectInbound": null,
+        "tenantRestrictions": null,
+        "invitationRedemptionIdentityProviderConfiguration": null,
+        "automaticUserConsentSettings": {
+            "inboundAllowed": null,
+            "outboundAllowed": true
+        }
+    }
+]
+
+```
+
+Please check the [.... example.md](./TMF/internal/data/configuration/crossTenantAccess/crossTenantAccessPartnerSettings/example.md) for further information.
+
+#### 2.6.14.3. CrossTenantAccessPolicy
+
+```json
+[
+    {
+        "displayName": "CrossTenantAccessPolicy",
+        "allowedCloudEndpoints": ["partner.microsoftonline.cn"]
+    }
+]
+
+```
+
+Please check the [.... example.md](./TMF/internal/data/configuration/crossTenantAccess/crossTenantAccessPolicy/example.md) for further information.
+
+### 2.6.15. DirectoryRoles
+
+```json
+[
+    {
+        "present": true,
+        "displayName": "Role displayname",
+        "members": [
+            {
+                "type": "group",
+                "reference": "some group"
+            },
+            {
+                "type": "singleUser",
+                "reference": "givenname.sn@tenant.onmicrosoft.com"
+            }
+        ]
+    }
+]
+
+```
+
+Please check the [.... example.md](./TMF/internal/data/configuration/directoryRoles/example.md) for further information.
+
+### 2.6.16. DirectorySettings
+
+#### Example for directory setting "Application"
+```json
+{
+    "displayName": "Application",
+    "present": true,
+    "EnableAccessCheckForPrivilegedApplicationUpdates": true
+}
+```
+
+#### Example for directory setting "Password Rule Settings" with disabled onPrem settings
+```json
+{
+    "displayName": "Password Rule Settings",
+    "present": true,
+    "BannedPasswordCheckOnPremisesMode": "Audit|Enforced",
+    "EnableBannedPasswordCheckOnPremises": false,
+    "EnableBannedPasswordCheck": true,
+    "LockoutDurationInSeconds": 60,
+    "LockoutThreshold": 5,
+    "BannedPasswordList": "password"
+}
+```
+
+#### Example for directory setting "Group.Unified"
+```json
+{
+    "displayName": "Group.Unified",
+    "present": true,
+    "NewUnifiedGroupWritebackDefault": true,
+    "EnableMIPLabels": true,
+    "CustomBlockedWordsList": "word1,word2",
+    "EnableMSStandardBlockedWords": false,
+    "ClassificationDescriptions": "Public:Information with no restrictions,Internal:Information that is intended for internal use only and not for the general public",
+    "DefaultClassification": "Internal",
+    "PrefixSuffixNamingRequirement": "[pre][suffix]",
+    "AllowGuestsToBeGroupOwner": false,
+    "AllowGuestsToAccessGroups": true,
+    "GuestUsageGuidelinesUrl": "https://someUrl.com",
+    "GroupCreationAllowedGroupId": "",
+    "AllowToAddGuests": true,
+    "UsageGuidelinesUrl": "https://someUrl.com",
+    "ClassificationList": "Internal,Public",
+    "EnableGroupCreation": true
+}
+```
+
+#### Example for directory setting "Prohibited Names Settings"
+```json
+{
+    "displayName": "Prohibited Names Settings",
+    "present": true,
+    "CustomBlockedSubStringsList": "substring1,substring2",
+    "CustomBlockedWholeWordsList": "word1,word2"
+}
+```
+
+#### Example for directory setting "Custom Policy Settings"
+```json
+{
+    "displayName": "Custom Policy Settings",
+    "present": true,
+    "CustomConditionalAccessPolicyUrl": "https://someUrl.com"
+}
+```
+
+#### Example for directory setting "Consent Policy Settings"
+```json
+{
+    "displayName": "Consent Policy Settings",
+    "present": true,
+    "BlockUserConsentForRiskyApps": true,
+    "EnableAdminConsentRequests": false
+}
+```
+
+Please check the [.... example.md](./TMF/internal/data/configuration/directorySettings/example.md) for further information.
+
+### 2.6.17. OrganizationalBrandings
+
+##### Example for default organizational branding
+```json
+{
+    "present": true,
+    "displayName": "default",
+    "backgroundColor": "#ffffff",
+    "customAccountResetCredentialsUrl": "Your custom URL",
+    "customCannotAccessYourAccountText": "Your custom text",
+    "customCannotAccessYourAccountUrl": "Your custom URL",
+    "customForgotMyPasswordText": "Your custom text",
+    "customPrivacyAndCookiesText": "Your custom text",
+    "customPrivacyAndCookiesUrl": "Your custom URL",
+    "customResetItNowText": "Your custom text",
+    "customTermsOfUseText": "Your custom text",
+    "customTermsOfUseUrl": "Your custom URL",
+    "headerBackgroundColor": "#000000",
+    "signInPageText": "Your custom text",
+    "usernameHintText": "Your custom text"
+}
+```
+#### Example for localized organizational branding
+```json
+{
+    "present": true,
+    "displayName": "en-US",
+    "backgroundColor": "#ffffff",
+    "signInPageText": "Another custom sign in text",
+    "usernameHintText": "Another custom username hint text"
+}
+```
+
+Please check the [.... example.md](./TMF/internal/data/configuration/organizationalBrandings/example.md) for further information.
+
+### 2.6.18. String mapping
 String mappings can help you with parameterization of your TMF configurations.
 
 You can create mappings between strings and the values they should be replaced with. Place the mappings in the *stringMappings.json* file in the *stringMappings* folder of your configuration.
