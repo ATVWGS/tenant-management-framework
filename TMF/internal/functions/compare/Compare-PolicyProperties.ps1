@@ -42,7 +42,7 @@ function Compare-PolicyProperties {
                         }
                         else {
 
-                            if (-Not (Compare-PolicyProperties -ReferenceObject ($reference.Value | ConvertTo-PSFHashtable) -DifferenceObject ($DifferenceObject[$reference.Key] -join ' '| ConvertTo-PSFHashtable))) {
+                            if (Compare-Object $reference.Value $DifferenceObject[$reference.Key]) {
                                 $same = $false
                             }
                         }                        
