@@ -54,3 +54,34 @@
     "activationApprover": [],
     "ruleTemplate": "some rule template"
 }
+```
+
+# RoleManagementPolicy for member role of an AADGroup
+```json
+{
+    "roleReference": "member",
+    "groupReference": "group name",
+    "scopeType": "group",
+    "activationApprover": [],
+    "ruleTemplate": "some rule template"
+}
+```
+
+# RoleManagementPolicy for owner role of an AADGroup with approvers
+```json
+{
+    "roleReference": "owner",
+    "groupReference": "group name",
+    "scopeType": "group",
+    "activationApprover": [
+        {
+            "reference": "userPrincipalName",
+            "type": "user"
+        },
+        {
+            "reference": "Some group",
+            "type": "group"
+        }
+    ],
+    "ruleTemplate": "some rule template"
+}

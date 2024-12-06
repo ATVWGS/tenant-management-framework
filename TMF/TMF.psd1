@@ -24,7 +24,7 @@
 	PowerShellVersion = '5.1'
 	
 	# Modules that must be imported into the global environment prior to importing this module
-	RequiredModules = @(@{ ModuleName='PSFramework'; ModuleVersion='1.5.171' }, 'Microsoft.Graph.Authentication', 'Microsoft.Graph.Identity.DirectoryManagement', 'Microsoft.Graph.Identity.Governance')
+	RequiredModules = @('PSFramework', 'Microsoft.Graph.Authentication')
 	
 	# Assemblies that must be loaded prior to importing this module
 	# RequiredAssemblies = @('bin\TMF.dll')
@@ -130,7 +130,24 @@
 		'Test-TmfCustomSecurityAttribute',
 		'Register-TmfAuthenticationContextClassReference',
 		'Test-TmfAuthenticationContextClassReference',
-		'Invoke-TmfAuthenticationContextClassReference'
+		'Invoke-TmfAuthenticationContextClassReference',
+		'Register-TmfOrganizationalBranding',
+		'Test-TmfOrganizationalBranding',
+		'Invoke-TmfOrganizationalBranding',
+		'Register-TmfCrossTenantAccessPolicy',
+		'Test-TmfCrossTenantAccessPolicy',
+		'Invoke-TmfCrossTenantAccessPolicy',
+		'Register-TmfCrossTenantAccessDefaultSetting',
+		'Test-TmfCrossTenantAccessDefaultSetting',
+		'Invoke-TmfCrossTenantAccessDefaultSetting',
+		'Register-TmfCrossTenantAccessPartnerSetting',
+		'Test-TmfCrossTenantAccessPartnerSetting',
+		'Invoke-TmfCrossTenantAccessPartnerSetting',
+		'Test-TmfCrossTenantAccess',
+		'Invoke-TmfCrossTenantAccess',
+		'Register-TmfDirectorySetting',
+		'Test-TmfDirectorySetting',
+		'Invoke-TmfDirectorySetting'
 	)
 	
 	# Cmdlets to export from this module

@@ -36,7 +36,22 @@ function Compare-Hashtable {
                 }
                 else {
                     if ($reference.Value -ne $DifferenceObject[$reference.Key]) {
-                        $same = $false
+                        if ($reference.Key -eq "guestOrExternalUserTypes") {
+                            if (-not ($DifferenceObject[$reference.Key])) {
+                                $same = $false
+                            }
+                            else {
+                                $referenceSplit = $reference.Value.split(",")
+                                $differenceSplit = $DifferenceObject[$reference.Key].Split(",")
+
+                                if (Compare-Object -ReferenceObject $referenceSplit -DifferenceObject $differenceSplit) {
+                                    $same = $false
+                                }
+                            }                            
+                        }
+                        else {
+                            $same = $false
+                        }                        
                     }
                 }
             }

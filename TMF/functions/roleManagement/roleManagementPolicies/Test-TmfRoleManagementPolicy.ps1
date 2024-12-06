@@ -8,7 +8,7 @@ function Test-TmfRoleManagementPolicy {
 	#>
 	[CmdletBinding()]
 	Param (
-        [ValidateSet('AzureResources', 'AzureAD')]
+        [ValidateSet('AzureResources', 'AzureAD', 'AADGroup')]
         [string] $scope,
 		[System.Management.Automation.PSCmdlet]
 		$Cmdlet = $PSCmdlet
@@ -23,7 +23,8 @@ function Test-TmfRoleManagementPolicy {
     process {
 
         switch ($scope) {
-            "AzureAD" {$definitions = $script:desiredConfiguration[$resourceName] | Where-Object {($_ |get-member -MemberType noteproperty).Name -notcontains "subscriptionReference"}}
+            "AADGroup" {$definitions = $script:desiredConfiguration[$resourceName] | Where-Object {$_.scopeType -eq "group"}}
+            "AzureAD" {$definitions = $script:desiredConfiguration[$resourceName] | Where-Object {($_ |get-member -MemberType noteproperty).Name -notcontains "subscriptionReference" -and $_.scopeType -ne "group"}}
             "AzureResources" {$definitions = $script:desiredConfiguration[$resourceName] | Where-Object {($_ |get-member -MemberType noteproperty).Name -contains "subscriptionReference"}}
             default {$definitions = $script:desiredConfiguration[$resourceName]}
         }
@@ -41,7 +42,12 @@ function Test-TmfRoleManagementPolicy {
                 $token = (Get-AzAccessToken -ResourceUrl $script:apiBaseUrl).Token
             }
             else {
-                $assignmentScope = "AzureAD"
+                if ($definition.scopeType -eq "group") {
+                    $assignmentScope = "AADGroup"
+                }
+                else {
+                    $assignmentScope = "AzureAD"
+                }                
             }
 
             switch ($assignmentScope) {
@@ -92,6 +98,23 @@ function Test-TmfRoleManagementPolicy {
 
                     $result["GraphResource"] = $resource
                 }
+
+                "AADGroup" {
+                    $result = @{
+                        Tenant = $tenant.Name
+                        TenantId = $tenant.Id
+                        ResourceType = 'roleManagementPolicy'
+                        ResourceName = "Policy for $($definition.roleReference) role on $($definition.scopeReference)"
+                        DesiredConfiguration = $definition
+                    }
+
+                    $groupId = Resolve-Group -InputReference $definition.scopeReference -SearchInDesiredConfiguration
+                    $policyId = (Invoke-MgGraphRequest -Method "GET" -Uri "$($script:graphBaseUrl)/policies/roleManagementPolicyAssignments?`$filter=scopeId eq '$($groupId)' and scopeType eq 'Group' and roleDefinitionId eq '$($definition.roleReference)'").value.policyId
+                    $resource = @()
+                    $resource += Invoke-MgGraphRequest -Method "GET" -Uri "$($script:graphBaseUrl)/policies/roleManagementPolicies/$($policyId)/rules"
+
+                    $result["GraphResource"] = $resource
+                }
             }
             
             $rules = @()
@@ -122,6 +145,13 @@ function Test-TmfRoleManagementPolicy {
                                         "@odata.type" = "#microsoft.graph.singleUser"
                                     }
                                 }
+                                "AADGroup" {
+                                    $primaryApprovers +=  @{
+                                        "id" = $referenceID
+                                        "isBackup" = $false
+                                        "@odata.type" = "#microsoft.graph.singleUser"
+                                    }
+                                }
                                 "AzureResources" {
                                     $primaryApprovers += @{
                                         "id" = $referenceID
@@ -135,6 +165,13 @@ function Test-TmfRoleManagementPolicy {
                             $referenceID = Resolve-Group -InputReference $item.reference
                             switch ($assignmentScope) {
                                 "AzureAD" {
+                                    $primaryApprovers +=  [PSCustomObject]@{
+                                        "id" = $referenceID
+                                        "isBackup" = $false
+                                        "@odata.type" = "#microsoft.graph.groupMembers"
+                                    }
+                                }
+                                "AADGroup" {
                                     $primaryApprovers +=  [PSCustomObject]@{
                                         "id" = $referenceID
                                         "isBackup" = $false
@@ -155,6 +192,38 @@ function Test-TmfRoleManagementPolicy {
 
                 switch ($assignmentScope) {
                     "AzureAD" {
+                        $activationApprover = [PSCustomObject]@{
+                            
+                            "setting"=  @{
+                                "isApprovalRequired" = $true
+                                "isApprovalRequiredForExtension" = $false
+                                "isRequestorJustificationRequired" = $true
+                                "approvalMode" = "SingleStage"
+                                "approvalStages"= @(
+                                    @{
+                                        "approvalStageTimeOutInDays" = 1
+                                        "isApproverJustificationRequired" = $true
+                                        "escalationTimeInMinutes" = 0
+                                        "primaryApprovers" = $primaryApprovers
+                                        "isEscalationEnabled" = $false
+                                    }
+                                )
+                            }
+                            "id" = "Approval_EndUser_Assignment"
+                            "@odata.type" = "#microsoft.graph.unifiedRoleManagementPolicyApprovalRule"
+                            "target" = @{
+                                "caller" = "EndUser"
+                                "operations" = @(
+                                    "All"
+                                )
+                                "level" = "Assignment"
+                                "inheritableSettings" = @()
+                                "enforcedSettings" = @()
+                            }
+                        }
+                        $rules += $activationApprover
+                    }
+                    "AADGroup" {
                         $activationApprover = [PSCustomObject]@{
                             
                             "setting"=  @{
@@ -252,6 +321,38 @@ function Test-TmfRoleManagementPolicy {
                         }
                         $rules += $activationApprover
                     }
+                    "AADGroup" {
+                        $activationApprover = [PSCustomObject]@{
+                            
+                            "setting"=  @{
+                                "isApprovalRequired" = $false
+                                "isApprovalRequiredForExtension" = $false
+                                "isRequestorJustificationRequired" = $true
+                                "approvalMode" = "SingleStage"
+                                "approvalStages"= @(
+                                    @{
+                                        "approvalStageTimeOutInDays" = 1
+                                        "isApproverJustificationRequired" = $true
+                                        "escalationTimeInMinutes" = 0
+                                        "primaryApprovers" = @()
+                                        "isEscalationEnabled" = $false
+                                    }
+                                )
+                            }
+                            "id" = "Approval_EndUser_Assignment"
+                            "@odata.type" = "#microsoft.graph.unifiedRoleManagementPolicyApprovalRule"
+                            "target" = @{
+                                "caller" = "EndUser"
+                                "operations" = @(
+                                    "All"
+                                )
+                                "level" = "Assignment"
+                                "inheritableSettings" = @()
+                                "enforcedSettings" = @()
+                            }
+                        }
+                        $rules += $activationApprover
+                    }
                     "AzureResources" {
                         $activationApprover = [PSCustomObject]@{
                             
@@ -293,6 +394,20 @@ function Test-TmfRoleManagementPolicy {
 
                     switch ($assignmentScope) {
                         "AzureAD" {
+                            foreach ($rule in $result.DesiredConfiguration.rules) {
+                                if (-not (Compare-PolicyProperties -ReferenceObject ($rule | ConvertTo-PSFHashtable) -DifferenceObject ($resource.value | Where-Object {$_.id -eq $rule.id} | ConvertTo-PSFHashtable))) {    
+                                    $change = [PSCustomObject] @{
+                                        Property = "rules"
+                                        Actions = @{"Set" = $rule.id}
+                                    }
+                                    $changes += $change
+                                }
+                            }
+
+                            if ($changes.count -gt 0) { $result = New-TestResult @result -Changes $changes -ActionType "Update"}
+                            else { $result = New-TestResult @result -ActionType "NoActionRequired" }
+                        }
+                        "AADGroup" {
                             foreach ($rule in $result.DesiredConfiguration.rules) {
                                 if (-not (Compare-PolicyProperties -ReferenceObject ($rule | ConvertTo-PSFHashtable) -DifferenceObject ($resource.value | Where-Object {$_.id -eq $rule.id} | ConvertTo-PSFHashtable))) {    
                                     $change = [PSCustomObject] @{

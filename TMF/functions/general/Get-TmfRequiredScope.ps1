@@ -44,23 +44,35 @@
 		[Parameter(ParameterSetName = "SpecifiedComponents")]
 		[switch] $AccessReviews,
 		[Parameter(ParameterSetName = "SpecifiedComponents")]
-		[switch] $RoleManagement,
-		[Parameter(ParameterSetName = "SpecifiedComponents")]
-		[switch] $Groups,
-		[Parameter(ParameterSetName = "SpecifiedComponents")]
-		[switch] $Users,
-		[Parameter(ParameterSetName = "SpecifiedComponents")]
-		[switch] $NamedLocations,
+		[switch] $AdministrativeUnits,
 		[Parameter(ParameterSetName = "SpecifiedComponents")]
 		[switch] $Agreements,
 		[Parameter(ParameterSetName = "SpecifiedComponents")]
+		[switch] $AuthenticationContextClassReferences,
+		[Parameter(ParameterSetName = "SpecifiedComponents")]
 		[switch] $ConditionalAccessPolicies,
+		[Parameter(ParameterSetName = "SpecifiedComponents")]
+		[switch] $CrossTenantAccess,
+		[Parameter(ParameterSetName = "SpecifiedComponents")]
+		[switch] $CustomSecurityAttributes,
+		[Parameter(ParameterSetName = "SpecifiedComponents")]
+		[switch] $DirectoryRoles,
+		[Parameter(ParameterSetName = "SpecifiedComponents")]
+		[switch] $DirectorySettings,
 		[Parameter(ParameterSetName = "SpecifiedComponents")]
 		[switch] $EntitlementManagement,
 		[Parameter(ParameterSetName = "SpecifiedComponents")]
-		[switch] $AdministrativeUnits,
+		[switch] $Groups,
+		[Parameter(ParameterSetName = "SpecifiedComponents")]
+		[switch] $NamedLocations,
+		[Parameter(ParameterSetName = "SpecifiedComponents")]
+		[switch] $OrganizationalBrandings,
 		[Parameter(ParameterSetName = "SpecifiedComponents")]
 		[switch] $Policies,
+		[Parameter(ParameterSetName = "SpecifiedComponents")]
+		[switch] $RoleManagement,		
+		[Parameter(ParameterSetName = "SpecifiedComponents")]
+		[switch] $Users,
 		[Parameter(ParameterSetName = "All")]
 		[switch] $All
 	)
@@ -74,33 +86,52 @@
 		if($AccessReviews -or $All) {
 			$scopes += "Group.Read.All", "AccessReview.ReadWrite.All", "RoleManagement.Read.Directory", "Directory.Read.All", "Directory.AccessAsUser.All"
 		}
-		if($RoleManagement -or $All) {
-			$scopes += "RoleManagement.ReadWrite.Directory", "Directory.AccessAsUser.All", "RoleEligibilitySchedule.ReadWrite.Directory", "RoleAssignmentSchedule.ReadWrite.Directory", "RoleManagementPolicy.ReadWrite.Directory"
+		if ($AdministrativeUnits -or $All) {
+			$scopes += "AdministrativeUnit.ReadWrite.All", "Directory.AccessAsUser.All", "RoleManagement.ReadWrite.Directory"
 		}
-		if ($Groups -or $All) {
-			$scopes += "Group.ReadWrite.All", "GroupMember.ReadWrite.All", "Directory.ReadWrite.All", "Directory.AccessAsUser.All"
-		}
-		if ($Users -or $All) {
-			$scopes += "User.ReadWrite.All"
-		}
-		if ($NamedLocations -or $All) {
-			$scopes += "Policy.ReadWrite.ConditionalAccess"
-		} 
 		if ($Agreements -or $All) {
 			$scopes += "Agreement.ReadWrite.All"
+		}
+		if ($AuthenticationContextClassReferences -or $All) {
+			$scopes += "AuthenticationContext.ReadWrite.All"
 		}
 		if ($ConditionalAccessPolicies -or $All) {
 			$scopes += "Policy.ReadWrite.ConditionalAccess", "Policy.Read.All", "RoleManagement.Read.Directory", "Application.Read.All", "Agreement.Read.All", "Group.Read.All"
 		}
+		if ($CrossTenantAccess -or $All) {
+			$scopes += "Policy.ReadWrite.CrossTenantAccess"
+		}
+		if ($CustomSecurityAttributes -or $All) {
+			$scopes += "CustomSecAttributeDefinition.ReadWrite.All"
+		}
+		if ($DirectoryRoles -or $All) {
+			$scopes += "RoleManagement.ReadWrite.Directory"
+		}
+		if ($DirectorySettings -or $All) {
+			$scopes += "Directory.ReadWrite.Directory"
+		}
 		if ($EntitlementManagement -or $All) {
 			$scopes += "EntitlementManagement.ReadWrite.All"
 		}
-		if ($AdministrativeUnits -or $All) {
-			$scopes += "AdministrativeUnit.ReadWrite.All", "Directory.AccessAsUser.All", "RoleManagement.ReadWrite.Directory"
+		if ($Groups -or $All) {
+			$scopes += "Group.ReadWrite.All", "GroupMember.ReadWrite.All", "Directory.ReadWrite.All", "Directory.AccessAsUser.All"
+		}
+		if ($NamedLocations -or $All) {
+			$scopes += "Policy.ReadWrite.ConditionalAccess"
+		}
+		if ($OrganizationalBrandings -or $All) {
+			$scopes += "OrganizationalBranding.ReadWrite.All"
 		}
 		if ($Policies -or $All) {
 			$scopes += "Policy.ReadWrite.AuthenticationMethod", "Policy.ReadWrite.Authorization", "Policy.ReadWrite.AuthenticationFlows"
 		}
+		if($RoleManagement -or $All) {
+			$scopes += "RoleManagement.ReadWrite.Directory", "Directory.AccessAsUser.All", "RoleEligibilitySchedule.ReadWrite.Directory", "RoleAssignmentSchedule.ReadWrite.Directory", "RoleManagementPolicy.ReadWrite.Directory","RoleManagementPolicy.ReadWrite.AzureADGroup"
+		}
+		if ($Users -or $All) {
+			$scopes += "User.ReadWrite.All"
+		}
+		
 		return ($scopes | Sort-Object -Unique)
 	}
 }

@@ -8,6 +8,8 @@ function Validate-ConditionalAccessUsers
 		[string[]] $excludeGroups,
 		[string[]] $includeRoles,
 		[string[]] $excludeRoles,
+		[object] $excludeGuestsOrExternalUsers,
+		[object] $includeGuestsOrExternalUsers,
 		[System.Management.Automation.PSCmdlet]
 		$Cmdlet = $PSCmdlet
 	)
@@ -30,6 +32,16 @@ function Validate-ConditionalAccessUsers
 			}
 			if ($property.Key -in @("includeRoles", "excludeRoles")) {
 				$validated = @($property.Value | Foreach-Object {Resolve-DirectoryRoleTemplate -InputReference $_ -SearchInDesiredConfiguration -Cmdlet $Cmdlet})
+			}
+			if ($property.Key -in @("includeGuestsOrExternalUsers", "excludeGuestsOrExternalUsers")) {
+				
+				$temp = $property.Value | ConvertTo-PSFHashtable
+				$temp.clone().keys | ForEach-Object {
+					if ($temp.$_.gettype().Name -eq "PSCustomObject") {
+						$temp.$_ = $temp.$_ | ConvertTo-PSFHashtable
+					}
+				}
+				$validated = $temp
 			}
 			$hashtable[$property.Key] = $validated
 		}

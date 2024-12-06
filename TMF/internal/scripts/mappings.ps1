@@ -211,6 +211,39 @@ $script:supportedResources = @{
         "invokeFunction" = (Get-Command Invoke-TmfAuthenticationContextClassReference)
         "weight" = 49
     }
+    "organizationalBrandings" = @{
+        "registerFunction" = (Get-Command Register-TmfOrganizationalBranding)
+        "testFunction" = (Get-Command Test-TmfOrganizationalBranding)
+        "invokeFunction" = (Get-Command Invoke-TmfOrganizationalBranding)
+        "weight" = 100
+    }
+    "crossTenantAccessPolicy" = @{
+        "registerFunction" = (Get-Command Register-TmfCrossTenantAccessPolicy)
+        "testFunction" = (Get-Command Test-TmfCrossTenantAccessPolicy)
+        "invokeFunction" = (Get-Command Invoke-TmfCrossTenantAccessPolicy)
+        "parentType" = "crossTenantAccess"
+        "weight" = 90
+    }
+    "crossTenantAccessDefaultSettings" = @{
+        "registerFunction" = (Get-Command Register-TmfCrossTenantAccessDefaultSetting)
+        "testFunction" = (Get-Command Test-TmfCrossTenantAccessDefaultSetting)
+        "invokeFunction" = (Get-Command Invoke-TmfCrossTenantAccessDefaultSetting)
+        "parentType" = "crossTenantAccess"
+        "weight" = 91
+    }
+    "crossTenantAccessPartnerSettings" = @{
+        "registerFunction" = (Get-Command Register-TmfCrossTenantAccessPartnerSetting)
+        "testFunction" = (Get-Command Test-TmfCrossTenantAccessPartnerSetting)
+        "invokeFunction" = (Get-Command Invoke-TmfCrossTenantAccessPartnerSetting)
+        "parentType" = "crossTenantAccess"
+        "weight" = 92
+    }
+    "directorySettings" = @{
+        "registerFunction" = (Get-Command Register-TmfDirectorySetting)
+        "testFunction" = (Get-Command Test-TmfDirectorySetting)
+        "invokeFunction" = (Get-Command Invoke-TmfDirectorySetting)
+        "weight" = 4
+    }
 
 } # All currently supported components.
 Set-Variable -Name supportedResources -Option ReadOnly

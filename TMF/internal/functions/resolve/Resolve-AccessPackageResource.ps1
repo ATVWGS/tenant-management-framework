@@ -19,7 +19,7 @@ function Resolve-AccessPackageResource
 	{			
 		try {
 			if ($InputReference -match $script:guidRegex) {
-				$resource = (Invoke-MgGraphRequest -Method GET -Uri ("$script:graphBaseUrl/identityGovernance/entitlementManagement/accessPackageCatalogs/{0}/accessPackageResources?`$filter=originId eq '{1}'" -f $CatalogId, $InputReference)).Id
+				$resource = (Invoke-MgGraphRequest -Method GET -Uri ("$script:graphBaseUrl/identityGovernance/entitlementManagement/accessPackageCatalogs/{0}/accessPackageResources?`$filter=originId eq '{1}'" -f $CatalogId, $InputReference)).Value.Id
 			}
 			else {
 				$resource = (Invoke-MgGraphRequest -Method GET -Uri ("$script:graphBaseUrl/identityGovernance/entitlementManagement/accessPackageCatalogs/{0}/accessPackageResources?`$filter=displayName eq '{1}'" -f $CatalogId, $InputReference)).Value.Id
