@@ -108,7 +108,7 @@
 			$scopes += "RoleManagement.ReadWrite.Directory"
 		}
 		if ($DirectorySettings -or $All) {
-			$scopes += "Directory.ReadWrite.Directory"
+			$scopes += "Directory.ReadWrite.All"
 		}
 		if ($EntitlementManagement -or $All) {
 			$scopes += "EntitlementManagement.ReadWrite.All"
