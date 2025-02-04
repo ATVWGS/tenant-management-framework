@@ -23,10 +23,10 @@ function Invoke-TmfDirectorySetting {
 	{
         if(Test-PSFFunctionInterrupt) {return}
 		if ($SpecificResources) {
-        	$testResults = Test-TmfDirectorySetting -SpecificResources $SpecificResources -Cmdlet $Cmdlet
+        	$testResults = Test-TmfDirectorySetting -SpecificResources $SpecificResources -RawOutput -Cmdlet $Cmdlet
 		}
 		else {
-			$testResults = Test-TmfDirectorySetting -Cmdlet $Cmdlet
+			$testResults = Test-TmfDirectorySetting -RawOutput -Cmdlet $Cmdlet
 		}
 
         foreach ($result in $testResults) {

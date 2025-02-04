@@ -9,6 +9,7 @@ function Test-TmfDirectoryRole {
 	[CmdletBinding()]
 	Param (
 		[string[]] $SpecificResources,
+		[switch] $RawOutput,
 		[System.Management.Automation.PSCmdlet]
 		$Cmdlet = $PSCmdlet
 	)
@@ -120,7 +121,13 @@ function Test-TmfDirectoryRole {
 			else {
 				$result = New-TestResult @result -ActionType "NoActionRequired"
 			}
-            $result
+
+            if ($RawOutput) {
+				$result
+			}
+			else {
+				$result | Beautify-TmfTestResult
+			}
         }
 
     }

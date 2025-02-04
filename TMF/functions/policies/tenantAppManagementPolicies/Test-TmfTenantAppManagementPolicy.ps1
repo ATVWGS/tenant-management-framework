@@ -8,7 +8,7 @@ function Test-TmfTenantAppManagementPolicy {
 	#>
 	[CmdletBinding()]
 	Param (
-        
+        [switch] $RawOutput,
 		[System.Management.Automation.PSCmdlet]
 		$Cmdlet = $PSCmdlet
 	)
@@ -106,7 +106,12 @@ function Test-TmfTenantAppManagementPolicy {
 				}
             }
 
-			$result
+			if ($RawOutput) {
+				$result
+			}
+			else {
+				$result | Beautify-TmfTestResult
+			}
         }
     }
 

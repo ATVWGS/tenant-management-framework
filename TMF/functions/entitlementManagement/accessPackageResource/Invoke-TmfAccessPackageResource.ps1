@@ -22,7 +22,7 @@ function Invoke-TmfAccessPackageResource
 	process
 	{
 		if (Test-PSFFunctionInterrupt) { return }
-		$testResults = Test-TmfAccessPackageResource -Cmdlet $Cmdlet
+		$testResults = Test-TmfAccessPackageResource -RawOutput -Cmdlet $Cmdlet
 
 		foreach ($result in $testResults) {
 			Beautify-TmfTestResult -TestResult $result -FunctionName $MyInvocation.MyCommand

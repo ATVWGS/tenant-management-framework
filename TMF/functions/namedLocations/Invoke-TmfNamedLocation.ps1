@@ -21,10 +21,10 @@
 	{
 		if (Test-PSFFunctionInterrupt) { return }
 		if ($SpecificResources) {
-        	$testResults = Test-TmfNamedLocation -SpecificResources $SpecificResources -Cmdlet $Cmdlet
+        	$testResults = Test-TmfNamedLocation -SpecificResources $SpecificResources -RawOutput -Cmdlet $Cmdlet
 		}
 		else {
-			$testResults = Test-TmfNamedLocation -Cmdlet $Cmdlet
+			$testResults = Test-TmfNamedLocation -RawOutput -Cmdlet $Cmdlet
 		}
 
 		foreach ($result in $testResults) {

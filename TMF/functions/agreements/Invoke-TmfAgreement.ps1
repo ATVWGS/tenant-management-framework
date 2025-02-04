@@ -10,7 +10,6 @@
 		[System.Management.Automation.PSCmdlet]
 		$Cmdlet = $PSCmdlet
 	)
-		
 	
 	begin
 	{
@@ -25,10 +24,10 @@
 	{
 		if (Test-PSFFunctionInterrupt) { return }
 		if ($SpecificResources) {
-        	$testResults = Test-TmfAgreement -SpecificResources $SpecificResources -Cmdlet $Cmdlet
+        	$testResults = Test-TmfAgreement -SpecificResources $SpecificResources -RawOutput -Cmdlet $Cmdlet
 		}
 		else {
-			$testResults = Test-TmfAgreement -Cmdlet $Cmdlet
+			$testResults = Test-TmfAgreement -RawOutput -Cmdlet $Cmdlet
 		}
 
 		foreach ($result in $testResults) {

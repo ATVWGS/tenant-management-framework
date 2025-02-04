@@ -10,6 +10,7 @@ function Test-TmfCustomSecurityAttributeAllowedValue
 	[CmdletBinding()]
 	Param (
 		[string[]] $SpecificResources,
+		[switch] $RawOutput,
 		[System.Management.Automation.PSCmdlet]
 		$Cmdlet = $PSCmdlet
 	)
@@ -129,7 +130,12 @@ function Test-TmfCustomSecurityAttributeAllowedValue
 				}
 			}
 			
-			$result
+			if ($RawOutput) {
+				$result
+			}
+			else {
+				$result | Beautify-TmfTestResult
+			}
 		}
 	}
 }

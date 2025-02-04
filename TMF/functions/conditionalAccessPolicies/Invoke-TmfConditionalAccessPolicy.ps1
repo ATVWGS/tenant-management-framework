@@ -24,10 +24,10 @@
 	{
 		if (Test-PSFFunctionInterrupt) { return }
 		if ($SpecificResources) {
-        	$testResults = Test-TmfConditionalAccessPolicy -SpecificResources $SpecificResources -Cmdlet $Cmdlet
+        	$testResults = Test-TmfConditionalAccessPolicy -SpecificResources $SpecificResources -RawOutput -Cmdlet $Cmdlet
 		}
 		else {
-			$testResults = Test-TmfConditionalAccessPolicy -Cmdlet $Cmdlet
+			$testResults = Test-TmfConditionalAccessPolicy -RawOutput -Cmdlet $Cmdlet
 		}
 
 		foreach ($result in $testResults) {

@@ -8,6 +8,7 @@ function Test-TmfOrganizationalBranding {
 	#>
 	[CmdletBinding()]
 	Param (
+		[switch] $RawOutput,
 		[System.Management.Automation.PSCmdlet]
 		$Cmdlet = $PSCmdlet
 	)
@@ -108,7 +109,13 @@ function Test-TmfOrganizationalBranding {
 					$cmdlet.ThrowTerminatingError($recordObject)
 				}
 			}
-			$result
+
+			if ($RawOutput) {
+				$result
+			}
+			else {
+				$result | Beautify-TmfTestResult
+			}
 		}
 	}
 }

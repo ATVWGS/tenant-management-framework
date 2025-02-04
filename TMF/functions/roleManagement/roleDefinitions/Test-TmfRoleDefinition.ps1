@@ -11,6 +11,7 @@ function Test-TmfRoleDefinition
 	Param (
         [ValidateSet('AzureResources', 'AzureAD')]
         [string] $scope,
+        [switch] $RawOutput,
 		[System.Management.Automation.PSCmdlet]
 		$Cmdlet = $PSCmdlet
 	)
@@ -239,7 +240,12 @@ function Test-TmfRoleDefinition
                 }
             }
             
-            $result
+            if ($RawOutput) {
+				$result
+			}
+			else {
+				$result | Beautify-TmfTestResult
+			}
         }
     }
 }

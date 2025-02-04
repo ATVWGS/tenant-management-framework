@@ -20,10 +20,10 @@ function Invoke-TmfRoleDefinition
     process {
         if (Test-PSFFunctionInterrupt) { return }
         if ($scope) {
-            $testResults = Test-TmfRoleDefinition -scope $scope -Cmdlet $Cmdlet
+            $testResults = Test-TmfRoleDefinition -scope $scope -RawOutput -Cmdlet $Cmdlet
         }
         else {
-            $testResults = Test-TmfRoleDefinition -Cmdlet $Cmdlet
+            $testResults = Test-TmfRoleDefinition -RawOutput -Cmdlet $Cmdlet
         }
         
 

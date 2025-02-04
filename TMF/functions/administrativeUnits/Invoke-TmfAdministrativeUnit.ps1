@@ -21,10 +21,10 @@ function Invoke-TmfAdministrativeUnit
     {
         if(Test-PSFFunctionInterrupt) {return}
         if ($SpecificResources) {
-        	$testResults = Test-TmfAdministrativeUnit -SpecificResources $SpecificResources -Cmdlet $Cmdlet
+        	$testResults = Test-TmfAdministrativeUnit -SpecificResources $SpecificResources -RawOutput -Cmdlet $Cmdlet
 		}
 		else {
-			$testResults = Test-TmfAdministrativeUnit -Cmdlet $Cmdlet
+			$testResults = Test-TmfAdministrativeUnit -RawOutput -Cmdlet $Cmdlet
 		}
 
         foreach ($result in $testResults) {

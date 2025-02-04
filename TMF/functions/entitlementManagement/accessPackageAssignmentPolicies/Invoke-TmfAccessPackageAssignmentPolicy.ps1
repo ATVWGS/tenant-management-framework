@@ -93,7 +93,7 @@ function Invoke-TmfAccessPackageAssignmentPolicy
 	process
 	{
 		if (Test-PSFFunctionInterrupt) { return }
-		$testResults = Test-TmfAccessPackageAssignmentPolicy -Cmdlet $Cmdlet
+		$testResults = Test-TmfAccessPackageAssignmentPolicy -RawOutput -Cmdlet $Cmdlet
 
 		foreach ($result in $testResults) {
 			Beautify-TmfTestResult -TestResult $result -FunctionName $MyInvocation.MyCommand

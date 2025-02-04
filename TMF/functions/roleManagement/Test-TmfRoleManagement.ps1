@@ -19,11 +19,11 @@ function Test-TmfRoleManagement
 			if ($script:desiredConfiguration[$resourceType.Name]) {
 				if ($scope) {
 					Write-PSFMessage -Level Host -FunctionName "Test-TmfRoleManagement" -String "TMF.StartingTestForScopedResource" -StringValues $resourceType.Name,$scope
-					& $resourceType.Value["testFunction"] -scope $scope -Cmdlet $PSCmdlet | Beautify-TmfTestResult
+					& $resourceType.Value["testFunction"] -scope $scope -Cmdlet $PSCmdlet
 				}
 				else {
 					Write-PSFMessage -Level Host -FunctionName "Test-TmfRoleManagement" -String "TMF.StartingTestForResource" -StringValues $resourceType.Name
-					& $resourceType.Value["testFunction"] -Cmdlet $PSCmdlet | Beautify-TmfTestResult
+					& $resourceType.Value["testFunction"] -Cmdlet $PSCmdlet
 				}
 			}			
 		}

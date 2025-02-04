@@ -8,8 +8,8 @@ trigger:
       - TMF
 
 variables:
-  major: 1
-  minor: 9
+  major: 2
+  minor: 0
   patch: $(Build.BuildID)
   moduleName: 'TMF'
   buildVer: $(major).$(minor).$(Build.BuildID)

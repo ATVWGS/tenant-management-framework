@@ -22,7 +22,7 @@ function Invoke-TmfAuthenticationStrengthPolicy {
 	{
         if(Test-PSFFunctionInterrupt) {return}
         
-        $testResults = Test-TmfAuthenticationStrengthPolicy -Cmdlet $Cmdlet
+        $testResults = Test-TmfAuthenticationStrengthPolicy -RawOutput -Cmdlet $Cmdlet
 		
         foreach ($result in $testResults) {
             Beautify-TmfTestResult -TestResult $result -FunctionName $MyInvocation.MyCommand

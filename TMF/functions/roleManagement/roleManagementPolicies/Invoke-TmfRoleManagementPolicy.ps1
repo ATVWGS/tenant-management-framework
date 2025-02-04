@@ -20,10 +20,10 @@ function Invoke-TmfRoleManagementPolicy {
         if (Test-PSFFunctionInterrupt) { return }
 
         if ($scope) {
-            $testResults = Test-TmfRoleManagementPolicy -scope $scope -Cmdlet $Cmdlet
+            $testResults = Test-TmfRoleManagementPolicy -scope $scope -RawOutput -Cmdlet $Cmdlet
         }
         else {
-            $testResults = Test-TmfRoleManagementPolicy -Cmdlet $Cmdlet
+            $testResults = Test-TmfRoleManagementPolicy -RawOutput -Cmdlet $Cmdlet
         }
 
         foreach ($result in $testResults) {

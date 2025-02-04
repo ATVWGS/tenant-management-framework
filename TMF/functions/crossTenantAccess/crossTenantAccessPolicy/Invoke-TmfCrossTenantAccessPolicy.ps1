@@ -23,7 +23,7 @@ function Invoke-TmfCrossTenantAccessPolicy
 	{
 		if (Test-PSFFunctionInterrupt) { return }
 
-        $testResults = Test-TmfCrossTenantAccessPolicy -Cmdlet $Cmdlet
+        $testResults = Test-TmfCrossTenantAccessPolicy -RawOutput -Cmdlet $Cmdlet
 
 		foreach ($result in $testResults) {
 			Beautify-TmfTestResult -TestResult $result -FunctionName $MyInvocation.MyCommand

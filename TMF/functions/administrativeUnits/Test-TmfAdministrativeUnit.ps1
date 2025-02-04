@@ -3,6 +3,7 @@ function Test-TmfAdministrativeUnit
 	[CmdletBinding()]
 	Param (
 		[string[]] $SpecificResources,
+		[switch] $RawOutput,
 		[System.Management.Automation.PSCmdlet]
 		$Cmdlet = $PSCmdlet
 	)
@@ -182,7 +183,13 @@ function Test-TmfAdministrativeUnit
 					$cmdlet.ThrowTerminatingError($recordObject)
 				}
 			}
-			$result
+			
+			if ($RawOutput) {
+				$result
+			}
+			else {
+				$result | Beautify-TmfTestResult
+			}
 		}
 	}
 }
