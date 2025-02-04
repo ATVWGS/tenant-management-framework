@@ -8,6 +8,7 @@ function Test-TmfAuthenticationStrengthPolicy {
 	#>
 	[CmdletBinding()]
 	Param (
+		[switch] $RawOutput,
 		[System.Management.Automation.PSCmdlet]
 		$Cmdlet = $PSCmdlet
 	)
@@ -115,7 +116,13 @@ function Test-TmfAuthenticationStrengthPolicy {
 					$cmdlet.ThrowTerminatingError($recordObject)
 				}
 			}
-            $result            
+
+            if ($RawOutput) {
+				$result
+			}
+			else {
+				$result | Beautify-TmfTestResult
+			}
         }
     }
     

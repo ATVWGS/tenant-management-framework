@@ -24,10 +24,10 @@ function Invoke-TmfAppManagementPolicy {
         if(Test-PSFFunctionInterrupt) {return}
         
         if ($SpecificResources) {
-            $testResults = Test-TmfAppManagementPolicy -SpecificResources $SpecificResources -Cmdlet $Cmdlet
+            $testResults = Test-TmfAppManagementPolicy -SpecificResources $SpecificResources -RawOutput -Cmdlet $Cmdlet
         }
         else {
-            $testResults = Test-TmfAppManagementPolicy -Cmdlet $Cmdlet
+            $testResults = Test-TmfAppManagementPolicy -RawOutput -Cmdlet $Cmdlet
         }
         		
         foreach ($result in $testResults) {

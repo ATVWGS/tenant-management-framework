@@ -24,10 +24,10 @@ function Invoke-TmfAttributeSet
 	{
 		if (Test-PSFFunctionInterrupt) { return }
 		if ($SpecificResources) {
-        	$testResults = Test-TmfAttributeSet -SpecificResources $SpecificResources -Cmdlet $Cmdlet
+        	$testResults = Test-TmfAttributeSet -SpecificResources $SpecificResources -RawOutput -Cmdlet $Cmdlet
 		}
 		else {
-			$testResults = Test-TmfAttributeSet -Cmdlet $Cmdlet
+			$testResults = Test-TmfAttributeSet -RawOutput -Cmdlet $Cmdlet
 		}
 
 		foreach ($result in $testResults) {

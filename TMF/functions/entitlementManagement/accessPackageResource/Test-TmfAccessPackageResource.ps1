@@ -9,6 +9,7 @@ function Test-TmfAccessPackageResource
 	#>
 	[CmdletBinding()]
 	Param (
+		[switch] $RawOutput,
 		[System.Management.Automation.PSCmdlet]
 		$Cmdlet = $PSCmdlet
 	)
@@ -84,7 +85,12 @@ function Test-TmfAccessPackageResource
 				}
 			}
 			
-			$result
+			if ($RawOutput) {
+				$result
+			}
+			else {
+				$result | Beautify-TmfTestResult
+			}
 		}
 	}
 }

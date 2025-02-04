@@ -11,6 +11,7 @@ function Test-TmfRoleAssignment
 	Param (
         [ValidateSet('AzureResources', 'AzureAD', 'AADGroup')]
         [string] $scope,
+        [switch] $RawOutput,
 		[System.Management.Automation.PSCmdlet]
 		$Cmdlet = $PSCmdlet
 	)
@@ -173,7 +174,12 @@ function Test-TmfRoleAssignment
                         }
                     }
                     
-                    $result
+                    if ($RawOutput) {
+                        $result
+                    }
+                    else {
+                        $result | Beautify-TmfTestResult
+                    }
                 }
                 "AzureAD" {
                     $result = @{
@@ -287,7 +293,12 @@ function Test-TmfRoleAssignment
                         }
                     }
                     
-                    $result
+                    if ($RawOutput) {
+                        $result
+                    }
+                    else {
+                        $result | Beautify-TmfTestResult
+                    }
                 }
                 "AADGroup" {
                     $result = @{
@@ -396,7 +407,12 @@ function Test-TmfRoleAssignment
                         }
                     }
                     
-                    $result
+                    if ($RawOutput) {
+                        $result
+                    }
+                    else {
+                        $result | Beautify-TmfTestResult
+                    }
                 }
             }
 		}

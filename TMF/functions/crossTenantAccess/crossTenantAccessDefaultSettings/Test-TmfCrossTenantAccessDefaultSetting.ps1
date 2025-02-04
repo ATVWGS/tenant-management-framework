@@ -9,6 +9,7 @@ function Test-TmfCrossTenantAccessDefaultSetting
 	#>
 	[CmdletBinding()]
 	Param (
+		[switch] $RawOutput,
 		[System.Management.Automation.PSCmdlet]
 		$Cmdlet = $PSCmdlet
 	)
@@ -122,7 +123,12 @@ function Test-TmfCrossTenantAccessDefaultSetting
             if ($changes.count -gt 0) { $result = New-TestResult @result -Changes $changes -ActionType "Update"}
             else { $result = New-TestResult @result -ActionType "NoActionRequired" }
 
-            $result
+            if ($RawOutput) {
+				$result
+			}
+			else {
+				$result | Beautify-TmfTestResult
+			}
         }
     }
 }

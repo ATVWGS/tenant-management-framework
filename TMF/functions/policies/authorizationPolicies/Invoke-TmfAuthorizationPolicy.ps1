@@ -22,7 +22,7 @@ function Invoke-TmfAuthorizationPolicy {
 	{
         if(Test-PSFFunctionInterrupt) {return}
         
-        $testResults = Test-TmfAuthorizationPolicy -Cmdlet $Cmdlet
+        $testResults = Test-TmfAuthorizationPolicy -RawOutput -Cmdlet $Cmdlet
 		
         foreach ($result in $testResults) {
             Beautify-TmfTestResult -TestResult $result -FunctionName $MyInvocation.MyCommand

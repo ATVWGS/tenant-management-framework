@@ -23,10 +23,10 @@ function Invoke-TmfDirectoryRole {
 	{
         if(Test-PSFFunctionInterrupt) {return}
 		if ($SpecificResources) {
-        	$testResults = Test-TmfDirectoryRole -SpecificResources $SpecificResources -Cmdlet $Cmdlet
+        	$testResults = Test-TmfDirectoryRole -SpecificResources $SpecificResources -RawOutput -Cmdlet $Cmdlet
 		}
 		else {
-			$testResults = Test-TmfDirectoryRole -Cmdlet $Cmdlet
+			$testResults = Test-TmfDirectoryRole -RawOutput -Cmdlet $Cmdlet
 		}
 
         foreach ($result in $testResults) {

@@ -9,6 +9,7 @@ function Test-TmfCrossTenantAccessPartnerSetting
 	#>
 	[CmdletBinding()]
 	Param (
+		[switch] $RawOutput,
 		[System.Management.Automation.PSCmdlet]
 		$Cmdlet = $PSCmdlet
 	)
@@ -161,7 +162,12 @@ function Test-TmfCrossTenantAccessPartnerSetting
                 }
             }
 
-            $result
+            if ($RawOutput) {
+				$result
+			}
+			else {
+				$result | Beautify-TmfTestResult
+			}
         }
     }
 }

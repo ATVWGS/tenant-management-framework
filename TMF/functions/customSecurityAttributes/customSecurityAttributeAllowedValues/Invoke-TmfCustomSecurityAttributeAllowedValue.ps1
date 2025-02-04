@@ -24,10 +24,10 @@ function Invoke-TmfCustomSecurityAttributeAllowedValue
 	{
 		if (Test-PSFFunctionInterrupt) { return }
 		if ($SpecificResources) {
-        	$testResults = Test-TmfCustomSecurityAttributeAlloweValue -SpecificResources $SpecificResources -Cmdlet $Cmdlet
+        	$testResults = Test-TmfCustomSecurityAttributeAlloweValue -SpecificResources $SpecificResources -RawOutput -Cmdlet $Cmdlet
 		}
 		else {
-			$testResults = Test-TmfCustomSecurityAttributeAllowedValue -Cmdlet $Cmdlet
+			$testResults = Test-TmfCustomSecurityAttributeAllowedValue -RawOutput -Cmdlet $Cmdlet
 		}
 
 		foreach ($result in $testResults) {

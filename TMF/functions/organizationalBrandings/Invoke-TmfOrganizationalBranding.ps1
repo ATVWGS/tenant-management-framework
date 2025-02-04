@@ -19,7 +19,7 @@ function Invoke-TmfOrganizationalBranding
     process
     {
         if(Test-PSFFunctionInterrupt) {return}
-		$testResults = Test-TmfOrganizationalBranding -Cmdlet $Cmdlet
+		$testResults = Test-TmfOrganizationalBranding -RawOutput -Cmdlet $Cmdlet
 
 
         foreach ($result in $testResults) {

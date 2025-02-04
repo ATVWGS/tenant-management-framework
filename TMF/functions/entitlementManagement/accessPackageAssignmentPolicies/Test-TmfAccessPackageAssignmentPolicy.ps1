@@ -9,6 +9,7 @@ function Test-TmfAccessPackageAssignmentPolicy
 	#>
 	[CmdletBinding()]
 	Param (
+		[switch] $RawOutput,
 		[System.Management.Automation.PSCmdlet]
 		$Cmdlet = $PSCmdlet
 	)
@@ -188,7 +189,12 @@ function Test-TmfAccessPackageAssignmentPolicy
 				}
 			}
 			
-			$result
+			if ($RawOutput) {
+				$result
+			}
+			else {
+				$result | Beautify-TmfTestResult
+			}
 		}
 	}
 }

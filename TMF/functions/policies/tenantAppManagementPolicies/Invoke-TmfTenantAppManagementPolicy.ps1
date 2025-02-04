@@ -22,7 +22,7 @@ function Invoke-TmfTenantAppManagementPolicy {
 	{
         if(Test-PSFFunctionInterrupt) {return}
         
-        $testResults = Test-TmfTenantAppManagementPolicy -Cmdlet $Cmdlet
+        $testResults = Test-TmfTenantAppManagementPolicy -RawOutput -Cmdlet $Cmdlet
         		
         foreach ($result in $testResults) {
             Beautify-TmfTestResult -TestResult $result -FunctionName $MyInvocation.MyCommand

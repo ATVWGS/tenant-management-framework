@@ -10,6 +10,7 @@ function Test-TmfRoleManagementPolicy {
 	Param (
         [ValidateSet('AzureResources', 'AzureAD', 'AADGroup')]
         [string] $scope,
+        [switch] $RawOutput,
 		[System.Management.Automation.PSCmdlet]
 		$Cmdlet = $PSCmdlet
 	)
@@ -448,7 +449,12 @@ function Test-TmfRoleManagementPolicy {
                 }
             }
 
-            $result
+            if ($RawOutput) {
+				$result
+			}
+			else {
+				$result | Beautify-TmfTestResult
+			}
         }        
     }
     end{}

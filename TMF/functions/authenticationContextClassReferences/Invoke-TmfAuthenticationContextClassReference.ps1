@@ -22,7 +22,7 @@ function Invoke-TmfAuthenticationContextClassReference {
 	{
         if(Test-PSFFunctionInterrupt) {return}
         
-        $testResults = Test-TmfAuthenticationContextClassReference -Cmdlet $Cmdlet
+        $testResults = Test-TmfAuthenticationContextClassReference -Cmdlet $Cmdlet -RawOutput
 		
         foreach ($result in $testResults) {
             Beautify-TmfTestResult -TestResult $result -FunctionName $MyInvocation.MyCommand
