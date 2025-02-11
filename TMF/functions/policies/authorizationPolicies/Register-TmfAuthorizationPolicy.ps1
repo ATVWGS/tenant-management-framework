@@ -27,7 +27,8 @@ function Register-TmfAuthorizationPolicy {
         [Parameter(Mandatory = $true)]
         [bool] $allowedToReadBitlockerKeysForOwnedDevice,
         [string []] $permissionGrantPolicyIdsAssignedToDefaultUserRole = @(),	
-        [string] $sourceConfig = "<Custom>",		
+        [string] $sourceConfig = "<Custom>",
+        [string] $sourceFile = "<Custom>",
 		[System.Management.Automation.PSCmdlet]
 		$Cmdlet = $PSCmdlet
 	)
@@ -64,6 +65,7 @@ function Register-TmfAuthorizationPolicy {
                 allowedToReadBitlockerKeysForOwnedDevice = $allowedToReadBitlockerKeysForOwnedDevice
             }
 			sourceConfig = $sourceConfig
+            sourceFile = $sourceFile
 		}
 
         switch ($guestUserRole) {

@@ -23,6 +23,9 @@ function Register-TmfRoleDefinition {
         [string] $sourceConfig = "<Custom>",
         [Parameter(ParameterSetName = "AzureAD")]
         [Parameter(ParameterSetName = "AzureResources")]
+        [string] $sourceFile = "<Custom>",
+        [Parameter(ParameterSetName = "AzureAD")]
+        [Parameter(ParameterSetName = "AzureResources")]
 		[System.Management.Automation.PSCmdlet]
 		$Cmdlet = $PSCmdlet
     )
@@ -55,6 +58,7 @@ function Register-TmfRoleDefinition {
                     description = $description
                     rolePermissions = $rolePermissions
                     sourceConfig = $sourceConfig
+                    sourceFile = $sourceFile
                 }
             }
             "AzureResources" {
@@ -66,6 +70,7 @@ function Register-TmfRoleDefinition {
                     assignableScopes = $assignableScopes
                     permissions = $permissions
                     sourceConfig = $sourceConfig
+                    sourceFile = $sourceFile
                 }
             }
         }

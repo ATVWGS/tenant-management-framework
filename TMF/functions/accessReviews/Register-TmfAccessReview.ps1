@@ -7,7 +7,9 @@ function Register-TmfAccessReview
 		[object] $scope,
 		[object[]] $reviewers,
 		[object] $settings,
-		[bool] $present = $true,		
+		[bool] $present = $true,
+		[string] $sourceConfig = "<Custom>",
+		[string] $sourceFile = "<Custom>",
 		[System.Management.Automation.PSCmdlet]
 		$Cmdlet = $PSCmdlet
 	)
@@ -32,6 +34,8 @@ function Register-TmfAccessReview
 		$object = [PSCustomObject] @{
 			displayName = $displayName
 			present = $present
+			sourceConfig = $sourceConfig
+			sourceFile = $sourceFile
 			reviewers = @()
 		}
 		

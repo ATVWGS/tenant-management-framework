@@ -7,17 +7,15 @@ function Register-TmfAccessPackageResource
 		[Parameter(Mandatory = $true)]
 		[string] $resourceIdentifier,
 		[string] $description = "Access Package Resource has been created with Tenant Management Framework",
-
 		[ValidateSet("SharePointOnline", "AadApplication", "AadGroup")]
 		[string] $originSystem = "AadGroup",
 		[string] $catalog = "General",
 		[ValidateSet("AadGroup", "Application", "Sharepoint Online Site")]
 		[string] $resourceType = "AadGroup",
 		[string] $resourceRole = "Member",
-
 		[bool] $present = $true,
 		[string] $sourceConfig = "<Custom>",
-
+		[string] $sourceFile = "<Custom>",
 		[System.Management.Automation.PSCmdlet]
 		$Cmdlet = $PSCmdlet,
 		[switch] $PassThru
@@ -47,6 +45,8 @@ function Register-TmfAccessPackageResource
 			resourceRole = $resourceRole
 			originSystem = $originSystem
 			catalog = $catalog
+			sourceConfig = $sourceConfig
+			sourceFile = $sourceFile
 			present = $present
 		}		
 		

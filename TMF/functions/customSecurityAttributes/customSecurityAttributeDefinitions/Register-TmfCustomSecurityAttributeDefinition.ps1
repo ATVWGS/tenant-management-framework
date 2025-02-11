@@ -21,7 +21,7 @@ function Register-TmfCustomSecurityAttributeDefinition
         [object[]] $allowedValues,
 		[bool] $present = $true,
 		[string] $sourceConfig = "<Custom>",
-
+		[string] $sourceFile = "<Custom>",
 		[System.Management.Automation.PSCmdlet]
 		$Cmdlet = $PSCmdlet
 	)
@@ -57,6 +57,7 @@ function Register-TmfCustomSecurityAttributeDefinition
             usePreDefinedValuesOnly = $usePreDefinedValuesOnly
 			present = $present
 			sourceConfig = $sourceConfig
+			sourceFile = $sourceFile
 		}
 	
 		Add-Member -InputObject $object -MemberType ScriptMethod -Name Properties -Value { ($this | Get-Member -MemberType NoteProperty).Name }

@@ -53,7 +53,7 @@ function Test-TmfCrossTenantAccessDefaultSetting
             $result["GraphResource"] = $resource
             
             $changes = @()            
-            foreach ($property in ($definition.Properties() | Where-Object {$_ -notin "present", "sourceConfig", "displayname", "isServiceDefault"})) {
+            foreach ($property in ($definition.Properties() | Where-Object {$_ -notin "present", "sourceConfig", "sourceFile", "displayname", "isServiceDefault"})) {
                 $change = [PSCustomObject] @{
                     Property = $property										
                     Actions = $null

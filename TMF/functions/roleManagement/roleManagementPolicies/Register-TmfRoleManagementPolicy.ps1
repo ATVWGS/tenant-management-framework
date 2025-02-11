@@ -30,6 +30,10 @@ function Register-TmfRoleManagementPolicy {
         [Parameter(ParameterSetName = "AzureAD")]
         [Parameter(ParameterSetName = "AzureResources")]
         [Parameter(ParameterSetName = "AADGroup")]
+		[string] $sourceFile = "<Custom>",
+        [Parameter(ParameterSetName = "AzureAD")]
+        [Parameter(ParameterSetName = "AzureResources")]
+        [Parameter(ParameterSetName = "AADGroup")]
 		[System.Management.Automation.PSCmdlet]
 		$Cmdlet = $PSCmdlet
     )
@@ -81,6 +85,7 @@ function Register-TmfRoleManagementPolicy {
                     scopeType = $scopeType
                     ruleTemplate = $ruleTemplate
                     sourceConfig = $sourceConfig
+                    sourceFile = $sourceFile
                     activationApprover = $activationApprover
                 }
             }
@@ -92,6 +97,7 @@ function Register-TmfRoleManagementPolicy {
                     scopeType = $scopeType
                     ruleTemplate = $ruleTemplate
                     sourceConfig = $sourceConfig
+                    sourceFile = $sourceFile
                     activationApprover = $activationApprover
                 }
                 if ($roleReference -notin @("member","owner")) {
@@ -109,6 +115,7 @@ function Register-TmfRoleManagementPolicy {
                     scopeType = $scopeType
                     ruleTemplate = $ruleTemplate
                     sourceConfig = $sourceConfig
+                    sourceFile = $sourceFile
                     activationApprover = $activationApprover
                 }
             }

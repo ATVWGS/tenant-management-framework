@@ -6,10 +6,9 @@ function Register-TmfAccessPackageCatalog
 		[string] $displayName,
 		[string] $description = "Access Package Catalog has been created with Tenant Management Framework",
 		[bool] $isExternallyVisible = $true,
-
 		[bool] $present = $true,
 		[string] $sourceConfig = "<Custom>",
-
+		[string] $sourceFile = "<Custom>",
 		[System.Management.Automation.PSCmdlet]
 		$Cmdlet = $PSCmdlet
 	)
@@ -36,6 +35,7 @@ function Register-TmfAccessPackageCatalog
 			isExternallyVisible = $isExternallyVisible
 			present = $present
 			sourceConfig = $sourceConfig
+			sourceFile = $sourceFile
 		}
 	
 		Add-Member -InputObject $object -MemberType ScriptMethod -Name Properties -Value { ($this | Get-Member -MemberType NoteProperty).Name }

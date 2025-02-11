@@ -11,6 +11,8 @@ function Test-TmfRoleAssignment
 	Param (
         [ValidateSet('AzureResources', 'AzureAD', 'AADGroup')]
         [string] $scope,
+        [string[]] $SourceFile,
+		[string[]] $SourceConfig,
         [switch] $RawOutput,
 		[System.Management.Automation.PSCmdlet]
 		$Cmdlet = $PSCmdlet
@@ -21,16 +23,40 @@ function Test-TmfRoleAssignment
         Test-GraphConnection -Cmdlet $Cmdlet
 		$resourceName = "roleAssignments"
         $tenant = (Invoke-MgGraphRequest -Method GET -Uri ("$script:graphBaseUrl/organization?`$select=displayname,id")).value
+
+        if (($scope -and $SourceFile -and $SourceConfig) -or ($scope -and $SourceFile) -or ($SourceFile -and $SourceConfig)) {
+			$exception = New-Object System.Data.DataException("Multiple filters are not supported. You can only filter by one type, sourceFile or sourceConfig or scope!")
+			$errorID = "MultipleFiltersNotSupported"
+			$category = [System.Management.Automation.ErrorCategory]::NotSpecified
+			$recordObject = New-Object System.Management.Automation.ErrorRecord($exception, $errorID, $category, $Cmdlet)
+			$cmdlet.ThrowTerminatingError($recordObject)
+		}
 	}
 	process
 	{
-        switch($scope) {
-            "AzureAD" {$definitions = $script:desiredConfiguration[$resourceName] | Where-Object {(($_ |get-member -MemberType noteproperty).Name -notcontains "subscriptionReference") -and (($_ |get-member -MemberType noteproperty).Name -notcontains "groupReference")}}
-            "AADGroup" {$definitions = $script:desiredConfiguration[$resourceName] | Where-Object {($_ |get-member -MemberType noteproperty).Name -contains "groupReference"}}
-            "AzureResources" {$definitions = $script:desiredConfiguration[$resourceName] | Where-Object {($_ |get-member -MemberType noteproperty).Name -contains "subscriptionReference"}}
-            default {$definitions = $script:desiredConfiguration[$resourceName]}
-        }
-    	
+        $definitions = @()
+
+        if ($scope) {
+            switch($scope) {
+                "AzureAD" {$definitions = $script:desiredConfiguration[$resourceName] | Where-Object {(($_ |get-member -MemberType noteproperty).Name -notcontains "subscriptionReference") -and (($_ |get-member -MemberType noteproperty).Name -notcontains "groupReference")}}
+                "AADGroup" {$definitions = $script:desiredConfiguration[$resourceName] | Where-Object {($_ |get-member -MemberType noteproperty).Name -contains "groupReference"}}
+                "AzureResources" {$definitions = $script:desiredConfiguration[$resourceName] | Where-Object {($_ |get-member -MemberType noteproperty).Name -contains "subscriptionReference"}}
+            }
+        }        
+    	elseif ($SourceFile) {
+			foreach ($file in $SourceFile) {
+				$definitions += $script:desiredConfiguration[$resourceName] | Where-Object {$_.sourceFile -eq $file}
+			}
+		}
+		elseif ($SourceConfig) {
+			foreach ($config in $SourceConfig) {
+				$definitions += $script:desiredConfiguration[$resourceName] | Where-Object {$_.sourceConfig -eq $config}
+			}					
+		}
+		else {
+			$definitions = $script:desiredConfiguration[$resourceName]
+		}
+
 		foreach ($definition in $definitions) {
 			foreach ($property in $definition.Properties()) {
 				if ($definition.$property.GetType().Name -eq "String") {
@@ -123,7 +149,7 @@ function Test-TmfRoleAssignment
                             if ($definition.present) {
                                 $changes = @()
                                 if ($definition.type -eq "eligible") {
-                                    foreach ($property in ($definition.Properties() | Where-Object {$_ -notin "displayName", "present"})) {
+                                    foreach ($property in ($definition.Properties() | Where-Object {$_ -notin "displayName", "present", "sourceConfig", "sourceFile"})) {
                                         $change = [PSCustomObject] @{
                                             Property = $property										
                                             Actions = $null
@@ -249,7 +275,7 @@ function Test-TmfRoleAssignment
                             if ($definition.present) {
                                 $changes = @()
 
-                                foreach ($property in ($definition.Properties() | Where-Object {$_ -notin "displayName", "present", "startDateTime"})) {
+                                foreach ($property in ($definition.Properties() | Where-Object {$_ -notin "displayName", "present", "startDateTime", "sourceConfig", "sourceFile"})) {
                                     $change = [PSCustomObject] @{
                                         Property = $property										
                                         Actions = $null
@@ -363,7 +389,7 @@ function Test-TmfRoleAssignment
                             if ($definition.present) {
                                 $changes = @()
 
-                                foreach ($property in ($definition.Properties() | Where-Object {$_ -notin "displayName", "present", "startDateTime"})) {
+                                foreach ($property in ($definition.Properties() | Where-Object {$_ -notin "displayName", "present", "startDateTime", "sourceConfig", "sourceFile"})) {
                                     $change = [PSCustomObject] @{
                                         Property = $property										
                                         Actions = $null

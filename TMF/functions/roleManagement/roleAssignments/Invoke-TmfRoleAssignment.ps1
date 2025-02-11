@@ -3,10 +3,11 @@ function Invoke-TmfRoleAssignment {
 	Param (
 		[ValidateSet('AzureResources', 'AzureAD', 'AADGroup')]
         [string] $scope,
+        [string[]] $SourceFile,
+		[string[]] $SourceConfig,
 		[System.Management.Automation.PSCmdlet]
 		$Cmdlet = $PSCmdlet
 	)
-		
 	
 	begin
 	{
@@ -15,6 +16,14 @@ function Invoke-TmfRoleAssignment {
 			Stop-PSFFunction -String "TMF.NoDefinitions" -StringValues "roleAssignment"
 			return
 		}
+
+        if (($scope -and $SourceFile -and $SourceConfig) -or ($scope -and $SourceFile) -or ($SourceFile -and $SourceConfig)) {
+			$exception = New-Object System.Data.DataException("Multiple filters are not supported. You can only filter by one type, sourceFile or sourceConfig or scope!")
+			$errorID = "MultipleFiltersNotSupported"
+			$category = [System.Management.Automation.ErrorCategory]::NotSpecified
+			$recordObject = New-Object System.Management.Automation.ErrorRecord($exception, $errorID, $category, $Cmdlet)
+			$cmdlet.ThrowTerminatingError($recordObject)
+		}
 	}
 
     process {
@@ -22,10 +31,15 @@ function Invoke-TmfRoleAssignment {
         if ($scope) {
             $testResults = Test-TmfRoleAssignment -scope $scope -RawOutput -Cmdlet $Cmdlet
         }
+        elseif ($SourceFile) {
+            $testResults = Test-TmfRoleAssignment -SourceFile $SourceFile -RawOutput -Cmdlet $Cmdlet
+        }
+        elseif ($SourceConfig) {
+            $testResults = Test-TmfRoleAssignment -SourceConfig $SourceConfig -RawOutput -Cmdlet $Cmdlet
+        }
         else {
             $testResults = Test-TmfRoleAssignment -RawOutput -Cmdlet $Cmdlet
         }
-        
 
         foreach ($result in $testResults) {
 			Beautify-TmfTestResult -TestResult $result -FunctionName $MyInvocation.MyCommand

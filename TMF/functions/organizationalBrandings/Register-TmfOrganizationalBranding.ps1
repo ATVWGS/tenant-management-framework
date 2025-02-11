@@ -22,7 +22,7 @@ function Register-TmfOrganizationalBranding
         [string] $usernameHintText,
         [bool] $present = $true,
 		[string] $sourceConfig = "<Custom>",
-
+        [string] $sourceFile = "<Custom>",
 		[System.Management.Automation.PSCmdlet]
 		$Cmdlet = $PSCmdlet
     )
@@ -50,6 +50,7 @@ function Register-TmfOrganizationalBranding
 			displayName = Resolve-String -Text $displayName			
             present = $present
             sourceConfig = $sourceConfig
+            sourceFile = $sourceFile
 		}
 
         foreach ($parameter in $AvailableParameters) {

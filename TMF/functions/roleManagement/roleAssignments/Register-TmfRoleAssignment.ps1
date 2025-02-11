@@ -62,6 +62,10 @@ function Register-TmfRoleAssignment {
         [Parameter(ParameterSetName = "AzureAD")]
         [Parameter(ParameterSetName = "AzureResources")]
         [Parameter(ParameterSetName = "AADGroup")]
+        [string] $sourceFile = "<Custom>",
+        [Parameter(ParameterSetName = "AzureAD")]
+        [Parameter(ParameterSetName = "AzureResources")]
+        [Parameter(ParameterSetName = "AADGroup")]
 		[System.Management.Automation.PSCmdlet]
 		$Cmdlet = $PSCmdlet
 	)
@@ -120,6 +124,7 @@ function Register-TmfRoleAssignment {
                     startDateTime = $startDateTime
                     expirationType = $expirationType
                     sourceConfig = $sourceConfig
+                    sourceFile = $sourceFile
                 }
         
                 "endDateTime", "duration" | ForEach-Object {
@@ -149,6 +154,7 @@ function Register-TmfRoleAssignment {
                     startDateTime = $startDateTime
                     expirationType = $expirationType
                     sourceConfig = $sourceConfig
+                    sourceFile = $sourceFile
                 }
         
                 "endDateTime", "duration" | ForEach-Object {
@@ -178,6 +184,7 @@ function Register-TmfRoleAssignment {
                     startDateTime = $startDateTime
                     expirationType = $expirationType
                     sourceConfig = $sourceConfig
+                    sourceFile = $sourceFile
                 }
         
                 if ($roleReference -notin @("member","owner")) {

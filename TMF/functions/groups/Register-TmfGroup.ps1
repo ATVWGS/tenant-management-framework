@@ -25,7 +25,7 @@ function Register-TmfGroup
 		[string] $administrativeUnit,
 		[bool] $present = $true,
 		[string] $sourceConfig = "<Custom>",
-
+		[string] $sourceFile = "<Custom>",
 		[System.Management.Automation.PSCmdlet]
 		$Cmdlet = $PSCmdlet
 	)
@@ -71,6 +71,7 @@ function Register-TmfGroup
 			mailNickname = $mailNickname						
 			present = $present
 			sourceConfig = $sourceConfig
+			sourceFile = $sourceFile
 		}
 
 		if ($PSBoundParameters.ContainsKey("oldNames")) {
