@@ -14,6 +14,7 @@ function Register-TmfAccessPackage
 		[object[]] $assignmentPolicies,
 		[bool] $present = $true,		
 		[string] $sourceConfig = "<Custom>",
+		[string] $sourceFile = "<Custom>",
 		[System.Management.Automation.PSCmdlet]
 		$Cmdlet = $PSCmdlet
 	)
@@ -42,6 +43,7 @@ function Register-TmfAccessPackage
 			catalog = $catalog
 			present = $present
 			sourceConfig = $sourceConfig
+			sourceFile = $sourceFile
 		}	
 
 		if ($PSBoundParameters.ContainsKey("oldNames")) {
@@ -51,7 +53,7 @@ function Register-TmfAccessPackage
 		Add-Member -InputObject $object -MemberType ScriptMethod -Name Properties -Value { ($this | Get-Member -MemberType NoteProperty).Name }
 
 		foreach ($policy in $assignmentPolicies) {
-			$resource = $policy | Add-Member -NotePropertyMembers @{sourceConfig = $sourceConfig; accessPackage = $displayName; catalog = $catalog} -PassThru | ConvertTo-PSFHashtable -Include $((Get-Command Register-TmfAccessPackageAssignmentPolicy).Parameters.Keys)			
+			$resource = $policy | Add-Member -NotePropertyMembers @{sourceConfig = $sourceConfig; sourceFile = $sourceFile; accessPackage = $displayName; catalog = $catalog} -PassThru | ConvertTo-PSFHashtable -Include $((Get-Command Register-TmfAccessPackageAssignmentPolicy).Parameters.Keys)			
 			Register-TmfAccessPackageAssignmentPolicy @resource -Cmdlet $PSCmdlet
 		}
 

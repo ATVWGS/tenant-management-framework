@@ -7,6 +7,8 @@
 	[CmdletBinding()]
 	Param (
 		[string[]] $SpecificResources,
+		[string[]] $SourceFile,
+		[string[]] $SourceConfig,
 		[System.Management.Automation.PSCmdlet]
 		$Cmdlet = $PSCmdlet
 	)
@@ -19,6 +21,14 @@
 			return
 		}
 		Test-GraphConnection -Cmdlet $Cmdlet
+
+		if (($SpecificResources -and $SourceFile -and $SourceConfig) -or ($SpecificResources -and $SourceFile) -or ($SourceFile -and $SourceConfig)) {
+			$exception = New-Object System.Data.DataException("Multiple filters are not supported. You can only filter by one type, sourceFile or sourceConfig or specificResources!")
+			$errorID = "MultipleFiltersNotSupported"
+			$category = [System.Management.Automation.ErrorCategory]::NotSpecified
+			$recordObject = New-Object System.Management.Automation.ErrorRecord($exception, $errorID, $category, $Cmdlet)
+			$cmdlet.ThrowTerminatingError($recordObject)
+		}
 	}
 	process
 	{
@@ -26,6 +36,12 @@
 		if ($SpecificResources) {
         	$testResults = Test-TmfConditionalAccessPolicy -SpecificResources $SpecificResources -RawOutput -Cmdlet $Cmdlet
 		}
+		elseif ($SourceFile) {
+            $testResults = Test-TmfConditionalAccessPolicy -SourceFile $SourceFile -RawOutput -Cmdlet $Cmdlet
+        }
+        elseif ($SourceConfig) {
+            $testResults = Test-TmfConditionalAccessPolicy -SourceConfig $SourceConfig -RawOutput -Cmdlet $Cmdlet
+        }
 		else {
 			$testResults = Test-TmfConditionalAccessPolicy -RawOutput -Cmdlet $Cmdlet
 		}
@@ -41,7 +57,7 @@
 						"state" = $result.DesiredConfiguration.state
 					}
 					try {						
-						foreach ($property in ($result.DesiredConfiguration.Properties() | Where-Object {$_ -notin @("displayName", "state", "present", "sourceConfig")})) {
+						foreach ($property in ($result.DesiredConfiguration.Properties() | Where-Object {$_ -notin @("displayName", "state", "present", "sourceConfig", "sourceFile")})) {
 							$requestBody[$property] = $result.DesiredConfiguration.$property
 						}
 						

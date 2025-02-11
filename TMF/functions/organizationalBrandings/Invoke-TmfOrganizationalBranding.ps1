@@ -2,6 +2,9 @@ function Invoke-TmfOrganizationalBranding
 {
 	[CmdletBinding()]
 	Param (
+        [string[]] $SpecificResources,
+		[string[]] $SourceFile,
+		[string[]] $SourceConfig,
 		[System.Management.Automation.PSCmdlet]
 		$Cmdlet = $PSCmdlet
 	)
@@ -14,13 +17,32 @@ function Invoke-TmfOrganizationalBranding
 			return
 		}
 		Test-GraphConnection -Cmdlet $Cmdlet
+
+        if (($SpecificResources -and $SourceFile -and $SourceConfig) -or ($SpecificResources -and $SourceFile) -or ($SourceFile -and $SourceConfig)) {
+			$exception = New-Object System.Data.DataException("Multiple filters are not supported. You can only filter by one type, sourceFile or sourceConfig or specificResources!")
+			$errorID = "MultipleFiltersNotSupported"
+			$category = [System.Management.Automation.ErrorCategory]::NotSpecified
+			$recordObject = New-Object System.Management.Automation.ErrorRecord($exception, $errorID, $category, $Cmdlet)
+			$cmdlet.ThrowTerminatingError($recordObject)
+		}
 	}
 
     process
     {
         if(Test-PSFFunctionInterrupt) {return}
-		$testResults = Test-TmfOrganizationalBranding -RawOutput -Cmdlet $Cmdlet
 
+        if ($SpecificResources) {
+        	$testResults = Test-TmfOrganizationalBranding -SpecificResources $SpecificResources -RawOutput -Cmdlet $Cmdlet
+		}
+		elseif ($SourceFile) {
+            $testResults = Test-TmfOrganizationalBranding -SourceFile $SourceFile -RawOutput -Cmdlet $Cmdlet
+        }
+        elseif ($SourceConfig) {
+            $testResults = Test-TmfOrganizationalBranding -SourceConfig $SourceConfig -RawOutput -Cmdlet $Cmdlet
+        }
+		else {
+			$testResults = Test-TmfOrganizationalBranding -RawOutput -Cmdlet $Cmdlet
+		}
 
         foreach ($result in $testResults) {
             Beautify-TmfTestResult -TestResult $result -FunctionName $MyInvocation.MyCommand
@@ -31,7 +53,7 @@ function Invoke-TmfOrganizationalBranding
                     $requestBody  = @{
                         "id" = $result.DesiredConfiguration.displayName
                     }
-                    $result.DesiredConfiguration.properties() | Where-Object {$_ -notin @("displayname","present","sourceConfig")} | ForEach-Object {
+                    $result.DesiredConfiguration.properties() | Where-Object {$_ -notin @("displayname","present","sourceConfig","sourceFile")} | ForEach-Object {
                         $requestBody[$_] = $result.DesiredConfiguration.$_
                     }
 

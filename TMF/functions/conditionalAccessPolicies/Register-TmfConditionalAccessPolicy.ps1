@@ -59,6 +59,7 @@
 
 		[bool] $present = $true,
 		[string] $sourceConfig = "<Custom>",
+		[string] $sourceFile = "<Custom>",
 
 		[System.Management.Automation.PSCmdlet]
 		$Cmdlet = $PSCmdlet
@@ -114,6 +115,7 @@
 			state = $state
 			present = $present
 			sourceConfig = $sourceConfig
+			sourceFile = $sourceFile
 		}
 
 		if ($PSBoundParameters.ContainsKey("oldNames")) {

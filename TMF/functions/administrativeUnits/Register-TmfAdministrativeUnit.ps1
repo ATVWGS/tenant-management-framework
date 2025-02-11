@@ -5,23 +5,21 @@ function Register-TmfAdministrativeUnit
 		[Parameter(Mandatory = $true)]
 		[string] $displayName,
 		[string[]] $oldNames,
-
 		[string] $description,
         [string] $visibility,
-        
 		[string] $membershipType = "assigned",
 		[Parameter(ParameterSetName="dynamic")]
 		[string] $membershipRule,
 		[Parameter(ParameterSetName="dynamic")]
 		[string] $membershipRuleProcessingState,
-
 		[Parameter(ParameterSetName="assigned")]
         [string[]] $members,
 		[Parameter(ParameterSetName="assigned")]
         [string[]] $groups,
-
         [object[]] $scopedRoleMembers,
 		[bool] $present = $true,
+		[string] $sourceConfig = "<Custom>",
+		[string] $sourceFile = "<Custom>",
 		[System.Management.Automation.PSCmdlet]
 		$Cmdlet = $PSCmdlet
 	)
@@ -50,6 +48,8 @@ function Register-TmfAdministrativeUnit
 			visibility = $visibility
 			membershipType = $membershipType
 			present = $present
+			sourceConfig = $sourceConfig
+			sourceFile = $sourceFile
 		}
 
 		if (($membershipType -eq "dynamic" -and (-not $PSBoundParameters.ContainsKey("membershipRule"))) -or ($membershipType -eq "assigned" -and ($PSBoundParameters.ContainsKey("membershipRule") -or $PSBoundParameters.ContainsKey("membershipRuleProcessingState")))) {

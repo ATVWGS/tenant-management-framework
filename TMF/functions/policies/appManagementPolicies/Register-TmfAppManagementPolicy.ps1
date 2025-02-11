@@ -10,7 +10,8 @@ function Register-TmfAppManagementPolicy {
         [object] $restrictions,
         [string[]] $appliesTo,
         [bool] $present = $true,
-        [string] $sourceConfig = "<Custom>",		
+        [string] $sourceConfig = "<Custom>",
+        [string] $sourceFile = "<Custom>",
 		[System.Management.Automation.PSCmdlet]
 		$Cmdlet = $PSCmdlet
     )
@@ -38,6 +39,7 @@ function Register-TmfAppManagementPolicy {
             restrictions = $restrictions
             present = $present
 			sourceConfig = $sourceConfig
+            sourceFile = $sourceFile
 		}
         
         if ($PSBoundParameters.ContainsKey("appliesTo")) {

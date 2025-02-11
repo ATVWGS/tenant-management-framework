@@ -5,11 +5,9 @@
 		[Parameter(Mandatory = $true)]
 		[string] $displayName,
 		[string[]] $oldNames,
-
 		[Parameter(Mandatory = $true)]
 		[ValidateSet('countryNamedLocation', 'ipNamedLocation')]
 		[string] $type = "ipNamedLocation",
-		
 		[Parameter(Mandatory = $true, ParameterSetName = "IPRanges")]
 		[object[]] $ipRanges,
 		[Parameter(ParameterSetName = "IPRanges")]
@@ -18,11 +16,9 @@
 		[string[]] $countriesAndRegions,
 		[Parameter(ParameterSetName = "Country")]
 		[bool] $includeUnknownCountriesAndRegions = $false,
-
 		[bool] $present = $true,		
-
 		[string] $sourceConfig = "<Custom>",
-
+		[string] $sourceFile = "<Custom>",
 		[System.Management.Automation.PSCmdlet]
 		$Cmdlet = $PSCmdlet
 	)
@@ -62,6 +58,7 @@
 			displayName = $displayName
 			present = $present
 			sourceConfig = $sourceConfig
+			sourceFile = $sourceFile
 		}
 
 		if ($PSBoundParameters.ContainsKey("oldNames")) {

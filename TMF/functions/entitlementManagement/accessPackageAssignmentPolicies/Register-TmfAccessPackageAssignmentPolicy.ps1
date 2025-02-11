@@ -39,6 +39,9 @@ function Register-TmfAccessPackageAssignmentPolicy
 		[string] $sourceConfig = "<Custom>",
 		[Parameter(ParameterSetName = "autoAssigned")]
 		[Parameter(ParameterSetName = "assigned")]
+		[string] $sourceFile = "<Custom>",
+		[Parameter(ParameterSetName = "autoAssigned")]
+		[Parameter(ParameterSetName = "assigned")]
 		[System.Management.Automation.PSCmdlet]
 		$Cmdlet = $PSCmdlet
 	)
@@ -65,6 +68,7 @@ function Register-TmfAccessPackageAssignmentPolicy
 			allowedTargetScope = $allowedTargetScope
 			present = $present
 			sourceConfig = $sourceConfig
+			sourceFile = $sourceFile
 		}
 
 		if ($PSBoundParameters.ContainsKey("oldNames")) {

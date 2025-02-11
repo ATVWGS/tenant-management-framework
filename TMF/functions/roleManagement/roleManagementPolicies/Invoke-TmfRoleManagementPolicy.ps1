@@ -3,6 +3,8 @@ function Invoke-TmfRoleManagementPolicy {
 	Param (
         [ValidateSet('AzureResources', 'AzureAD', 'AADGroup')]
 		[string] $scope,
+        [string[]] $SourceFile,
+		[string[]] $SourceConfig,
 		[System.Management.Automation.PSCmdlet]
 		$Cmdlet = $PSCmdlet
 	)
@@ -14,6 +16,14 @@ function Invoke-TmfRoleManagementPolicy {
 			Stop-PSFFunction -String "TMF.NoDefinitions" -StringValues "roleManagementPolicies"
 			return
 		}
+
+        if (($scope -and $SourceFile -and $SourceConfig) -or ($scope -and $SourceFile) -or ($SourceFile -and $SourceConfig)) {
+			$exception = New-Object System.Data.DataException("Multiple filters are not supported. You can only filter by one type, sourceFile or sourceConfig or scope!")
+			$errorID = "MultipleFiltersNotSupported"
+			$category = [System.Management.Automation.ErrorCategory]::NotSpecified
+			$recordObject = New-Object System.Management.Automation.ErrorRecord($exception, $errorID, $category, $Cmdlet)
+			$cmdlet.ThrowTerminatingError($recordObject)
+		}
 	}
 
     process {
@@ -21,6 +31,12 @@ function Invoke-TmfRoleManagementPolicy {
 
         if ($scope) {
             $testResults = Test-TmfRoleManagementPolicy -scope $scope -RawOutput -Cmdlet $Cmdlet
+        }
+        elseif ($SourceFile) {
+            $testResults = Test-TmfRoleManagementPolicy -SourceFile $SourceFile -RawOutput -Cmdlet $Cmdlet
+        }
+        elseif ($SourceConfig) {
+            $testResults = Test-TmfRoleManagementPolicy -SourceConfig $SourceConfig -RawOutput -Cmdlet $Cmdlet
         }
         else {
             $testResults = Test-TmfRoleManagementPolicy -RawOutput -Cmdlet $Cmdlet

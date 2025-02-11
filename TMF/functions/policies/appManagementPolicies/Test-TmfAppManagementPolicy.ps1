@@ -9,6 +9,8 @@ function Test-TmfAppManagementPolicy {
 	[CmdletBinding()]
 	Param (
 		[string[]] $SpecificResources,
+		[string[]] $SourceFile,
+		[string[]] $SourceConfig,
 		[switch] $RawOutput,
 		[System.Management.Automation.PSCmdlet]
 		$Cmdlet = $PSCmdlet
@@ -19,6 +21,14 @@ function Test-TmfAppManagementPolicy {
 		Test-GraphConnection -Cmdlet $Cmdlet
 		$resourceName = "appManagementPolicies"
 		$tenant = (Invoke-MgGraphRequest -Method GET -Uri ("$script:graphBaseUrl/organization?`$select=displayname,id")).value
+
+		if (($SpecificResources -and $SourceFile -and $SourceConfig) -or ($SpecificResources -and $SourceFile) -or ($SourceFile -and $SourceConfig)) {
+			$exception = New-Object System.Data.DataException("Multiple filters are not supported. You can only filter by one type, sourceFile or sourceConfig or specificResources!")
+			$errorID = "MultipleFiltersNotSupported"
+			$category = [System.Management.Automation.ErrorCategory]::NotSpecified
+			$recordObject = New-Object System.Management.Automation.ErrorRecord($exception, $errorID, $category, $Cmdlet)
+			$cmdlet.ThrowTerminatingError($recordObject)
+		}
 	}
 	process
 	{
@@ -54,6 +64,16 @@ function Test-TmfAppManagementPolicy {
 				}
 			}
 			$definitions = $definitions | Sort-Object -Property displayName -Unique
+		}
+		elseif ($SourceFile) {
+			foreach ($file in $SourceFile) {
+				$definitions += $script:desiredConfiguration[$resourceName] | Where-Object {$_.sourceFile -eq $file}
+			}
+		}
+		elseif ($SourceConfig) {
+			foreach ($config in $SourceConfig) {
+				$definitions += $script:desiredConfiguration[$resourceName] | Where-Object {$_.sourceConfig -eq $config}
+			}					
 		}
 		else {
 			$definitions = $script:desiredConfiguration[$resourceName]
@@ -102,7 +122,7 @@ function Test-TmfAppManagementPolicy {
                     $result["GraphResource"] = $resource
 					if ($definition.present) {
 						$changes = @()
-						foreach ($property in ($definition.Properties() | Where-Object {$_ -notin "present", "sourceConfig", "displayName"})) {
+						foreach ($property in ($definition.Properties() | Where-Object {$_ -notin "present", "sourceConfig", "sourceFile", "displayName"})) {
 							$change = [PSCustomObject] @{
 								Property = $property										
 								Actions = $null

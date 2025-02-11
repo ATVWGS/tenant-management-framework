@@ -12,6 +12,7 @@ function Register-TmfAuthenticationContextClassReference
 		[bool] $isAvailable,
 		[bool] $present = $true,		
 		[string] $sourceConfig = "<Custom>",
+		[string] $sourceFile = "<Custom>",
 		[System.Management.Automation.PSCmdlet]
 		$Cmdlet = $PSCmdlet
 	)
@@ -37,6 +38,7 @@ function Register-TmfAuthenticationContextClassReference
             isAvailable = $isAvailable
 			present = $present
 			sourceConfig = $sourceConfig
+			sourceFile = $sourceFile
 		}
 
 		if ($PSBoundParameters.ContainsKey("description")) {

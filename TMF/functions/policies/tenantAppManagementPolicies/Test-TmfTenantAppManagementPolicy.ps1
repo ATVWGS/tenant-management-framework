@@ -63,7 +63,7 @@ function Test-TmfTenantAppManagementPolicy {
                     $result["GraphResource"] = $resource
 					if ($definition.present) {
 						$changes = @()
-						foreach ($property in ($definition.Properties() | Where-Object {$_ -notin "present", "sourceConfig"})) {
+						foreach ($property in ($definition.Properties() | Where-Object {$_ -notin "present", "sourceConfig", "sourceFile"})) {
 							$change = [PSCustomObject] @{
 								Property = $property										
 								Actions = $null
