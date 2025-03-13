@@ -4,7 +4,8 @@
     'TMF.ConfigurationFileNotFound' = 'Can not find configuration file {0}.'
     'TMF.RegisterComponent.AlreadyLoaded' = 'A {0} with name "{1}" from source configuration {2} has already been loaded. Ignoring {0}.'
     'TMF.PrerequisiteNotActivated' = '[{0}] Configuration "{1}" is not activated. Please activate related configurations before this configuration. It is also possible to activate them in a single command.'
-    'TMF.TenantInformation' = 'Currently connected to <c="red">{0}</c> (<c="gray">{1}</c>)'
+    'TMF.TenantInformation' = 'Currently connected to tenant <c="red">{0}</c> (<c="gray">{1}</c>)'
+    'TMF.SubscriptionInformation' = 'Currently connected to subscription <c="red">{0}</c> (<c="gray">{1}</c>)'
     'TMF.StartingTestForScopedResource' = 'Starting tests for <c="yellow">{0}</c> with scope <c="yellow">{1}</c>'
     'TMF.StartingTestForResource' = 'Starting tests for <c="yellow">{0}</c>'
     'TMF.StartingInvokeForScopedResource' = 'Invoking <c="yellow">{0}</c> with scope <c="yellow">{1}</c>'
@@ -33,6 +34,7 @@
     'TMF.Invoke.SendingRequest' = '[{0} {1}] Sending request'
     'TMF.Invoke.ActionCompleted' = '[Tenant: <c="gray">{0}</c>][{1} Resource: <c="gray">{2}</c>] <c="green">Completed</c>.'
     'TMF.Invoke.DeleteNotPossible' = 'Not possible to delete resources of type {0}. Please change parameter present of {1} from false to true.'
+    'TMF.Invoke.Confirmed' = 'Invoke confirmed: {0}'
 
     'New-TMFConfiguration.OutPath.PathDoesNotExist' = 'The path {0} does not exist. You can use -Force to create the configuration anyway!'
     'New-TMFConfiguration.OutPath.AlreadyExists' = 'There is already a Tenant configuration in the target directory ({0}). You can use -Force to create the configuration anyway!'

@@ -6,6 +6,7 @@ function Invoke-TmfCrossTenantAccessPolicy
 	#>
 	[CmdletBinding()]
 	Param (
+		[switch] $Confirm = $false,
 		[System.Management.Automation.PSCmdlet]
 		$Cmdlet = $PSCmdlet
 	)
@@ -18,13 +19,23 @@ function Invoke-TmfCrossTenantAccessPolicy
 			return
 		}
 		Test-GraphConnection -Cmdlet $Cmdlet
+		$tenant = (Invoke-MgGraphRequest -Method GET -Uri ("$script:graphBaseUrl/organization?`$select=displayname,id")).value
 	}
 	process
 	{
 		if (Test-PSFFunctionInterrupt) { return }
-
-        $testResults = Test-TmfCrossTenantAccessPolicy -RawOutput -Cmdlet $Cmdlet
-
+		if (-not $Confirm) {
+			Write-PSFMessage -Level Host -FunctionName "Invoke-TmfCrossTenantAccessPolicy" -String "TMF.TenantInformation" -StringValues $tenant.displayName, $tenant.Id
+			if ((Read-Host "Is this the correct tenant? [y/n]") -notin @("y","Y"))	{
+				Write-PSFMessage -Level Error -String "TMF.UserCanceled"
+				throw "Connected to the wrong tenant."
+			}
+			Write-PSFMessage -Level Host -FunctionName "Invoke-TmfCrossTenantAccessPolicy" -String "TMF.Invoke.Confirmed" -StringValues "all crossTenantAccessPolicy configurations"
+        	$testResults = Test-TmfCrossTenantAccessPolicy -RawOutput -Cmdlet $Cmdlet
+		}
+		else {
+			$testResults = Test-TmfCrossTenantAccessPolicy -RawOutput -Cmdlet $Cmdlet
+		}
 		foreach ($result in $testResults) {
 			Beautify-TmfTestResult -TestResult $result -FunctionName $MyInvocation.MyCommand
 			switch ($result.ActionType) {

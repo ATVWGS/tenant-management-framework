@@ -9,6 +9,7 @@ function Invoke-TmfAccessPackageAssignmentPolicy
 		[string[]] $SpecificResources,
 		[string[]] $SourceFile,
 		[string[]] $SourceConfig,
+		[switch] $Confirm = $false,
 		[System.Management.Automation.PSCmdlet]
 		$Cmdlet = $PSCmdlet
 	)
@@ -21,6 +22,7 @@ function Invoke-TmfAccessPackageAssignmentPolicy
 			return
 		}
 		Test-GraphConnection -Cmdlet $Cmdlet
+		$tenant = (Invoke-MgGraphRequest -Method GET -Uri ("$script:graphBaseUrl/organization?`$select=displayname,id")).value
 
 		if (($SpecificResources -and $SourceFile -and $SourceConfig) -or ($SpecificResources -and $SourceFile) -or ($SourceFile -and $SourceConfig)) {
 			$exception = New-Object System.Data.DataException("Multiple filters are not supported. You can only filter by one type, sourceFile or sourceConfig or specificResources!")
@@ -104,19 +106,43 @@ function Invoke-TmfAccessPackageAssignmentPolicy
 	process
 	{
 		if (Test-PSFFunctionInterrupt) { return }
-
-		if ($SpecificResources) {
-        	$testResults = Test-TmfAccessPackageAssignmentPolicy -SpecificResources $SpecificResources -RawOutput -Cmdlet $Cmdlet
+		if (-not $Confirm) {
+			Write-PSFMessage -Level Host -FunctionName "Invoke-TmfAccessPackageAssignmentPolicy" -String "TMF.TenantInformation" -StringValues $tenant.displayName, $tenant.Id
+			if ((Read-Host "Is this the correct tenant? [y/n]") -notin @("y","Y"))	{
+				Write-PSFMessage -Level Error -String "TMF.UserCanceled"
+				throw "Connected to the wrong tenant."
+			}
+			if ($SpecificResources) {
+				Write-PSFMessage -Level Host -FunctionName "Invoke-TmfAccessPackageAssignmentPolicy" -String "TMF.Invoke.Confirmed" -StringValues "accessPackageAssignmentPolicy configuration for resources: $($SpecificResources -join ",")"
+				$testResults = Test-TmfAccessPackageAssignmentPolicy -SpecificResources $SpecificResources -RawOutput -Cmdlet $Cmdlet
+			}
+			elseif ($SourceFile) {
+				Write-PSFMessage -Level Host -FunctionName "Invoke-TmfAccessPackageAssignmentPolicy" -String "TMF.Invoke.Confirmed" -StringValues "accessPackageAssignmentPolicy configuration for SourceFile(s): $($SourceFile -join ",")"
+				$testResults = Test-TmfAccessPackageAssignmentPolicy -SourceFile $SourceFile -RawOutput -Cmdlet $Cmdlet
+			}
+			elseif ($SourceConfig) {
+				Write-PSFMessage -Level Host -FunctionName "Invoke-TmfAccessPackageAssignmentPolicy" -String "TMF.Invoke.Confirmed" -StringValues "accessPackageAssignmentPolicy configuration for SourceConfig(s): $($SourceConfig -join ",")"
+				$testResults = Test-TmfAccessPackageAssignmentPolicy -SourceConfig $SourceConfig -RawOutput -Cmdlet $Cmdlet
+			}
+			else {
+				Write-PSFMessage -Level Host -FunctionName "Invoke-TmfAccessPackageAssignmentPolicy" -String "TMF.Invoke.Confirmed" -StringValues "all accessPackageAssignmentPolicy configurations"
+				$testResults = Test-TmfAccessPackageAssignmentPolicy -RawOutput -Cmdlet $Cmdlet
+			}
 		}
-		elseif ($SourceFile) {
-            $testResults = Test-TmfAccessPackageAssignmentPolicy -SourceFile $SourceFile -RawOutput -Cmdlet $Cmdlet
-        }
-        elseif ($SourceConfig) {
-            $testResults = Test-TmfAccessPackageAssignmentPolicy -SourceConfig $SourceConfig -RawOutput -Cmdlet $Cmdlet
-        }
 		else {
-			$testResults = Test-TmfAccessPackageAssignmentPolicy -RawOutput -Cmdlet $Cmdlet
-		}		
+			if ($SpecificResources) {
+				$testResults = Test-TmfAccessPackageAssignmentPolicy -SpecificResources $SpecificResources -RawOutput -Cmdlet $Cmdlet
+			}
+			elseif ($SourceFile) {
+				$testResults = Test-TmfAccessPackageAssignmentPolicy -SourceFile $SourceFile -RawOutput -Cmdlet $Cmdlet
+			}
+			elseif ($SourceConfig) {
+				$testResults = Test-TmfAccessPackageAssignmentPolicy -SourceConfig $SourceConfig -RawOutput -Cmdlet $Cmdlet
+			}
+			else {
+				$testResults = Test-TmfAccessPackageAssignmentPolicy -RawOutput -Cmdlet $Cmdlet
+			}	
+		}
 
 		foreach ($result in $testResults) {
 			Beautify-TmfTestResult -TestResult $result -FunctionName $MyInvocation.MyCommand

@@ -35,7 +35,7 @@ Describe 'Tmf.AccessReview.Groups.Invoke.Creation' {
     }
 
     It "should successfully invoke the TMF configuration" {
-        { Invoke-TmfGroup -Verbose } | Should -Not -Throw
+        { Invoke-TmfGroup -Confirm -Verbose } | Should -Not -Throw
     }
 }
 
@@ -58,7 +58,7 @@ Describe 'Tmf.AccessReview.Invoke.Creation' {
     }
 
     It "should successfully invoke the TMF configuration" {
-        { Invoke-TmfAccessReview -Verbose } | Should -Not -Throw
+        { Invoke-TmfAccessReview -Confirm -Verbose } | Should -Not -Throw
     }
 
     
@@ -96,7 +96,7 @@ Describe 'Tmf.AccessReview.Invoke.Deletion' {
     }
 
     It "should successfully invoke the TMF configuration" {
-        { Invoke-TmfAccessReview -Verbose } | Should -Not -Throw
+        { Invoke-TmfAccessReview -Confirm -Verbose } | Should -Not -Throw
     }
 
     $testCases = $global:definitions["accessReviews"] | Foreach-Object {
@@ -133,7 +133,7 @@ Describe 'Tmf.AccessReview.Groups.Invoke.Deletion' {
     }
 
     It "should successfully invoke the TMF configuration" {
-        { Invoke-TmfGroup -Verbose } | Should -Not -Throw
+        { Invoke-TmfGroup -Confirm -Verbose } | Should -Not -Throw
     }
 
     $testCases = $global:definitions["groups"] | Foreach-Object {

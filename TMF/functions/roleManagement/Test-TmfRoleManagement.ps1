@@ -2,7 +2,7 @@ function Test-TmfRoleManagement
 {
 	[CmdletBinding()]
 	Param (
-		[ValidateSet('AzureResources', 'AzureAD')]
+		[ValidateSet('AzureResources', 'AzureAD', 'AADGroup')]
         [string] $scope
 	)
 	

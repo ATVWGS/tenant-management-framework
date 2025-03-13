@@ -35,7 +35,7 @@ Describe 'Tmf.RoleManagement.Groups.Invoke.Creation' {
     }
 
     It "should successfully invoke the TMF configuration" {
-        { Invoke-TmfGroup -Verbose } | Should -Not -Throw
+        { Invoke-TmfGroup -Confirm -Verbose } | Should -Not -Throw
     }
 }
 
@@ -102,7 +102,7 @@ Describe 'Tmf.RoleManagement.Invoke.Creation' {
     }
 
     It "should successfully invoke the TMF configuration" {
-        { Invoke-TmfRoleManagement -DoNotRequireTenantConfirm -Verbose } | Should -Not -Throw
+        { Invoke-TmfRoleManagement -Confirm -Verbose } | Should -Not -Throw
     }
 }
 
@@ -157,7 +157,7 @@ Describe 'Tmf.RoleManagement.Invoke.Deletion' {
     }
 
     It "should successfully invoke the roleAssignments configuration" {
-        { Invoke-TmfRoleAssignment -Verbose } | Should -Not -Throw
+        { Invoke-TmfRoleAssignment -Confirm -Verbose } | Should -Not -Throw
     }
 
     #Second remove roleDefinitions
@@ -166,7 +166,7 @@ Describe 'Tmf.RoleManagement.Invoke.Deletion' {
     }
 
     It "should successfully invoke the roleDefinitions configuration" {
-        { Invoke-TmfRoleDefinition -Verbose } | Should -Not -Throw
+        { Invoke-TmfRoleDefinition -Confirm -Verbose } | Should -Not -Throw
     }
 }
 
@@ -208,7 +208,7 @@ Describe 'Tmf.RoleManagement.Groups.Invoke.Deletion' {
     }
 
     It "should successfully invoke the TMF configuration" {
-        { Invoke-TmfGroup -Verbose } | Should -Not -Throw
+        { Invoke-TmfGroup -Confirm -Verbose } | Should -Not -Throw
     }
 
     $testCases = $global:definitions["groups"] | Foreach-Object {

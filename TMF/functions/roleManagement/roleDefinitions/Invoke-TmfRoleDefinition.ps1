@@ -2,10 +2,11 @@ function Invoke-TmfRoleDefinition
 {
     [CmdletBinding()]
 	Param (
-        [ValidateSet('AzureResource', 'AzureAD')]
+        [ValidateSet('AzureResources', 'AzureAD')]
 		[string] $scope,
         [string[]] $SourceFile,
 		[string[]] $SourceConfig,
+        [switch] $Confirm = $false,
 		[System.Management.Automation.PSCmdlet]
 		$Cmdlet = $PSCmdlet
 	)
@@ -17,6 +18,7 @@ function Invoke-TmfRoleDefinition
 			Stop-PSFFunction -String "TMF.NoDefinitions" -StringValues "roleDefinitions"
 			return
 		}
+        $tenant = (Invoke-MgGraphRequest -Method GET -Uri ("$script:graphBaseUrl/organization?`$select=displayname,id")).value
 
         if (($scope -and $SourceFile -and $SourceConfig) -or ($scope -and $SourceFile) -or ($SourceFile -and $SourceConfig)) {
 			$exception = New-Object System.Data.DataException("Multiple filters are not supported. You can only filter by one type, sourceFile or sourceConfig or scope!")
@@ -29,19 +31,52 @@ function Invoke-TmfRoleDefinition
 
     process {
         if (Test-PSFFunctionInterrupt) { return }
-        if ($scope) {
-            $testResults = Test-TmfRoleDefinition -scope $scope -RawOutput -Cmdlet $Cmdlet
-        }
-        elseif ($SourceFile) {
-            $testResults = Test-TmfRoleDefinition -SourceFile $SourceFile -RawOutput -Cmdlet $Cmdlet
-        }
-        elseif ($SourceConfig) {
-            $testResults = Test-TmfRoleDefinition -SourceConfig $SourceConfig -RawOutput -Cmdlet $Cmdlet
+        if (-not $Confirm) {
+			Write-PSFMessage -Level Host -FunctionName "Invoke-TmfRoleDefinition" -String "TMF.TenantInformation" -StringValues $tenant.displayName, $tenant.Id
+			if ((Read-Host "Is this the correct tenant? [y/n]") -notin @("y","Y"))	{
+				Write-PSFMessage -Level Error -String "TMF.UserCanceled"
+				throw "Connected to the wrong tenant."
+			}
+            if ($scope) {
+                Write-PSFMessage -Level Host -FunctionName "Invoke-TmfRoleDefinition" -String "TMF.Invoke.Confirmed" -StringValues "roleDefinition configuration for scope: $($scope)"
+                $testResults = Test-TmfRoleDefinition -scope $scope -RawOutput -Cmdlet $Cmdlet
+            }
+            elseif ($SourceFile) {
+                Write-PSFMessage -Level Host -FunctionName "Invoke-TmfRoleDefinition" -String "TMF.Invoke.Confirmed" -StringValues "roleDefinition configuration for SourceFile(s): $($SourceFile -join ",")"
+                $testResults = Test-TmfRoleDefinition -SourceFile $SourceFile -RawOutput -Cmdlet $Cmdlet
+            }
+            elseif ($SourceConfig) {
+                Write-PSFMessage -Level Host -FunctionName "Invoke-TmfRoleDefinition" -String "TMF.Invoke.Confirmed" -StringValues "roleDefinition configuration for SourceConfig(s): $($SourceConfig -join ",")"
+                $testResults = Test-TmfRoleDefinition -SourceConfig $SourceConfig -RawOutput -Cmdlet $Cmdlet
+            }
+            else {
+                Write-PSFMessage -Level Host -FunctionName "Invoke-TmfRoleDefinition" -String "TMF.Invoke.Confirmed" -StringValues "all roleDefinition configurations"
+                $testResults = Test-TmfRoleDefinition -RawOutput -Cmdlet $Cmdlet
+            }
+
+            if ($testResults.DesiredConfiguration.subscriptionReference) {
+                $subscriptionInfo = (Get-AzContext).Subscription
+                Write-PSFMessage -Level Host -FunctionName "Invoke-TmfRoleDefinition" -String "TMF.SubscriptionInformation" -StringValues $subscriptionInfo.Name, $subscriptionInfo.Id
+                if ((Read-Host "Is this the correct subscription? [y/n]") -notin @("y","Y"))	{
+                    Write-PSFMessage -Level Error -String "TMF.UserCanceled"
+                    throw "Connected to the wrong subscription."
+                }
+            }
         }
         else {
-            $testResults = Test-TmfRoleDefinition -RawOutput -Cmdlet $Cmdlet
+            if ($scope) {
+                $testResults = Test-TmfRoleDefinition -scope $scope -RawOutput -Cmdlet $Cmdlet
+            }
+            elseif ($SourceFile) {
+                $testResults = Test-TmfRoleDefinition -SourceFile $SourceFile -RawOutput -Cmdlet $Cmdlet
+            }
+            elseif ($SourceConfig) {
+                $testResults = Test-TmfRoleDefinition -SourceConfig $SourceConfig -RawOutput -Cmdlet $Cmdlet
+            }
+            else {
+                $testResults = Test-TmfRoleDefinition -RawOutput -Cmdlet $Cmdlet
+            }
         }
-        
 
         foreach ($result in $testResults) {
 			Beautify-TmfTestResult -TestResult $result -FunctionName $MyInvocation.MyCommand
