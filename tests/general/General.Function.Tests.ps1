@@ -10,7 +10,8 @@ $globalIgnoredAnalyzerRules = @(
     "PSReviewUnusedParameter",
     "PSUseApprovedVerbs",
     "PSUseDeclaredVarsMoreThanAssignments",
-    "PSUseShouldProcessForStateChangingFunctions"
+    "PSUseShouldProcessForStateChangingFunctions",
+    "PSUseSupportsShouldProcess"
 )
 
 Describe 'General.Function.Tests' {    
