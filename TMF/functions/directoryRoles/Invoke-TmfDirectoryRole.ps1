@@ -8,6 +8,7 @@ function Invoke-TmfDirectoryRole {
 		[string[]] $SpecificResources,
 		[string[]] $SourceFile,
 		[string[]] $SourceConfig,
+		[switch] $Confirm = $false,
 		[System.Management.Automation.PSCmdlet]
 		$Cmdlet = $PSCmdlet
 	)
@@ -20,6 +21,7 @@ function Invoke-TmfDirectoryRole {
 			return
 		}
 		Test-GraphConnection -Cmdlet $Cmdlet
+		$tenant = (Invoke-MgGraphRequest -Method GET -Uri ("$script:graphBaseUrl/organization?`$select=displayname,id")).value
 
 		if (($SpecificResources -and $SourceFile -and $SourceConfig) -or ($SpecificResources -and $SourceFile) -or ($SourceFile -and $SourceConfig)) {
 			$exception = New-Object System.Data.DataException("Multiple filters are not supported. You can only filter by one type, sourceFile or sourceConfig or specificResources!")
@@ -32,17 +34,42 @@ function Invoke-TmfDirectoryRole {
 	process
 	{
         if(Test-PSFFunctionInterrupt) {return}
-		if ($SpecificResources) {
-        	$testResults = Test-TmfDirectoryRole -SpecificResources $SpecificResources -RawOutput -Cmdlet $Cmdlet
+		if (-not $Confirm) {
+			Write-PSFMessage -Level Host -FunctionName "Invoke-TmfDirectoryRole" -String "TMF.TenantInformation" -StringValues $tenant.displayName, $tenant.Id
+			if ((Read-Host "Is this the correct tenant? [y/n]") -notin @("y","Y"))	{
+				Write-PSFMessage -Level Error -String "TMF.UserCanceled"
+				throw "Connected to the wrong tenant."
+			}
+			if ($SpecificResources) {
+				Write-PSFMessage -Level Host -FunctionName "Invoke-TmfDirectoryRole" -String "TMF.Invoke.Confirmed" -StringValues "directoryRole configuration for resources: $($SpecificResources -join ",")"
+				$testResults = Test-TmfDirectoryRole -SpecificResources $SpecificResources -RawOutput -Cmdlet $Cmdlet
+			}
+			elseif ($SourceFile) {
+				Write-PSFMessage -Level Host -FunctionName "Invoke-TmfDirectoryRole" -String "TMF.Invoke.Confirmed" -StringValues "directoryRole configuration for SourceFile(s): $($SourceFile -join ",")"
+				$testResults = Test-TmfDirectoryRole -SourceFile $SourceFile -RawOutput -Cmdlet $Cmdlet
+			}
+			elseif ($SourceConfig) {
+				Write-PSFMessage -Level Host -FunctionName "Invoke-TmfDirectoryRole" -String "TMF.Invoke.Confirmed" -StringValues "directoryRole configuration for SourceConfig(s): $($SourceConfig -join ",")"
+				$testResults = Test-TmfDirectoryRole -SourceConfig $SourceConfig -RawOutput -Cmdlet $Cmdlet
+			}
+			else {
+				Write-PSFMessage -Level Host -FunctionName "Invoke-TmfDirectoryRole" -String "TMF.Invoke.Confirmed" -StringValues "all directoryRole configurations"
+				$testResults = Test-TmfDirectoryRole -RawOutput -Cmdlet $Cmdlet
+			}
 		}
-		elseif ($SourceFile) {
-            $testResults = Test-TmfDirectoryRole -SourceFile $SourceFile -RawOutput -Cmdlet $Cmdlet
-        }
-        elseif ($SourceConfig) {
-            $testResults = Test-TmfDirectoryRole -SourceConfig $SourceConfig -RawOutput -Cmdlet $Cmdlet
-        }
 		else {
-			$testResults = Test-TmfDirectoryRole -RawOutput -Cmdlet $Cmdlet
+			if ($SpecificResources) {
+				$testResults = Test-TmfDirectoryRole -SpecificResources $SpecificResources -RawOutput -Cmdlet $Cmdlet
+			}
+			elseif ($SourceFile) {
+				$testResults = Test-TmfDirectoryRole -SourceFile $SourceFile -RawOutput -Cmdlet $Cmdlet
+			}
+			elseif ($SourceConfig) {
+				$testResults = Test-TmfDirectoryRole -SourceConfig $SourceConfig -RawOutput -Cmdlet $Cmdlet
+			}
+			else {
+				$testResults = Test-TmfDirectoryRole -RawOutput -Cmdlet $Cmdlet
+			}
 		}
 
         foreach ($result in $testResults) {

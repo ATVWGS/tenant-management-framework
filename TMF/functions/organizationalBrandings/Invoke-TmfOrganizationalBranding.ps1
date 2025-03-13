@@ -5,6 +5,7 @@ function Invoke-TmfOrganizationalBranding
         [string[]] $SpecificResources,
 		[string[]] $SourceFile,
 		[string[]] $SourceConfig,
+        [switch] $Confirm = $false,
 		[System.Management.Automation.PSCmdlet]
 		$Cmdlet = $PSCmdlet
 	)
@@ -17,6 +18,7 @@ function Invoke-TmfOrganizationalBranding
 			return
 		}
 		Test-GraphConnection -Cmdlet $Cmdlet
+        $tenant = (Invoke-MgGraphRequest -Method GET -Uri ("$script:graphBaseUrl/organization?`$select=displayname,id")).value
 
         if (($SpecificResources -and $SourceFile -and $SourceConfig) -or ($SpecificResources -and $SourceFile) -or ($SourceFile -and $SourceConfig)) {
 			$exception = New-Object System.Data.DataException("Multiple filters are not supported. You can only filter by one type, sourceFile or sourceConfig or specificResources!")
@@ -30,19 +32,43 @@ function Invoke-TmfOrganizationalBranding
     process
     {
         if(Test-PSFFunctionInterrupt) {return}
-
-        if ($SpecificResources) {
-        	$testResults = Test-TmfOrganizationalBranding -SpecificResources $SpecificResources -RawOutput -Cmdlet $Cmdlet
-		}
-		elseif ($SourceFile) {
-            $testResults = Test-TmfOrganizationalBranding -SourceFile $SourceFile -RawOutput -Cmdlet $Cmdlet
+        if (-not $Confirm) {
+			Write-PSFMessage -Level Host -FunctionName "Invoke-TmfOrganizationalBranding" -String "TMF.TenantInformation" -StringValues $tenant.displayName, $tenant.Id
+			if ((Read-Host "Is this the correct tenant? [y/n]") -notin @("y","Y"))	{
+				Write-PSFMessage -Level Error -String "TMF.UserCanceled"
+				throw "Connected to the wrong tenant."
+			}
+            if ($SpecificResources) {
+                Write-PSFMessage -Level Host -FunctionName "Invoke-TmfOrganizationalBranding" -String "TMF.Invoke.Confirmed" -StringValues "organizationalBranding configuration for resources: $($SpecificResources -join ",")"
+                $testResults = Test-TmfOrganizationalBranding -SpecificResources $SpecificResources -RawOutput -Cmdlet $Cmdlet
+            }
+            elseif ($SourceFile) {
+                Write-PSFMessage -Level Host -FunctionName "Invoke-TmfOrganizationalBranding" -String "TMF.Invoke.Confirmed" -StringValues "organizationalBranding configuration for SourceFile(s): $($SourceFile -join ",")"
+                $testResults = Test-TmfOrganizationalBranding -SourceFile $SourceFile -RawOutput -Cmdlet $Cmdlet
+            }
+            elseif ($SourceConfig) {
+                Write-PSFMessage -Level Host -FunctionName "Invoke-TmfOrganizationalBranding" -String "TMF.Invoke.Confirmed" -StringValues "organizationalBranding configuration for SourceConfig(s): $($SourceConfig -join ",")"
+                $testResults = Test-TmfOrganizationalBranding -SourceConfig $SourceConfig -RawOutput -Cmdlet $Cmdlet
+            }
+            else {
+                Write-PSFMessage -Level Host -FunctionName "Invoke-TmfOrganizationalBranding" -String "TMF.Invoke.Confirmed" -StringValues "all organizationalBranding configurations"
+                $testResults = Test-TmfOrganizationalBranding -RawOutput -Cmdlet $Cmdlet
+            }
         }
-        elseif ($SourceConfig) {
-            $testResults = Test-TmfOrganizationalBranding -SourceConfig $SourceConfig -RawOutput -Cmdlet $Cmdlet
+        else {
+            if ($SpecificResources) {
+                $testResults = Test-TmfOrganizationalBranding -SpecificResources $SpecificResources -RawOutput -Cmdlet $Cmdlet
+            }
+            elseif ($SourceFile) {
+                $testResults = Test-TmfOrganizationalBranding -SourceFile $SourceFile -RawOutput -Cmdlet $Cmdlet
+            }
+            elseif ($SourceConfig) {
+                $testResults = Test-TmfOrganizationalBranding -SourceConfig $SourceConfig -RawOutput -Cmdlet $Cmdlet
+            }
+            else {
+                $testResults = Test-TmfOrganizationalBranding -RawOutput -Cmdlet $Cmdlet
+            }
         }
-		else {
-			$testResults = Test-TmfOrganizationalBranding -RawOutput -Cmdlet $Cmdlet
-		}
 
         foreach ($result in $testResults) {
             Beautify-TmfTestResult -TestResult $result -FunctionName $MyInvocation.MyCommand

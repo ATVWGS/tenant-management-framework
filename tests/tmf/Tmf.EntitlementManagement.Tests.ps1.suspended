@@ -84,7 +84,7 @@ Describe 'Tmf.EntitlementManagement.Invoke.Creation' {
     }
 
     It "should successfully invoke the EntitlementManagement configuration" {
-        { Invoke-TmfEntitlementManagement -DoNotRequireTenantConfirm -Verbose } | Should -Not -Throw
+        { Invoke-TmfEntitlementManagement -Confirm -Verbose } | Should -Not -Throw
     }
 }
 

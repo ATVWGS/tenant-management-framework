@@ -51,7 +51,7 @@ Describe 'General.Function.Tests' {
                 foreach ($result in $results) {
                     switch ($result.Severity) {
                         "Information" {
-                            Set-ItResult -Skipped -Because "serverity is Information. Violation in $($result.ScriptName) at line $($result.Line) with message: `"$($result.Message)`""
+                            Set-ItResult -Skipped -Because "severity is Information. Violation in $($result.ScriptName) at line $($result.Line) with message: `"$($result.Message)`""
                         }
                         default {
                             "problem in $($result.ScriptName) at line $($result.Line) with message: `"$($result.Message)`"" | Should -BeNullOrEmpty

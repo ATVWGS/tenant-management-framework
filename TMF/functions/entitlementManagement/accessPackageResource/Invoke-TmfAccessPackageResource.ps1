@@ -9,6 +9,7 @@ function Invoke-TmfAccessPackageResource
 		[string[]] $SpecificResources,
 		[string[]] $SourceFile,
 		[string[]] $SourceConfig,
+		[switch] $Confirm = $false,
 		[System.Management.Automation.PSCmdlet]
 		$Cmdlet = $PSCmdlet
 	)
@@ -21,6 +22,7 @@ function Invoke-TmfAccessPackageResource
 			return
 		}
 		Test-GraphConnection -Cmdlet $Cmdlet
+		$tenant = (Invoke-MgGraphRequest -Method GET -Uri ("$script:graphBaseUrl/organization?`$select=displayname,id")).value
 
 		if (($SpecificResources -and $SourceFile -and $SourceConfig) -or ($SpecificResources -and $SourceFile) -or ($SourceFile -and $SourceConfig)) {
 			$exception = New-Object System.Data.DataException("Multiple filters are not supported. You can only filter by one type, sourceFile or sourceConfig or specificResources!")
@@ -33,18 +35,42 @@ function Invoke-TmfAccessPackageResource
 	process
 	{
 		if (Test-PSFFunctionInterrupt) { return }
-
-		if ($SpecificResources) {
-        	$testResults = Test-TmfAccessPackageResource -SpecificResources $SpecificResources -RawOutput -Cmdlet $Cmdlet
+		if (-not $Confirm) {
+			Write-PSFMessage -Level Host -FunctionName "Invoke-TmfAccessPackageResource" -String "TMF.TenantInformation" -StringValues $tenant.displayName, $tenant.Id
+			if ((Read-Host "Is this the correct tenant? [y/n]") -notin @("y","Y"))	{
+				Write-PSFMessage -Level Error -String "TMF.UserCanceled"
+				throw "Connected to the wrong tenant."
+			}
+			if ($SpecificResources) {
+				Write-PSFMessage -Level Host -FunctionName "Invoke-TmfAccessPackageResource" -String "TMF.Invoke.Confirmed" -StringValues "accessPackageResource configuration for resources: $($SpecificResources -join ",")"
+				$testResults = Test-TmfAccessPackageResource -SpecificResources $SpecificResources -RawOutput -Cmdlet $Cmdlet
+			}
+			elseif ($SourceFile) {
+				Write-PSFMessage -Level Host -FunctionName "Invoke-TmfAccessPackageResource" -String "TMF.Invoke.Confirmed" -StringValues "accessPackageResource configuration for SourceFile(s): $($SourceFile -join ",")"
+				$testResults = Test-TmfAccessPackageResource -SourceFile $SourceFile -RawOutput -Cmdlet $Cmdlet
+			}
+			elseif ($SourceConfig) {
+				Write-PSFMessage -Level Host -FunctionName "Invoke-TmfAccessPackageResource" -String "TMF.Invoke.Confirmed" -StringValues "accessPackageResource configuration for SourceConfig(s): $($SourceConfig -join ",")"
+				$testResults = Test-TmfAccessPackageResource -SourceConfig $SourceConfig -RawOutput -Cmdlet $Cmdlet
+			}
+			else {
+				Write-PSFMessage -Level Host -FunctionName "Invoke-TmfAccessPackageResource" -String "TMF.Invoke.Confirmed" -StringValues "all accessPackageResource configurations"
+				$testResults = Test-TmfAccessPackageResource -RawOutput -Cmdlet $Cmdlet
+			}
 		}
-		elseif ($SourceFile) {
-            $testResults = Test-TmfAccessPackageResource -SourceFile $SourceFile -RawOutput -Cmdlet $Cmdlet
-        }
-        elseif ($SourceConfig) {
-            $testResults = Test-TmfAccessPackageResource -SourceConfig $SourceConfig -RawOutput -Cmdlet $Cmdlet
-        }
 		else {
-			$testResults = Test-TmfAccessPackageResource -RawOutput -Cmdlet $Cmdlet
+			if ($SpecificResources) {
+				$testResults = Test-TmfAccessPackageResource -SpecificResources $SpecificResources -RawOutput -Cmdlet $Cmdlet
+			}
+			elseif ($SourceFile) {
+				$testResults = Test-TmfAccessPackageResource -SourceFile $SourceFile -RawOutput -Cmdlet $Cmdlet
+			}
+			elseif ($SourceConfig) {
+				$testResults = Test-TmfAccessPackageResource -SourceConfig $SourceConfig -RawOutput -Cmdlet $Cmdlet
+			}
+			else {
+				$testResults = Test-TmfAccessPackageResource -RawOutput -Cmdlet $Cmdlet
+			}
 		}
 
 		foreach ($result in $testResults) {

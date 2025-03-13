@@ -8,7 +8,7 @@ function Invoke-TmfCrossTenantAccess
 			crossTenantAccessPolicy, crossTenantAccessDefaultSettings, crossTenantAccessPartnerSettings
 	#>
 	Param (
-		[switch] $DoNotRequireTenantConfirm
+		[switch] $Confirm = $false
 	)
 	
 	begin
@@ -20,7 +20,7 @@ function Invoke-TmfCrossTenantAccess
 	process
 	{
 		Write-PSFMessage -Level Host -FunctionName "Invoke-TmfCrossTenantAccess" -String "TMF.TenantInformation" -StringValues $tenant.displayName, $tenant.Id		
-		if (-Not $DoNotRequireTenantConfirm) {
+		if (-Not $Confirm) {
 			if ((Read-Host "Is this the correct tenant? [y/n]") -notin @("y","Y"))	{
 				Write-PSFMessage -Level Error -String "TMF.UserCanceled"
 				throw "Connected to the wrong tenant."
@@ -30,7 +30,7 @@ function Invoke-TmfCrossTenantAccess
 		foreach ($resourceType in ($script:supportedResources.GetEnumerator() | Where-Object {$_.Value.invokeFunction -and $_.Name -in $crossTenantAccessResources} | Sort-Object {$_.Value.weight})) {			
 			if ($script:desiredConfiguration[$resourceType.Name]) {
 				Write-PSFMessage -Level Host -FunctionName "Invoke-TmfCrossTenantAccess" -String "TMF.StartingInvokeForResource" -StringValues $resourceType.Name					
-				& $resourceType.Value["invokeFunction"] -Cmdlet $PSCmdlet
+				& $resourceType.Value["invokeFunction"] -Cmdlet $PSCmdlet -Confirm
 			}						
 		}
 	}

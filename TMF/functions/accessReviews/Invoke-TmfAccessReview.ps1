@@ -8,6 +8,7 @@ function Invoke-TmfAccessReview {
 		[string[]] $SpecificResources,
 		[string[]] $SourceFile,
 		[string[]] $SourceConfig,
+		[switch] $Confirm = $false,
 		[System.Management.Automation.PSCmdlet]
 		$Cmdlet = $PSCmdlet
 	)
@@ -21,6 +22,8 @@ function Invoke-TmfAccessReview {
 		}
 		Test-GraphConnection -Cmdlet $Cmdlet
 
+		$tenant = (Invoke-MgGraphRequest -Method GET -Uri ("$script:graphBaseUrl/organization?`$select=displayname,id")).value
+		
 		if (($SpecificResources -and $SourceFile -and $SourceConfig) -or ($SpecificResources -and $SourceFile) -or ($SourceFile -and $SourceConfig)) {
 			$exception = New-Object System.Data.DataException("Multiple filters are not supported. You can only filter by one type, sourceFile or sourceConfig or specificResources!")
 			$errorID = "MultipleFiltersNotSupported"
@@ -32,18 +35,42 @@ function Invoke-TmfAccessReview {
 	process
 	{
         if(Test-PSFFunctionInterrupt) {return}
-
-		if ($SpecificResources) {
-        	$testResults = Test-TmfAccessReview -specificResources $SpecificResources -RawOutput -Cmdlet $Cmdlet
+		if (-not $Confirm) {
+			Write-PSFMessage -Level Host -FunctionName "Invoke-TmfAccessReview" -String "TMF.TenantInformation" -StringValues $tenant.displayName, $tenant.Id
+			if ((Read-Host "Is this the correct tenant? [y/n]") -notin @("y","Y"))	{
+				Write-PSFMessage -Level Error -String "TMF.UserCanceled"
+				throw "Connected to the wrong tenant."
+			}
+			if ($SpecificResources) {
+				Write-PSFMessage -Level Host -FunctionName "Invoke-TmfAccessReview" -String "TMF.Invoke.Confirmed" -StringValues "accessReview configuration for resources: $($SpecificResources -join ",")"
+				$testResults = Test-TmfAccessReview -specificResources $SpecificResources -RawOutput -Cmdlet $Cmdlet
+			}
+			elseif ($SourceFile) {
+				Write-PSFMessage -Level Host -FunctionName "Invoke-TmfAccessReview" -String "TMF.Invoke.Confirmed" -StringValues "accessReview configuration for SourceFile(s): $($SourceFile -join ",")"
+				$testResults = Test-TmfAccessReview -SourceFile $SourceFile -RawOutput -Cmdlet $Cmdlet
+			}
+			elseif ($SourceConfig) {
+				Write-PSFMessage -Level Host -FunctionName "Invoke-TmfAccessReview" -String "TMF.Invoke.Confirmed" -StringValues "accessReview configuration for SourceConfig(s): $($SourceConfig -join ",")"
+				$testResults = Test-TmfAccessReview -SourceConfig $SourceConfig -RawOutput -Cmdlet $Cmdlet
+			}
+			else {
+				Write-PSFMessage -Level Host -FunctionName "Invoke-TmfAccessReview" -String "TMF.Invoke.Confirmed" -StringValues "all accessReview configurations"
+				$testResults = Test-TmfAccessReview -RawOutput -Cmdlet $Cmdlet
+			}	
 		}
-		elseif ($SourceFile) {
-            $testResults = Test-TmfAccessReview -SourceFile $SourceFile -RawOutput -Cmdlet $Cmdlet
-        }
-        elseif ($SourceConfig) {
-            $testResults = Test-TmfAccessReview -SourceConfig $SourceConfig -RawOutput -Cmdlet $Cmdlet
-        }
-        else {            
-			$testResults = Test-TmfAccessReview -RawOutput -Cmdlet $Cmdlet
+		else {
+			if ($SpecificResources) {
+				$testResults = Test-TmfAccessReview -specificResources $SpecificResources -RawOutput -Cmdlet $Cmdlet
+			}
+			elseif ($SourceFile) {
+				$testResults = Test-TmfAccessReview -SourceFile $SourceFile -RawOutput -Cmdlet $Cmdlet
+			}
+			elseif ($SourceConfig) {
+				$testResults = Test-TmfAccessReview -SourceConfig $SourceConfig -RawOutput -Cmdlet $Cmdlet
+			}
+			else {
+				$testResults = Test-TmfAccessReview -RawOutput -Cmdlet $Cmdlet
+			}
 		}
 
         foreach ($result in $testResults) {

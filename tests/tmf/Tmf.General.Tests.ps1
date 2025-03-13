@@ -68,7 +68,7 @@ Describe 'Tmf.General.Invoke.Creation' {
     }
 
     It "should successfully invoke the TMF configuration" {
-        { Invoke-TmfTenant -DoNotRequireTenantConfirm } | Should -Not -Throw
+        { Invoke-TmfTenant -Confirm } | Should -Not -Throw
     }
 
     foreach ($type in $global:definitions.GetEnumerator()) {
@@ -108,7 +108,7 @@ Describe 'Tmf.General.Invoke.Deletion' {
     }
 
     It "should successfully invoke the TMF configuration" {
-        { Invoke-TmfTenant -DoNotRequireTenantConfirm } | Should -Not -Throw
+        { Invoke-TmfTenant -Confirm } | Should -Not -Throw
     }
 
     foreach ($type in $global:definitions.GetEnumerator()) {

@@ -59,7 +59,7 @@ Describe 'Tmf.Groups.Invoke.Creation' {
     }
 
     It "should successfully invoke the TMF configuration" {
-        { Invoke-TmfTenant -DoNotRequireTenantConfirm -Verbose } | Should -Not -Throw
+        { Invoke-TmfGroup -Confirm -Verbose } | Should -Not -Throw
     }
 
     
@@ -97,7 +97,7 @@ Describe 'Tmf.General.Invoke.Deletion' {
     }
 
     It "should successfully invoke the TMF configuration" {
-        { Invoke-TmfGroup -Verbose } | Should -Not -Throw
+        { Invoke-TmfGroup -Confirm -Verbose } | Should -Not -Throw
     }
 
     $testCases = $global:definitions["groups"] | Where-Object { -Not $_["assignedLicenses"] -and -Not $_["privilegedAccess"] } | Foreach-Object {

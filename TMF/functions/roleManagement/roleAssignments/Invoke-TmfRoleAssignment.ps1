@@ -5,6 +5,7 @@ function Invoke-TmfRoleAssignment {
         [string] $scope,
         [string[]] $SourceFile,
 		[string[]] $SourceConfig,
+        [switch] $Confirm = $false,
 		[System.Management.Automation.PSCmdlet]
 		$Cmdlet = $PSCmdlet
 	)
@@ -16,6 +17,7 @@ function Invoke-TmfRoleAssignment {
 			Stop-PSFFunction -String "TMF.NoDefinitions" -StringValues "roleAssignment"
 			return
 		}
+        $tenant = (Invoke-MgGraphRequest -Method GET -Uri ("$script:graphBaseUrl/organization?`$select=displayname,id")).value
 
         if (($scope -and $SourceFile -and $SourceConfig) -or ($scope -and $SourceFile) -or ($SourceFile -and $SourceConfig)) {
 			$exception = New-Object System.Data.DataException("Multiple filters are not supported. You can only filter by one type, sourceFile or sourceConfig or scope!")
@@ -28,17 +30,51 @@ function Invoke-TmfRoleAssignment {
 
     process {
         if (Test-PSFFunctionInterrupt) { return }
-        if ($scope) {
-            $testResults = Test-TmfRoleAssignment -scope $scope -RawOutput -Cmdlet $Cmdlet
-        }
-        elseif ($SourceFile) {
-            $testResults = Test-TmfRoleAssignment -SourceFile $SourceFile -RawOutput -Cmdlet $Cmdlet
-        }
-        elseif ($SourceConfig) {
-            $testResults = Test-TmfRoleAssignment -SourceConfig $SourceConfig -RawOutput -Cmdlet $Cmdlet
+        if (-not $Confirm) {
+			Write-PSFMessage -Level Host -FunctionName "Invoke-TmfRoleAssignment" -String "TMF.TenantInformation" -StringValues $tenant.displayName, $tenant.Id
+			if ((Read-Host "Is this the correct tenant? [y/n]") -notin @("y","Y"))	{
+				Write-PSFMessage -Level Error -String "TMF.UserCanceled"
+				throw "Connected to the wrong tenant."
+			}
+            if ($scope) {
+                Write-PSFMessage -Level Host -FunctionName "Invoke-TmfRoleAssignment" -String "TMF.Invoke.Confirmed" -StringValues "roleAssignment configuration for scope: $($scope)"
+                $testResults = Test-TmfRoleAssignment -scope $scope -RawOutput -Cmdlet $Cmdlet
+            }
+            elseif ($SourceFile) {
+                Write-PSFMessage -Level Host -FunctionName "Invoke-TmfRoleAssignment" -String "TMF.Invoke.Confirmed" -StringValues "roleAssignment configuration for SourceFile(s): $($SourceFile -join ",")"
+                $testResults = Test-TmfRoleAssignment -SourceFile $SourceFile -RawOutput -Cmdlet $Cmdlet
+            }
+            elseif ($SourceConfig) {
+                Write-PSFMessage -Level Host -FunctionName "Invoke-TmfRoleAssignment" -String "TMF.Invoke.Confirmed" -StringValues "roleAssignment configuration for SourceConfig(s): $($SourceConfig -join ",")"
+                $testResults = Test-TmfRoleAssignment -SourceConfig $SourceConfig -RawOutput -Cmdlet $Cmdlet
+            }
+            else {
+                Write-PSFMessage -Level Host -FunctionName "Invoke-TmfRoleAssignment" -String "TMF.Invoke.Confirmed" -StringValues "all roleAssignment configurations"
+                $testResults = Test-TmfRoleAssignment -RawOutput -Cmdlet $Cmdlet
+            }
+
+            if ($testResults.DesiredConfiguration.subscriptionReference) {
+                $subscriptionInfo = Get-AzContext
+                Write-PSFMessage -Level Host -FunctionName "Invoke-TmfRoleAssignment" -String "TMF.SubscriptionInformation" -StringValues $subscriptionInfo.Subscription.Name, $subscriptionInfo.Subscription.Id
+                if ((Read-Host "Is this the correct subscription? [y/n]") -notin @("y","Y"))	{
+                    Write-PSFMessage -Level Error -String "TMF.UserCanceled"
+                    throw "Connected to the wrong subscription."
+                }
+            }
         }
         else {
-            $testResults = Test-TmfRoleAssignment -RawOutput -Cmdlet $Cmdlet
+            if ($scope) {
+                $testResults = Test-TmfRoleAssignment -scope $scope -RawOutput -Cmdlet $Cmdlet
+            }
+            elseif ($SourceFile) {
+                $testResults = Test-TmfRoleAssignment -SourceFile $SourceFile -RawOutput -Cmdlet $Cmdlet
+            }
+            elseif ($SourceConfig) {
+                $testResults = Test-TmfRoleAssignment -SourceConfig $SourceConfig -RawOutput -Cmdlet $Cmdlet
+            }
+            else {
+                $testResults = Test-TmfRoleAssignment -RawOutput -Cmdlet $Cmdlet
+            }
         }
 
         foreach ($result in $testResults) {

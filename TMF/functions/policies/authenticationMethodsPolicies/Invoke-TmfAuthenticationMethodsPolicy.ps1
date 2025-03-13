@@ -8,6 +8,7 @@ function Invoke-TmfAuthenticationMethodsPolicy {
         [string[]] $SpecificResources,
         [string[]] $SourceFile,
 		[string[]] $SourceConfig,
+        [switch] $Confirm = $false,
 		[System.Management.Automation.PSCmdlet]
 		$Cmdlet = $PSCmdlet
 	)
@@ -20,6 +21,7 @@ function Invoke-TmfAuthenticationMethodsPolicy {
 			return
 		}
 		Test-GraphConnection -Cmdlet $Cmdlet
+        $tenant = (Invoke-MgGraphRequest -Method GET -Uri ("$script:graphBaseUrl/organization?`$select=displayname,id")).value
 
         if (($SpecificResources -and $SourceFile -and $SourceConfig) -or ($SpecificResources -and $SourceFile) -or ($SourceFile -and $SourceConfig)) {
 			$exception = New-Object System.Data.DataException("Multiple filters are not supported. You can only filter by one type, sourceFile or sourceConfig or specificResources!")
@@ -32,18 +34,42 @@ function Invoke-TmfAuthenticationMethodsPolicy {
 	process
 	{
         if(Test-PSFFunctionInterrupt) {return}
-        
-        if ($SpecificResources) {
-            $testResults = Test-TmfAuthenticationMethodsPolicy -SpecificResources $SpecificResources -RawOutput -Cmdlet $Cmdlet
-        }
-        elseif ($SourceFile) {
-            $testResults = Test-TmfAuthenticationMethodsPolicy -SourceFile $SourceFile -RawOutput -Cmdlet $Cmdlet
-        }
-        elseif ($SourceConfig) {
-            $testResults = Test-TmfAuthenticationMethodsPolicy -SourceConfig $SourceConfig -RawOutput -Cmdlet $Cmdlet
+        if (-not $Confirm) {
+			Write-PSFMessage -Level Host -FunctionName "Invoke-TmfAuthenticationMethodsPolicy" -String "TMF.TenantInformation" -StringValues $tenant.displayName, $tenant.Id
+			if ((Read-Host "Is this the correct tenant? [y/n]") -notin @("y","Y"))	{
+				Write-PSFMessage -Level Error -String "TMF.UserCanceled"
+				throw "Connected to the wrong tenant."
+			}
+            if ($SpecificResources) {
+                Write-PSFMessage -Level Host -FunctionName "Invoke-TmfAuthenticationMethodsPolicy" -String "TMF.Invoke.Confirmed" -StringValues "authenticationMethodsPolicy configuration for resources: $($SpecificResources -join ",")"
+                $testResults = Test-TmfAuthenticationMethodsPolicy -SpecificResources $SpecificResources -RawOutput -Cmdlet $Cmdlet
+            }
+            elseif ($SourceFile) {
+                Write-PSFMessage -Level Host -FunctionName "Invoke-TmfAuthenticationMethodsPolicy" -String "TMF.Invoke.Confirmed" -StringValues "authenticationMethodsPolicy configuration for SourceFile(s): $($SourceFile -join ",")"
+                $testResults = Test-TmfAuthenticationMethodsPolicy -SourceFile $SourceFile -RawOutput -Cmdlet $Cmdlet
+            }
+            elseif ($SourceConfig) {
+                Write-PSFMessage -Level Host -FunctionName "Invoke-TmfAuthenticationMethodsPolicy" -String "TMF.Invoke.Confirmed" -StringValues "authenticationMethodsPolicy configuration for SourceConfig(s): $($SourceConfig -join ",")"
+                $testResults = Test-TmfAuthenticationMethodsPolicy -SourceConfig $SourceConfig -RawOutput -Cmdlet $Cmdlet
+            }
+            else {
+                Write-PSFMessage -Level Host -FunctionName "Invoke-TmfAuthenticationMethodsPolicy" -String "TMF.Invoke.Confirmed" -StringValues "all authenticationMethodsPolicy configurations"
+                $testResults = Test-TmfAuthenticationMethodsPolicy -RawOutput -Cmdlet $Cmdlet
+            }
         }
         else {
-            $testResults = Test-TmfAuthenticationMethodsPolicy -RawOutput -Cmdlet $Cmdlet
+            if ($SpecificResources) {
+                $testResults = Test-TmfAuthenticationMethodsPolicy -SpecificResources $SpecificResources -RawOutput -Cmdlet $Cmdlet
+            }
+            elseif ($SourceFile) {
+                $testResults = Test-TmfAuthenticationMethodsPolicy -SourceFile $SourceFile -RawOutput -Cmdlet $Cmdlet
+            }
+            elseif ($SourceConfig) {
+                $testResults = Test-TmfAuthenticationMethodsPolicy -SourceConfig $SourceConfig -RawOutput -Cmdlet $Cmdlet
+            }
+            else {
+                $testResults = Test-TmfAuthenticationMethodsPolicy -RawOutput -Cmdlet $Cmdlet
+            }
         }
 		
         foreach ($result in $testResults) {
