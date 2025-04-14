@@ -13,9 +13,11 @@ function Register-TmfAdministrativeUnit
 		[Parameter(ParameterSetName="dynamic")]
 		[string] $membershipRuleProcessingState,
 		[Parameter(ParameterSetName="assigned")]
-        [string[]] $members,
+        [string[]] $users,
 		[Parameter(ParameterSetName="assigned")]
         [string[]] $groups,
+		[Parameter(ParameterSetName="assigned")]
+        [string[]] $devices,
         [object[]] $scopedRoleMembers,
 		[bool] $present = $true,
 		[string] $sourceConfig = "<Custom>",
@@ -62,7 +64,7 @@ function Register-TmfAdministrativeUnit
 			Add-Member -InputObject $object -MemberType NoteProperty -Name "oldNames" -Value @($oldNames | ForEach-Object {Resolve-String $_})
 		}
 
-		"members", "groups", "scopedRoleMembers", "membershipRule", "membershipRuleProcessingState" | ForEach-Object {
+		"users", "groups", "devices", "scopedRoleMembers", "membershipRule", "membershipRuleProcessingState" | ForEach-Object {
 			if ($PSBoundParameters.ContainsKey($_)) {
 				Add-Member -InputObject $object -MemberType NoteProperty -Name $_ -Value $PSBoundParameters[$_];
 			}

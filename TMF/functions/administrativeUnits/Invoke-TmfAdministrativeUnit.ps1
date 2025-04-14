@@ -113,7 +113,16 @@ function Invoke-TmfAdministrativeUnit
                             $scopedRoleMemberships += $result.DesiredConfiguration.scopedRoleMembers | Foreach-Object {
                                 $identityId = Resolve-User -InputReference $_.identity -Cmdlet $Cmdlet -DontFailIfNotExisting
                                 if (-Not $identityId) {
-                                    $identityId = Resolve-Group -InputReference $_.identity -Cmdlet $Cmdlet
+                                    $identityId = Resolve-Group -InputReference $_.identity -Cmdlet $Cmdlet -DontFailIfNotExisting
+                                    if (-Not $identityId) {
+                                        $identityId = Resolve-ServicePrincipal -InputReference $_.identity -Cmdlet $Cmdlet -DontFailIfNotExisting
+                                        if (-Not $identityId) {
+                                            $identityId = Resolve-ApplicationId -InputReference $_.identity -Cmdlet $Cmdlet -DontFailIfNotExisting
+                                            if (-Not $identityId) {
+                                                throw "Cannot resolve $($_.identity) as user, group, application or serviceprincipal"
+                                            }
+                                        }
+                                    }
                                 }
 
                                 @{
