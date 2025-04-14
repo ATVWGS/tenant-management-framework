@@ -126,16 +126,56 @@ function Test-TmfAdministrativeUnit
 								Actions = $null
 							}
 							switch ($property) {
-								"members" {
-									$resourceMembers = (Invoke-MgGraphRequest -Method GET -Uri ("$script:graphBaseUrl/administrativeUnits/{0}/members/$/microsoft.graph.user" -f $resource.Id)).Value.Id;
-									$change.Actions = Compare-ResourceList -ReferenceList $resourceMembers `
-														-DifferenceList $($definition.members | ForEach-Object {Resolve-User -InputReference $_ -Cmdlet $Cmdlet}) `
+								"users" {
+									$resourceUsers = @()
+									$userResponse = Invoke-MgGraphRequest -Method GET -Uri ("$script:graphBaseUrl/administrativeUnits/{0}/members/$/microsoft.graph.user" -f $resource.Id)
+									if ($userResponse.Keys -contains "@odata.nextLink") {
+										$resourceUsers += $userResponse.Value.Id
+										while ($null -ne $userResponse."@odata.nextLink") {
+											$userResponse = Invoke-MgGraphRequest -Method GET -Uri $userResponse."@odata.nextLink"
+											$resourceUsers += $userResponse.Value.Id											
+										}										
+									}
+									else {
+										$resourceUsers += $userResponse.Value.Id
+									}
+									$change.Actions = Compare-ResourceList -ReferenceList $resourceUsers `
+														-DifferenceList $($definition.users | ForEach-Object {Resolve-User -InputReference $_ -Cmdlet $Cmdlet}) `
 														-Cmdlet $PSCmdlet
 								}
 								"groups" {
-									$resourceGroups = (Invoke-MgGraphRequest -Method GET -Uri ("$script:graphBaseUrl/administrativeUnits/{0}/members/$/microsoft.graph.group" -f $resource.Id)).Value.Id;
+									$resourceGroups = @()
+									$groupResponse = Invoke-MgGraphRequest -Method GET -Uri ("$script:graphBaseUrl/administrativeUnits/{0}/members/$/microsoft.graph.group" -f $resource.Id)
+									if ($groupResponse.Keys -contains "@odata.nextLink") {
+										$resourceGroups += $groupResponse.Value.Id
+										while ($null -ne $groupResponse."@odata.nextLink") {
+											$groupResponse = Invoke-MgGraphRequest -Method GET -Uri $groupResponse."@odata.nextLink"
+											$resourceGroups += $groupResponse.Value.Id											
+										}
+										
+									}
+									else {
+										$resourceGroups += $groupResponse.Value.Id
+									}
 									$change.Actions = Compare-ResourceList -ReferenceList $resourceGroups `
 														-DifferenceList $($definition.groups | ForEach-Object {Resolve-Group -InputReference $_ -Cmdlet $Cmdlet}) `
+														-Cmdlet $PSCmdlet
+								}
+								"devices" {
+									$resourceDevices = @()
+									$deviceResponse = Invoke-MgGraphRequest -Method GET -Uri ("$script:graphBaseUrl/administrativeUnits/{0}/members/$/microsoft.graph.device" -f $resource.Id)
+									if ($deviceResponse.Keys -contains "@odata.nextLink") {
+										$resourceDevices += $deviceResponse.Value.Id
+										while ($deviceResponse."@odata.nextLink") {
+											$deviceResponse = Invoke-MgGraphRequest -Method GET -Uri $deviceResponse."@odata.nextLink"
+											$resourceDevices += $deviceResponse.Value.Id											
+										}										
+									}
+									else {
+										$resourceDevices += $deviceResponse.Value.Id
+									}
+									$change.Actions = Compare-ResourceList -ReferenceList $resourceDevices `
+														-DifferenceList $($definition.devices | ForEach-Object {Resolve-Device -InputReference $_ -Cmdlet $Cmdlet}) `
 														-Cmdlet $PSCmdlet
 								}
 								"scopedRoleMembers" {
@@ -146,14 +186,23 @@ function Test-TmfAdministrativeUnit
 									$definition.scopedRoleMembers | Foreach-Object {
 										$identityId = Resolve-User -InputReference $_.identity -Cmdlet $Cmdlet -DontFailIfNotExisting
 										if (-Not $identityId) {
-											$identityId = Resolve-Group -InputReference $_.identity -Cmdlet $Cmdlet
+											$identityId = Resolve-Group -InputReference $_.identity -Cmdlet $Cmdlet -DontFailIfNotExisting
+											if (-Not $identityId) {
+												$identityId = Resolve-ServicePrincipal -InputReference $_.identity -Cmdlet $Cmdlet -DontFailIfNotExisting
+												if (-Not $identityId) {
+													$identityId = Resolve-ApplicationId -InputReference $_.identity -Cmdlet $Cmdlet -DontFailIfNotExisting
+													if (-Not $identityId) {
+														$Cmdlet.ThrowTerminatingError("Cannot resolve $($_.identity) as user, group, application or serviceprincipal")
+													}
+												}
+											}
 										}
 										$definitionScopedRoleMembers += [PSCustomObject]@{
 											identity = $identityId
 											role = Resolve-DirectoryRole -InputReference $_.role -Cmdlet $Cmdlet
 										}
 									}									
-									
+
 									$dummy = Compare-ResourceList -ReferenceList ($resourceScopedRoleMembers | Select-Object role, identity | Foreach-Object {$_ | ConvertTo-Json -Compress}) `
 														-DifferenceList ($definitionScopedRoleMembers | Select-Object role, identity | Foreach-Object {$_ | ConvertTo-Json -Compress}) `
 														-Cmdlet $PSCmdlet

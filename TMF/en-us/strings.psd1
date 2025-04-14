@@ -17,6 +17,8 @@
     'TMF.UserCanceled' = 'User canceled the operation.'
     'TMF.Error.QueryWithFilterFailed' = 'Query with filter {0} failed.'
 
+    'TMF.Export.NotFound' = 'Resource {0} of type {1} not found in tenant {2}.'
+
     'TMF.Register.PropertySetNotPossible' = 'The provided property set for "{0}" (Type: {1}) is not applicable.'
     'TMF.Register.PropertyWrongType' = 'The provided property set for "{0}" (Type: {1}) is not applicable. The child property {2} has the wrong type. Must be {3} and is {4}.'
     'TMF.Register.UnsupportedPropertyValue' = 'The provided value for property "{0}" is not supported. Possible values are: {1}'

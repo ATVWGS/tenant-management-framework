@@ -76,6 +76,7 @@
 		'Invoke-TmfAdministrativeUnit',
         'Test-TmfAdministrativeUnit',
         'Register-TmfAdministrativeUnit',
+		'Export-TmfAdministrativeUnit',
 		'Register-TmfAccessPackageResource',
 		'Test-TmfAccessPackageResource',
 		'Invoke-TmfAccessPackageResource',

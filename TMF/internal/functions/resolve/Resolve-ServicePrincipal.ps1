@@ -20,7 +20,7 @@
 				$servicePrincipal = (Invoke-MgGraphRequest -Method GET -Uri ("$script:graphBaseUrl/servicePrincipals/{0}" -f $InputReference)).Id
 			}
 			else {
-				$servicePrincipal = (Invoke-MgGraphRequest -Method GET -Uri ("$script:graphBaseUrl/servicePrincipals/?`$filter=(displayName eq '{0}') and (servicePrincipalType eq 'Application')" -f $InputReference)).Value.Id
+				$servicePrincipal = (Invoke-MgGraphRequest -Method GET -Uri ("$script:graphBaseUrl/servicePrincipals/?`$filter=displayName eq '{0}'" -f $InputReference)).Value.Id
 			}
 
 			if (-Not $servicePrincipal -and $SearchInDesiredConfiguration) {
