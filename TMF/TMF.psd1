@@ -130,6 +130,7 @@
 		'Invoke-TmfCustomSecurityAttribute',
 		'Test-TmfCustomSecurityAttribute',
 		'Register-TmfAuthenticationContextClassReference',
+		'Export-TmfAuthenticationContextClassReference',
 		'Test-TmfAuthenticationContextClassReference',
 		'Invoke-TmfAuthenticationContextClassReference',
 		'Register-TmfOrganizationalBranding',

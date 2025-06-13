@@ -210,6 +210,7 @@ $script:supportedResources = @{
         "registerFunction" = (Get-Command Register-TmfAuthenticationContextClassReference)
         "testFunction" = (Get-Command Test-TmfAuthenticationContextClassReference)
         "invokeFunction" = (Get-Command Invoke-TmfAuthenticationContextClassReference)
+        "exportFunction" = (Get-Command Export-TmfAuthenticationContextClassReference)
         "weight" = 49
     }
     "organizationalBrandings" = @{
