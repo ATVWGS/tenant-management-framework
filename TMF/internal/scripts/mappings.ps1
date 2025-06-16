@@ -6,7 +6,8 @@ $script:supportedResources = @{
     "groups" = @{
         "registerFunction" = (Get-Command Register-TmfGroup)
         "testFunction" = (Get-Command Test-TmfGroup)
-        "invokeFunction" = (Get-Command Invoke-TmfGroup)        
+        "invokeFunction" = (Get-Command Invoke-TmfGroup)
+        "exportFunction" = (Get-Command Export-TmfGroup)          
         "weight" = 10
     }
     "namedLocations" = @{

@@ -51,6 +51,7 @@
 		'Invoke-TmfTenant',
 		'Register-TmfStringMapping',
 		'Register-TmfGroup',
+		'Export-TmfGroup',
 		'Test-TmfGroup',
 		'Invoke-TmfGroup',
 		'Register-TmfNamedLocation',
