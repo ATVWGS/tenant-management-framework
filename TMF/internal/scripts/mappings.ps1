@@ -216,6 +216,7 @@ $script:supportedResources = @{
         "registerFunction" = (Get-Command Register-TmfOrganizationalBranding)
         "testFunction" = (Get-Command Test-TmfOrganizationalBranding)
         "invokeFunction" = (Get-Command Invoke-TmfOrganizationalBranding)
+        "exportFunction" = (Get-Command Export-TmfOrganizationalBranding)
         "weight" = 100
     }
     "crossTenantAccessPolicy" = @{

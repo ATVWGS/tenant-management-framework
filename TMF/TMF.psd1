@@ -133,6 +133,7 @@
 		'Test-TmfAuthenticationContextClassReference',
 		'Invoke-TmfAuthenticationContextClassReference',
 		'Register-TmfOrganizationalBranding',
+		'Export-TmfOrganizationalBranding',
 		'Test-TmfOrganizationalBranding',
 		'Invoke-TmfOrganizationalBranding',
 		'Register-TmfCrossTenantAccessPolicy',
