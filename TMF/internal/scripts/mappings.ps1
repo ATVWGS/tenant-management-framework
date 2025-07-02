@@ -247,6 +247,7 @@ $script:supportedResources = @{
         "registerFunction" = (Get-Command Register-TmfDirectorySetting)
         "testFunction" = (Get-Command Test-TmfDirectorySetting)
         "invokeFunction" = (Get-Command Invoke-TmfDirectorySetting)
+        "exportFunction" = (Get-Command Export-TmfDirectorySetting)
         "weight" = 4
     }
 

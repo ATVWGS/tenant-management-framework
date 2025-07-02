@@ -150,6 +150,7 @@
 		'Invoke-TmfCrossTenantAccessPartnerSetting',
 		'Test-TmfCrossTenantAccess',
 		'Invoke-TmfCrossTenantAccess',
+		'Export-TmfDirectorySetting',
 		'Register-TmfDirectorySetting',
 		'Test-TmfDirectorySetting',
 		'Invoke-TmfDirectorySetting'
