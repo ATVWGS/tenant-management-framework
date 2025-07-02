@@ -222,6 +222,7 @@ $script:supportedResources = @{
         "registerFunction" = (Get-Command Register-TmfCrossTenantAccessPolicy)
         "testFunction" = (Get-Command Test-TmfCrossTenantAccessPolicy)
         "invokeFunction" = (Get-Command Invoke-TmfCrossTenantAccessPolicy)
+        "exportFunction" = (Get-Command Export-TmfCrossTenantAccessPolicy)
         "parentType" = "crossTenantAccess"
         "weight" = 90
     }
@@ -229,6 +230,7 @@ $script:supportedResources = @{
         "registerFunction" = (Get-Command Register-TmfCrossTenantAccessDefaultSetting)
         "testFunction" = (Get-Command Test-TmfCrossTenantAccessDefaultSetting)
         "invokeFunction" = (Get-Command Invoke-TmfCrossTenantAccessDefaultSetting)
+        "exportFunction" = (Get-Command Export-TmfCrossTenantAccessDefaultSetting)
         "parentType" = "crossTenantAccess"
         "weight" = 91
     }
@@ -236,6 +238,7 @@ $script:supportedResources = @{
         "registerFunction" = (Get-Command Register-TmfCrossTenantAccessPartnerSetting)
         "testFunction" = (Get-Command Test-TmfCrossTenantAccessPartnerSetting)
         "invokeFunction" = (Get-Command Invoke-TmfCrossTenantAccessPartnerSetting)
+        "exportFunction" = (Get-Command Export-TmfCrossTenantAccessPartnerSetting)
         "parentType" = "crossTenantAccess"
         "weight" = 92
     }
