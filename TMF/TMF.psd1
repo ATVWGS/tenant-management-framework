@@ -83,6 +83,7 @@
 		'Register-TmfAccessReview',
 		'Test-TmfAccessReview',
 		'Invoke-TmfAccessReview',
+		'Export-TmfDirectoryRole',
 		'Register-TmfDirectoryRole',
 		'Test-TmfDirectoryRole',
 		'Invoke-TmfDirectoryRole',
