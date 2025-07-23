@@ -10,6 +10,9 @@ function Resolve-Subscription {
     begin {
 		$InputReference = Resolve-String -Text $InputReference
         $token = (Get-AzAccessToken -ResourceUrl $script:apiBaseUrl).Token
+		if ($token.GetType().Name -eq "SecureString") {
+			$token = $token | ConvertFrom-SecureString -AsPlainText
+		}
 	}
 	process
 	{			
