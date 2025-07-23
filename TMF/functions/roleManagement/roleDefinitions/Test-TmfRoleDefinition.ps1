@@ -75,6 +75,9 @@ function Test-TmfRoleDefinition
                 $roleDefinitionScope = "AzureResources"
                 Test-AzureConnection -Cmdlet $Cmdlet
                 $token = (Get-AzAccessToken -ResourceUrl $script:apiBaseUrl).Token
+                if ($token.GetType().Name -eq "SecureString") {
+                    $token = $token | ConvertFrom-SecureString -AsPlainText
+                }
             }
             else {
                 $roleDefinitionScope = "AzureAD"

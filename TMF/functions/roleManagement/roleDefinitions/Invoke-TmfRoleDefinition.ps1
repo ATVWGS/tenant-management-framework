@@ -84,7 +84,10 @@ function Invoke-TmfRoleDefinition
             if ($result.DesiredConfiguration.subscriptionReference) {
                 $roleDefinitionScope = "AzureResources"
                 Test-AzureConnection
-                $azureToken = (Get-AzAccessToken -ResourceUrl $script:apiBaseUrl).Token
+                $token = (Get-AzAccessToken -ResourceUrl $script:apiBaseUrl).Token
+                if ($token.GetType().Name -eq "SecureString") {
+                    $token = $token | ConvertFrom-SecureString -AsPlainText
+                }
             }
             else {
                 $roleDefinitionScope = "AzureAD"
@@ -108,7 +111,7 @@ function Invoke-TmfRoleDefinition
                                 $requestBody = $requestBody | ConvertTo-Json -Depth 5
                                 $guid = (New-Guid).Guid
         
-                                Invoke-RestMethod -Method $requestMethod -Uri "$($script:apiBaseUrl)$($subscriptionId.trimStart("/"))/providers/Microsoft.Authorization/roleDefinitions/$($guid)?api-version=2018-01-01-preview" -Headers @{"Authorization" = "Bearer $($azureToken)"} -Body $requestBody -ContentType "application/json"  | Out-Null
+                                Invoke-RestMethod -Method $requestMethod -Uri "$($script:apiBaseUrl)$($subscriptionId.trimStart("/"))/providers/Microsoft.Authorization/roleDefinitions/$($guid)?api-version=2018-01-01-preview" -Headers @{"Authorization" = "Bearer $($token)"} -Body $requestBody -ContentType "application/json"  | Out-Null
                                 Write-PSFMessage -Level Host -String "TMF.Invoke.ActionCompleted" -StringValues $result.Tenant, $result.ResourceType, $result.ResourceName, (Get-ActionColor -Action $result.ActionType), $result.ActionType
                             }
                             catch {
@@ -129,7 +132,7 @@ function Invoke-TmfRoleDefinition
                                 }
                                 $requestBody = $requestBody | ConvertTo-Json -Depth 5
         
-                                Invoke-RestMethod -Method $requestMethod -Uri "$($script:apiBaseUrl)$($result.GraphResource.id.trimStart("/"))?api-version=2018-01-01-preview" -Headers @{"Authorization" = "Bearer $($azureToken)"} -Body $requestBody -ContentType "application/json"  | Out-Null
+                                Invoke-RestMethod -Method $requestMethod -Uri "$($script:apiBaseUrl)$($result.GraphResource.id.trimStart("/"))?api-version=2018-01-01-preview" -Headers @{"Authorization" = "Bearer $($token)"} -Body $requestBody -ContentType "application/json"  | Out-Null
                                 Write-PSFMessage -Level Host -String "TMF.Invoke.ActionCompleted" -StringValues $result.Tenant, $result.ResourceType, $result.ResourceName, (Get-ActionColor -Action $result.ActionType), $result.ActionType
                             }
                             catch {
@@ -141,7 +144,7 @@ function Invoke-TmfRoleDefinition
                             try {
                                 $requestMethod = "DELETE"
         
-                                Invoke-RestMethod -Method $requestMethod -Uri "$($script:apiBaseUrl)$($result.GraphResource.id.trimStart("/"))?api-version=2018-01-01-preview" -Headers @{"Authorization" = "Bearer $($azureToken)"}  | Out-Null
+                                Invoke-RestMethod -Method $requestMethod -Uri "$($script:apiBaseUrl)$($result.GraphResource.id.trimStart("/"))?api-version=2018-01-01-preview" -Headers @{"Authorization" = "Bearer $($token)"}  | Out-Null
                                 Write-PSFMessage -Level Host -String "TMF.Invoke.ActionCompleted" -StringValues $result.Tenant, $result.ResourceType, $result.ResourceName, (Get-ActionColor -Action $result.ActionType), $result.ActionType
                             }
                             catch {

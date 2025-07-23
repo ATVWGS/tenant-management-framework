@@ -83,7 +83,10 @@ function Invoke-TmfRoleAssignment {
             if ($result.DesiredConfiguration.subscriptionReference) {
                 $assignmentScope = "AzureResources"
                 Test-AzureConnection
-                $azureToken = (Get-AzAccessToken -ResourceUrl $script:apiBaseUrl).Token
+                $token = (Get-AzAccessToken -ResourceUrl $script:apiBaseUrl).Token
+                if ($token.GetType().Name -eq "SecureString") {
+                    $token = $token | ConvertFrom-SecureString -AsPlainText
+                }
             }
             else {
                 if ($result.DesiredConfiguration.groupReference) {
@@ -173,7 +176,7 @@ function Invoke-TmfRoleAssignment {
                                 $requestBody = $requestBody | ConvertTo-Json -Depth 5
                                 switch ($result.DesiredConfiguration.type) {
                                     "eligible" {
-                                        Invoke-RestMethod -Method $requestMethod -Uri "$($script:apiBaseUrl)$($scopeId.trimStart("/"))/providers/Microsoft.Authorization/roleEligibilityScheduleRequests/$($guid)?api-version=2020-10-01-preview" -Headers @{"Authorization"="Bearer $($azureToken)"} -Body $requestBody -ContentType "application/json"  | Out-Null
+                                        Invoke-RestMethod -Method $requestMethod -Uri "$($script:apiBaseUrl)$($scopeId.trimStart("/"))/providers/Microsoft.Authorization/roleEligibilityScheduleRequests/$($guid)?api-version=2020-10-01-preview" -Headers @{"Authorization"="Bearer $($token)"} -Body $requestBody -ContentType "application/json"  | Out-Null
                                     }
                                     "active" {
                                         $requestBody = @{
@@ -183,7 +186,7 @@ function Invoke-TmfRoleAssignment {
                                             }
                                         }
                                         $requestBody = $requestBody | ConvertTo-Json -Depth 5
-                                        Invoke-RestMethod -Method $requestMethod -Uri "$($script:apiBaseUrl)$($scopeId.trimStart("/"))/providers/Microsoft.Authorization/roleAssignments/$($guid)?api-version=2018-01-01-preview" -Headers @{"Authorization"="Bearer $($azureToken)"} -Body $requestBody -ContentType "application/json"  | Out-Null
+                                        Invoke-RestMethod -Method $requestMethod -Uri "$($script:apiBaseUrl)$($scopeId.trimStart("/"))/providers/Microsoft.Authorization/roleAssignments/$($guid)?api-version=2018-01-01-preview" -Headers @{"Authorization"="Bearer $($token)"} -Body $requestBody -ContentType "application/json"  | Out-Null
                                     }
                                 }
                                 Write-PSFMessage -Level Host -String "TMF.Invoke.ActionCompleted" -StringValues $result.Tenant, $result.ResourceType, $result.ResourceName, (Get-ActionColor -Action $result.ActionType), $result.ActionType
@@ -265,10 +268,10 @@ function Invoke-TmfRoleAssignment {
                                 $guid = (New-Guid).Guid
                                 switch ($result.DesiredConfiguration.type) {
                                     "eligible" {
-                                        Invoke-RestMethod -Method $requestMethod -Uri "$($script:apiBaseUrl)$($result.AzureResource.properties.scope.trimStart("/"))/providers/Microsoft.Authorization/roleEligibilityScheduleRequests/$($guid)?api-version=2020-10-01-preview" -Headers @{"Authorization"="Bearer $($azureToken)"} -Body $requestBody -ContentType "application/json"  | Out-Null
+                                        Invoke-RestMethod -Method $requestMethod -Uri "$($script:apiBaseUrl)$($result.AzureResource.properties.scope.trimStart("/"))/providers/Microsoft.Authorization/roleEligibilityScheduleRequests/$($guid)?api-version=2020-10-01-preview" -Headers @{"Authorization"="Bearer $($token)"} -Body $requestBody -ContentType "application/json"  | Out-Null
                                     }
                                     "active" {
-                                        Invoke-RestMethod -Method $requestMethod -Uri "$($script:apiBaseUrl)$($result.AzureResource.properties.scope.trimStart("/"))/providers/Microsoft.Authorization/roleAssignmentScheduleRequests/$($guid)?api-version=2020-10-01-preview" -Headers @{"Authorization"="Bearer $($azureToken)"} -Body $requestBody -ContentType "application/json"  | Out-Null
+                                        Invoke-RestMethod -Method $requestMethod -Uri "$($script:apiBaseUrl)$($result.AzureResource.properties.scope.trimStart("/"))/providers/Microsoft.Authorization/roleAssignmentScheduleRequests/$($guid)?api-version=2020-10-01-preview" -Headers @{"Authorization"="Bearer $($token)"} -Body $requestBody -ContentType "application/json"  | Out-Null
                                     }
                                 }
                                 Write-PSFMessage -Level Host -String "TMF.Invoke.ActionCompleted" -StringValues $result.Tenant, $result.ResourceType, $result.ResourceName, (Get-ActionColor -Action $result.ActionType), $result.ActionType
@@ -307,11 +310,11 @@ function Invoke-TmfRoleAssignment {
                                 $guid = (New-Guid).Guid
                                 switch ($result.DesiredConfiguration.type) {
                                     "eligible" {
-                                        Invoke-RestMethod -Method $requestMethod -Uri "$($script:apiBaseUrl)$($result.GraphResource.properties.scope.trimStart("/"))/providers/Microsoft.Authorization/roleEligibilityScheduleRequests/$($guid)?api-version=2020-10-01-preview" -Headers @{"Authorization" = "Bearer $($azureToken)"} -Body $requestBody -ContentType "application/json" | Out-Null
+                                        Invoke-RestMethod -Method $requestMethod -Uri "$($script:apiBaseUrl)$($result.GraphResource.properties.scope.trimStart("/"))/providers/Microsoft.Authorization/roleEligibilityScheduleRequests/$($guid)?api-version=2020-10-01-preview" -Headers @{"Authorization" = "Bearer $($token)"} -Body $requestBody -ContentType "application/json" | Out-Null
                                     }
                                     "active" {
                                         $requestMethod = "DELETE"
-                                        Invoke-RestMethod -Method $requestMethod -Uri "$($script:apiBaseUrl)$($result.GraphResource.id.trimStart("/"))?api-version=2018-01-01-preview" -Headers @{"Authorization" = "Bearer $($azureToken)"}  | Out-Null
+                                        Invoke-RestMethod -Method $requestMethod -Uri "$($script:apiBaseUrl)$($result.GraphResource.id.trimStart("/"))?api-version=2018-01-01-preview" -Headers @{"Authorization" = "Bearer $($token)"}  | Out-Null
                                     }
                                 }
                                 Write-PSFMessage -Level Host -String "TMF.Invoke.ActionCompleted" -StringValues $result.Tenant, $result.ResourceType, $result.ResourceName, (Get-ActionColor -Action $result.ActionType), $result.ActionType                        
