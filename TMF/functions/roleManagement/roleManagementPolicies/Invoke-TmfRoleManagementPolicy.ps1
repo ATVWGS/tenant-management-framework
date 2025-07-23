@@ -83,6 +83,9 @@ function Invoke-TmfRoleManagementPolicy {
                 $assignmentScope = "AzureResources"
                 Test-AzureConnection -Cmdlet $Cmdlet
                 $token = (Get-AzAccessToken -ResourceUrl $script:apiBaseUrl).Token
+                if ($token.GetType().Name -eq "SecureString") {
+                    $token = $token | ConvertFrom-SecureString -AsPlainText
+                }
             }
             else {
                 if ($result.DesiredConfiguration.scopeType -eq "group") {
