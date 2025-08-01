@@ -84,7 +84,8 @@ function Invoke-TmfRoleManagementPolicy {
                 Test-AzureConnection -Cmdlet $Cmdlet
                 $token = (Get-AzAccessToken -ResourceUrl $script:apiBaseUrl).Token
                 if ($token.GetType().Name -eq "SecureString") {
-                    $token = $token | ConvertFrom-SecureString -AsPlainText
+                    $bstr = [System.Runtime.InteropServices.Marshal]::SecureStringToBSTR($token)
+                    $token = [System.Runtime.InteropServices.Marshal]::PtrToStringAuto($bstr)
                 }
             }
             else {
