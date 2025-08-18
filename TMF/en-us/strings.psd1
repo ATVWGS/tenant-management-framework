@@ -17,7 +17,15 @@
     'TMF.UserCanceled' = 'User canceled the operation.'
     'TMF.Error.QueryWithFilterFailed' = 'Query with filter {0} failed.'
 
-    'TMF.Export.NotFound' = 'Resource {0} of type {1} not found in tenant {2}.'
+    'TMF.ResourceTypes' = 'Exporting role management resource types: {0}'
+    'TMF.RoleAssignment.Exporting' = 'Exporting role assignments for scope: {0}'
+    'TMF.RoleAssignment.Retrieved' = 'Retrieved {0} role assignments'
+    'TMF.RoleAssignment.ActiveAssignmentsError' = 'Error retrieving active role assignments: {0}'
+    'TMF.RoleAssignment.EligibleAssignmentsError' = 'Error retrieving eligible role assignments: {0}'
+    'TMF.RoleAssignment.RoleDefinitionNotFound' = 'Role definition with ID {0} not found'
+    'TMF.StartingExportForResource' = 'Starting export for resource type: {0}'
+    'TMF.ExportCompleted' = 'Export completed for resource type: {0}'
+    'TMF.AllExportsCompleted' = 'All exports completed successfully'
 
     'TMF.Register.PropertySetNotPossible' = 'The provided property set for "{0}" (Type: {1}) is not applicable.'
     'TMF.Register.PropertyWrongType' = 'The provided property set for "{0}" (Type: {1}) is not applicable. The child property {2} has the wrong type. Must be {3} and is {4}.'
@@ -28,7 +36,19 @@
     'TMF.Test.MissingPolicyRuleTemplate' = 'Referenced policy rule template {1} for {0} not found.'
     'TMF.Test.DeleteNotPossible' = 'Not possible to delete resources of type {0}. Please change parameter present of {1} from false to true.'
     'TMF.Test.UpdateNotPossibleForBuiltInResources' = 'It is not possible to update built-in resources of type ''{0}''. Please remove ''{1}'' from configuration.'
-    'TMF.Test.DeleteNotPossibleForBuiltInResources' = 'It is not possible to delete built-in resources of type ''{0}''. Please remove ''{1}'' from configuration.'
+
+    'TMF.Export.NotFound' = 'Resource {0} of type {1} not found in tenant {2}.'
+    'TMF.Export.FileWriteFailed' = 'Failed to write export file {0}. Error: {1}'
+    'TMF.Export.FileDownloadFailed' = 'Failed to download export file {0}. Error: {1}'
+    'TMF.Export.FileDownloadSuccess' = 'Successfully downloaded export file {0}.'
+    'TMF.Export.DownloadingFile' = 'Downloading export file {0}...'
+    'TMF.Export.LocalizationsNotFound' = 'No localizations found for export file {0}.'
+    'TMF.Export.TryingLegacyFilesAPI' = 'Trying to use legacy files API for export file {0}.'
+    'TMF.Export.FileRetrievalFailed' = 'Failed to retrieve export file {0}. Error: {1}'
+    'TMF.Export.ResourceProcessed' = 'Export file {0} has been processed successfully.'
+    'TMF.Export.CreatedDirectory' = 'Created directory for export file {0}.'
+    'TMF.Export.Completed' = 'Export process completed successfully.'   
+
 
     'TMF.Invoke.ActionTypeUnknown' = 'Action type (<c="yellow">{0}</c>) is unknown!'
     'TMF.Invoke.ActionFailed' = '[Tenant: <c="gray">{0}</c>][{1} Resource: <c="gray">{2}</c>] Action ({3}) failed! Stopping actions.'

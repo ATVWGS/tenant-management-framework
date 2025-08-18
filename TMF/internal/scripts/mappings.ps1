@@ -10,6 +10,13 @@ $script:supportedResources = @{
         "exportFunction" = (Get-Command Export-TmfGroup)          
         "weight" = 10
     }
+    "users" = @{
+        "registerFunction" = (Get-Command Register-TmfUser)
+        "testFunction" = (Get-Command Test-TmfUser)
+        "invokeFunction" = (Get-Command Invoke-TmfUser)
+        "exportFunction" = (Get-Command Export-TmfUser)
+        "weight" = 11
+    }
     "namedLocations" = @{
         "registerFunction" = (Get-Command Register-TmfNamedLocation)
         "testFunction" = (Get-Command Test-TmfNamedLocation)
@@ -56,12 +63,14 @@ $script:supportedResources = @{
         "registerFunction" = (Get-Command Register-TmfAccessPackageCatalog)
         "testFunction" = (Get-Command Test-TmfAccessPackageCatalog)
         "invokeFunction" = (Get-Command Invoke-TmfAccessPackageCatalog)
+    "exportFunction" = (Get-Command Export-TmfAccessPackageCatalog)
         "parentType" = "entitlementManagement"
         "weight" = 54
     }
     "accessPackageResources" = @{
         "testFunction" = (Get-Command Test-TmfAccessPackageResource)
         "invokeFunction" = (Get-Command Invoke-TmfAccessPackageResource)
+    "exportFunction" = (Get-Command Export-TmfAccessPackageResource)
         "parentType" = "entitlementManagement"
         "weight" = 55
     }
@@ -69,12 +78,14 @@ $script:supportedResources = @{
         "registerFunction" = (Get-Command Register-TmfAccessPackage)
         "testFunction" = (Get-Command Test-TmfAccessPackage)
         "invokeFunction" = (Get-Command Invoke-TmfAccessPackage)
+    "exportFunction" = (Get-Command Export-TmfAccessPackage)
         "parentType" = "entitlementManagement"
         "weight" = 56
     }
     "accessPackageAssignmentPolicies" = @{     
         "testFunction" = (Get-Command Test-TmfAccessPackageAssignmentPolicy)
         "invokeFunction" = (Get-Command Invoke-TmfAccessPackageAssignmentPolicy)
+    "exportFunction" = (Get-Command Export-TmfAccessPackageAssignmentPolicy)
         "validateFunctions" = @{
             "reviewSettings" = (Get-Command Validate-AssignmentReviewSettings)
             "requestApprovalSettings" = (Get-Command Validate-RequestApprovalSettings)
@@ -101,6 +112,7 @@ $script:supportedResources = @{
         "registerFunction" = (Get-Command Register-TmfAccessReview)
         "testFunction" = (Get-Command Test-TmfAccessReview)
         "invokeFunction" = (Get-Command Invoke-TmfAccessReview)
+    "exportFunction" = (Get-Command Export-TmfAccessReview)
         "validateFunctions" = @{
             "scope" = (Get-Command Validate-AccessReviewScope)
             "settings" = (Get-Command Validate-AccessReviewSettings)
@@ -123,6 +135,7 @@ $script:supportedResources = @{
         "registerFunction" = (Get-Command Register-TmfRoleManagementPolicy)
         "testFunction" = (Get-Command Test-TmfRoleManagementPolicy)
         "invokeFunction" = (Get-Command Invoke-TmfRoleManagementPolicy)
+    "exportFunction" = (Get-Command Export-TmfRoleManagementPolicy)
         "parentType" = "roleManagement"
         "weight" = 17
     }
@@ -130,6 +143,7 @@ $script:supportedResources = @{
         "registerFunction" = (Get-Command Register-TmfRoleAssignment)
         "testFunction" = (Get-Command Test-TmfRoleAssignment)
         "invokeFunction" = (Get-Command Invoke-TmfRoleAssignment)
+    "exportFunction" = (Get-Command Export-TmfRoleAssignment)
         "parentType" = "roleManagement"
         "weight" = 18
     }
@@ -137,6 +151,7 @@ $script:supportedResources = @{
         "registerFunction" = (Get-Command Register-TmfRoleDefinition)
         "testFunction" = (Get-Command Test-TmfRoleDefinition)
         "invokeFunction" = (Get-Command Invoke-TmfRoleDefinition)
+    "exportFunction" = (Get-Command Export-TmfRoleDefinition)
         "parentType" = "roleManagement"
         "weight" = 15
     }
@@ -149,6 +164,7 @@ $script:supportedResources = @{
         "registerFunction" = (Get-Command Register-TmfAppManagementPolicy)
         "testFunction" = (Get-Command Test-TmfAppManagementPolicy)
         "invokeFunction" = (Get-Command Invoke-TmfAppManagementPolicy)
+    "exportFunction" = (Get-Command Export-TmfAppManagementPolicy)
         "parentType" = "policies"
         "weight" = 6
     }
@@ -156,6 +172,7 @@ $script:supportedResources = @{
         "registerFunction" = (Get-Command Register-TmfAuthenticationFlowsPolicy)
         "testFunction" = (Get-Command Test-TmfAuthenticationFlowsPolicy)
         "invokeFunction" = (Get-Command Invoke-TmfAuthenticationFlowsPolicy)
+    "exportFunction" = (Get-Command Export-TmfAuthenticationFlowsPolicy)
         "parentType" = "policies"
         "weight" = 5
     }
@@ -163,6 +180,7 @@ $script:supportedResources = @{
         "registerFunction" = (Get-Command Register-TmfAuthenticationMethodsPolicy)
         "testFunction" = (Get-Command Test-TmfAuthenticationMethodsPolicy)
         "invokeFunction" = (Get-Command Invoke-TmfAuthenticationMethodsPolicy)
+    "exportFunction" = (Get-Command Export-TmfAuthenticationMethodsPolicy)
         "parentType" = "policies"
         "weight" = 6
     }
@@ -170,6 +188,7 @@ $script:supportedResources = @{
         "registerFunction" = (Get-Command Register-TmfAuthorizationPolicy)
         "testFunction" = (Get-Command Test-TmfAuthorizationPolicy)
         "invokeFunction" = (Get-Command Invoke-TmfAuthorizationPolicy)
+    "exportFunction" = (Get-Command Export-TmfAuthorizationPolicy)
         "parentType" = "policies"
         "weight" = 7
     }
@@ -177,6 +196,7 @@ $script:supportedResources = @{
         "registerFunction" = (Get-Command Register-TmfAuthenticationStrengthPolicy)
         "testFunction" = (Get-Command Test-TmfAuthenticationStrengthPolicy)
         "invokeFunction" = (Get-Command Invoke-TmfAuthenticationStrengthPolicy)
+    "exportFunction" = (Get-Command Export-TmfAuthenticationStrengthPolicy)
         "parentType" = "policies"
         "weight" = 8
     }
@@ -184,6 +204,7 @@ $script:supportedResources = @{
         "registerFunction" = (Get-Command Register-TmfTenantAppManagementPolicy)
         "testFunction" = (Get-Command Test-TmfTenantAppManagementPolicy)
         "invokeFunction" = (Get-Command Invoke-TmfTenantAppManagementPolicy)
+    "exportFunction" = (Get-Command Export-TmfTenantAppManagementPolicy)
         "parentType" = "policies"
         "weight" = 5
     }
@@ -191,6 +212,7 @@ $script:supportedResources = @{
         "registerFunction" = (Get-Command Register-TmfAttributeSet)
         "testFunction" = (Get-Command Test-TmfAttributeSet)
         "invokeFunction" = (Get-Command Invoke-TmfAttributeSet)
+    "exportFunction" = (Get-Command Export-TmfAttributeSet)
         "parentType" = "customSecurityAttributes"
         "weight" = 40
     }
@@ -198,6 +220,7 @@ $script:supportedResources = @{
         "registerFunction" = (Get-Command Register-TmfCustomSecurityAttributeDefinition)
         "testFunction" = (Get-Command Test-TmfCustomSecurityAttributeDefinition)
         "invokeFunction" = (Get-Command Invoke-TmfCustomSecurityAttributeDefinition)
+    "exportFunction" = (Get-Command Export-TmfCustomSecurityAttributeDefinition)
         "parentType" = "customSecurityAttributes"
         "weight" = 41
     }
@@ -205,6 +228,7 @@ $script:supportedResources = @{
         "registerFunction" = (Get-Command Register-TmfCustomSecurityAttributeAllowedValue)
         "testFunction" = (Get-Command Test-TmfCustomSecurityAttributeAllowedValue)
         "invokeFunction" = (Get-Command Invoke-TmfCustomSecurityAttributeAllowedValue)
+    "exportFunction" = (Get-Command Export-TmfCustomSecurityAttributeAllowedValue)
         "parentType" = "customSecurityAttributes"
         "weight" = 42
     }
