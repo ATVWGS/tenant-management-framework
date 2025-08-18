@@ -1,76 +1,79 @@
+<#
+.SYNOPSIS
+Exports authentication context class references.
+.DESCRIPTION
+Retrieves authenticationContextClassReferences (v1.0 with beta fallback) merging missing properties. Returns objects unless -OutPutPath supplied.
+.PARAMETER SpecificResources
+Optional list of IDs or display names (comma separated accepted) to filter.
+.PARAMETER OutPutPath
+Root folder to write export; when omitted objects are returned.
+.PARAMETER ForceBeta
+Force beta endpoint usage.
+.PARAMETER Cmdlet
+Internal pipeline parameter; do not supply manually.
+.EXAMPLE
+Export-TmfAuthenticationContextClassReference -OutPutPath C:\temp\tmf
+.EXAMPLE
+Export-TmfAuthenticationContextClassReference -SpecificResources 'c1','HighRisk'
+#>
 function Export-TmfAuthenticationContextClassReference {
-    [CmdletBinding()]
-    Param(
-        [string[]]$SpecificResources,
-        [string]$OutPutPath,
-        [System.Management.Automation.PSCmdlet]$Cmdlet = $PSCmdlet
+    [CmdletBinding()] Param(
+        [string[]] $SpecificResources,
+        [string] $OutPutPath,
+        [switch] $ForceBeta,
+        [System.Management.Automation.PSCmdlet] $Cmdlet = $PSCmdlet
     )
     begin {
         Test-GraphConnection -Cmdlet $Cmdlet
         $resourceName = 'authenticationContextClassReferences'
-        $tenant = (Invoke-MgGraphRequest -Method GET -Uri ("$script:graphBaseUrl/organization?`$select=displayname,id")).value
-        $accrExport = @()
-
-        function Convert-Value {
-            param([string] $Value)
-            if ($null -eq $Value) { return $null }
-            if ($Value -match '^(?i:true|false)$') { return [System.Convert]::ToBoolean($Value) }
-            if ($Value -match '^[-]?\d+$') { return [int] $Value }
-            return $Value
-        }
-
-        function Convert-ACCR {
-            param([object]$Ref)
-            $export = [ordered]@{
-                displayName = $Ref.displayName
-                id          = $Ref.id
-            }
-            if ($Ref.PSObject.Properties['description']) { $export.description = $Ref.description }
-            $export.isAvailable = Convert-Value $Ref.isAvailable
-            $export.present     = $true
-            return $export
-        }
-
+        $graphV1 = if ($script:graphBaseUrl1) { $script:graphBaseUrl1 } elseif ($script:graphBaseUrl -match '/beta$') { 'https://graph.microsoft.com/v1.0' } else { $script:graphBaseUrl }
+        if (-not $graphV1) { $graphV1 = 'https://graph.microsoft.com/v1.0' }
+        $graphBeta = if ($script:graphBaseUrlBeta) { $script:graphBaseUrlBeta } else { 'https://graph.microsoft.com/beta' }
+        try { $tenant = (Invoke-MgGraphRequest -Method GET -Uri ("$graphV1/organization?`$select=displayName,id") -ErrorAction Stop).value } catch { try { $tenant = (Invoke-MgGraphRequest -Method GET -Uri ("$graphBeta/organization?`$select=displayName,id") -ErrorAction Stop).value } catch { $tenant = @(@{ displayName='Unknown'; id='' }) } }
+        $accrExport=@()
+        function Convert-Value { param([string]$Value) if ($null -eq $Value) { return $null }; if ($Value -match '^(?i:true|false)$') { return [bool]$Value }; if ($Value -match '^[-]?\d+$') { return [int]$Value }; return $Value }
+        function Convert-ACCR { param([object]$Ref) $e=[ordered]@{ displayName=$Ref.displayName; id=$Ref.id; isAvailable=(Convert-Value $Ref.isAvailable); present=$true }; if ($Ref.PSObject.Properties['description']) { $e.description=$Ref.description }; return $e }
+        function Get-Paged { param([string]$Base) $all=@(); $uri="$Base/identity/conditionalAccess/authenticationContextClassReferences?"; while ($uri) { $resp = Invoke-MgGraphRequest -Method GET -Uri $uri -ErrorAction Stop; if ($resp.value) { $all += $resp.value }; $uri = $resp.'@odata.nextLink' }; return $all }
         function Get-AllReferences {
-            $list = @()
-            $resp = Invoke-MgGraphRequest -Method GET -Uri "$script:graphBaseUrl/identity/conditionalAccess/authenticationContextClassReferences?`$top=999"
-            if ($resp.keys -contains '@odata.nextLink') {
-                do {
-                    $list += $resp.value
-                    $resp = Invoke-MgGraphRequest -Method GET -Uri $resp.'@odata.nextLink'
-                } while ($resp.'@odata.nextLink')
-            } else {
-                $list += $resp.value
+            $list = @(); $usedBeta = $false
+            if (-not $ForceBeta) {
+                try { $list = Get-Paged -Base $graphV1 }
+                catch { Write-PSFMessage -Level Verbose -Message ('v1.0 retrieval failed: {0}' -f $_.Exception.Message) }
             }
+            $needBeta = $ForceBeta.IsPresent -or ($list.Count -eq 0) -or ($list | Where-Object { -not ($_.PSObject.Properties.Name -contains 'isAvailable') })
+            if ($needBeta) {
+                try {
+                    $betaList = Get-Paged -Base $graphBeta
+                    if ($betaList.Count -gt 0) {
+                        if ($list.Count -eq 0) { $list = $betaList }
+                        else {
+                            foreach ($b in $betaList) {
+                                $existing = $list | Where-Object { $_.id -eq $b.id }
+                                if ($existing) {
+                                    if (-not ($existing.PSObject.Properties.Name -contains 'isAvailable') -and ($b.PSObject.Properties.Name -contains 'isAvailable')) { $existing | Add-Member -NotePropertyName isAvailable -NotePropertyValue $b.isAvailable -Force }
+                                    if (-not ($existing.PSObject.Properties.Name -contains 'description') -and ($b.PSObject.Properties.Name -contains 'description')) { $existing | Add-Member -NotePropertyName description -NotePropertyValue $b.description -Force }
+                                }
+                                else { $list += $b }
+                            }
+                        }
+                    }
+                    $usedBeta = $true
+                }
+                catch { Write-PSFMessage -Level Verbose -Message ('beta retrieval failed: {0}' -f $_.Exception.Message) }
+            }
+            if ($usedBeta) { Write-PSFMessage -Level Verbose -Message 'Returned data includes beta fallback.' }
+            else { Write-PSFMessage -Level Verbose -Message 'Returned data from v1.0 only.' }
             return $list
         }
     }
     process {
-        if ($SpecificResources) {
-            $identifiers = @()
-            foreach ($entry in $SpecificResources) {
-                $identifiers += $entry -split ',' | ForEach-Object { $_.Trim() } | Where-Object { $_ }
-            }
-            $identifiers = $identifiers | Select-Object -Unique
-            $allRefs = Get-AllReferences
-
-            foreach ($idOrName in $identifiers) {
-                $match = $allRefs | Where-Object { $_.id -eq $idOrName -or $_.displayName -eq $idOrName }
-                if ($match) {
-                    foreach ($m in $match) { $accrExport += Convert-ACCR $m }
-                } else {
-                    Write-PSFMessage -Level Warning -FunctionName 'Export-TmfAuthenticationContextClassReference' -String 'TMF.Export.NotFound' -StringValues $idOrName,$resourceName,$tenant.displayName
-                }
-            }
-        } else {
-            $all = Get-AllReferences
-            foreach ($r in $all) { $accrExport += Convert-ACCR $r }
-        }
+        if ($SpecificResources) { $ids=@(); foreach ($entry in $SpecificResources) { $ids += $entry -split ',' | ForEach-Object { $_.Trim() } | Where-Object { $_ } }; $ids = $ids | Select-Object -Unique; $allRefs = Get-AllReferences; foreach ($idOrName in $ids) { $match = $allRefs | Where-Object { $_.id -eq $idOrName -or $_.displayName -eq $idOrName }; if ($match) { foreach ($m in $match) { $accrExport += Convert-ACCR $m } } else { Write-PSFMessage -Level Warning -FunctionName 'Export-TmfAuthenticationContextClassReference' -String 'TMF.Export.NotFound' -StringValues $idOrName,$resourceName,$tenant.displayName } } } else { foreach ($r in (Get-AllReferences)) { $accrExport += Convert-ACCR $r } }
     }
     end {
-        if (-not (Test-Path "$OutPutPath/$($resourceName)")) {
-            New-Item -Path $OutPutPath -Name $resourceName -ItemType Directory -Force | Out-Null
-        }
-        $accrExport | ConvertTo-Json -Depth 10 | Out-File -FilePath "$OutPutPath/$($resourceName)/$($resourceName).json" -Encoding utf8 -Force
+        Write-PSFMessage -Level Verbose -FunctionName 'Export-TmfAuthenticationContextClassReference' -Message "Exporting $($accrExport.Count) authentication context class reference(s)"
+        if (-not $OutPutPath) { return $accrExport }
+        $targetDir = Join-Path -Path $OutPutPath -ChildPath $resourceName
+        if (-not (Test-Path -LiteralPath $targetDir)) { New-Item -Path $OutPutPath -Name $resourceName -ItemType Directory -Force | Out-Null }
+        $accrExport | ConvertTo-Json -Depth 15 | Out-File -FilePath (Join-Path $targetDir "$resourceName.json") -Encoding utf8 -Force
     }
 }

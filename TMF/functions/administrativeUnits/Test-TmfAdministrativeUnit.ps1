@@ -190,7 +190,7 @@ function Test-TmfAdministrativeUnit
 											if (-Not $identityId) {
 												$identityId = Resolve-ServicePrincipal -InputReference $_.identity -Cmdlet $Cmdlet -DontFailIfNotExisting
 												if (-Not $identityId) {
-													$identityId = Resolve-ApplicationId -InputReference $_.identity -Cmdlet $Cmdlet -DontFailIfNotExisting
+													$identityId = Resolve-Application -InputReference $_.identity -ReturnObjectId -DontFailIfNotExisting -Cmdlet $Cmdlet
 													if (-Not $identityId) {
 														$Cmdlet.ThrowTerminatingError("Cannot resolve $($_.identity) as user, group, application or serviceprincipal")
 													}
