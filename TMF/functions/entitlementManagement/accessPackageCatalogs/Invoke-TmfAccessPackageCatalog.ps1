@@ -77,7 +77,7 @@ function Invoke-TmfAccessPackageCatalog
 			Beautify-TmfTestResult -TestResult $result -FunctionName $MyInvocation.MyCommand
 			switch ($result.ActionType) {
 				"Create" {
-					$requestUrl = "$script:graphBaseUrl/identityGovernance/entitlementManagement/accessPackageCatalogs"
+					$requestUrl = "$script:graphBaseUrl/identityGovernance/entitlementManagement/catalogs"
 					$requestMethod = "POST"
 					$requestBody = @{						
 						"displayName" = $result.DesiredConfiguration.displayName
@@ -95,7 +95,7 @@ function Invoke-TmfAccessPackageCatalog
 					}
 				}
 				"Delete" {
-					$requestUrl = "$script:graphBaseUrl/identityGovernance/entitlementManagement/accessPackageCatalogs/{0}" -f $result.GraphResource.Id
+					$requestUrl = "$script:graphBaseUrl/identityGovernance/entitlementManagement/catalogs/{0}" -f $result.GraphResource.Id
 					$requestMethod = "DELETE"
 					try {
 						Write-PSFMessage -Level Verbose -String "TMF.Invoke.SendingRequest" -StringValues $requestMethod, $requestUrl
@@ -107,7 +107,7 @@ function Invoke-TmfAccessPackageCatalog
 					}
 				}
 				"Update" {
-					$requestUrl = "$script:graphBaseUrl/identityGovernance/entitlementManagement/accessPackageCatalogs/{0}" -f $result.GraphResource.Id
+					$requestUrl = "$script:graphBaseUrl/identityGovernance/entitlementManagement/catalogs/{0}" -f $result.GraphResource.Id
 					$requestMethod = "PATCH"
 					$requestBody = @{}
 					foreach ($change in $result.Changes) {						

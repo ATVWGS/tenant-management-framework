@@ -104,7 +104,7 @@ function Invoke-TmfAccessPackage
 							"Application" {
 								$catalogID = Resolve-AccessPackageCatalog -InputReference $result.DesiredConfiguration.catalog
 								$accessPackageResourceId = Resolve-AccessPackageResource -InputReference $roleScope.resourceIdentifier -CatalogId $catalogID
-								$roleOriginId = (Invoke-MgGraphRequest -Method GET -Uri ("$script:graphBaseUrl/identityGovernance/entitlementManagement/accessPackageCatalogs/{0}/accessPackageResourceRoles?`$filter=(originSystem eq 'AadApplication' and accessPackageResource/id eq '{1}' and displayname eq '{2}')" -f $catalogID,$accessPackageResourceId,$roleScope.resourceRole)).value.originId
+								$roleOriginId = (Invoke-MgGraphRequest -Method GET -Uri ("$script:graphBaseUrl/identityGovernance/entitlementManagement/catalogs/{0}/accessPackageResourceRoles?`$filter=(originSystem eq 'AadApplication' and accessPackageResource/id eq '{1}' and displayname eq '{2}')" -f $catalogID,$accessPackageResourceId,$roleScope.resourceRole)).value.originId
 							}
 						}
 						$requestBody = @{
