@@ -1,43 +1,33 @@
-function Resolve-AccessPackage
-{
+function Resolve-AccessPackage {
 	[CmdletBinding()]
 	Param (
 		[Parameter(Mandatory = $true)]
 		[string] $InputReference,
 		[switch] $DontFailIfNotExisting,
 		[switch] $SearchInDesiredConfiguration,
+		[switch] $Expand, # Return object { id, displayName }
+		[switch] $DisplayName,
 		[System.Management.Automation.PSCmdlet]
 		$Cmdlet = $PSCmdlet
 	)
-	
-	begin {
-		$InputReference = Resolve-String -Text $InputReference
-	}
-	process
-	{			
+	begin { $InputReference = Resolve-String -Text $InputReference; if (-not $script:accessPackageDetailCache) { $script:accessPackageDetailCache = @{} } }
+	process {
 		try {
+			if ($Expand -and $script:accessPackageDetailCache.ContainsKey($InputReference)) { return $script:accessPackageDetailCache[$InputReference] }
+			$detail = $null; $pkgId = $null
 			if ($InputReference -match $script:guidRegex) {
-				$package = (Invoke-MgGraphRequest -Method GET -Uri ("$script:graphBaseUrl/identityGovernance/entitlementManagement/accessPackages/{0}" -f $InputReference)).Id
+				$detail = Invoke-MgGraphRequest -Method GET -Uri ("$script:graphBaseUrl/identityGovernance/entitlementManagement/accessPackages/{0}?`$select=id,displayName" -f $InputReference)
+				$pkgId = $detail.id
+			} else {
+				$detail = (Invoke-MgGraphRequest -Method GET -Uri ("$script:graphBaseUrl/identityGovernance/entitlementManagement/accessPackages/?`$filter=displayName eq '{0}'&`$select=id,displayName" -f $InputReference)).value | Select-Object -First 1
+				$pkgId = $detail.id
 			}
-			else {
-				$package = (Invoke-MgGraphRequest -Method GET -Uri ("$script:graphBaseUrl/identityGovernance/entitlementManagement/accessPackages/?`$filter=displayName eq '{0}'" -f $InputReference)).Value.Id
-			}
-
-			if (-Not $package -and $SearchInDesiredConfiguration) {
-				if ($InputReference -in $script:desiredConfiguration["accessPackages"].displayName) {
-					$package = $InputReference
-				}
-			}
-
-			if (-Not $package -and -Not $DontFailIfNotExisting){ throw "Cannot find accessPackage $InputReference" }
-			elseif (-Not $package -and $DontFailIfNotExisting) { return }
-
-			if ($package.count -gt 1) { throw "Got multiple accessPackages for $InputReference" }
-			return $package
-		}
-		catch {
-			Write-PSFMessage -Level Warning -String 'TMF.CannotResolveResource' -StringValues "Group" -Tag 'failed' -ErrorRecord $_
-			$Cmdlet.ThrowTerminatingError($_)				
-		}
-	}	
+			if (-not $pkgId -and $SearchInDesiredConfiguration) { if ($InputReference -in $script:desiredConfiguration['accessPackages'].displayName) { $pkgId = $InputReference } }
+			if (-not $pkgId) { if ($DontFailIfNotExisting) { return $InputReference } else { throw "Cannot find accessPackage $InputReference" } }
+			if (-not $Expand) { if ($DisplayName) { return ($detail.displayName ?? $InputReference) } return $pkgId }
+			$obj = [pscustomobject]@{ id=$pkgId; displayName=$detail.displayName }
+			foreach ($k in @($obj.id,$obj.displayName)) { if ($k -and -not $script:accessPackageDetailCache.ContainsKey($k)) { $script:accessPackageDetailCache[$k] = $obj } }
+			return $obj
+		} catch { if ($DontFailIfNotExisting) { Write-PSFMessage -Level Warning -Message ("Cannot resolve AccessPackage resource for input '{0}'. Searched tenant & desired configuration. Error: {1}" -f $InputReference,$_.Exception.Message) -Tag failed -ErrorRecord $_; return $InputReference } else { Write-PSFMessage -Level Warning -Message ("Cannot resolve AccessPackage resource for input '{0}'. Searched tenant & desired configuration. Error: {1}" -f $InputReference,$_.Exception.Message) -Tag failed -ErrorRecord $_; $Cmdlet.ThrowTerminatingError($_) } }
+	}
 }

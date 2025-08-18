@@ -1,46 +1,37 @@
-function Resolve-AdministrativeUnit
-{
+function Resolve-AdministrativeUnit {
 	[CmdletBinding()]
 	Param (
 		[Parameter(Mandatory = $true)]
 		[string] $InputReference,
 		[switch] $DontFailIfNotExisting,
 		[switch] $SearchInDesiredConfiguration,
+		[switch] $Expand, # Return object { id, displayName }
+		[switch] $DisplayName,
 		[System.Management.Automation.PSCmdlet]
 		$Cmdlet = $PSCmdlet
 	)
-	
 	begin {
 		$InputReference = Resolve-String -Text $InputReference
+		if (-not $script:administrativeUnitDetailCache) { $script:administrativeUnitDetailCache = @{} }
 	}
-	process
-	{			
+	process {
 		try {
+			if ($InputReference -eq 'All') { if ($Expand) { return [pscustomobject]@{ id='All'; displayName='All' } } return 'All' }
+			if ($Expand -and $script:administrativeUnitDetailCache.ContainsKey($InputReference)) { return $script:administrativeUnitDetailCache[$InputReference] }
+			$detail = $null; $auId = $null
 			if ($InputReference -match $script:guidRegex) {
-				$administrativeUnit = (Invoke-MgGraphRequest -Method GET -Uri ("$script:graphBaseUrl/administrativeUnits?`$filter=id eq '{0}'" -f $InputReference)).Id
+				try { $detail = Invoke-MgGraphRequest -Method GET -Uri ("$script:graphBaseUrl/administrativeUnits/{0}?`$select=id,displayName" -f $InputReference) } catch { $detail=$null }
+				$auId = $detail.id
+			} else {
+				$detail = (Invoke-MgGraphRequest -Method GET -Uri ("$script:graphBaseUrl/administrativeUnits/?`$filter=displayName eq '{0}'&`$select=id,displayName" -f $InputReference)).value | Select-Object -First 1
+				$auId = $detail.id
 			}
-			elseif ($InputReference -in @("All")) {
-				return $InputReference
-			}
-			else {
-				$administrativeUnit = (Invoke-MgGraphRequest -Method GET -Uri ("$script:graphBaseUrl/administrativeUnits/?`$filter=displayName eq '{0}'" -f $InputReference)).Value.Id
-			}
-
-			if (-Not $administrativeUnit -and $SearchInDesiredConfiguration) {
-				if ($InputReference -in $script:desiredConfiguration["administrativeUnits"].displayName) {
-					$administrativeUnit = $InputReference
-				}
-			}
-
-			if (-Not $administrativeUnit -and -Not $DontFailIfNotExisting) { throw "Cannot find administrativeUnit $InputReference." } 
-			elseif (-Not $administrativeUnit -and $DontFailIfNotExisting) { return }
-
-			if ($administrativeUnit.count -gt 1) { throw "Got multiple administrativeUnits for $InputReference" }
-			return $administrativeUnit
-		}
-		catch {
-			Write-PSFMessage -Level Warning -String 'TMF.CannotResolveResource' -StringValues "AdministrativeUnit" -Tag 'failed' -ErrorRecord $_
-			$Cmdlet.ThrowTerminatingError($_)				
-		}			
+			if (-not $auId -and $SearchInDesiredConfiguration) { if ($InputReference -in $script:desiredConfiguration['administrativeUnits'].displayName) { $auId = $InputReference } }
+			if (-not $auId) { if ($DontFailIfNotExisting) { return $InputReference } else { throw "Cannot find administrativeUnit $InputReference" } }
+			if (-not $Expand) { if ($DisplayName) { return ($detail.displayName ?? $InputReference) } return $auId }
+			$obj = [pscustomobject]@{ id=$auId; displayName=$detail.displayName }
+			foreach ($k in @($obj.id,$obj.displayName)) { if ($k -and -not $script:administrativeUnitDetailCache.ContainsKey($k)) { $script:administrativeUnitDetailCache[$k] = $obj } }
+			return $obj
+		} catch { if ($DontFailIfNotExisting) { Write-PSFMessage -Level Warning -Message ("Cannot resolve AdministrativeUnit resource for input '{0}'. Searched tenant & desired configuration. Error: {1}" -f $InputReference,$_.Exception.Message) -Tag failed -ErrorRecord $_; return $InputReference } else { Write-PSFMessage -Level Warning -Message ("Cannot resolve AdministrativeUnit resource for input '{0}'. Searched tenant & desired configuration. Error: {1}" -f $InputReference,$_.Exception.Message) -Tag failed -ErrorRecord $_; $Cmdlet.ThrowTerminatingError($_) } }
 	}
 }

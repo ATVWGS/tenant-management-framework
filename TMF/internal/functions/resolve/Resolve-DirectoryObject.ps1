@@ -26,7 +26,7 @@
 			return $directoryObject
 		}
 		catch {
-			Write-PSFMessage -Level Warning -String 'TMF.CannotResolveResource' -StringValues "DirectoryObject" -Tag 'failed' -ErrorRecord $_
+			Write-PSFMessage -Level Warning -Message ("Cannot resolve DirectoryObject resource for input '{0}'. Searched tenant & desired configuration. Error: {1}" -f $InputReference,$_.Exception.Message) -Tag 'failed' -ErrorRecord $_
 			$Cmdlet.ThrowTerminatingError($_)				
 		}			
 	}

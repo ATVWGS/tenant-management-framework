@@ -3,6 +3,8 @@ function Resolve-Subscription {
 	Param (
 		[Parameter(Mandatory = $true)]
 		[string] $InputReference,
+		[switch] $Expand, # Return object { id, displayName }
+		[switch] $DisplayName,
 		[System.Management.Automation.PSCmdlet]
 		$Cmdlet = $PSCmdlet
 	)
@@ -13,19 +15,16 @@ function Resolve-Subscription {
 	}
 	process
 	{			
-		try { 
-			if ($InputReference -match $script:guidRegex) {
-				$subscriptionId = ((Invoke-RestMethod -Method GET -uri "$($script:apiBaseUrl)subscriptions?$($script:apiVersion)" -Headers @{"Authorization"="Bearer $($token)"}).value | Where-Object {$_.subscriptionId -eq $InputReference}).id
-			}
-			else {
-				$subscriptionId = ((Invoke-RestMethod -Method GET -uri "$($script:apiBaseUrl)subscriptions?$($script:apiVersion)" -Headers @{"Authorization"="Bearer $($token)"}).value | Where-Object {$_.displayname -eq $InputReference}).id
-			}
-            if ($subscriptionId.count -ne 1) {throw "Can not find subscription $($InputReference)"}
-            return $subscriptionId
+		try {
+			$subs = (Invoke-RestMethod -Method GET -uri "$($script:apiBaseUrl)subscriptions?$($script:apiVersion)" -Headers @{"Authorization"="Bearer $($token)"}).value
+			$match = if ($InputReference -match $script:guidRegex) { $subs | Where-Object { $_.subscriptionId -eq $InputReference } | Select-Object -First 1 } else { $subs | Where-Object { $_.displayName -eq $InputReference } | Select-Object -First 1 }
+			if (-not $match) { throw "Can not find subscription $InputReference" }
+			if (-not $Expand) { if ($DisplayName) { return ($match.displayName ?? $InputReference) } return $match.id }
+			return [pscustomobject]@{ id=$match.id; displayName=$match.displayName; subscriptionId=$match.subscriptionId }
         }
-        catch {
-            Write-PSFMessage -Level Warning -String 'TMF.CannotResolveResource' -StringValues "Subscription" -Tag 'failed' -ErrorRecord $_
+		catch {
+			Write-PSFMessage -Level Warning -Message ("Cannot resolve Subscription resource for input '{0}'. Searched tenant & desired configuration. Error: {1}" -f $InputReference,$_.Exception.Message) -Tag 'failed' -ErrorRecord $_
 			$Cmdlet.ThrowTerminatingError($_)
-        }
+		}
     }
 }

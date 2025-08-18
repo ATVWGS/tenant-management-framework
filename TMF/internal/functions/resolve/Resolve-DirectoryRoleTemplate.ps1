@@ -6,6 +6,8 @@
 		[string] $InputReference,
 		[switch] $DontFailIfNotExisting,
 		[switch] $SearchInDesiredConfiguration,
+		[switch] $Expand, # Return object { id, displayName }
+		[switch] $DisplayName,
 		[System.Management.Automation.PSCmdlet]
 		$Cmdlet = $PSCmdlet
 	)
@@ -35,13 +37,15 @@
 			}
 
 			if (-Not $roleTemplate -and -Not $DontFailIfNotExisting) { throw "Cannot find directoryRoleTemplate $InputReference." } 
-			elseif (-Not $roleTemplate -and $DontFailIfNotExisting) { return }
+			elseif (-Not $roleTemplate -and $DontFailIfNotExisting) { Write-PSFMessage -Level Warning -Message ("Cannot resolve DirectoryRoleTemplate resource for input '{0}'. Searched tenant & desired configuration." -f $InputReference) -Tag 'failed'; return $InputReference }
 
 			if ($roleTemplate.count -gt 1) { throw "Got multiple directoryRoleTemplates for $InputReference" }
-			return $roleTemplate
+			if (-not $Expand) { if ($DisplayName) { return ($script:cache["allRoleTemplates"] | Where-Object { $_.id -eq $roleTemplate } | Select-Object -ExpandProperty displayName) } return $roleTemplate }
+			$detail = $script:cache['allRoleTemplates'] | Where-Object { $_.id -eq $roleTemplate } | Select-Object -First 1
+			return [pscustomobject]@{ id=$roleTemplate; displayName=$detail.displayName }
 		}
 		catch {
-			Write-PSFMessage -Level Warning -String 'TMF.CannotResolveResource' -StringValues "DirectoryRoleTemplate" -Tag 'failed' -ErrorRecord $_
+			Write-PSFMessage -Level Warning -Message ("Cannot resolve DirectoryRoleTemplate resource for input '{0}'. Searched tenant & desired configuration. Error: {1}" -f $InputReference,$_.Exception.Message) -Tag 'failed' -ErrorRecord $_
 			$Cmdlet.ThrowTerminatingError($_)				
 		}			
 	}
