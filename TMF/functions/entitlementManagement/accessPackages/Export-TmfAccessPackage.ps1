@@ -1,21 +1,21 @@
 function Export-TmfAccessPackage {
-    [CmdletBinding()] Param(
+    [CmdletBinding()] param(
         [string[]]$SpecificResources,
-        [string]$OutPutPath,
+        [Alias('OutPutPath')] [string]$OutPath,
         [System.Management.Automation.PSCmdlet]$Cmdlet = $PSCmdlet
     )
     begin {
         Test-GraphConnection -Cmdlet $Cmdlet
         $resourceName = 'accessPackages'
-        $base = ($script:graphBaseUrl -replace '/beta$','/v1.0')
-        $tenant = (Invoke-MgGraphRequest -Method GET -Uri ("$base/organization?`$select=displayName,id")).value
+        $base = ($script:graphBaseUrl -replace '/beta$', '/v1.0')
+        $tenant = (Invoke-MgGraphRequest -Method GET -Uri ("$($script:graphBaseUrl)/organization?`$select=displayName,id")).value
         $export = @()
-        function Convert-Package { 
+        function Convert-Package {
             param($p)
             # Map expanded accessPackageResourceRoleScopes into simplified objects
             $roleScopes = @()
             if ($p.accessPackageResourceRoleScopes) {
-                foreach($rs in $p.accessPackageResourceRoleScopes){
+                foreach ($rs in $p.accessPackageResourceRoleScopes) {
                     $role = $rs.accessPackageResourceRole
                     $scope = $rs.accessPackageResourceScope
                     $roleScopes += [ordered]@{
@@ -30,42 +30,57 @@ function Export-TmfAccessPackage {
                 }
             }
             $catalogName = $null
-            if ($p.catalog -and $p.catalog.displayName){ $catalogName = $p.catalog.displayName }
-            elseif ($p.catalogId){ $catalogName = $p.catalogId }
-            [ordered]@{ 
-                displayName=$p.displayName; 
-                description=$p.description; 
-                isHidden=$p.isHidden; 
-                isRoleScopesVisible=$p.isRoleScopesVisible; 
-                catalog=$catalogName; 
-                accessPackageResourceRoleScopes=$roleScopes; 
-                present=$true 
+            if ($p.catalog -and $p.catalog.displayName) {
+                $catalogName = $p.catalog.displayName 
+            } elseif ($p.catalogId) {
+                $catalogName = $p.catalogId 
+            }
+            [ordered]@{
+                displayName                     = $p.displayName
+                description                     = $p.description
+                isHidden                        = $p.isHidden
+                isRoleScopesVisible             = $p.isRoleScopesVisible
+                catalog                         = $catalogName
+                accessPackageResourceRoleScopes = $roleScopes
+                present                         = $true
             }
         }
         function Get-AllPackages {
-            $list=@();
-            $expand='accessPackageResourceRoleScopes($expand=accessPackageResourceRole,accessPackageResourceScope),catalog';
-            try { 
-                $resp = Invoke-MgGraphRequest -Method GET -Uri "$base/identityGovernance/entitlementManagement/accessPackages?`$top=50&`$expand=$expand" -ErrorAction Stop 
-                if ($resp.'@odata.nextLink'){ do { $list += $resp.value; $resp = Invoke-MgGraphRequest -Method GET -Uri $resp.'@odata.nextLink' } while ($resp.'@odata.nextLink') } else { $list += $resp.value }
+            $list = @()
+            $expand = 'accessPackageResourceRoleScopes($expand=accessPackageResourceRole,accessPackageResourceScope),catalog'
+            try {
+                $resp = Invoke-MgGraphRequest -Method GET -Uri "$base/identityGovernance/entitlementManagement/accessPackages?`$top=50&`$expand=$expand" -ErrorAction Stop
+                if ($resp.'@odata.nextLink') {
+                    do {
+                        $list += $resp.value; $resp = Invoke-MgGraphRequest -Method GET -Uri $resp.'@odata.nextLink' 
+                    } while ($resp.'@odata.nextLink') 
+                } else {
+                    $list += $resp.value 
+                }
                 return $list
             } catch {
                 $initialError = $_.Exception.Message
-                Write-PSFMessage -Level Verbose -FunctionName 'Export-TmfAccessPackage' -Message "Expanded retrieval failed ($initialError). Falling back to minimal retrieval then per-package expansion." 
+                Write-PSFMessage -Level Verbose -FunctionName 'Export-TmfAccessPackage' -Message "Expanded retrieval failed ($initialError). Falling back to minimal retrieval then per-package expansion."
                 # Fallback: retrieve packages without expand
-                try { 
-                    $resp = Invoke-MgGraphRequest -Method GET -Uri "$base/identityGovernance/entitlementManagement/accessPackages?`$top=50" -ErrorAction Stop 
-                } catch { 
-                    Write-PSFMessage -Level Warning -FunctionName 'Export-TmfAccessPackage' -Message "Fallback minimal retrieval failed: $($_.Exception.Message)"; return $list 
+                try {
+                    $resp = Invoke-MgGraphRequest -Method GET -Uri "$base/identityGovernance/entitlementManagement/accessPackages?`$top=50" -ErrorAction Stop
+                } catch {
+                    Write-PSFMessage -Level Warning -FunctionName 'Export-TmfAccessPackage' -Message "Fallback minimal retrieval failed: $($_.Exception.Message)"; return $list
                 }
-                $minimal=@(); if ($resp.'@odata.nextLink'){ do { $minimal += $resp.value; $resp = Invoke-MgGraphRequest -Method GET -Uri $resp.'@odata.nextLink' } while ($resp.'@odata.nextLink') } else { $minimal += $resp.value }
-                foreach($pkg in $minimal){
+                $minimal = @(); if ($resp.'@odata.nextLink') {
+                    do {
+                        $minimal += $resp.value; $resp = Invoke-MgGraphRequest -Method GET -Uri $resp.'@odata.nextLink' 
+                    } while ($resp.'@odata.nextLink') 
+                } else {
+                    $minimal += $resp.value 
+                }
+                foreach ($pkg in $minimal) {
                     $detail = $null
                     try {
-                        $detail = Invoke-MgGraphRequest -Method GET -Uri ("$base/identityGovernance/entitlementManagement/accessPackages/{0}?`$expand={1}" -f $pkg.id,$expand) -ErrorAction Stop
+                        $detail = Invoke-MgGraphRequest -Method GET -Uri ("$base/identityGovernance/entitlementManagement/accessPackages/{0}?`$expand={1}" -f $pkg.id, $expand) -ErrorAction Stop
                         $list += $detail
                     } catch {
-                        Write-PSFMessage -Level Verbose -FunctionName 'Export-TmfAccessPackage' -Message ("Per-package expand failed for {0}: {1}. Using minimal object." -f $pkg.displayName,$_.Exception.Message)
+                        Write-PSFMessage -Level Verbose -FunctionName 'Export-TmfAccessPackage' -Message ("Per-package expand failed for {0}: {1}. Using minimal object." -f $pkg.displayName, $_.Exception.Message)
                         $list += $pkg
                     }
                 }
@@ -75,15 +90,29 @@ function Export-TmfAccessPackage {
         $all = Get-AllPackages
     }
     process {
-        if ($SpecificResources){
+        if ($SpecificResources) {
             $ids = $SpecificResources | ForEach-Object { $_ -split ',' } | ForEach-Object Trim | Where-Object { $_ } | Select-Object -Unique
-            foreach($id in $ids){ $match = $all | Where-Object displayName -eq $id; if($match){ $match | ForEach-Object { $export += Convert-Package $_ } } else { Write-PSFMessage -Level Warning -FunctionName 'Export-TmfAccessPackage' -String 'TMF.Export.NotFound' -StringValues $id,$resourceName,$tenant.displayName } }
-        } else { foreach($p in $all){ $export += Convert-Package $p } }
+            foreach ($id in $ids) {
+                $match = $all | Where-Object displayName -EQ $id; if ($match) {
+                    $match | ForEach-Object { $export += Convert-Package $_ } 
+                } else {
+                    Write-PSFMessage -Level Warning -FunctionName 'Export-TmfAccessPackage' -String 'TMF.Export.NotFound' -StringValues $id, $resourceName, $tenant.displayName 
+                } 
+            }
+        } else {
+            foreach ($p in $all) {
+                $export += Convert-Package $p 
+            } 
+        }
     }
     end {
-        $emRoot = Join-Path $OutPutPath 'entitlementManagement'
-        if(-not (Test-Path $emRoot)){ New-Item -Path $OutPutPath -Name 'entitlementManagement' -ItemType Directory -Force | Out-Null }
-        $path = Join-Path $emRoot $resourceName; if(-not (Test-Path $path)){ New-Item -Path $emRoot -Name $resourceName -ItemType Directory -Force | Out-Null }
-        $export | ConvertTo-Json -Depth 20 | Out-File -FilePath (Join-Path $path "$resourceName.json") -Encoding utf8 -Force
+        if ($PSBoundParameters.ContainsKey('OutPutPath')) {
+            Write-TmfDeprecatedParameterWarning -Cmdlet $Cmdlet -LegacyName 'OutPutPath' -NewName 'OutPath' 
+        }
+        if ($OutPath) {
+            Write-TmfExportFile -OutPath $OutPath -ParentPath 'entitlementManagement' -ResourceName $resourceName -Data $export
+        } else {
+            return $export 
+        }
     }
 }

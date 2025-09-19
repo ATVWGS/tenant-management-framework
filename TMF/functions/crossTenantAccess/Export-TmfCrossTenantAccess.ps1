@@ -1,6 +1,6 @@
 function Export-TmfCrossTenantAccess {
     [CmdletBinding()]
-    Param(
+    param(
         [string]$OutPutPath,
         [System.Management.Automation.PSCmdlet]$Cmdlet = $PSCmdlet
     )

@@ -1,25 +1,26 @@
-<#
-.SYNOPSIS
-Exports the tenant authentication methods policy into TMF configuration objects or JSON.
-.DESCRIPTION
-Retrieves the singleton authenticationMethodsPolicy (v1.0 by default; beta when -ForceBeta for fallbacks) and its authenticationMethodConfigurations, converting to the TMF shape. Returns object unless -OutPutPath is supplied.
-.PARAMETER SpecificResources
-Optional filter by display name (singleton semantics; rarely needed).
-.PARAMETER OutPutPath
-Root folder to write the export. When omitted, object is returned instead of writing files.
-.PARAMETER ForceBeta
-Use beta Graph endpoint for initial retrieval (fallback to beta already occurs when v1.0 lacks detail).
-.PARAMETER Cmdlet
-Internal pipeline parameter; do not supply manually.
-.EXAMPLE
-Export-TmfAuthenticationMethodsPolicy -OutPutPath C:\temp\tmf
-.EXAMPLE
-Export-TmfAuthenticationMethodsPolicy | ConvertTo-Json -Depth 15
-#>
 function Export-TmfAuthenticationMethodsPolicy {
-    [CmdletBinding()] Param(
+    <#
+    .SYNOPSIS
+    Exports the tenant authentication methods policy into TMF configuration objects or JSON.
+    .DESCRIPTION
+    Retrieves the singleton authenticationMethodsPolicy (v1.0 by default; beta when -ForceBeta for fallbacks) and its authenticationMethodConfigurations, converting to the TMF shape. Returns object unless -OutPath is supplied.
+    .PARAMETER SpecificResources
+    Optional filter by display name (singleton semantics; rarely needed).
+    .PARAMETER OutPath
+    Root folder to write the export. When omitted, object is returned instead of writing files.
+    .PARAMETER ForceBeta
+    Use beta Graph endpoint for initial retrieval (fallback to beta already occurs when v1.0 lacks detail).
+    .PARAMETER Cmdlet
+    Internal pipeline parameter; do not supply manually.
+    .EXAMPLE
+    Export-TmfAuthenticationMethodsPolicy -OutPath C:\temp\tmf
+    .EXAMPLE
+    Export-TmfAuthenticationMethodsPolicy | ConvertTo-Json -Depth 15
+    #>
+
+    [CmdletBinding()] param(
         [string[]] $SpecificResources,
-        [string] $OutPutPath,
+        [Alias('OutPutPath')] [string] $OutPath,
         [switch] $ForceBeta,
         [System.Management.Automation.PSCmdlet] $Cmdlet = $PSCmdlet
     )
@@ -49,26 +50,40 @@ function Export-TmfAuthenticationMethodsPolicy {
             if ($policy.PSObject.Members.Match('authenticationMethodConfigurations') -and $null -ne $policy.authenticationMethodConfigurations) {
                 $converted = @()
                 foreach ($cfg in $policy.authenticationMethodConfigurations) {
-                    if ($null -eq $cfg) { continue }
+                    if ($null -eq $cfg) {
+                        continue
+                    }
                     $entry = [ordered]@{}
                     # Always keep id
-                    if ($cfg.PSObject.Members.Match('id') -and $null -ne $cfg.id) { $entry.id = $cfg.id }
+                    if ($cfg.PSObject.Members.Match('id') -and $null -ne $cfg.id) {
+                        $entry.id = $cfg.id
+                    }
 
                     # Known common properties across methods
-                    foreach ($p in @('state','isSelfServiceRegistrationAllowed','isAttestationEnforced','defaultLifetimeInMinutes','defaultLength','minimumLifetimeInMinutes','maximumLifetimeInMinutes','isUsableOnce','allowExternalIdToUseEmailOtp','certificateUserBindings','authenticationModeConfiguration')) {
-                        if ($cfg.PSObject.Members.Match($p) -and $null -ne $cfg.$p) { $entry[$p] = $cfg.$p }
+                    foreach ($p in @('state', 'isSelfServiceRegistrationAllowed', 'isAttestationEnforced', 'defaultLifetimeInMinutes', 'defaultLength', 'minimumLifetimeInMinutes', 'maximumLifetimeInMinutes', 'isUsableOnce', 'allowExternalIdToUseEmailOtp', 'certificateUserBindings', 'authenticationModeConfiguration')) {
+                        if ($cfg.PSObject.Members.Match($p) -and $null -ne $cfg.$p) {
+                            $entry[$p] = $cfg.$p
+                        }
                     }
 
                     # Copy any remaining note properties (excluding @odata.type and id) not already set
                     $noteProps = ($cfg | Get-Member -MemberType NoteProperty).Name
                     foreach ($m in $noteProps) {
-                        if ($m -in '@odata.type','id') { continue }
-                        if (-not $entry.Contains($m)) { $entry[$m] = $cfg.$m }
+                        if ($m -in '@odata.type', 'id') {
+                            continue
+                        }
+                        if (-not $entry.Contains($m)) {
+                            $entry[$m] = $cfg.$m
+                        }
                     }
 
-                    if ($entry.Count -gt 0) { $converted += [pscustomobject]$entry }
+                    if ($entry.Count -gt 0) {
+                        $converted += [pscustomobject]$entry
+                    }
                 }
-                if ($converted.Count -gt 0) { $obj.authenticationMethodConfigurations = $converted }
+                if ($converted.Count -gt 0) {
+                    $obj.authenticationMethodConfigurations = $converted
+                }
             }
 
             return [pscustomobject]$obj
@@ -76,26 +91,46 @@ function Export-TmfAuthenticationMethodsPolicy {
     }
     process {
         # Fetch singleton from v1.0 with expanded configurations
-    $graphBase = if ($ForceBeta) { $script:graphBaseUrl } else { $script:graphBaseUrl1 }
-    try { $policy = Invoke-MgGraphRequest -Method GET -Uri ("$graphBase/policies/authenticationMethodsPolicy?`$expand=authenticationMethodConfigurations") } catch { throw $_ }
+        $graphBase = if ($ForceBeta) {
+            $script:graphBaseUrl
+        } else {
+            $script:graphBaseUrl1
+        }
+        try {
+            $policy = Invoke-MgGraphRequest -Method GET -Uri ("$graphBase/policies/authenticationMethodsPolicy?`$expand=authenticationMethodConfigurations")
+        } catch {
+            throw $_
+        }
 
-        if (-not $policy) { return @() }
+        if (-not $policy) {
+            return @()
+        }
 
         # Build from IDs on the policy response to fetch full properties for each configuration
         if ($policy.PSObject.Members.Match('authenticationMethodConfigurations') -and $null -ne $policy.authenticationMethodConfigurations) {
             $hasProps = $false
             foreach ($itm in $policy.authenticationMethodConfigurations) {
-                if ($null -eq $itm) { continue }
+                if ($null -eq $itm) {
+                    continue
+                }
                 $names = (($itm | Get-Member -MemberType NoteProperty).Name | Where-Object { $_ -ne 'id' -and $_ -ne '@odata.type' })
-                if ($names.Count -gt 0) { $hasProps = $true; break }
+                if ($names.Count -gt 0) {
+                    $hasProps = $true; break
+                }
             }
 
             if (-not $hasProps) {
                 $ids = @()
                 foreach ($item in $policy.authenticationMethodConfigurations) {
-                    if ($null -eq $item) { continue }
-                    if ($item -is [string]) { $ids += $item; continue }
-                    if ($item.PSObject.Members.Match('id') -and $null -ne $item.id -and $item.id -ne '') { $ids += $item.id }
+                    if ($null -eq $item) {
+                        continue
+                    }
+                    if ($item -is [string]) {
+                        $ids += $item; continue
+                    }
+                    if ($item.PSObject.Members.Match('id') -and $null -ne $item.id -and $item.id -ne '') {
+                        $ids += $item.id
+                    }
                 }
                 $ids = $ids | Where-Object { $_ } | Select-Object -Unique
 
@@ -104,9 +139,10 @@ function Export-TmfAuthenticationMethodsPolicy {
                     foreach ($id in $ids) {
                         try {
                             $cfg = Invoke-MgGraphRequest -Method GET -Uri ("$script:graphBaseUrl1/policies/authenticationMethodsPolicy/authenticationMethodConfigurations/$id")
-                            if ($cfg) { $full += $cfg }
-                        }
-                        catch {
+                            if ($cfg) {
+                                $full += $cfg
+                            }
+                        } catch {
                             Write-PSFMessage -Level Verbose -FunctionName 'Export-TmfAuthenticationMethodsPolicy' -Message "Skipping configuration $id due to error: $_"
                         }
                     }
@@ -116,28 +152,41 @@ function Export-TmfAuthenticationMethodsPolicy {
                     if ($full.Count -gt 0) {
                         $allIdOnly = $true
                         foreach ($cfg in $full) {
-                            if ($null -eq $cfg) { continue }
+                            if ($null -eq $cfg) {
+                                continue
+                            }
                             $pn = (($cfg | Get-Member -MemberType NoteProperty).Name | Where-Object { $_ -ne 'id' -and $_ -ne '@odata.type' })
-                            if ($pn.Count -gt 0) { $allIdOnly = $false; break }
+                            if ($pn.Count -gt 0) {
+                                $allIdOnly = $false; break
+                            }
                         }
-                        if ($allIdOnly) { $needsBeta = $true }
-                    } else { $needsBeta = $true }
+                        if ($allIdOnly) {
+                            $needsBeta = $true
+                        }
+                    } else {
+                        $needsBeta = $true
+                    }
 
                     if ($needsBeta) {
                         $betaFull = @()
                         foreach ($id in $ids) {
                             try {
                                 $cfgB = Invoke-MgGraphRequest -Method GET -Uri ("$script:graphBaseUrl/policies/authenticationMethodsPolicy/authenticationMethodConfigurations/$id")
-                                if ($cfgB) { $betaFull += $cfgB }
-                            }
-                            catch {
+                                if ($cfgB) {
+                                    $betaFull += $cfgB
+                                }
+                            } catch {
                                 Write-PSFMessage -Level Verbose -FunctionName 'Export-TmfAuthenticationMethodsPolicy' -Message "Skipping configuration $id (beta) due to error: $_"
                             }
                         }
-                        if ($betaFull.Count -gt 0) { $full = $betaFull }
+                        if ($betaFull.Count -gt 0) {
+                            $full = $betaFull
+                        }
                     }
 
-                    if ($full.Count -gt 0) { $policy.authenticationMethodConfigurations = $full }
+                    if ($full.Count -gt 0) {
+                        $policy.authenticationMethodConfigurations = $full
+                    }
                 }
             }
         }
@@ -147,19 +196,30 @@ function Export-TmfAuthenticationMethodsPolicy {
         # Optional filtering by display name (singleton semantics)
         if ($SpecificResources -and ($SpecificResources -notcontains $exportObject.displayName) -and ($SpecificResources -notcontains '*')) {
             # Nothing to export if filter doesn't match
-            if (-not $OutPutPath) { return @() }
-            else { return }
+            if (-not $OutPutPath) {
+                return @()
+            } else {
+                return
+            }
         }
 
-        if (-not $OutPutPath) {
+        if (-not $OutPath) {
             return @($exportObject)
         }
     }
     end {
-    Write-PSFMessage -Level Verbose -FunctionName 'Export-TmfAuthenticationMethodsPolicy' -Message "Exporting authentication methods policy. ForceBeta=$ForceBeta"
-    if (-not $OutPutPath) { return @($exportObject) }
-    $targetDir = Join-Path -Path $OutPutPath -ChildPath $resourceFolder
-    if (-not (Test-Path -LiteralPath $targetDir)) { if (-not (Test-Path -LiteralPath (Join-Path $OutPutPath 'policies'))) { New-Item -ItemType Directory -Path (Join-Path $OutPutPath 'policies') -Force | Out-Null }; New-Item -ItemType Directory -Path $targetDir -Force | Out-Null }
-    @($exportObject) | ConvertTo-Json -Depth 15 | Out-File -FilePath (Join-Path $targetDir $fileName) -Encoding utf8 -Force
+        Write-PSFMessage -Level Verbose -FunctionName 'Export-TmfAuthenticationMethodsPolicy' -Message "Exporting authentication methods policy. ForceBeta=$ForceBeta"
+        Write-TmfDeprecatedParameterWarning -Cmdlet $Cmdlet -LegacyName 'OutPutPath' -NewName 'OutPath'
+        if (-not $OutPath) {
+            return @($exportObject)
+        }
+        $targetDir = Join-Path -Path $OutPath -ChildPath $resourceFolder
+        if (-not (Test-Path -LiteralPath $targetDir)) {
+            if (-not (Test-Path -LiteralPath (Join-Path $OutPath 'policies'))) {
+                New-Item -ItemType Directory -Path (Join-Path $OutPath 'policies') -Force | Out-Null
+            }; New-Item -ItemType Directory -Path $targetDir -Force | Out-Null
+        }
+        @($exportObject) | ConvertTo-Json -Depth 15 | Out-File -FilePath (Join-Path $targetDir $fileName) -Encoding utf8 -Force
+        # TODO: Add Pester tests (CI-002)
     }
 }
