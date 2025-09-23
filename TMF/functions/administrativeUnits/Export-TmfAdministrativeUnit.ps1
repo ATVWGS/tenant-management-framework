@@ -27,6 +27,12 @@ function Export-TmfAdministrativeUnit {
         Test-GraphConnection -Cmdlet $Cmdlet
         $resourceName = 'administrativeUnits'
         $tenant = (Invoke-MgGraphRequest -Method GET -Uri ("$($script:graphBaseUrl)/organization?`$select=displayname,id")).value
+        if ($ForceBeta) {
+            $graphUrl = $script:graphBaseUrl
+        }
+        else {
+            $graphUrl = $script:graphBaseUrl1
+        }
         $administrativeUnitsExport = @()
     }
     process {
@@ -34,7 +40,7 @@ function Export-TmfAdministrativeUnit {
             param([string]$Id, [string]$MembershipType)
             $users = @(); $groups = @(); $devices = @()
             if ($MembershipType -ne 'Dynamic') {
-                $mResponse = Invoke-MgGraphRequest -Method GET -Uri ("$((if ($ForceBeta) { $script:graphBaseUrlbeta } else { $script:graphBaseUrl1 }))/directory/administrativeUnits/$Id/members")
+                $mResponse = Invoke-MgGraphRequest -Method GET -Uri ("$($graphUrl)/directory/administrativeUnits/$Id/members")
                 while ($mResponse) {
                     if ($mResponse.value) {
                         $users += ($mResponse.value | Where-Object { $_.'@odata.type' -eq '#microsoft.graph.user' }).id; $groups += ($mResponse.value | Where-Object { $_.'@odata.type' -eq '#microsoft.graph.group' }).id; $devices += ($mResponse.value | Where-Object { $_.'@odata.type' -eq '#microsoft.graph.device' }).id 
@@ -49,7 +55,7 @@ function Export-TmfAdministrativeUnit {
             return [pscustomobject]@{ users = $users; groups = $groups; devices = $devices }
         }
         function Get-AUScopedRoleMembers {
-            param([string]$Id) $result = @(); $srm = Invoke-MgGraphRequest -Method GET -Uri ("$((if ($ForceBeta) { $script:graphBaseUrlbeta } else { $script:graphBaseUrl1 }))/directory/administrativeUnits/$Id/scopedRoleMembers"); while ($srm) {
+            param([string]$Id) $result = @(); $srm = Invoke-MgGraphRequest -Method GET -Uri ("$($graphUrl)/directory/administrativeUnits/$Id/scopedRoleMembers"); while ($srm) {
                 if ($srm.value) {
                     foreach ($s in $srm.value) {
                         $result += @{ identity = $s.roleMemberInfo.displayName; role = (Resolve-DirectoryRole -InputReference $s.roleId -DisplayName -DontFailIfNotExisting -Cmdlet $Cmdlet); roleId = $s.roleId } 
@@ -64,15 +70,32 @@ function Export-TmfAdministrativeUnit {
         if ($SpecificResources) {
             foreach ($name in ($SpecificResources | ForEach-Object { $_ -split ',' } | ForEach-Object Trim | Where-Object { $_ })) {
                 $escaped = $name -replace "'", "''"
-                $AU = (Invoke-MgGraphRequest -Method GET -Uri ("$((if ($ForceBeta) { $script:graphBaseUrlbeta } else { $script:graphBaseUrl1 }))/directory/administrativeUnits?`$filter=displayName eq '{0}'" -f $escaped)).value
+                $AU = (Invoke-MgGraphRequest -Method GET -Uri ("$($graphUrl)/directory/administrativeUnits?`$filter=displayName eq '{0}'" -f $escaped)).value
                 if ($AU) {
                     $members = Get-AUMembers -Id $AU.id -MembershipType $AU.membershipType
                     $scoped = Get-AUScopedRoleMembers -Id $AU.id
-                    $base = [ordered]@{ displayName = $AU.displayName; description = $AU.description; visibility = $AU.visibility; membershipType = $AU.membershipType; scopedRoleMembers = $scoped; present = $true }
+                    $base = [ordered]@{ displayName = $AU.displayName; description = $AU.description; present = $true }
                     if ($AU.membershipType -eq 'Dynamic') {
                         $base.membershipRule = $AU.membershipRule; $base.membershipRuleProcessingState = $AU.membershipRuleProcessingState 
                     } elseif ($members.users -or $members.groups -or $members.devices) {
-                        $base.users = $members.users; $base.groups = $members.groups; $base.devices = $members.devices 
+                        if ($members.users) {
+                            $base.users = $members.users
+                        }
+                        if ($members.groups) {
+                            $base.groups = $members.groups
+                        }
+                        if ($members.devices) {
+                            $base.devices = $members.devices 
+                        }
+                    }
+                    if ($AU.membershipType) {
+                        $base.membershipType = $AU.membershipType
+                    }
+                    if ($scoped) {
+                        $base.scopedRoleMembers = $scoped
+                    }
+                    if ($AU.visibility) {
+                        $base.visibility = $AU.visibility
                     }
                     $administrativeUnitsExport += $base
                 } else {
@@ -80,7 +103,7 @@ function Export-TmfAdministrativeUnit {
                 }
             }
         } else {
-            $all = @(); $resp = Invoke-MgGraphRequest -Method GET -Uri "$(if ($ForceBeta) { $script:graphBaseUrlbeta } else { $script:graphBaseUrl1 })/directory/administrativeUnits?`$top=999"; while ($resp) {
+            $all = @(); $resp = Invoke-MgGraphRequest -Method GET -Uri "$($graphUrl)/directory/administrativeUnits?`$top=999"; while ($resp) {
                 if ($resp.value) {
                     $all += $resp.value 
                 }; if ($resp.'@odata.nextLink') {
@@ -90,7 +113,9 @@ function Export-TmfAdministrativeUnit {
                 } 
             }
             foreach ($AU in $all) {
-                $members = Get-AUMembers -Id $AU.id -MembershipType $AU.membershipType
+                if ($AU.membershipType -ne 'Dynamic') {
+                    $members = Get-AUMembers -Id $AU.id -MembershipType $AU.membershipType
+                }                
                 $scoped = Get-AUScopedRoleMembers -Id $AU.id
                 $base = [ordered]@{ displayName = $AU.displayName; description = $AU.description; visibility = $AU.visibility; membershipType = $AU.membershipType; scopedRoleMembers = $scoped; present = $true }
                 if ($AU.membershipType -eq 'Dynamic') {

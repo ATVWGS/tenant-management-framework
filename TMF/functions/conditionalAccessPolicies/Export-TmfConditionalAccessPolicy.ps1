@@ -27,7 +27,7 @@ function Export-TmfConditionalAccessPolicy {
     begin {
         Test-GraphConnection -Cmdlet $Cmdlet
         # Emit one-time deprecation warning if legacy alias used
-        Write-TmfDeprecatedParameterWarning -Cmdlet $Cmdlet -LegacyName 'OutPutPath' -NewName 'OutPath'
+        #Write-TmfDeprecatedParameterWarning -Cmdlet $Cmdlet -LegacyName 'OutPutPath' -NewName 'OutPath'
         $resourceName = 'conditionalAccessPolicies'
         try {
             $tenant = (Invoke-MgGraphRequest -Method GET -Uri ("$($script:graphBaseUrl)/organization?`$select=displayName,id") -ErrorAction Stop).value 
@@ -64,10 +64,15 @@ function Export-TmfConditionalAccessPolicy {
                 }
                 if ($toResolve.Count -gt 0) {
                     $resolved = & $Resolver $toResolve
-                    $r = 0
-                    foreach ($pos in $indexMap) {
-                        $result[$pos] = $resolved[$r]; $r++ 
+                    if ($resolved.getType().Name -eq "String") {
+                        $result = $resolved
                     }
+                    else {
+                        $r = 0
+                        foreach ($pos in $indexMap) {
+                            $result[$pos] = $resolved[$r]; $r++ 
+                        }
+                    }                    
                 }
                 return $result
             }
@@ -78,22 +83,26 @@ function Export-TmfConditionalAccessPolicy {
 
                 if ($policy.conditions.users) {
                     if ($policy.conditions.users.includeUsers) {
-                        $obj.includeUsers = _ResolveWithSentinels -Values $policy.conditions.users.includeUsers -Sentinels $userSentinels -Resolver { param($vals) (Resolve-User -InputReference $vals -DontFailIfNotExisting -DisplayName -Cmdlet $Cmdlet) }
+                        $obj.includeUsers = _ResolveWithSentinels -Values $policy.conditions.users.includeUsers -Sentinels $userSentinels -Resolver { param($vals) (Resolve-User -InputReference $vals -DontFailIfNotExisting -UserPrincipalName -Cmdlet $Cmdlet) }
                     }
                     if ($policy.conditions.users.excludeUsers) {
-                        $obj.excludeUsers = _ResolveWithSentinels -Values $policy.conditions.users.excludeUsers -Sentinels $userSentinels -Resolver { param($vals) (Resolve-User -InputReference $vals -DontFailIfNotExisting -DisplayName -Cmdlet $Cmdlet) }
+                        $obj.excludeUsers = _ResolveWithSentinels -Values $policy.conditions.users.excludeUsers -Sentinels $userSentinels -Resolver { param($vals) (Resolve-User -InputReference $vals -DontFailIfNotExisting -UserPrincipalName -Cmdlet $Cmdlet) }
                     }
                     if ($policy.conditions.users.includeGroups) {
-                        $obj.includeGroups = @(Resolve-Group -InputReference $policy.conditions.users.includeGroups -DontFailIfNotExisting -DisplayName -Cmdlet $Cmdlet) 
+                        $obj.includeGroups = @()
+                        $obj.includeGroups += Resolve-Group -InputReference $policy.conditions.users.includeGroups -DontFailIfNotExisting -DisplayName -Cmdlet $Cmdlet
                     }
                     if ($policy.conditions.users.excludeGroups) {
-                        $obj.excludeGroups = @(Resolve-Group -InputReference $policy.conditions.users.excludeGroups -DontFailIfNotExisting -DisplayName -Cmdlet $Cmdlet) 
+                        $obj.excludeGroups = @()
+                        $obj.excludeGroups += Resolve-Group -InputReference $policy.conditions.users.excludeGroups -DontFailIfNotExisting -DisplayName -Cmdlet $Cmdlet
                     }
                     if ($policy.conditions.users.includeRoles) {
-                        $obj.includeRoles = @(Resolve-DirectoryRoleTemplate -InputReference $policy.conditions.users.includeRoles -DontFailIfNotExisting -DisplayName -Cmdlet $Cmdlet) 
+                        $obj.includeRoles = @()
+                        $obj.includeRoles += Resolve-DirectoryRoleTemplate -InputReference $policy.conditions.users.includeRoles -DontFailIfNotExisting -DisplayName -Cmdlet $Cmdlet
                     }
                     if ($policy.conditions.users.excludeRoles) {
-                        $obj.excludeRoles = @(Resolve-DirectoryRoleTemplate -InputReference $policy.conditions.users.excludeRoles -DontFailIfNotExisting -DisplayName -Cmdlet $Cmdlet) 
+                        $obj.excludeRoles = @()
+                        $obj.excludeRoles += Resolve-DirectoryRoleTemplate -InputReference $policy.conditions.users.excludeRoles -DontFailIfNotExisting -DisplayName -Cmdlet $Cmdlet
                     }
                 }
                 if ($policy.conditions.applications) {
@@ -181,6 +190,12 @@ function Export-TmfConditionalAccessPolicy {
                 }
                 if ($policy.grantControls.termsOfUse) {
                     $obj.termsOfUse = @(Resolve-Agreement -InputReference $policy.grantControls.termsOfUse -DontFailIfNotExisting -DisplayName -Cmdlet $Cmdlet) 
+                }
+                if ($policy.grantControls.operator) {
+                    $obj.operator = $policy.grantControls.operator
+                }
+                if ($policy.grantControls.builtInControls) {
+                    $obj.builtInControls = $policy.grantControls.builtInControls
                 }
             }
             if ($policy.sessionControls) {

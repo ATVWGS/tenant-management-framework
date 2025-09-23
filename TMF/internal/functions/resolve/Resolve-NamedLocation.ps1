@@ -20,9 +20,9 @@
 	}
 	process {
 		if ($InputReference -is [array] -and $InputReference.Count -gt 1) {
-			if (Test-TmfInputsCached -CacheName 'namedLocationDetailCache' -Inputs $InputReference -SkipValues @('All', 'None')) {
+			if (Test-TmfInputsCached -CacheName 'namedLocationDetailCache' -Inputs $InputReference -SkipValues @('All', 'AllTrusted', 'None')) {
 				$results = foreach ($i in $InputReference) {
-					if ($i -in @('All', 'None')) {
+					if ($i -in @('All', 'AllTrusted', 'None')) {
 						$i
 					} elseif ($script:namedLocationDetailCache.ContainsKey($i)) {
 						if ($Expand) {
@@ -59,7 +59,7 @@
 			}
 			$single = {
 				param($one)
-				if ($one -ceq "All" -or $one -ceq "None") {
+				if ($one -ceq "All" -or $one -ceq "AllTrusted" -or $one -ceq "None") {
 					return $one
 				}
 				if ($script:namedLocationDetailCache.ContainsKey($one)) {
@@ -77,6 +77,9 @@
 		}
 		try {
 			if ($InputReference -ceq "All") {
+				return $InputReference
+			}
+			if ($InputReference -ceq "AllTrusted") {
 				return $InputReference
 			}
 			if ($InputReference -ceq "None") {

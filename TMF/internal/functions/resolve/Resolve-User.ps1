@@ -25,7 +25,7 @@
 		[switch] $DontFailIfNotExisting,
 		[switch] $SearchInDesiredConfiguration,
 		[switch] $Expand,
-		[switch] $DisplayName,
+		[switch] $UserPrincipalName,
 		[System.Management.Automation.PSCmdlet]
 		$Cmdlet = $PSCmdlet
 	)
@@ -51,8 +51,8 @@
 					} elseif ($script:userDetailCache.ContainsKey($i)) {
 						if ($Expand) {
 							$script:userDetailCache[$i]
-						} elseif ($DisplayName) {
-							$script:userDetailCache[$i].displayName
+						} elseif ($UserPrincipalName) {
+							$script:userDetailCache[$i].userPrincipalName
 						} else {
 							$script:userDetailCache[$i].id
 						}
@@ -138,23 +138,23 @@
 				if ($script:userDetailCache.ContainsKey($one)) {
 					if ($Expand) {
 						return $script:userDetailCache[$one]
-					} elseif ($DisplayName) {
-						return ($script:userDetailCache[$one].displayName ?? $one)
+					} elseif ($UserPrincipalName) {
+						return ($script:userDetailCache[$one].userPrincipalName ?? $one)
 					} else {
 						return $script:userDetailCache[$one].id
 					}
 				}
-				return (Resolve-User -InputReference $one -DontFailIfNotExisting -Expand:$Expand -DisplayName:$DisplayName -SearchInDesiredConfiguration:$SearchInDesiredConfiguration -Cmdlet $Cmdlet)
+				return (Resolve-User -InputReference $one -DontFailIfNotExisting -Expand:$Expand -UserPrincipalName:$UserPrincipalName -SearchInDesiredConfiguration:$SearchInDesiredConfiguration -Cmdlet $Cmdlet)
 			}
 			return Invoke-TmfArrayResolution -Inputs $InputReference -Prefetch $prefetch -ResolveSingle $single
 		}
 		try {
 			# Fast path cache checks
-			if (-not $Expand -and -not $DisplayName -and $script:userDetailCache.ContainsKey($InputReference)) {
+			if (-not $Expand -and -not $UserPrincipalName -and $script:userDetailCache.ContainsKey($InputReference)) {
 				return $script:userDetailCache[$InputReference].id
 			}
-			if (-not $Expand -and $DisplayName -and $script:userDetailCache.ContainsKey($InputReference)) {
-				return ($script:userDetailCache[$InputReference].displayName ?? $InputReference)
+			if (-not $Expand -and $UserPrincipalName -and $script:userDetailCache.ContainsKey($InputReference)) {
+				return ($script:userDetailCache[$InputReference].userPrincipalName ?? $InputReference)
 			}
 			if ($InputReference -in @('None', 'All', 'GuestsOrExternalUsers')) {
 				if ($Expand) {
@@ -162,13 +162,13 @@
 				} return $InputReference
 			}
 
-			$fullObj = $null; $resolvedId = $null; $needDetail = $Expand -or $DisplayName
+			$fullObj = $null; $resolvedId = $null; $needDetail = $Expand -or $UserPrincipalName
 			if ($InputReference -match $script:guidRegex) {
 				if ($script:userDetailCache.ContainsKey($InputReference)) {
 					if ($Expand) {
 						return $script:userDetailCache[$InputReference]
-					} elseif ($DisplayName) {
-						return ($script:userDetailCache[$InputReference].displayName ?? $InputReference)
+					} elseif ($UserPrincipalName) {
+						return ($script:userDetailCache[$InputReference].userPrincipalName ?? $InputReference)
 					} else {
 						return $script:userDetailCache[$InputReference].id
 					}
@@ -227,8 +227,8 @@
 				}
 			}
 			if (-not $Expand) {
-				if ($DisplayName) {
-					return ($fullObj.displayName ?? $InputReference)
+				if ($UserPrincipalName) {
+					return ($fullObj.userPrincipalName ?? $InputReference)
 				}; return $resolvedId
 			}
 			if (-not $fullObj) {

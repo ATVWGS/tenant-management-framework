@@ -30,10 +30,10 @@ function Export-TmfAccessPackage {
                 }
             }
             $catalogName = $null
-            if ($p.catalog -and $p.catalog.displayName) {
-                $catalogName = $p.catalog.displayName 
-            } elseif ($p.catalogId) {
-                $catalogName = $p.catalogId 
+            if ($p.accessPackageCatalog -and $p.accessPackageCatalog.displayName) {
+                $catalogName = $p.accessPackageCatalog.displayName 
+            } elseif ($p.accessPackageCatalog.Id) {
+                $catalogName = $p.accessPackageCatalog.Id 
             }
             [ordered]@{
                 displayName                     = $p.displayName
@@ -47,9 +47,9 @@ function Export-TmfAccessPackage {
         }
         function Get-AllPackages {
             $list = @()
-            $expand = 'accessPackageResourceRoleScopes($expand=accessPackageResourceRole,accessPackageResourceScope),catalog'
+            $expand = 'accessPackageResourceRoleScopes($expand=*),accessPackageCatalog'
             try {
-                $resp = Invoke-MgGraphRequest -Method GET -Uri "$base/identityGovernance/entitlementManagement/accessPackages?`$top=50&`$expand=$expand" -ErrorAction Stop
+                $resp = Invoke-MgGraphRequest -Method GET -Uri "$script:graphBaseUrl/identityGovernance/entitlementManagement/accessPackages?`$top=50&`$expand=$expand" -ErrorAction Stop
                 if ($resp.'@odata.nextLink') {
                     do {
                         $list += $resp.value; $resp = Invoke-MgGraphRequest -Method GET -Uri $resp.'@odata.nextLink' 
