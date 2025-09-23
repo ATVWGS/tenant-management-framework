@@ -27,20 +27,37 @@ function Export-TmfAuthorizationPolicy {
         Test-GraphConnection -Cmdlet $Cmdlet
         $resourceName = 'authorizationPolicies'
         $parentName = 'policies'
-        function Convert-AuthorizationPolicy {
-            param([object]$policy) $o = [ordered]@{ present = $true }; if ($policy.displayName) {
-                $o.displayName = $policy.displayName
-            }; foreach ($p in 'allowInvitesFrom', 'allowedToSignUpEmailBasedSubscriptions', 'allowedToUseSSPR', 'allowEmailVerifiedUsersToJoinOrganization', 'blockMsolPowerShell', 'guestUserRole', 'allowedToCreateApps', 'allowedToCreateSecurityGroups', 'allowedToReadOtherUsers', 'allowedToReadBitlockerKeysForOwnedDevice', 'permissionGrantPolicyIdsAssignedToDefaultUserRole') {
-                if ($policy.PSObject.Members.Match($p) -and $null -ne $policy.$p) {
-                    $o[$p] = $policy.$p
-                }
-            }; if ($policy.defaultUserRolePermissions) {
-                $durp = $policy.defaultUserRolePermissions; foreach ($prop in $durp.PSObject.Properties) {
-                    if ($prop.Name -ne '@odata.type' -and $null -ne $prop.Value) {
-                        $o[$prop.Name] = $prop.Value
+        function Convert-AuthorizationPolicy { 
+            param([object]$policy) 
+            $o = [ordered]@{ 
+                present = $true 
+            }
+            if ($policy.displayName) { 
+                $o.displayName = $policy.displayName 
+            }
+            foreach ($p in 'allowInvitesFrom','allowedToSignUpEmailBasedSubscriptions','allowedToUseSSPR','allowEmailVerifiedUsersToJoinOrganization','blockMsolPowerShell','guestUserRoleId','allowedToCreateApps','allowedToCreateSecurityGroups','allowedToReadOtherUsers','allowedToReadBitlockerKeysForOwnedDevice','permissionGrantPolicyIdsAssignedToDefaultUserRole') { 
+                if ($policy.PSObject.Members.Match($p) -and $null -ne $policy.$p) { 
+                    if ($p -eq "guestUserRoledId") {
+                        switch ($policy.$p) {
+                            "a0b1b346-4d3e-4e8b-98f8-753987be4970" {$o["guestUserRole"]="User"}
+                            "10dae51f-b6af-4016-8d66-8c2a99b929b3" {$o["guestUserRole"]="Guest User"}
+                            "2af84b1e-32c8-42b7-82bc-daa82404023b" {$o["guestUserRole"]="Restricted Guest User"}
+                        }
                     }
-                }
-            }; [pscustomobject]$o
+                    else {
+                        $o[$p] = $policy.$p 
+                    }                    
+                } 
+            } 
+            if ($policy.defaultUserRolePermissions) { 
+                $durp = $policy.defaultUserRolePermissions
+                foreach ($prop in $durp.PSObject.Properties) { 
+                    if ($prop.Name -ne '@odata.type' -and $null -ne $prop.Value) { 
+                        $o[$prop.Name] = $prop.Value 
+                    } 
+                } 
+            }
+            [pscustomobject]$o 
         }
     }
     process {
