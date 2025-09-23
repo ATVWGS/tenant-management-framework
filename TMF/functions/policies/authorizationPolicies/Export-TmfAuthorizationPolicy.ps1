@@ -19,7 +19,8 @@ function Export-TmfAuthorizationPolicy {
     [CmdletBinding()] param(
         [string[]] $SpecificResources,
         [Alias('OutPutPath')] [string] $OutPath,
-        [switch] $ForceBeta,
+        #Register, Test and Invoke function use beta endpoint. Has to be adjusted to v1.0 first before ForceBeta = $true can be removed
+        [switch] $ForceBeta = $true,
         [System.Management.Automation.PSCmdlet] $Cmdlet = $PSCmdlet
     )
 
@@ -29,31 +30,31 @@ function Export-TmfAuthorizationPolicy {
         $parentName = 'policies'
         function Convert-AuthorizationPolicy { 
             param([object]$policy) 
-            $o = [ordered]@{ 
-                present = $true 
+            $o = [PSCustomObject][ordered]@{
+                present = $true
             }
             if ($policy.displayName) { 
-                $o.displayName = $policy.displayName 
+                Add-Member -InputObject $o -MemberType NoteProperty -Name "displayName" -Value $policy.displayName 
             }
             foreach ($p in 'allowInvitesFrom','allowedToSignUpEmailBasedSubscriptions','allowedToUseSSPR','allowEmailVerifiedUsersToJoinOrganization','blockMsolPowerShell','guestUserRoleId','allowedToCreateApps','allowedToCreateSecurityGroups','allowedToReadOtherUsers','allowedToReadBitlockerKeysForOwnedDevice','permissionGrantPolicyIdsAssignedToDefaultUserRole') { 
                 if ($policy.PSObject.Members.Match($p) -and $null -ne $policy.$p) { 
-                    if ($p -eq "guestUserRoledId") {
+                    if ($p -eq "guestUserRoleId") {
                         switch ($policy.$p) {
-                            "a0b1b346-4d3e-4e8b-98f8-753987be4970" {$o["guestUserRole"]="User"}
-                            "10dae51f-b6af-4016-8d66-8c2a99b929b3" {$o["guestUserRole"]="Guest User"}
-                            "2af84b1e-32c8-42b7-82bc-daa82404023b" {$o["guestUserRole"]="Restricted Guest User"}
+                            "a0b1b346-4d3e-4e8b-98f8-753987be4970" {Add-Member -InputObject $o -MemberType NoteProperty -Name "guestUserRole" -Value "User"}
+                            "10dae51f-b6af-4016-8d66-8c2a99b929b3" {Add-Member -InputObject $o -MemberType NoteProperty -Name "guestUserRole" -Value "Guest User"}
+                            "2af84b1e-32c8-42b7-82bc-daa82404023b" {Add-Member -InputObject $o -MemberType NoteProperty -Name "guestUserRole" -Value "Restricted Guest User"}
                         }
                     }
                     else {
-                        $o[$p] = $policy.$p 
+                        Add-Member -InputObject $o -MemberType NoteProperty -Name $p -Value $policy.$p
                     }                    
                 } 
             } 
             if ($policy.defaultUserRolePermissions) { 
                 $durp = $policy.defaultUserRolePermissions
-                foreach ($prop in $durp.PSObject.Properties) { 
+                foreach ($prop in $durp.getEnumerator()) { 
                     if ($prop.Name -ne '@odata.type' -and $null -ne $prop.Value) { 
-                        $o[$prop.Name] = $prop.Value 
+                        Add-Member -InputObject $o -MemberType NoteProperty -Name $prop.Name -Value $prop.Value
                     } 
                 } 
             }
@@ -71,7 +72,7 @@ function Export-TmfAuthorizationPolicy {
         }
         if ($ForceBeta -or -not $policy) {
             try {
-                $policy = Invoke-MgGraphRequest -Method GET -Uri "$script:graphBaseUrlbeta/policies/authorizationPolicy"; $usedBeta = $true
+                $policy = (Invoke-MgGraphRequest -Method GET -Uri "$script:graphBaseUrlbeta/policies/authorizationPolicy").value; $usedBeta = $true
             } catch {
                 Write-PSFMessage -Level Verbose -Message ('beta retrieval failed: {0}' -f $_.Exception.Message)
             }
