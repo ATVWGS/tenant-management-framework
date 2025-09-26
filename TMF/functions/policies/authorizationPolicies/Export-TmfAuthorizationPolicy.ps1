@@ -97,9 +97,6 @@ function Export-TmfAuthorizationPolicy {
         Write-PSFMessage -Level Verbose -FunctionName 'Export-TmfAuthorizationPolicy' -Message ("Exporting authorization policy. ForceBeta={0} UsedBeta={1}" -f $ForceBeta, $usedBeta)
     }
     end {
-        if ($PSBoundParameters.ContainsKey('OutPutPath')) {
-            Write-TmfDeprecatedParameterWarning -Cmdlet $Cmdlet -LegacyName 'OutPutPath' -NewName 'OutPath'
-        }
         if (-not $OutPath) {
             return @($exportObject)
         }

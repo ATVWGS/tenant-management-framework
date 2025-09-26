@@ -23,8 +23,6 @@ Export-TmfAttributeSet -SpecificResources AttributeSet1
     )
     begin {
         Test-GraphConnection -Cmdlet $Cmdlet
-        Write-TmfDeprecatedParameterWarning -Parameters $PSBoundParameters -LegacyName 'OutPutPath' -NewName 'OutPath'
-        # TODO: Add Pester tests for -OutPath deprecation (CI-002)
         $resourceName = 'attributeSets'
         $tenant = (Invoke-MgGraphRequest -Method GET -Uri ("$($script:graphBaseUrl)/organization?`$select=displayName,id")).value
         function Convert-AttributeSet {

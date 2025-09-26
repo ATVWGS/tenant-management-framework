@@ -31,7 +31,6 @@ function Export-TmfRoleManagement {
 
     begin {
         Test-GraphConnection -Cmdlet $Cmdlet
-        Write-TmfDeprecatedParameterWarning -Cmdlet $Cmdlet -LegacyName 'OutPutPath' -NewName 'OutPath'
         $tenant = (Invoke-MgGraphRequest -Method GET -Uri ("$script:graphBaseUrl1/organization?`$select=displayname,id")).value
         if ($tenant) {
             Write-PSFMessage -Level Verbose -FunctionName 'Export-TmfRoleManagement' -Message "Tenant: $($tenant.displayName) ($($tenant.id))"

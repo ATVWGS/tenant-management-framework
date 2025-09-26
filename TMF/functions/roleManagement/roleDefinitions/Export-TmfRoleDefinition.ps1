@@ -117,9 +117,6 @@ function Export-TmfRoleDefinition {
     }
     end {
         Write-PSFMessage -Level Verbose -FunctionName 'Export-TmfRoleDefinition' -Message "Exporting $($roleDefinitionsExport.Count) role definition(s)"
-        if ($PSBoundParameters.ContainsKey('OutPutPath')) {
-            Write-TmfDeprecatedParameterWarning -Cmdlet $Cmdlet -LegacyName 'OutPutPath' -NewName 'OutPath'
-        }
         if ($OutPath) {
             Write-TmfExportFile -OutPath $OutPath -ParentPath 'roleManagement' -ResourceName $resourceName -Data $roleDefinitionsExport
         } else {

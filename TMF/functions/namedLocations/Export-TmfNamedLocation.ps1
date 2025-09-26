@@ -74,9 +74,6 @@ function Export-TmfNamedLocation {
     }
     end {
         Write-PSFMessage -Level Verbose -FunctionName 'Export-TmfNamedLocation' -Message "Exporting $($namedLocationsExport.Count) named location(s). ForceBeta=$ForceBeta"
-        if ($PSBoundParameters.ContainsKey('OutPutPath')) {
-            Write-TmfDeprecatedParameterWarning -InvocationLine $MyInvocation.Line -LegacyParameter 'OutPutPath' -NewParameter 'OutPath' 
-        }
         if ($OutPath) {
             Write-TmfExportFile -OutPath $OutPath -ResourceName $resourceName -Data $namedLocationsExport
         } else {

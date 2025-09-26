@@ -15,7 +15,6 @@ Internal pipeline parameter; do not supply manually.
 Export-TmfConditionalAccessPolicy -OutPath C:\temp\tmf
 .EXAMPLE
 Export-TmfConditionalAccessPolicy -SpecificResources "Policy 1","abcd-1234" | ConvertTo-Json -Depth 15
-NOTE: Parameter `-OutPutPath` is deprecated; it remains as an alias for backward compatibility and will be removed in a future major version.
 #>
 function Export-TmfConditionalAccessPolicy {
     [CmdletBinding()] param(
@@ -26,8 +25,6 @@ function Export-TmfConditionalAccessPolicy {
     )
     begin {
         Test-GraphConnection -Cmdlet $Cmdlet
-        # Emit one-time deprecation warning if legacy alias used
-        #Write-TmfDeprecatedParameterWarning -Cmdlet $Cmdlet -LegacyName 'OutPutPath' -NewName 'OutPath'
         $resourceName = 'conditionalAccessPolicies'
         try {
             $tenant = (Invoke-MgGraphRequest -Method GET -Uri ("$($script:graphBaseUrl)/organization?`$select=displayName,id") -ErrorAction Stop).value 

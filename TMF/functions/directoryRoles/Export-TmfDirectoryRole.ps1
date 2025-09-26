@@ -25,8 +25,6 @@ function Export-TmfDirectoryRole {
     )
     begin {
         Test-GraphConnection -Cmdlet $Cmdlet
-        Write-TmfDeprecatedParameterWarning -Parameters $PSBoundParameters -LegacyName 'OutPutPath' -NewName 'OutPath'
-        # TODO: Add Pester tests for -OutPath deprecation (CI-002)
         $resourceName = 'directoryRoles'
         $graphBase = if ($ForceBeta) {
             $script:graphBaseUrl 

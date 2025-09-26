@@ -104,7 +104,7 @@ function Test-TmfAccessPackageResource
 
 			$originId = $definition.originId()
 			try {
-				$resource = (Invoke-MgGraphRequest -Method GET -Uri ("$script:graphBaseUrl/identityGovernance/entitlementManagement/catalogs/{0}/resources?`$filter=originId eq '{1}'" -f $catalogId, $originId)).Value
+				$resource = (Invoke-MgGraphRequest -Method GET -Uri ("$script:graphBaseUrl1/identityGovernance/entitlementManagement/catalogs/{0}/resources?`$filter=originId eq '{1}'" -f $catalogId, $originId)).Value
 			}
 			catch {
 				Write-PSFMessage -Level Warning -String 'TMF.Error.QueryWithFilterFailed' -StringValues $filter -Tag 'failed'

@@ -93,7 +93,10 @@ function Export-TmfAccessReview {
                 }
                 $principalId = $rev.principalId
                 if (-not $principalId -and $rev.query -match '/groups/([0-9a-fA-F\-]{36})') {
-                    $principalId = $matches[1] 
+                    $principalId = $rev.query.split("/")[3]
+                }
+                if (-not $principalId -and $rev.query -match '/users/([0-9a-fA-F\-]{36})') {
+                    $principalId = $rev.query.split("/")[3]
                 }
                 if (-not $principalId) {
                     continue 
@@ -366,9 +369,6 @@ function Export-TmfAccessReview {
         GetAccessReviewPageData 
     }
     end {
-        if ($PSBoundParameters.ContainsKey('OutPutPath')) {
-            Write-TmfDeprecatedParameterWarning -InvocationLine $MyInvocation.Line -LegacyParameter 'OutPutPath' -NewParameter 'OutPath' 
-        }
         if ($streaming) {
             if (-not $JsonLines) {
                 $streamWriter.Write(']') 

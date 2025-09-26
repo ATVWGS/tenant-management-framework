@@ -48,7 +48,7 @@ function Export-TmfAuthenticationStrengthPolicy {
         function Get-AllAuthenticationStrengthPolicies {
             $all = @()
             try {
-                $resp = Invoke-MgGraphRequest -Method GET -Uri "$(if ($ForceBeta) { $script:graphBaseUrlbeta } else { $script:graphBaseUrl1 })/policies/authenticationStrengthPolicies" 
+                $resp = Invoke-MgGraphRequest -Method GET -Uri "$(if ($ForceBeta) { $script:graphBaseUrlbeta } else { $script:graphBaseUrl1 })/policies/authenticationStrengthPolicies?`$filter=policyType ne 'builtIn'" 
             } catch {
                 throw $_ 
             }
@@ -83,9 +83,6 @@ function Export-TmfAuthenticationStrengthPolicy {
     }
     end {
         Write-PSFMessage -Level Verbose -FunctionName 'Export-TmfAuthenticationStrengthPolicy' -Message "Exporting $($export.Count) authentication strength policy(s). ForceBeta=$ForceBeta"
-        if ($PSBoundParameters.ContainsKey('OutPutPath')) {
-            Write-TmfDeprecatedParameterWarning -Cmdlet $Cmdlet -LegacyName 'OutPutPath' -NewName 'OutPath' 
-        }
         if (-not $OutPath) {
             return $export 
         }

@@ -161,7 +161,7 @@
 			}
 			if (-not $resolvedId) {
 				if ($DontFailIfNotExisting) {
-					Write-PSFMessage -Level Warning -Message ("Cannot resolve Group resource for input '{0}'." -f $InputReference) -Tag failed; return $InputReference
+					return $InputReference
 				} else {
 					throw "Cannot find group $InputReference"
 				}

@@ -112,9 +112,6 @@ function Export-TmfCrossTenantAccessPartnerSetting {
     }
     end {
         Write-PSFMessage -Level Verbose -FunctionName 'Export-TmfCrossTenantAccessPartnerSetting' -Message "Exporting $($exports.Count) partner setting(s). ForceBeta=$ForceBeta"
-        if ($PSBoundParameters.ContainsKey('OutPutPath')) {
-            Write-TmfDeprecatedParameterWarning -Cmdlet $Cmdlet -LegacyName 'OutPutPath' -NewName 'OutPath' 
-        }
         if ($OutPath) {
             Write-TmfExportFile -OutPath $OutPath -ParentPath 'crossTenantAccess' -ResourceName $resourceName -Data $exports
         } else {

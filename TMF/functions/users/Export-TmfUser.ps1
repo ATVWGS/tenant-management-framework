@@ -73,9 +73,6 @@ function Export-TmfUser {
     }
     end {
         Write-PSFMessage -Level Verbose -FunctionName 'Export-TmfUser' -Message "Exporting $($usersExport.Count) user(s). ForceBeta=$ForceBeta"
-        if ($PSBoundParameters.ContainsKey('OutPutPath')) {
-            Write-TmfDeprecatedParameterWarning -InvocationLine $MyInvocation.Line -LegacyParameter 'OutPutPath' -NewParameter 'OutPath'
-        }
         if ($OutPath) {
             Write-TmfExportFile -OutPath $OutPath -ResourceName $resourceName -Data $usersExport
         } else {

@@ -19,7 +19,7 @@ function Export-TmfCustomSecurityAttribute {
         [System.Management.Automation.PSCmdlet] $Cmdlet = $PSCmdlet
     )
     begin {
-        Test-GraphConnection -Cmdlet $Cmdlet; Write-TmfDeprecatedParameterWarning -Parameters $PSBoundParameters -LegacyName 'OutPutPath' -NewName 'OutPath'; # TODO: Add Pester tests for -OutPath deprecation (CI-002)
+        Test-GraphConnection -Cmdlet $Cmdlet
     }
     process {
         Export-TmfAttributeSet -OutPath $OutPath -ForceBeta:$ForceBeta.IsPresent -Cmdlet $Cmdlet

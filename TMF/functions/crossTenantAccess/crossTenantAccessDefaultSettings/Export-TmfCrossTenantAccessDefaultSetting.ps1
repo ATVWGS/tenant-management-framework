@@ -51,9 +51,6 @@ function Export-TmfCrossTenantAccessDefaultSetting {
         }
     }
     end {
-        if ($PSBoundParameters.ContainsKey('OutPutPath')) {
-            Write-TmfDeprecatedParameterWarning -Cmdlet $Cmdlet -LegacyName 'OutPutPath' -NewName 'OutPath' 
-        }
         if ($OutPath) {
             Write-TmfExportFile -OutPath $OutPath -ParentPath 'crossTenantAccess' -ResourceName $resourceName -Data @($export)
         } else {

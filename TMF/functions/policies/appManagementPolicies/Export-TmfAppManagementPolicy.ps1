@@ -119,12 +119,11 @@ function Export-TmfAppManagementPolicy {
         }
     }
     end {
-        if ($PSBoundParameters.ContainsKey('OutPutPath')) {
-            Write-TmfDeprecatedParameterWarning -Parameters $PSBoundParameters -LegacyName 'OutPutPath' -NewName 'OutPath'
-        }
         if (-not $OutPath) {
             return $export
         }
-        Write-TmfExportFile -OutPath $OutPath -ParentPath $parentName -ResourceName $resourceName -Data $export
+        if ($export) {
+            Write-TmfExportFile -OutPath $OutPath -ParentPath $parentName -ResourceName $resourceName -Data $export
+        }        
     }
 }

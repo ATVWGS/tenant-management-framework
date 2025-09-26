@@ -21,7 +21,7 @@ function Export-TmfAuthenticationMethodsPolicy {
     [CmdletBinding()] param(
         [string[]] $SpecificResources,
         [Alias('OutPutPath')] [string] $OutPath,
-        [switch] $ForceBeta,
+        [switch] $ForceBeta = $true,
         [System.Management.Automation.PSCmdlet] $Cmdlet = $PSCmdlet
     )
 
@@ -209,7 +209,6 @@ function Export-TmfAuthenticationMethodsPolicy {
     }
     end {
         Write-PSFMessage -Level Verbose -FunctionName 'Export-TmfAuthenticationMethodsPolicy' -Message "Exporting authentication methods policy. ForceBeta=$ForceBeta"
-        Write-TmfDeprecatedParameterWarning -Cmdlet $Cmdlet -LegacyName 'OutPutPath' -NewName 'OutPath'
         if (-not $OutPath) {
             return @($exportObject)
         }

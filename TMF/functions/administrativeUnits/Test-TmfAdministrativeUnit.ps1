@@ -185,13 +185,13 @@ function Test-TmfAdministrativeUnit
 									$definitionScopedRoleMembers = @()
 									$definition.scopedRoleMembers | Foreach-Object {
 										$identityId = Resolve-User -InputReference $_.identity -Cmdlet $Cmdlet -DontFailIfNotExisting
-										if (-Not $identityId) {
+										if (-Not $identityId -or $identityId -eq $_.identity) {
 											$identityId = Resolve-Group -InputReference $_.identity -Cmdlet $Cmdlet -DontFailIfNotExisting
-											if (-Not $identityId) {
+											if (-Not $identityId -or $identityId -eq $_.identity) {
 												$identityId = Resolve-ServicePrincipal -InputReference $_.identity -Cmdlet $Cmdlet -DontFailIfNotExisting
-												if (-Not $identityId) {
+												if (-Not $identityId -or $identityId -eq $_.identity) {
 													$identityId = Resolve-Application -InputReference $_.identity -ReturnObjectId -DontFailIfNotExisting -Cmdlet $Cmdlet
-													if (-Not $identityId) {
+													if (-Not $identityId -or $identityId -eq $_.identity) {
 														$Cmdlet.ThrowTerminatingError("Cannot resolve $($_.identity) as user, group, application or serviceprincipal")
 													}
 												}

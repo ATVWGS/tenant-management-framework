@@ -69,9 +69,6 @@ function Export-TmfGroup {
     }
     end {
         Write-PSFMessage -Level Verbose -FunctionName 'Export-TmfGroup' -Message "Exporting $($groupsExport.Count) group(s). ForceBeta=$ForceBeta"
-        if ($PSBoundParameters.ContainsKey('OutPutPath')) {
-            Write-TmfDeprecatedParameterWarning -InvocationLine $MyInvocation.Line -LegacyParameter 'OutPutPath' -NewParameter 'OutPath' 
-        }
         if ($OutPath) {
             Write-TmfExportFile -OutPath $OutPath -ResourceName $resourceName -Data $groupsExport
         } else {

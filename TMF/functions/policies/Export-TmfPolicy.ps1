@@ -27,7 +27,6 @@ function Export-TmfPolicy {
         $results = @{}
     }
     process {
-        Write-TmfDeprecatedParameterWarning -InvocationLine $MyInvocation.Line -LegacyParameter 'OutPutPath' -NewParameter 'OutPath'
         $exporters = @(
             { Export-TmfAuthenticationFlowsPolicy -OutPath $OutPath -SpecificResources $SpecificResources -Cmdlet $Cmdlet },
             { Export-TmfAuthenticationMethodsPolicy -OutPath $OutPath -SpecificResources $SpecificResources -Cmdlet $Cmdlet },

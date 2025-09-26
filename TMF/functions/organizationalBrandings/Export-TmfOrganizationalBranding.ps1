@@ -38,7 +38,7 @@ function Export-TmfOrganizationalBranding {
         $properties = 'backgroundColor', 'customAccountResetCredentialsUrl', 'customCannotAccessYourAccountText', 'customCannotAccessYourAccountUrl', 'customForgotMyPasswordText', 'customPrivacyAndCookiesText', 'customPrivacyAndCookiesUrl', 'customResetItNowText', 'customTermsOfUseText', 'customTermsOfUseUrl', 'headerBackgroundColor', 'signInPageText', 'usernameHintText'
         function Convert-Branding {
             param([object]$branding, [string]$name) $o = [ordered]@{displayName = $name; present = $true }; foreach ($p in $properties) {
-                if ($branding.PSObject.Properties[$p]) {
+                if ($branding.$p) {
                     $o[$p] = $branding.$p 
                 } 
             }; return $o 
@@ -64,15 +64,14 @@ function Export-TmfOrganizationalBranding {
             }
         } else {
             $exports += Convert-Branding $defaultBranding 'default'; foreach ($loc in $localizations) {
-                $exports += Convert-Branding $loc $loc.id 
+                if ($loc.id -ne "0") {
+                    $exports += Convert-Branding $loc $loc.id 
+                }                
             } 
         }
     }
     end {
         Write-PSFMessage -Level Verbose -FunctionName 'Export-TmfOrganizationalBranding' -Message "Exporting $($exports.Count) branding record(s)"
-        if ($PSBoundParameters.ContainsKey('OutPutPath')) {
-            Write-TmfDeprecatedParameterWarning -Cmdlet $Cmdlet -LegacyName 'OutPutPath' -NewName 'OutPath' 
-        }
         if ($OutPath) {
             Write-TmfExportFile -OutPath $OutPath -ResourceName $resourceName -Data $exports
         } else {

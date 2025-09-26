@@ -129,6 +129,7 @@ function Test-TmfAuthenticationMethodsPolicy {
                                             for ($i=0; $i -lt $objectcount; $i++) {
                                                 foreach ($key in ($method.$methodProperty[$i] | Get-Member -MemberType NoteProperty).Name) {
                                                     if ($method.$methodProperty[$i].$key -ne $resourceMethod.$methodProperty[$i].$key) {
+														Write-Verbose $method.$methodProperty[$i].$key
                                                         $methodChange = $true
                                                     }
                                                 }
@@ -136,14 +137,28 @@ function Test-TmfAuthenticationMethodsPolicy {
                                         }
                                         "Hashtable" {
                                             if (Compare-Hashtable ($method.$methodProperty | ConvertTo-PSFHashtable) $resourceMethod.$methodProperty) {
+												Write-Verbose $method.$methodProperty
                                                 $methodChange = $true
                                             }
                                         }
                                         "PSCustomObject" {
                                             foreach ($item in ($method.$methodProperty | Get-Member -MemberType NoteProperty).Name) {
-                                                if ($method.$methodProperty.$item -ne $resourceMethod.$methodProperty.$item) {
-                                                    $methodChange = $true
-                                                }
+												if ($method.$methodProperty.$item.GetType().Name -eq "Object[]") {
+													$objectcount = $method.$methodProperty.$item.count
+													for ($i=0; $i -lt $objectcount; $i++) {
+														foreach ($key in ($method.$methodProperty.$item[$i] | Get-Member -MemberType NoteProperty).Name) {
+															if ($method.$methodProperty.$item[$i].$key -ne $resourceMethod.$methodProperty.$item[$i].$key) {
+																$methodChange = $true
+															}
+														}
+													}
+												}
+												else {
+													if ($method.$methodProperty.$item -ne $resourceMethod.$methodProperty.$item) {
+														Write-Verbose $item
+														$methodChange = $true
+													}
+												}                                                
                                             }
                                         }
                                     }

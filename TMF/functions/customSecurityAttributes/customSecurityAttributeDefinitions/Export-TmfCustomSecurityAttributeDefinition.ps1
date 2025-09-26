@@ -25,7 +25,6 @@ function Export-TmfCustomSecurityAttributeDefinition {
     )
     begin {
         Test-GraphConnection -Cmdlet $Cmdlet
-        Write-TmfDeprecatedParameterWarning -Parameters $PSBoundParameters -LegacyName 'OutPutPath' -NewName 'OutPath'
         $resourceName = 'customSecurityAttributeDefinitions'
         $tenant = (Invoke-MgGraphRequest -Method GET -Uri ("$($script:graphBaseUrl)/organization?`$select=displayName,id")).value
         $export = @()

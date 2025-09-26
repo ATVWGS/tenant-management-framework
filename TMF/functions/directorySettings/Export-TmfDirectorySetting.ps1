@@ -99,9 +99,6 @@ function Export-TmfDirectorySetting {
     }
     end {
         Write-PSFMessage -Level Verbose -FunctionName 'Export-TmfDirectorySetting' -Message "Exporting $($directorySettingsExport.Count) directory setting(s)"
-        if ($PSBoundParameters.ContainsKey('OutPutPath')) {
-            Write-TmfDeprecatedParameterWarning -Parameters $PSBoundParameters -LegacyName 'OutPutPath' -NewName 'OutPath' 
-        }
         if ($OutPath) {
             Write-TmfExportFile -OutPath $OutPath -ResourceName $resourceName -Data $directorySettingsExport
         } else {

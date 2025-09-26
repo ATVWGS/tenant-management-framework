@@ -221,7 +221,7 @@
 			}
 			if (-not $resolvedId) {
 				if ($DontFailIfNotExisting) {
-					Write-PSFMessage -Level Warning -Message ("Cannot resolve User '{0}'." -f $InputReference) -Tag failed; return $InputReference
+					return $InputReference
 				} else {
 					throw "Cannot find user $InputReference"
 				}

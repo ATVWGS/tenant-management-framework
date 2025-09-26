@@ -213,9 +213,6 @@ function Export-TmfRoleManagementPolicy {
         }
     }
     end {
-        if ($PSBoundParameters.ContainsKey('OutPutPath')) {
-            Write-TmfDeprecatedParameterWarning -Cmdlet $Cmdlet -LegacyName 'OutPutPath' -NewName 'OutPath'
-        }
         if (-not $OutPath) {
             return $roleManagementPoliciesExport
         }

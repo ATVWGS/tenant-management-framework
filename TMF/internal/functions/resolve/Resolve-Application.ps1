@@ -205,7 +205,7 @@
 
 			if (-not $appId) {
 				if ($DontFailIfNotExisting) {
-					Write-PSFMessage -Level Warning -Message ("Cannot resolve Application resource for input '{0}'. Searched tenant & desired configuration." -f $InputReference) -Tag failed; return $InputReference
+					return $InputReference
 				} else {
 					throw "Cannot find application $InputReference"
 				}

@@ -23,7 +23,7 @@ function Export-TmfTenantAppManagementPolicy {
 
     begin {
         Test-GraphConnection -Cmdlet $Cmdlet
-        $resourceFolder = 'policies/tenantAppManagementPolicy'
+        $resourceFolder = 'policies/tenantAppManagementPolicies'
         $fileName = 'tenantAppManagementPolicy.json'
 
         function Convert-TenantAppManagementPolicy {
@@ -45,21 +45,19 @@ function Export-TmfTenantAppManagementPolicy {
         }
     }
     process {
-    $graphBase = if ($ForceBeta) { $script:graphBaseUrl } else { $script:graphBaseUrl1 }
-    try { $policy = Invoke-MgGraphRequest -Method GET -Uri ("$graphBase/policies/defaultAppManagementPolicy") } catch { throw $_ }
+        $graphBase = if ($ForceBeta) { $script:graphBaseUrl } else { $script:graphBaseUrl1 }
+        try { $policy = Invoke-MgGraphRequest -Method GET -Uri ("$graphBase/policies/defaultAppManagementPolicy") } catch { throw $_ }
 
-        if (-not $policy) { return @() }
+            if (-not $policy) { return @() }
 
-        $exportObject = Convert-TenantAppManagementPolicy -policy $policy
-        Write-TmfDeprecatedParameterWarning -InvocationLine $MyInvocation.Line -LegacyParameter 'OutPutPath' -NewParameter 'OutPath'
-        if (-not $OutPath) { return @($exportObject) }
+            $exportObject = Convert-TenantAppManagementPolicy -policy $policy
+            if (-not $OutPath) { return @($exportObject) }
     }
     end {
-    Write-PSFMessage -Level Verbose -FunctionName 'Export-TmfTenantAppManagementPolicy' -Message "Exporting tenant app management policy. ForceBeta=$ForceBeta"
-    if (-not $OutPath) { return @($exportObject) }
-    $targetDir = Join-Path -Path $OutPath -ChildPath $resourceFolder
-    if (-not (Test-Path -LiteralPath $targetDir)) { if (-not (Test-Path -LiteralPath (Join-Path $OutPath 'policies'))) { New-Item -ItemType Directory -Path (Join-Path $OutPath 'policies') -Force | Out-Null }; New-Item -ItemType Directory -Path $targetDir -Force | Out-Null }
-    @($exportObject) | ConvertTo-Json -Depth 15 | Out-File -FilePath (Join-Path $targetDir $fileName) -Encoding utf8 -Force
-    # TODO: Add Pester tests (CI-002) for deprecation warning when using -OutPutPath alias in Export-TmfTenantAppManagementPolicy
+        Write-PSFMessage -Level Verbose -FunctionName 'Export-TmfTenantAppManagementPolicy' -Message "Exporting tenant app management policy. ForceBeta=$ForceBeta"
+        if (-not $OutPath) { return @($exportObject) }
+        $targetDir = Join-Path -Path $OutPath -ChildPath $resourceFolder
+        if (-not (Test-Path -LiteralPath $targetDir)) { if (-not (Test-Path -LiteralPath (Join-Path $OutPath 'policies'))) { New-Item -ItemType Directory -Path (Join-Path $OutPath 'policies') -Force | Out-Null }; New-Item -ItemType Directory -Path $targetDir -Force | Out-Null }
+        @($exportObject) | ConvertTo-Json -Depth 15 | Out-File -FilePath (Join-Path $targetDir $fileName) -Encoding utf8 -Force
     }
 }

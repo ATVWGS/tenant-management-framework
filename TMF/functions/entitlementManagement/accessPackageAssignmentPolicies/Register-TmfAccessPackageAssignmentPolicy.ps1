@@ -78,8 +78,18 @@ function Register-TmfAccessPackageAssignmentPolicy
 		"reviewSettings", "requestApprovalSettings", "requestorSettings", "specificAllowedTargets", "expiration", "automaticRequestSettings" | ForEach-Object {
 			if ($PSBoundParameters.ContainsKey($_)) {
 				if ($script:supportedResources[$resourceName]["validateFunctions"].ContainsKey($_)) {
-					$validated = $PSBoundParameters[$_] | ConvertTo-PSFHashtable -Include $($script:supportedResources[$resourceName]["validateFunctions"][$_].Parameters.Keys)
-					$validated = & $script:supportedResources[$resourceName]["validateFunctions"][$_] @validated -Cmdlet $Cmdlet
+					if ($PSBoundParameters[$_].GetType().Name -eq "Object[]") {
+						$validated = @()
+						$property = $_
+						foreach ($value in $PSBoundParameters[$property]) {
+							$dummy = $value | ConvertTo-PSFHashtable -Include $($script:supportedResources[$resourceName]["validateFunctions"][$property].Parameters.Keys)
+							$validated += & $script:supportedResources[$resourceName]["validateFunctions"][$property] @dummy -Cmdlet $Cmdlet
+						}
+					}
+					else {
+						$validated = $PSBoundParameters[$_] | ConvertTo-PSFHashtable -Include $($script:supportedResources[$resourceName]["validateFunctions"][$_].Parameters.Keys)
+						$validated = & $script:supportedResources[$resourceName]["validateFunctions"][$_] @validated -Cmdlet $Cmdlet
+					}					
 				}
 				else {
 					$validated = $PSBoundParameters[$_] | ConvertTo-PSFHashtable

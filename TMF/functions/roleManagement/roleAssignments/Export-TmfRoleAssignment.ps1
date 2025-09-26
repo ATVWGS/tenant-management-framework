@@ -213,9 +213,6 @@ function Export-TmfRoleAssignment {
     }
     end {
         Write-PSFMessage -Level Verbose -FunctionName 'Export-TmfRoleAssignment' -Message "Exporting $($roleAssignmentsExport.Count) role assignment(s)"
-        if ($PSBoundParameters.ContainsKey('OutPutPath')) {
-            Write-TmfDeprecatedParameterWarning -Cmdlet $Cmdlet -LegacyName 'OutPutPath' -NewName 'OutPath'
-        }
         if ($OutPath) {
             Write-TmfExportFile -OutPath $OutPath -ParentPath 'roleManagement' -ResourceName $resourceName -Data $roleAssignmentsExport
         } else {

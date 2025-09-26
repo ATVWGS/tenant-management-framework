@@ -9,6 +9,8 @@ Optional list of AU display names to export (comma separated accepted).
 Root folder to write export; when omitted objects are returned. (Legacy alias: -OutPutPath)
 .PARAMETER ForceBeta
 Use beta endpoint for retrieval.
+.PARAMETER IncludeMembers
+Include members of administrative unit in export.
 .PARAMETER Cmdlet
 Internal pipeline parameter; do not supply manually.
 .EXAMPLE
@@ -21,6 +23,7 @@ function Export-TmfAdministrativeUnit {
         [string[]] $SpecificResources,
         [Alias('OutPutPath')] [string] $OutPath,
         [switch] $ForceBeta,
+        [switch] $IncludeMembers,
         [System.Management.Automation.PSCmdlet] $Cmdlet = $PSCmdlet
     )
     begin {
@@ -72,7 +75,9 @@ function Export-TmfAdministrativeUnit {
                 $escaped = $name -replace "'", "''"
                 $AU = (Invoke-MgGraphRequest -Method GET -Uri ("$($graphUrl)/directory/administrativeUnits?`$filter=displayName eq '{0}'" -f $escaped)).value
                 if ($AU) {
-                    $members = Get-AUMembers -Id $AU.id -MembershipType $AU.membershipType
+                    if ($IncludeMembers) {
+                        $members = Get-AUMembers -Id $AU.id -MembershipType $AU.membershipType
+                    }                    
                     $scoped = Get-AUScopedRoleMembers -Id $AU.id
                     $base = [ordered]@{ displayName = $AU.displayName; description = $AU.description; present = $true }
                     if ($AU.membershipType -eq 'Dynamic') {
@@ -113,15 +118,32 @@ function Export-TmfAdministrativeUnit {
                 } 
             }
             foreach ($AU in $all) {
-                if ($AU.membershipType -ne 'Dynamic') {
+                if ($AU.membershipType -ne 'Dynamic' -and $IncludeMembers) {
                     $members = Get-AUMembers -Id $AU.id -MembershipType $AU.membershipType
                 }                
                 $scoped = Get-AUScopedRoleMembers -Id $AU.id
-                $base = [ordered]@{ displayName = $AU.displayName; description = $AU.description; visibility = $AU.visibility; membershipType = $AU.membershipType; scopedRoleMembers = $scoped; present = $true }
+                $base = [ordered]@{ displayName = $AU.displayName; description = $AU.description; present = $true }
                 if ($AU.membershipType -eq 'Dynamic') {
                     $base.membershipRule = $AU.membershipRule; $base.membershipRuleProcessingState = $AU.membershipRuleProcessingState 
                 } elseif ($members.users -or $members.groups -or $members.devices) {
-                    $base.users = $members.users; $base.groups = $members.groups; $base.devices = $members.devices 
+                    if ($members.users) {
+                        $base.users = $members.users
+                    }
+                    if ($members.groups) {
+                        $base.groups = $members.groups
+                    }
+                    if ($members.devices) {
+                        $base.devices = $members.devices 
+                    }
+                }
+                if ($AU.membershipType) {
+                    $base.membershipType = $AU.membershipType
+                }
+                if ($scoped) {
+                    $base.scopedRoleMembers = $scoped
+                }
+                if ($AU.visibility) {
+                    $base.visibility = $AU.visibility
                 }
                 $administrativeUnitsExport += $base
             }
@@ -129,9 +151,6 @@ function Export-TmfAdministrativeUnit {
     }
     end {
         Write-PSFMessage -Level Verbose -FunctionName 'Export-TmfAdministrativeUnit' -Message "Exporting $($administrativeUnitsExport.Count) administrative unit(s)"
-        if ($PSBoundParameters.ContainsKey('OutPutPath')) {
-            Write-TmfDeprecatedParameterWarning -Parameters $PSBoundParameters -LegacyName 'OutPutPath' -NewName 'OutPath' 
-        }
         if (-not $OutPath) {
             return $administrativeUnitsExport 
         }

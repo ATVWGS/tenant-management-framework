@@ -12,44 +12,195 @@ function Export-TmfAccessPackage {
         $export = @()
         function Convert-Package {
             param($p)
-            # Map expanded accessPackageResourceRoleScopes into simplified objects
+            # Map expanded accessPackageResources into simplified objects
             $roleScopes = @()
-            if ($p.accessPackageResourceRoleScopes) {
-                foreach ($rs in $p.accessPackageResourceRoleScopes) {
-                    $role = $rs.accessPackageResourceRole
-                    $scope = $rs.accessPackageResourceScope
+            if ($p.resourceRoleScopes) {
+                foreach ($rs in $p.resourceRoleScopes) {
+                    $role = $rs.role
+                    $scope = $rs.scope
                     $roleScopes += [ordered]@{
-                        roleDisplayName = $role.displayName
-                        roleOriginId    = $role.originId
-                        resourceId      = $role.resource.id
-                        scopeType       = $scope.scopeType
-                        scopeId         = $scope.id
-                        scopeOriginId   = $scope.originId
-                        createdDateTime = $rs.createdDateTime
+                        resourceRole       = $role.displayName
+                        originSystem       = $role.originSystem
+                        resourceIdentifier = (Resolve-DirectoryObject -InputReference $scope.originId -ReturnObjects).displayName
                     }
                 }
             }
+            # Map expanded accessPackageAssignmentPolicies into simplified objects
+            $assignmentPolicies = @()
+            if ($p.assignmentPolicies) {
+                foreach ($asp in $p.assignmentPolicies) {
+                    $specificAllowedTargets = @()
+                    foreach ($allowedTarget in $asp.specificAllowedTargets) {
+                        $specificAllowedTargets += @{
+                            reference = $allowedTarget.description
+                            type = $allowedTarget."@odata.type".replace("#microsoft.graph.","")
+                            description = $allowedTarget.description
+                        }
+                    }
+                    if ($asp.requestApprovalSettings.stages) {
+                        $stages = @()
+                        foreach ($stage in $asp.requestApprovalSettings.stages) {
+                            $primaryApprovers = @()
+                            $fallbackPrimaryApprovers = @()
+                            $escalationApprovers = @()
+                            $fallbackEscalationApprovers = @()
+                            if ($stage.primaryApprovers) {
+                                foreach ($Approver in $stage.primaryApprovers) {
+                                    switch ($Approver."@odata.type") {
+                                        "#microsoft.graph.singleUser" {
+                                            $primaryApprovers += @{
+                                                reference = Resolve-User -InputReference $Approver.UserId -UserPrincipalName
+                                                type = "singleUser"
+                                            }
+                                        }
+                                        "#microsoft.graph.singleServicePrincipal" {
+                                            $primaryApprovers += @{
+                                                reference = Resolve-ServicePrincipal -InputReference $Approver.ServicePrincipalId -DisplayName
+                                                type = "singleServicePrincipal"
+                                            }
+                                        }
+                                        "#microsoft.graph.groupMembers" {
+                                            $primaryApprovers += @{
+                                                reference = Resolve-Group -InputReference $Approver.GroupId -DisplayName
+                                                type = "groupMembers"
+                                            }
+                                        }
+                                    }
+                                    
+                                }
+                            }
+                            if ($stage.fallbackPrimaryApprovers) {
+                                foreach ($Approver in $stage.fallbackPrimaryApprovers) {
+                                    switch ($Approver."@odata.type") {
+                                        "#microsoft.graph.singleUser" {
+                                            $fallbackPrimaryApprovers += @{
+                                                reference = Resolve-User -InputReference $Approver.UserId -UserPrincipalName
+                                                type = "singleUser"
+                                            }
+                                        }
+                                        "#microsoft.graph.singleServicePrincipal" {
+                                            $fallbackPrimaryApprovers += @{
+                                                reference = Resolve-ServicePrincipal -InputReference $Approver.ServicePrincipalId -DisplayName
+                                                type = "singleServicePrincipal"
+                                            }
+                                        }
+                                        "#microsoft.graph.groupMembers" {
+                                            $fallbackPrimaryApprovers += @{
+                                                reference = Resolve-Group -InputReference $Approver.UserId -DisplayName
+                                                type = "groupMembers"
+                                            }
+                                        }
+                                    }
+                                    
+                                }
+                            }
+                            if ($stage.escalationApprovers) {
+                                foreach ($Approver in $stage.escalationApprovers) {
+                                    switch ($Approver."@odata.type") {
+                                        "#microsoft.graph.singleUser" {
+                                            $escalationApprovers += @{
+                                                reference = Resolve-User -InputReference $Approver.UserId -UserPrincipalName
+                                                type = "singleUser"
+                                            }
+                                        }
+                                        "#microsoft.graph.singleServicePrincipal" {
+                                            $escalationApprovers += @{
+                                                reference = Resolve-ServicePrincipal -InputReference $Approver.ServicePrincipalId -DisplayName
+                                                type = "singleServicePrincipal"
+                                            }
+                                        }
+                                        "#microsoft.graph.groupMembers" {
+                                            $escalationApprovers += @{
+                                                reference = Resolve-Group -InputReference $Approver.UserId -DisplayName
+                                                type = "groupMembers"
+                                            }
+                                        }
+                                    }
+                                    
+                                }
+                            }
+                            if ($stage.fallbackEscalationApprovers) {
+                                foreach ($Approver in $stage.fallbackEscalationApprovers) {
+                                    switch ($Approver."@odata.type") {
+                                        "#microsoft.graph.singleUser" {
+                                            $fallbackEscalationApprovers += @{
+                                                reference = Resolve-User -InputReference $Approver.UserId -UserPrincipalName
+                                                type = "singleUser"
+                                            }
+                                        }
+                                        "#microsoft.graph.singleServicePrincipal" {
+                                            $fallbackEscalationApprovers += @{
+                                                reference = Resolve-ServicePrincipal -InputReference $Approver.ServicePrincipalId -DisplayName
+                                                type = "singleServicePrincipal"
+                                            }
+                                        }
+                                        "#microsoft.graph.groupMembers" {
+                                            $fallbackEscalationApprovers += @{
+                                                reference = Resolve-Group -InputReference $Approver.UserId -DisplayName
+                                                type = "groupMembers"
+                                            }
+                                        }
+                                    }
+                                    
+                                }
+                            }
+                            $stage.primaryApprovers = $primaryApprovers
+                            $stage.fallbackPrimaryApprovers = $fallbackPrimaryApprovers
+                            $stage.escalationApprovers = $escalationApprovers
+                            $stage.fallbackEscalationApprovers = $fallbackEscalationApprovers
+
+                            $stages += $stage
+                            
+                        }
+                        $asp.requestApprovalSettings.stages = $stages
+                    }
+                    if (-not $specificAllowedTargets) {
+                        $assignmentPolicies += [ordered]@{
+                            displayname             = $asp.displayName
+                            description             = $asp.description
+                            allowedTargetScope      = $asp.allowedTargetScope
+                            expiration              = $asp.expiration
+                            requestorSettings       = $asp.requestorSettings
+                            requestApprovalSettings = $asp.requestApprovalSettings
+                            present                 = $true
+                        }
+                    }
+                    else {
+                        $assignmentPolicies += [ordered]@{
+                            displayname             = $asp.displayName
+                            description             = $asp.description
+                            allowedTargetScope      = $asp.allowedTargetScope
+                            specificAllowedTargets  = $specificAllowedTargets
+                            expiration              = $asp.expiration
+                            requestorSettings       = $asp.requestorSettings
+                            requestApprovalSettings = $asp.requestApprovalSettings
+                            present                 = $true
+                        }
+                    }                    
+                }
+            }
+            # Get catalogName
             $catalogName = $null
-            if ($p.accessPackageCatalog -and $p.accessPackageCatalog.displayName) {
-                $catalogName = $p.accessPackageCatalog.displayName 
-            } elseif ($p.accessPackageCatalog.Id) {
-                $catalogName = $p.accessPackageCatalog.Id 
+            if ($p.catalog -and $p.catalog.displayName) {
+                $catalogName = $p.catalog.displayName 
+            } elseif ($p.catalog.Id) {
+                $catalogName = $p.catalog.Id 
             }
             [ordered]@{
                 displayName                     = $p.displayName
                 description                     = $p.description
                 isHidden                        = $p.isHidden
-                isRoleScopesVisible             = $p.isRoleScopesVisible
                 catalog                         = $catalogName
-                accessPackageResourceRoleScopes = $roleScopes
+                accessPackageResources          = $roleScopes
+                assignmentPolicies              = $assignmentPolicies
                 present                         = $true
             }
         }
         function Get-AllPackages {
             $list = @()
-            $expand = 'accessPackageResourceRoleScopes($expand=*),accessPackageCatalog'
+            $expand = 'assignmentPolicies,resourceRoleScopes($expand=*),catalog'
             try {
-                $resp = Invoke-MgGraphRequest -Method GET -Uri "$script:graphBaseUrl/identityGovernance/entitlementManagement/accessPackages?`$top=50&`$expand=$expand" -ErrorAction Stop
+                $resp = Invoke-MgGraphRequest -Method GET -Uri "$base/identityGovernance/entitlementManagement/accessPackages?`$top=50&`$expand=$expand" -ErrorAction Stop
                 if ($resp.'@odata.nextLink') {
                     do {
                         $list += $resp.value; $resp = Invoke-MgGraphRequest -Method GET -Uri $resp.'@odata.nextLink' 
@@ -106,9 +257,6 @@ function Export-TmfAccessPackage {
         }
     }
     end {
-        if ($PSBoundParameters.ContainsKey('OutPutPath')) {
-            Write-TmfDeprecatedParameterWarning -Cmdlet $Cmdlet -LegacyName 'OutPutPath' -NewName 'OutPath' 
-        }
         if ($OutPath) {
             Write-TmfExportFile -OutPath $OutPath -ParentPath 'entitlementManagement' -ResourceName $resourceName -Data $export
         } else {
