@@ -32,25 +32,16 @@ function Export-TmfRoleManagementPolicy {
     begin {
         Test-GraphConnection -Cmdlet $Cmdlet
         $resourceName = 'roleManagementPolicies'
+        $templateName = 'roleManagementPolicyRuleTemplates'
         $tenant = (Invoke-MgGraphRequest -Method GET -Uri ("$($script:graphBaseUrl)/organization?`$select=displayname,id")).value
         $roleManagementPoliciesExport = @()
+        $roleManagementPolicyRuleTemplatesExport = @()
         function Convert-RoleManagementPolicy {
             param([object]$policy, [string]$policyScope)
             $obj = [ordered]@{present = $true }
-            if ($policy.PSObject.Members.Match('displayName') -and $policy.displayName) {
-                $obj.displayName = $policy.displayName
-            }
-            if ($policy.PSObject.Members.Match('description') -and $policy.description) {
-                $obj.description = $policy.description
-            }
             if ($policy.PSObject.Members.Match('id') -and $policy.id) {
-                $obj.id = $policy.id
-            }
-            if ($policy.PSObject.Members.Match('isOrganizationDefault')) {
-                $obj.isOrganizationDefault = $policy.isOrganizationDefault
-            }
-            if ($policy.roleDefinition -and $policy.roleDefinition.PSObject.Members.Match('displayName')) {
-                $obj.roleReference = $policy.roleDefinition.displayName
+                $roleId = (Invoke-MgGraphRequest -Method "GET" -Uri "$($script:graphBaseUrl)/policies/roleManagementPolicyAssignments?`$filter=scopeId eq '/' and scopeType eq 'Directory' and policyId eq '$($policy.id)'").value.roleDefinitionId
+                $obj.roleReference = Resolve-DirectoryRoleDefinition -InputReference $roleId -DisplayName
             }
             $obj.activationApprover = @()
             if ($policy.PSObject.Members.Match('rules')) {
@@ -64,35 +55,16 @@ function Export-TmfRoleManagementPolicy {
                         foreach ($stage in $rule.setting.approvalStages) {
                             if ($stage.primaryApprovers) {
                                 foreach ($approver in $stage.primaryApprovers) {
-                                    $obj.activationApprover += [ordered]@{reference = $approver.displayName; type = ($approver.'@odata.type' -replace '#microsoft.graph.', '') }
+                                    if ($approver.userId) {
+                                        $reference = Resolve-User -InputReference $approver.userId -UserPrincipalName
+                                    }
+                                    else {
+                                        $reference = Resolve-Group -InputReference $approver.groupId -DisplayName
+                                    }
+                                    $obj.activationApprover += [ordered]@{reference = $reference; type = ($approver.'@odata.type' -replace '#microsoft.graph.', '') }
                                 }
                             }
                         }
-                    }
-                }
-            }
-            if ($policy.PSObject.Members.Match('rules')) {
-                $obj.rules = @()
-                foreach ($rule in $policy.rules) {
-                    if ($rule.PSObject.Members.Match('id')) {
-                        $derivedRuleType = if ($rule.PSObject.Members.Match('ruleType')) {
-                            $rule.ruleType
-                        } elseif ($rule.PSObject.Members.Match('@odata.type')) {
-                            ($rule.'@odata.type' -replace '#microsoft.graph.', '')
-                        } else {
-                            $null
-                        }
-                        $r = [ordered]@{id = $rule.id }
-                        if ($derivedRuleType) {
-                            $r.ruleType = $derivedRuleType
-                        }
-                        if ($rule.PSObject.Members.Match('target')) {
-                            $r.target = $rule.target
-                        }
-                        if ($rule.PSObject.Members.Match('setting')) {
-                            $r.setting = $rule.setting
-                        }
-                        $obj.rules += $r
                     }
                 }
             }
@@ -119,8 +91,25 @@ function Export-TmfRoleManagementPolicy {
                     $obj.scopeReference = '/'; $obj.scopeType = 'directory'
                 }
             }
-            return $obj
+            if ($policy.PSObject.Members.Match('rules')) {
+                $templateObj = [ordered]@{displayName = "$($obj.roleReference.replace(' ',''))_$($policy.scopeType)" }
+                $templateObj.rules = @()
+                foreach ($rule in $policy.rules) {
+                    if ($rule.PSObject.Members.Match('id') -and $rule.id -ne 'Approval_EndUser_Assignment') {
+                        $templateObj.rules += $rule
+                    }
+                }
+                $obj.ruleTemplate = $templateObj.displayName
+            }
+            
+            if ($templateObj) {
+                return $obj,$templateObj
+            }
+            else {
+                return $obj
+            }            
         }
+        
         function Get-AllRoleManagementPolicies {
             param([string]$policyScope, [string[]]$GroupIds)
             $collected = @()
@@ -136,7 +125,8 @@ function Export-TmfRoleManagementPolicy {
             $filters = @()
             switch ($policyScope) {
                 'AzureAD' {
-                    $filters += "scopeId eq '/' and scopeType eq 'DirectoryRole'"; $filters += "scopeId eq '/' and scopeType eq 'Directory'"
+                    #$filters += "scopeId eq '/' and scopeType eq 'DirectoryRole'"; 
+                    $filters += "scopeId eq '/' and scopeType eq 'Directory'"
                 }
                 'AzureResources' {
                     $filters += "scopeType eq 'AzureResource'"
@@ -182,10 +172,11 @@ function Export-TmfRoleManagementPolicy {
         }
     }
     process {
-        $policyScope = if ($Scope) {
-            $Scope
+        if ($Scope -and ($Scope -ne "AzureAD")) {
+            $policyScope = 'AzureAD'
+            Write-PSFMessage -Level Warning -FunctionName 'Export-TmfRoleAssignment' -String 'TMF.Export.ScopeNotSupported' -StringValues $Scope,$resourceName,$policyScope
         } else {
-            'AzureAD'
+            $policyScope = 'AzureAD'
         }
 
         if ($SpecificResources) {
@@ -199,7 +190,15 @@ function Export-TmfRoleManagementPolicy {
                 $match = $allRoleManagementPolicies | Where-Object { $_.id -eq $idOrName -or $_.displayName -eq $idOrName -or $_.roleDefinition.displayName -eq $idOrName }
                 if ($match) {
                     foreach ($m in $match) {
-                        $roleManagementPoliciesExport += Convert-RoleManagementPolicy $m $policyScope
+                        $result = Convert-RoleManagementPolicy $m $policyScope
+                        if ($result.count -eq 2) {
+                            $roleManagementPoliciesExport += $result[0]
+                            $roleManagementPolicyRuleTemplatesExport += $result[1]
+                        }
+                        else {
+                            $roleManagementPoliciesExport += $result
+                        }
+                        #$roleManagementPoliciesExport += Convert-RoleManagementPolicy $m $policyScope
                     }
                 } else {
                     Write-PSFMessage -Level Warning -FunctionName 'Export-TmfRoleManagementPolicy' -String 'TMF.Export.NotFound' -StringValues $idOrName, $resourceName, $tenant.displayName
@@ -208,7 +207,15 @@ function Export-TmfRoleManagementPolicy {
         } else {
             $allRoleManagementPolicies = Get-AllRoleManagementPolicies -policyScope $policyScope
             foreach ($policy in $allRoleManagementPolicies) {
-                $roleManagementPoliciesExport += Convert-RoleManagementPolicy $policy $policyScope
+                $result = Convert-RoleManagementPolicy $policy $policyScope
+                if ($result.count -eq 2) {
+                    $roleManagementPoliciesExport += $result[0]
+                    $roleManagementPolicyRuleTemplatesExport += $result[1]
+                }
+                else {
+                    $roleManagementPoliciesExport += $result
+                }
+                #$roleManagementPoliciesExport += Convert-RoleManagementPolicy $policy $policyScope
             }
         }
     }
@@ -217,5 +224,8 @@ function Export-TmfRoleManagementPolicy {
             return $roleManagementPoliciesExport
         }
         Write-TmfExportFile -OutPath $OutPath -ParentPath 'roleManagement' -ResourceName $resourceName -Data $roleManagementPoliciesExport
+        if ($roleManagementPolicyRuleTemplatesExport) {
+            Write-TmfExportFile -OutPath $OutPath -ParentPath 'roleManagement' -ResourceName $templateName -Data $roleManagementPolicyRuleTemplatesExport
+        }
     }
 }

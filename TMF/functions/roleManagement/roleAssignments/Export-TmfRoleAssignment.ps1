@@ -88,7 +88,12 @@ function Export-TmfRoleAssignment {
                     if ($directoryScopeId -eq '/' -or $directoryScopeId -eq '') {
                         $obj.directoryScopeReference = '/'; $obj.directoryScopeType = 'directory'
                     } else {
-                        $obj.directoryScopeReference = $directoryScopeId; $obj.directoryScopeType = 'administrativeUnit'
+                        if ($directoryScopeId -match 'administrativeUnits') {
+                            $obj.directoryScopeReference = Resolve-AdministrativeUnit $directoryScopeId.split("/")[2] -DisplayName; $obj.directoryScopeType = 'administrativeUnit'
+                        }
+                        else {
+                            $obj.directoryScopeReference = Resolve-Application $directoryScopeId.replace("/","") -DisplayName; $obj.directoryScopeType = 'application'
+                        }                        
                     }
                 } else {
                     $obj.directoryScopeReference = '/'; $obj.directoryScopeType = 'directory'
@@ -138,7 +143,7 @@ function Export-TmfRoleAssignment {
             }
             $list = @()
             try {
-                $activeResp = Invoke-MgGraphRequest -Method GET -Uri "$apiBase/roleManagement/directory/roleAssignments?`$expand=principal" -ErrorAction Stop
+                $activeResp = Invoke-MgGraphRequest -Method GET -Uri "$apiBase/roleManagement/directory/roleAssignmentSchedules?`$expand=principal" -ErrorAction Stop
             } catch {
                 Write-PSFMessage -Level Warning -FunctionName 'Export-TmfRoleAssignment' -Message "Active role assignments error: $($_.Exception.Message)"; $activeResp = @{value = @() }
             }
@@ -174,10 +179,11 @@ function Export-TmfRoleAssignment {
         }
     }
     process {
-        $assignmentScope = if ($Scope) {
-            $Scope
+        if ($Scope -and ($Scope -ne "AzureAD")) {
+            $assignmentScope = 'AzureAD'
+            Write-PSFMessage -Level Warning -FunctionName 'Export-TmfRoleAssignment' -String 'TMF.Export.ScopeNotSupported' -StringValues $Scope,$resourceName,$assignmentScope
         } else {
-            'AzureAD'
+            $assignmentScope = 'AzureAD'
         }
         if ($SpecificResources) {
             $identifiers = @()

@@ -75,7 +75,7 @@ function Export-TmfRoleDefinition {
             } else {
                 $script:graphBaseUrl1
             }
-            $list = @(); $resp = Invoke-MgGraphRequest -Method GET -Uri "$base/roleManagement/directory/roleDefinitions"; if ($resp.keys -contains '@odata.nextLink') {
+            $list = @(); $resp = Invoke-MgGraphRequest -Method GET -Uri "$base/roleManagement/directory/roleDefinitions?`$filter=isBuiltIn eq false"; if ($resp.keys -contains '@odata.nextLink') {
                 do {
                     $list += $resp.value; $resp = Invoke-MgGraphRequest -Method GET -Uri $resp.'@odata.nextLink'
                 } while ($resp.'@odata.nextLink')
@@ -85,10 +85,11 @@ function Export-TmfRoleDefinition {
         }
     }
     process {
-        $definitionScope = if ($Scope) {
-            $Scope
+        if ($Scope -and ($Scope -ne "AzureAD")) {
+            $definitionScope = 'AzureAD'
+            Write-PSFMessage -Level Warning -FunctionName 'Export-TmfRoleAssignment' -String 'TMF.Export.ScopeNotSupported' -StringValues $Scope,$resourceName,$definitionScope
         } else {
-            'AzureAD'
+            $definitionScope = 'AzureAD'
         }
 
         if ($SpecificResources) {

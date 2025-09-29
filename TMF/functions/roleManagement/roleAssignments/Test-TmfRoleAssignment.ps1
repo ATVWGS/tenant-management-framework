@@ -227,7 +227,7 @@ function Test-TmfRoleAssignment
                         switch ($definition.directoryScopeType) {
                             "directory" {$directoryScopeId="/"}
                             "administrativeUnit" {$directoryScopeId="/administrativeUnits/"+$(Resolve-AdministrativeUnit -InputReference $definition.directoryScopeReference -SearchInDesiredConfiguration)}
-                            
+                            "application" {$directoryScopeId="/"+$((Resolve-Application -InputReference $definition.directoryScopeReference -SearchInDesiredConfiguration -Expand).servicePrincipalId)}
                         }
 
                         switch ($definition.type) {

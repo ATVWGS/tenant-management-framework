@@ -48,6 +48,7 @@
     'TMF.Export.ResourceProcessed' = 'Export file {0} has been processed successfully.'
     'TMF.Export.CreatedDirectory' = 'Created directory for export file {0}.'
     'TMF.Export.Completed' = 'Export process completed successfully.'   
+    'TMF.Export.ScopeNotSupported' = 'Currently the scope {0} in {1} is not supported. Fallback to scope: {2}.'
 
 
     'TMF.Invoke.ActionTypeUnknown' = 'Action type (<c="yellow">{0}</c>) is unknown!'
