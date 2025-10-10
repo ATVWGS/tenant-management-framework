@@ -4,11 +4,15 @@ Exports Azure AD groups into TMF configuration objects or JSON.
 .DESCRIPTION
 Retrieves groups via Microsoft Graph (v1.0 by default; beta when -ForceBeta) and converts them to the TMF shape. Returns objects unless -OutPath is supplied, in which case JSON is written to groups/groups.json.
 .PARAMETER SpecificResources
-Optional list of group display names or IDs (comma separated accepted) to filter.
+Optional list of group display names, IDs or wildcards (comma separated accepted) to filter.
+.PARAMETER Scope
+Scope on security groups, M365 groups or all group types. Default: Security
 .PARAMETER OutPath
 Root folder to write the export. When omitted, objects are returned instead of writing files. Legacy alias -OutPutPath is deprecated.
 .PARAMETER ForceBeta
 Use beta Graph endpoint for retrieval (may expose additional properties).
+.PARAMETER Append
+Add content to an existing file
 .PARAMETER Cmdlet
 Internal pipeline parameter; do not supply manually.
 .EXAMPLE
@@ -22,6 +26,7 @@ function Export-TmfGroup {
         [ValidateSet("Security", "M365", "All")]
         [string] $Scope = "Security",
         [Alias('OutPutPath')] [string] $OutPath,
+        [switch] $Append,
         [switch] $ForceBeta,
         [System.Management.Automation.PSCmdlet] $Cmdlet = $PSCmdlet
     )
@@ -137,21 +142,6 @@ function Export-TmfGroup {
             foreach ($g in $allGroups) {
                 $groupsExport += Convert-Group $g $PAGs
             }
-            <#
-            $identifiers = @(); foreach ($entry in $SpecificResources) {
-                $identifiers += $entry -split ',' | ForEach-Object { $_.Trim() } | Where-Object { $_ } 
-            }; $identifiers = $identifiers | Select-Object -Unique
-            $allGroups = Get-AllGroups -Scope $Scope
-            foreach ($idOrName in $identifiers) {
-                $match = $allGroups | Where-Object { $_.id -eq $idOrName -or $_.displayName -eq $idOrName }
-                if ($match) {
-                    foreach ($m in $match) {
-                        $groupsExport += Convert-Group $m $PAGs
-                    } 
-                } else {
-                    Write-PSFMessage -Level Warning -FunctionName 'Export-TmfGroup' -String 'TMF.Export.NotFound' -StringValues $idOrName, $resourceName, $tenant.displayName 
-                }
-            }#>
         } else {
             foreach ($g in (Get-AllGroups -Scope $Scope)) {
                 $groupsExport += Convert-Group $g $PAGs
@@ -161,7 +151,12 @@ function Export-TmfGroup {
     end {
         Write-PSFMessage -Level Verbose -FunctionName 'Export-TmfGroup' -Message "Exporting $($groupsExport.Count) group(s). ForceBeta=$ForceBeta"
         if ($OutPath) {
-            Write-TmfExportFile -OutPath $OutPath -ResourceName $resourceName -Data $groupsExport
+            if ($Append) {
+                Write-TmfExportFile -OutPath $OutPath -ResourceName $resourceName -Data $groupsExport -Append
+            }
+            else {
+                Write-TmfExportFile -OutPath $OutPath -ResourceName $resourceName -Data $groupsExport
+            }            
         } else {
             return $groupsExport
         }

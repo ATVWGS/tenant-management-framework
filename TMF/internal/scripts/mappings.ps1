@@ -120,6 +120,7 @@ $script:supportedResources = @{
             "pattern" = (Get-Command Validate-AccessReviewPattern)
             "range" = (Get-Command Validate-AccessReviewRange)
             "reviewers" = (Get-Command Validate-AccessReviewReviewers)
+            "fallbackReviewers" = (Get-Command Validate-AccessReviewReviewers)
         }
         "weight" = 60
     }

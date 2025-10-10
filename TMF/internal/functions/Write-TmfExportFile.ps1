@@ -22,6 +22,8 @@ function Write-TmfExportFile {
     Explicit file name (defaults to <ResourceName>.json).
     .PARAMETER Encoding
     Text encoding (default 'utf8').
+    .PARAMETER Append
+    Add content to existing file
     .PARAMETER PassThru
     When set, returns the written file path. Otherwise produces no output.
     .EXAMPLE
@@ -43,6 +45,7 @@ function Write-TmfExportFile {
         [int] $Depth = 15,
         [string] $FileName,
         [string] $Encoding = 'utf8',
+        [switch] $Append,
         [switch] $PassThru
     )
 
@@ -73,7 +76,15 @@ function Write-TmfExportFile {
     $filePath = Join-Path $targetDir $effectiveFileName
 
     try {
-        $Data | ConvertTo-Json -Depth $Depth | Out-File -FilePath $filePath -Encoding $Encoding -Force
+        if ($Append) {
+            $existingData = Get-Content -Path $filePath | ConvertFrom-Json -Depth $Depth
+            $combinedExport = $existingData
+            $combinedExport += $Data
+            $combinedExport | ConvertTo-Json -Depth $Depth | Out-File -FilePath $filePath -Encoding $Encoding -Force
+        }
+        else {
+            $Data | ConvertTo-Json -Depth $Depth | Out-File -FilePath $filePath -Encoding $Encoding -Force
+        }        
         Write-PSFMessage -Level Verbose -FunctionName 'Write-TmfExportFile' -Message "Wrote export file: $filePath"
     } catch {
         Write-PSFMessage -Level Warning -FunctionName 'Write-TmfExportFile' -Message ("Failed writing export file {0}: {1}" -f $filePath, $_.Exception.Message)

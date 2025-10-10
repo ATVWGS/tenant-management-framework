@@ -180,9 +180,9 @@
 			return $detail
 		} catch {
 			if ($DontFailIfNotExisting) {
-				Write-PSFMessage -Level Warning -Message ("Cannot resolve Group resource for input '{0}'. Error: {1}" -f $InputReference, $_.Exception.Message) -Tag failed -ErrorRecord $_; return $InputReference
+				Write-PSFMessage -Level Warning -Message ("Cannot resolve Group resource for input '{0}'. Error: {1}" -f ($InputReference -join ","), $_.Exception.Message) -Tag failed -ErrorRecord $_; return $InputReference
 			} else {
-				Write-PSFMessage -Level Warning -Message ("Cannot resolve Group resource for input '{0}'. Error: {1}" -f $InputReference, $_.Exception.Message) -Tag failed -ErrorRecord $_; $Cmdlet.ThrowTerminatingError($_)
+				Write-PSFMessage -Level Warning -Message ("Cannot resolve Group resource for input '{0}'. Error: {1}" -f ($InputReference -join ","), $_.Exception.Message) -Tag failed -ErrorRecord $_; $Cmdlet.ThrowTerminatingError($_)
 			}
 		}
 	}
