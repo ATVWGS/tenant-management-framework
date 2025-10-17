@@ -27,17 +27,23 @@ function Export-TmfCustomSecurityAttributeDefinition {
         Test-GraphConnection -Cmdlet $Cmdlet
         $resourceName = 'customSecurityAttributeDefinitions'
         $tenant = (Invoke-MgGraphRequest -Method GET -Uri ("$($script:graphBaseUrl)/organization?`$select=displayName,id")).value
+        $graph = if ($ForceBeta) {
+            $script:graphBaseUrlBeta 
+        } else {
+            $script:graphBaseUrl1 
+        }
         $export = @()
         function Convert-Definition {
             param([object]$d, [object[]]$vals) [ordered]@{ displayName = $d.id; description = $d.description; attributeSet = $d.attributeSet; name = $d.name; isCollection = $d.isCollection; isSearchable = $d.isSearchable; status = $d.status; type = $d.type; usePreDefinedValuesOnly = $d.usePreDefinedValuesOnly; allowedValues = $vals; present = $true }
         }
         function Get-AllDefinitions {
-            $list = @(); $apiBase = if ($ForceBeta) {
-                $script:graphBaseUrlbeta
-            } else {
-                $script:graphBaseUrl1
-            }; try {
-                $resp = Invoke-MgGraphRequest -Method GET -Uri "$apiBase/directory/customSecurityAttributeDefinitions?`$top=999" -ErrorAction Stop; if ($resp.'@odata.nextLink') {
+            param(
+                [Parameter(Mandatory=$true)]
+                [string]$graphBase
+            )
+            $list = @()
+            try {
+                $resp = Invoke-MgGraphRequest -Method GET -Uri "$graphBase/directory/customSecurityAttributeDefinitions?`$top=999" -ErrorAction Stop; if ($resp.'@odata.nextLink') {
                     do {
                         $list += $resp.value; $resp = Invoke-MgGraphRequest -Method GET -Uri $resp.'@odata.nextLink'
                     } while ($resp.'@odata.nextLink')
@@ -48,14 +54,17 @@ function Export-TmfCustomSecurityAttributeDefinition {
                 Write-PSFMessage -Level Warning -FunctionName 'Export-TmfCustomSecurityAttributeDefinition' -Message "Unable to retrieve customSecurityAttributeDefinitions: $($_.Exception.Message)"
             }; return $list
         }
-        $all = Get-AllDefinitions
+        $all = Get-AllDefinitions -graphBase $graph
     }
     process {
         function Get-AllowedValuesForDefinition {
-            param([object]$def)
+            param(
+                [object]$def,
+                [string]$graphBase
+            )
             $vals = @()
             try {
-                $resp = Invoke-MgGraphRequest -Method GET -Uri ("$((if ($ForceBeta) { $script:graphBaseUrlbeta } else { $script:graphBaseUrl1 }))/directory/customSecurityAttributeDefinitions/{0}/allowedValues?`$top=999" -f [System.Web.HttpUtility]::UrlEncode($def.id)) -ErrorAction Stop
+                $resp = Invoke-MgGraphRequest -Method GET -Uri ("$($graphBase)/directory/customSecurityAttributeDefinitions/{0}/allowedValues?`$top=999" -f $def.id) -ErrorAction Stop
                 if ($resp.'@odata.nextLink') {
                     do {
                         $vals += $resp.value; $resp = Invoke-MgGraphRequest -Method GET -Uri $resp.'@odata.nextLink'
@@ -86,7 +95,7 @@ function Export-TmfCustomSecurityAttributeDefinition {
         }
 
         foreach ($d in $targets) {
-            $vals = Get-AllowedValuesForDefinition -def $d
+            $vals = Get-AllowedValuesForDefinition -def $d -graphBase $graph
             $export += Convert-Definition $d $vals
         }
     }

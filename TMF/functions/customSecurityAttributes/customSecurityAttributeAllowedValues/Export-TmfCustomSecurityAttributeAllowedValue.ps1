@@ -28,13 +28,18 @@ Export-TmfCustomSecurityAttributeAllowedValue -OutPath C:\config -EmitStandalone
         Test-GraphConnection -Cmdlet $Cmdlet
         $resourceName = 'customSecurityAttributeAllowedValues'
         $tenant = (Invoke-MgGraphRequest -Method GET -Uri ("$($script:graphBaseUrl)/organization?`$select=displayName,id")).value
+        $graph = if ($ForceBeta) {
+            $script:graphBaseUrlBeta 
+        } else {
+            $script:graphBaseUrl1 
+        }
         $export = @()
         function Convert-AllowedValue {
             param([object]$v, [string]$attributeId) [ordered]@{ displayName = ("{0}_{1}" -f $attributeId, $v.id); id = $v.id; attributeId = $attributeId; isActive = $v.isActive; present = $true } 
         }
         $definitions = @()
         try {
-            $defsResp = Invoke-MgGraphRequest -Method GET -Uri "$(if ($ForceBeta) { $script:graphBaseUrlbeta } else { $script:graphBaseUrl1 })/directory/customSecurityAttributeDefinitions?`$top=999" -ErrorAction Stop
+            $defsResp = Invoke-MgGraphRequest -Method GET -Uri "$($graph)/directory/customSecurityAttributeDefinitions?`$top=999" -ErrorAction Stop
             if ($defsResp.'@odata.nextLink') {
                 do {
                     $definitions += $defsResp.value; $defsResp = Invoke-MgGraphRequest -Method GET -Uri $defsResp.'@odata.nextLink' 
@@ -48,7 +53,7 @@ Export-TmfCustomSecurityAttributeAllowedValue -OutPath C:\config -EmitStandalone
         $all = @()
         foreach ($def in $definitions) {
             try {
-                $resp = Invoke-MgGraphRequest -Method GET -Uri ("$((if ($ForceBeta) { $script:graphBaseUrlbeta } else { $script:graphBaseUrl1 }))/directory/customSecurityAttributeDefinitions/{0}/allowedValues?`$top=999" -f [System.Web.HttpUtility]::UrlEncode($def.id))
+                $resp = Invoke-MgGraphRequest -Method GET -Uri ("$($graph)/directory/customSecurityAttributeDefinitions/{0}/allowedValues?`$top=999" -f [System.Web.HttpUtility]::UrlEncode($def.id))
                 $vals = @()
                 if ($resp.'@odata.nextLink') {
                     do {

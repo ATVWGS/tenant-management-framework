@@ -31,35 +31,54 @@ function Export-TmfCrossTenantAccessPartnerSetting {
         } else {
             $script:graphBaseUrl1 
         }
+        Write-PSFMessage -Level Verbose -Message "GraphBaseUrl: $($graphBase)"
         $tenant = (Invoke-MgGraphRequest -Method GET -Uri ("$($script:graphBaseUrl)/organization?`$select=displayname,id")).value
         $exports = @()
-        $partners = (Invoke-MgGraphRequest -Method GET -Uri "$graphBase/policies/crossTenantAccessPolicy/partners").value
+        $partners = (Invoke-MgGraphRequest -Method GET -Uri "$($graphBase)/policies/crossTenantAccessPolicy/partners").value
         $tenantPrimaryDomainCache = @{}
-        $resolvePartnerPrimaryDomain = { param($tenantId) if (-not $tenantId) {
+        $resolvePartnerPrimaryDomain = { 
+            param($tenantId,$graphBase) 
+            if (-not $tenantId) {
                 return $null 
-            }; if ($tenantPrimaryDomainCache.ContainsKey($tenantId)) {
+            }
+            if ($tenantPrimaryDomainCache.ContainsKey($tenantId)) {
                 return $tenantPrimaryDomainCache[$tenantId] 
-            } ; $primaryDomain = $null; $displayNameFallback = $null; try {
-                $uri = "$graphBase/tenantRelationships/findTenantInformationByTenantId(tenantId='$tenantId')"; $resp = Invoke-MgGraphRequest -Method GET -Uri $uri -ErrorAction Stop; $data = if ($resp.PSObject.Properties['value'] -and ($resp.value -isnot [string])) {
-                    $resp.value 
-                } else {
-                    $resp 
-                }; if ($data) {
-                    if ($data.PSObject.Properties['defaultDomainName']) {
+            } 
+            $primaryDomain = $null
+            $displayNameFallback = $null 
+            try {
+                $uri = "$($graphBase)/tenantRelationships/findTenantInformationByTenantId(tenantId='$tenantId')"
+
+                $resp = Invoke-MgGraphRequest -Method GET -Uri $uri -ErrorAction Stop
+                $data = if ($resp.PSObject.Properties['value'] -and ($resp.value -isnot [string])) {
+                            $resp.value 
+                        } 
+                        else {
+                            $resp 
+                        }
+                if ($data) {
+                    if ($data.defaultDomainName) {
                         $primaryDomain = $data.defaultDomainName 
-                    }; if ($data.PSObject.Properties['displayName']) {
+                    }
+                    if ($data.displayName) {
                         $displayNameFallback = $data.displayName 
                     } 
                 } 
             } catch {
                 Write-PSFMessage -Level Verbose -Message "Primary domain lookup failed for '$tenantId': $($_.Exception.Message)" -FunctionName 'Export-TmfCrossTenantAccessPartnerSetting' 
-            } ; if (-not $primaryDomain) {
+            } 
+            if (-not $primaryDomain) {
                 $primaryDomain = $displayNameFallback 
-            }; if (-not $primaryDomain) {
+            }
+            if (-not $primaryDomain) {
                 $primaryDomain = $tenantId 
-            }; if (-not $primaryDomain -or $primaryDomain -eq $tenantId) {
+            }
+            if (-not $primaryDomain -or $primaryDomain -eq $tenantId) {
                 Write-PSFMessage -Level Warning -Message "Could not retrieve defaultDomainName for partner tenant '$tenantId'. Using fallback '$primaryDomain'." -FunctionName 'Export-TmfCrossTenantAccessPartnerSetting' 
-            } ; $tenantPrimaryDomainCache[$tenantId] = $primaryDomain; return $primaryDomain }
+            } 
+            $tenantPrimaryDomainCache[$tenantId] = $primaryDomain
+            return $primaryDomain 
+        }
     }
     process {
         if ($SpecificResources) {
@@ -73,7 +92,7 @@ function Export-TmfCrossTenantAccessPartnerSetting {
                         foreach ($prop in '@odata.context', 'id', '@odata.etag', 'policyTenantId', 'tenantGroup', 'supportedClouds', 'migrationStatus', 'version', 'lastModifiedDateTime', 'applyDefaultsToDomainBasedOrganizations') {
                             $m.PSObject.Properties.Remove($prop) | Out-Null 
                         }
-                        $partnerDisplayName = & $resolvePartnerPrimaryDomain $m.tenantId
+                        $partnerDisplayName = & $resolvePartnerPrimaryDomain $m.tenantId $graphBase
                         if ($partnerDisplayName -eq $m.tenantId -and $m.PSObject.Properties['displayName'] -and $m.displayName) {
                             $partnerDisplayName = $m.displayName 
                         }
@@ -95,7 +114,7 @@ function Export-TmfCrossTenantAccessPartnerSetting {
                 foreach ($prop in '@odata.context', 'id', '@odata.etag', 'policyTenantId', 'tenantGroup', 'supportedClouds', 'migrationStatus', 'version', 'lastModifiedDateTime', 'applyDefaultsToDomainBasedOrganizations') {
                     $p.PSObject.Properties.Remove($prop) | Out-Null 
                 }
-                $partnerDisplayName = & $resolvePartnerPrimaryDomain $p.tenantId
+                $partnerDisplayName = & $resolvePartnerPrimaryDomain $p.tenantId $graphBase
                 if ($partnerDisplayName -eq $p.tenantId -and $p.PSObject.Properties['displayName'] -and $p.displayName) {
                     $partnerDisplayName = $p.displayName 
                 }

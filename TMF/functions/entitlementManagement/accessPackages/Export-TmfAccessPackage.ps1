@@ -86,7 +86,7 @@ function Export-TmfAccessPackage {
                                         }
                                         "#microsoft.graph.groupMembers" {
                                             $fallbackPrimaryApprovers += @{
-                                                reference = Resolve-Group -InputReference $Approver.UserId -DisplayName
+                                                reference = Resolve-Group -InputReference $Approver.GroupId -DisplayName
                                                 type = "groupMembers"
                                             }
                                         }

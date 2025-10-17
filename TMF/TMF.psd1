@@ -49,6 +49,7 @@
 		'Load-TmfConfiguration',
 		'Test-TmfTenant',
 		'Invoke-TmfTenant',
+		'Export-TmfTenant',
 		'Register-TmfStringMapping',
 		'Register-TmfGroup',
 		'Export-TmfGroup',
@@ -68,14 +69,15 @@
 		'Invoke-TmfConditionalAccessPolicy',
 		'Test-TmfEntitlementManagement',
 		'Invoke-TmfEntitlementManagement',
+		'Export-TmfEntitlementManagement',
 		'Export-TmfAccessPackageCatalog',
 		'Export-TmfAccessPackage',
-		'Export-TmfAccessPackageAssignmentPolicy',
-		'Export-TmfAccessPackageResource',
-		'Export-TmfEntitlementManagement',
 		'Register-TmfAccessPackageCatalog',
 		'Test-TmfAccessPackageCatalog',
 		'Invoke-TmfAccessPackageCatalog',
+		'Register-TmfAccessPackageResource',
+		'Test-TmfAccessPackageResource',
+		'Invoke-TmfAccessPackageResource',		
 		'Register-TmfAccessPackage',
 		'Test-TmfAccessPackage',
 		'Invoke-TmfAccessPackage',
@@ -86,9 +88,6 @@
 		'Test-TmfAdministrativeUnit',
 		'Register-TmfAdministrativeUnit',
 		'Export-TmfAdministrativeUnit',
-		'Register-TmfAccessPackageResource',
-		'Test-TmfAccessPackageResource',
-		'Invoke-TmfAccessPackageResource',
 		'Register-TmfAccessReview',
 		'Export-TmfAccessReview',
 		'Test-TmfAccessReview',
@@ -185,8 +184,7 @@
 		'Export-TmfUser',
 		'Register-TmfUser',
 		'Test-TmfUser',
-		'Invoke-TmfUser',
-		'Export-TmfUsers'
+		'Invoke-TmfUser'
 	)
 
 	# Cmdlets to export from this module

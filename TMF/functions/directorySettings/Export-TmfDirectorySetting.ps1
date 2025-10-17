@@ -20,7 +20,7 @@ function Export-TmfDirectorySetting {
     [CmdletBinding()] param(
         [string[]] $SpecificResources,
         [Alias('OutPutPath')] [string] $OutPath,
-        [switch] $ForceBeta,
+        [switch] $ForceBeta = $true,
         [System.Management.Automation.PSCmdlet] $Cmdlet = $PSCmdlet
     )
     begin {
