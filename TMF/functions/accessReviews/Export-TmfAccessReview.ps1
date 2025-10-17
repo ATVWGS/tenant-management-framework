@@ -247,7 +247,7 @@ function Export-TmfAccessReview {
             if ($Review.settings) {
                 $obj.settings = $Review.settings 
             }
-            if ($obj.scope.reference -eq "NotFound" -or (-not $obj.scope) -or $obj.reviewers.reference -contains "NotFound" -or (-not $obj.reviewers)) {
+            if ($obj.scope.reference -match $script:guidRegex -or $obj.scope.reference -eq "NotFound" -or (-not $obj.scope) -or $obj.reviewers.reference -contains "NotFound" -or (-not $obj.reviewers)) {
                 Write-PSFMessage -Level Verbose -Message "Access review $($obj.displayname) skipped due to unresolvable scope or reviewers."
             }
             else {
@@ -518,11 +518,16 @@ function Export-TmfAccessReview {
                 return $accessReviewsExport 
             }
             # Use central helper for non-stream writes
-            if ($Append) {
-                Write-TmfExportFile -OutPath $OutPath -ResourceName $resourceName -Data $accessReviewsExport -Append
+            if ($accessReviewsExport) {
+                if ($Append) {
+                    Write-TmfExportFile -OutPath $OutPath -ResourceName $resourceName -Data $accessReviewsExport -Append
+                }
+                else {
+                    Write-TmfExportFile -OutPath $OutPath -ResourceName $resourceName -Data $accessReviewsExport
+                }
             }
             else {
-                Write-TmfExportFile -OutPath $OutPath -ResourceName $resourceName -Data $accessReviewsExport
+                Write-PSFMessage -Level Warning -Message "No access review data found to export."
             }
         }
     }

@@ -151,6 +151,10 @@
 				$fullObj = (Invoke-MgGraphRequest -Method GET -Uri ("$script:graphBaseUrl/groups/?`$filter=mailNickname eq '{0}'&`$select=id,displayName,mailNickname" -f $InputReference)).value | Select-Object -First 1
 				$resolvedId = $fullObj.id
 			} else {
+				$InputReference = $InputReference -replace "'","''"
+				if ($InputReference -notmatch "'") {
+					$InputReference = [System.Web.HttpUtility]::UrlEncode($InputReference)
+				}
 				$fullObj = (Invoke-MgGraphRequest -Method GET -Uri ("$script:graphBaseUrl/groups/?`$filter=displayName eq '{0}'&`$select=id,displayName,mailNickname" -f $InputReference)).value | Select-Object -First 1
 				$resolvedId = $fullObj.id
 			}

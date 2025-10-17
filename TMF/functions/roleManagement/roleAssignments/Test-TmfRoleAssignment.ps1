@@ -235,6 +235,19 @@ function Test-TmfRoleAssignment
                                 try {
                                     $resource = @()
                                     $resource += (Invoke-MgGraphRequest -Method GET -Uri ("$($script:graphBaseUrl)/roleManagement/directory/roleEligibilitySchedules?`$filter=principalId eq '{0}' and roleDefinitionId eq '{1}' and directoryScopeId eq '{2}'" -f $principalId,$roleDefinitionId,$directoryScopeId)).value
+
+                                    #Check if an assignment for a custom role exists, based on the name (Graph bug)
+                                    if (-not $resource) {
+                                        $principalAssignments = @()
+                                        $principalAssignments += (Invoke-MgGraphRequest -Method GET -Uri ("$($script:graphBaseUrl)/roleManagement/directory/roleEligibilitySchedules?`$filter=principalId eq '{0}' and directoryScopeId eq '{1}'" -f $principalId,$directoryScopeId)).value
+                                        if ($principalAssignments) {
+                                            foreach ($assignment in $principalAssignments) {
+                                                if ((Invoke-MgGraphRequest -Method GET -Uri ("$($script:graphBaseUrl)/roleManagement/directory/roleDefinitions/{0}" -f $assignment.roleDefinitionId)).displayName -eq $definition.roleReference) {
+                                                    $resource += $assignment
+                                                }
+                                            }
+                                        }
+                                    }                                    
                                 }
                                 catch {
                                     $resource = @()
@@ -245,6 +258,19 @@ function Test-TmfRoleAssignment
                                 try {
                                     $resource = @()
                                     $resource += (Invoke-MgGraphRequest -Method GET -Uri ("$($script:graphBaseUrl)/roleManagement/directory/roleAssignmentSchedules?`$filter=principalId eq '{0}' and roleDefinitionId eq '{1}' and directoryScopeId eq '{2}'" -f $principalId,$roleDefinitionId,$directoryScopeId)).value
+
+                                    #Check if an assignment for a custom role exists, based on the name (Graph bug)
+                                    if (-not $resource) {
+                                        $principalAssignments = @()
+                                        $principalAssignments += (Invoke-MgGraphRequest -Method GET -Uri ("$($script:graphBaseUrl)/roleManagement/directory/roleAssignmentSchedules?`$filter=principalId eq '{0}' and directoryScopeId eq '{1}'" -f $principalId,$directoryScopeId)).value
+                                        if ($principalAssignments) {
+                                            foreach ($assignment in $principalAssignments) {
+                                                if ((Invoke-MgGraphRequest -Method GET -Uri ("$($script:graphBaseUrl)/roleManagement/directory/roleDefinitions/{0}" -f $assignment.roleDefinitionId)).displayName -eq $definition.roleReference) {
+                                                    $resource += $assignment
+                                                }
+                                            }
+                                        }
+                                    }   
                                 }
                                 catch {
                                     $resource = @()
