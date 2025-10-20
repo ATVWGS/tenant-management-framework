@@ -7,6 +7,8 @@ Retrieves directory roles and enumerates user and group members. Returns objects
 Optional list of role display names or IDs (comma separated accepted).
 .PARAMETER OutPath
 Root folder to write export; when omitted objects are returned. (Legacy alias: -OutPutPath)
+.PARAMETER Append
+Add content to existing file
 .PARAMETER ForceBeta
 Use beta endpoint for retrieval.
 .PARAMETER Cmdlet
@@ -94,6 +96,13 @@ function Export-TmfDirectoryRole {
         if (-not (Test-Path -LiteralPath $targetDir)) {
             New-Item -Path $OutPath -Name $resourceName -ItemType Directory -Force | Out-Null 
         }
-        $roleExports | ConvertTo-Json -Depth 15 | Out-File -FilePath (Join-Path $targetDir "$resourceName.json") -Encoding utf8 -Force
+        if ($roleExports) {
+            if ($Append) {
+                Write-TmfExportFile -OutPath $OutPath -ResourceName $resourceName -Data $roleExports -Append
+            }
+            else {
+                Write-TmfExportFile -OutPath $OutPath -ResourceName $resourceName -Data $roleExports
+            }
+        }
     }
 }

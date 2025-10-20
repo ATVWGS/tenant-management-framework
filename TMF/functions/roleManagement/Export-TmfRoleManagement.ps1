@@ -1,30 +1,33 @@
+<#
+.SYNOPSIS
+Exports all role management resources (assignments, definitions, policies) into TMF configuration JSON.
+.DESCRIPTION
+Invokes individual role management export functions for roleAssignments, roleDefinitions and roleManagementPolicies using optional scope and resource filtering. Returns nothing unless -OutPath is omitted; subordinate functions handle object returns.
+.PARAMETER Scope
+AzureResources | AzureAD | AADGroup. Passed to underlying role exports.
+.PARAMETER SpecificResources
+Optional list of IDs or display names (comma separated accepted) passed through to underlying role export functions.
+.PARAMETER OutPath
+Root folder to write export output. When omitted, underlying functions return objects (this wrapper does not aggregate them).
+.PARAMETER Append
+Add content to an existing file
+.PARAMETER ForceBeta
+Use beta Graph endpoint for underlying exports.
+.PARAMETER Cmdlet
+Internal pipeline parameter; do not supply manually.
+.EXAMPLE
+Export-TmfRoleManagement -Scope AzureAD -OutPath C:\temp\tmf
+.EXAMPLE
+Export-TmfRoleManagement -Scope AzureResources -SpecificResources Owner
+NOTE: Parameter `-OutPutPath` is deprecated; retained as alias.
+#>
 function Export-TmfRoleManagement {
-    <#
-    .SYNOPSIS
-    Exports all role management resources (assignments, definitions, policies) into TMF configuration JSON.
-    .DESCRIPTION
-    Invokes individual role management export functions for roleAssignments, roleDefinitions and roleManagementPolicies using optional scope and resource filtering. Returns nothing unless -OutPath is omitted; subordinate functions handle object returns.
-    .PARAMETER Scope
-    AzureResources | AzureAD | AADGroup. Passed to underlying role exports.
-    .PARAMETER SpecificResources
-    Optional list of IDs or display names (comma separated accepted) passed through to underlying role export functions.
-    .PARAMETER OutPath
-    Root folder to write export output. When omitted, underlying functions return objects (this wrapper does not aggregate them).
-    .PARAMETER ForceBeta
-    Use beta Graph endpoint for underlying exports.
-    .PARAMETER Cmdlet
-    Internal pipeline parameter; do not supply manually.
-    .EXAMPLE
-    Export-TmfRoleManagement -Scope AzureAD -OutPath C:\temp\tmf
-    .EXAMPLE
-    Export-TmfRoleManagement -Scope AzureResources -SpecificResources Owner
-    NOTE: Parameter `-OutPutPath` is deprecated; retained as alias.
-    #>
 
     [CmdletBinding()] param(
         [ValidateSet('AzureResources', 'AzureAD', 'AADGroup')] [string] $Scope,
         [string[]] $SpecificResources,
         [Alias('OutPutPath')] [string] $OutPath,
+        [switch] $Append,
         [switch] $ForceBeta,
         [System.Management.Automation.PSCmdlet] $Cmdlet = $PSCmdlet
     )
@@ -50,6 +53,9 @@ function Export-TmfRoleManagement {
             }
             if ($ForceBeta) {
                 $exportParams.ForceBeta = $true
+            }
+            if ($Append) {
+                $exportParams.Append = $true
             }
             switch ($resourceType) {
                 'roleAssignments' {

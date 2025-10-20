@@ -100,6 +100,8 @@ function Export-TmfAuthorizationPolicy {
         if (-not $OutPath) {
             return @($exportObject)
         }
-        Write-TmfExportFile -OutPath $OutPath -ParentPath $parentName -ResourceName $resourceName -Data @($exportObject)
+        if ($exportObject) {
+            Write-TmfExportFile -OutPath $OutPath -ParentPath $parentName -ResourceName $resourceName -Data @($exportObject)
+        }        
     }
 }

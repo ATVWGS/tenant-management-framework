@@ -1,25 +1,29 @@
+<#
+.SYNOPSIS
+Exports authentication strength policies into TMF configuration objects or JSON.
+.DESCRIPTION
+Retrieves authentication strength policies from Microsoft Graph (v1.0 by default; beta when -ForceBeta) and converts them to the TMF shape. Returns objects unless -OutPath is supplied.
+.PARAMETER SpecificResources
+Optional list of policy display names (wildcards allowed) to filter.
+.PARAMETER OutPath
+Root folder to write the export. When omitted, objects are returned instead of writing files.
+.PARAMETER Append
+Add content to an existing file
+.PARAMETER ForceBeta
+Use beta Graph endpoint for retrieval (may expose additional properties).
+.PARAMETER Cmdlet
+Internal pipeline parameter; do not supply manually.
+.EXAMPLE
+Export-TmfAuthenticationStrengthPolicy -OutPath C:\temp\tmf
+.EXAMPLE
+Export-TmfAuthenticationStrengthPolicy -SpecificResources "*MFA*" | ConvertTo-Json -Depth 15
+#>
 function Export-TmfAuthenticationStrengthPolicy {
-    <#
-    .SYNOPSIS
-    Exports authentication strength policies into TMF configuration objects or JSON.
-    .DESCRIPTION
-    Retrieves authentication strength policies from Microsoft Graph (v1.0 by default; beta when -ForceBeta) and converts them to the TMF shape. Returns objects unless -OutPath is supplied.
-    .PARAMETER SpecificResources
-    Optional list of policy display names (wildcards allowed) to filter.
-    .PARAMETER OutPath
-    Root folder to write the export. When omitted, objects are returned instead of writing files.
-    .PARAMETER ForceBeta
-    Use beta Graph endpoint for retrieval (may expose additional properties).
-    .PARAMETER Cmdlet
-    Internal pipeline parameter; do not supply manually.
-    .EXAMPLE
-    Export-TmfAuthenticationStrengthPolicy -OutPath C:\temp\tmf
-    .EXAMPLE
-    Export-TmfAuthenticationStrengthPolicy -SpecificResources "*MFA*" | ConvertTo-Json -Depth 15
-    #>
+    
     [CmdletBinding()] param(
         [string[]] $SpecificResources,
         [Alias('OutPutPath')] [string] $OutPath,
+        [switch] $Append,
         [switch] $ForceBeta,
         [System.Management.Automation.PSCmdlet] $Cmdlet = $PSCmdlet
     )
@@ -86,6 +90,13 @@ function Export-TmfAuthenticationStrengthPolicy {
         if (-not $OutPath) {
             return $export 
         }
-        Write-TmfExportFile -OutPath $OutPath -ParentPath $parentName -ResourceName $resourceName -Data $export
+        if ($export) {
+            if ($Append) {
+                Write-TmfExportFile -OutPath $OutPath -ParentPath $parentName -ResourceName $resourceName -Data $export -Append
+            }
+            else {
+                Write-TmfExportFile -OutPath $OutPath -ParentPath $parentName -ResourceName $resourceName -Data $export
+            }
+        }
     }
 }

@@ -6,6 +6,8 @@ Retrieves custom security attribute sets (v1.0 by default; beta with -ForceBeta)
 Optional list (comma separated accepted) of set IDs (display names) to filter. Wildcards allowed.
 .PARAMETER OutPath
 Root folder to write export; when omitted objects are returned. (Legacy alias: -OutPutPath)
+.PARAMETER Append
+Add content to existing file
 .PARAMETER ForceBeta
 Use beta endpoint for retrieval.
 .PARAMETER Cmdlet
@@ -18,6 +20,7 @@ Export-TmfAttributeSet -SpecificResources AttributeSet1
     [CmdletBinding()] param(
         [string[]] $SpecificResources,
         [Alias('OutPutPath')] [string] $OutPath,
+        [switch] $Append,
         [switch] $ForceBeta,
         [System.Management.Automation.PSCmdlet] $Cmdlet = $PSCmdlet
     )
@@ -71,15 +74,23 @@ Export-TmfAttributeSet -SpecificResources AttributeSet1
     }
     end {
         if ($OutPath) {
-            $root = Join-Path $OutPath 'customSecurityAttributes'
+            <#$root = Join-Path $OutPath 'customSecurityAttributes'
             if (-not (Test-Path $root)) {
                 New-Item -Path $OutPath -Name 'customSecurityAttributes' -ItemType Directory -Force | Out-Null 
             }
             $path = Join-Path $root $resourceName
             if (-not (Test-Path $path)) {
                 New-Item -Path $root -Name $resourceName -ItemType Directory -Force | Out-Null 
+            }##>
+            if ($export) {
+                if ($Append) {
+                    Write-TmfExportFile -OutPath $OutPath -ParentPath 'customSecurityAttributes' -ResourceName $resourceName -Data $export -Append
+                }
+                else {
+                    Write-TmfExportFile -OutPath $OutPath -ParentPath 'customSecurityAttributes' -ResourceName $resourceName -Data $export -Append
+                }
             }
-            $export | ConvertTo-Json -Depth 15 | Out-File -FilePath (Join-Path $path "$resourceName.json") -Encoding utf8 -Force
+            #$export | ConvertTo-Json -Depth 15 | Out-File -FilePath (Join-Path $path "$resourceName.json") -Encoding utf8 -Force
         }
     }
 }

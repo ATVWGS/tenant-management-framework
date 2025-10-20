@@ -7,6 +7,7 @@
 		.DESCRIPTION
 			This command tests the desired configuration against the Tenant you are connected to.
 			You can connect to a Tenant using Connect-MgGraph.
+		.PARAMETER RawOutput
 
 		.PARAMETER Exclude
 			Exclude resources from testing.
@@ -25,6 +26,7 @@
 
 		})]
 		[string[]] $Exclude,
+		[switch] $RawOutput,
 		[Parameter(ParameterSetName = 'resourceTypes')]
 		[ValidateScript({
 			if ($_ -in $script:supportedResources.Keys) { return $true}
@@ -46,7 +48,12 @@
 			foreach ($resourceType in ($script:supportedResources.GetEnumerator() | Where-Object {$_.Value.testFunction -and $_.Name -in $resourceTypes} | Sort-Object {$_.Value.weight})) {
 				if ($script:desiredConfiguration[$resourceType.Name]) {
 					Write-PSFMessage -Level Host -FunctionName "Test-TmfTenant" -String "TMF.StartingTestForResource" -StringValues $resourceType.Name
-					& $resourceType.Value["testFunction"] -Cmdlet $PSCmdlet
+					if ($RawOutput) {
+						& $resourceType.Value["testFunction"] -Cmdlet $PSCmdlet -RawOutput
+					}
+					else {
+						& $resourceType.Value["testFunction"] -Cmdlet $PSCmdlet	
+					}
 				}			
 			}
 		}
@@ -54,7 +61,12 @@
 			foreach ($resourceType in ($script:supportedResources.GetEnumerator() | Where-Object {$_.Value.testFunction -and $_.Name -notin $Exclude} | Sort-Object {$_.Value.weight})) {
 				if ($script:desiredConfiguration[$resourceType.Name]) {
 					Write-PSFMessage -Level Host -FunctionName "Test-TmfTenant" -String "TMF.StartingTestForResource" -StringValues $resourceType.Name
-					& $resourceType.Value["testFunction"] -Cmdlet $PSCmdlet
+					if ($RawOutput) {
+						& $resourceType.Value["testFunction"] -Cmdlet $PSCmdlet -RawOutput
+					}
+					else {
+						& $resourceType.Value["testFunction"] -Cmdlet $PSCmdlet	
+					}
 				}			
 			}
 		}		

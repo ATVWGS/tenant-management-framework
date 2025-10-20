@@ -1,31 +1,34 @@
 
+<#
+.SYNOPSIS
+Exports role definitions into TMF configuration objects or JSON.
+.DESCRIPTION
+Retrieves directory (or Azure resource placeholder) role definitions and converts them to TMF shape including metadata, permissions and scopes. Returns objects unless -OutPath is supplied.
+.PARAMETER SpecificResources
+Optional list of role definition IDs or display names (comma separated accepted) to filter.
+.PARAMETER Scope
+AzureResources | AzureAD | AADGroup (default AzureAD).
+.PARAMETER OutPath
+Root folder to write export; when omitted objects are returned.
+.PARAMETER Append
+Add content to an existing file
+.PARAMETER ForceBeta
+Use beta Graph endpoint for retrieval.
+.PARAMETER Cmdlet
+Internal pipeline parameter; do not supply manually.
+.EXAMPLE
+Export-TmfRoleDefinition -Scope AzureAD -OutPath C:\temp\tmf
+.EXAMPLE
+Export-TmfRoleDefinition -SpecificResources Global* | ConvertTo-Json -Depth 15
+NOTE: Parameter `-OutPutPath` is deprecated; retained as alias.
+#>
 function Export-TmfRoleDefinition {
-    <#
-    .SYNOPSIS
-    Exports role definitions into TMF configuration objects or JSON.
-    .DESCRIPTION
-    Retrieves directory (or Azure resource placeholder) role definitions and converts them to TMF shape including metadata, permissions and scopes. Returns objects unless -OutPath is supplied.
-    .PARAMETER SpecificResources
-    Optional list of role definition IDs or display names (comma separated accepted) to filter.
-    .PARAMETER Scope
-    AzureResources | AzureAD | AADGroup (default AzureAD).
-    .PARAMETER OutPath
-    Root folder to write export; when omitted objects are returned.
-    .PARAMETER ForceBeta
-    Use beta Graph endpoint for retrieval.
-    .PARAMETER Cmdlet
-    Internal pipeline parameter; do not supply manually.
-    .EXAMPLE
-    Export-TmfRoleDefinition -Scope AzureAD -OutPath C:\temp\tmf
-    .EXAMPLE
-    Export-TmfRoleDefinition -SpecificResources Global* | ConvertTo-Json -Depth 15
-    NOTE: Parameter `-OutPutPath` is deprecated; retained as alias.
-    #>
 
     [CmdletBinding()] param(
         [string[]] $SpecificResources,
         [ValidateSet('AzureResources', 'AzureAD', 'AADGroup')] [string] $Scope,
         [Alias('OutPutPath')] [string] $OutPath,
+        [switch] $Append,
         [switch] $ForceBeta,
         [System.Management.Automation.PSCmdlet] $Cmdlet = $PSCmdlet
     )
@@ -119,7 +122,14 @@ function Export-TmfRoleDefinition {
     end {
         Write-PSFMessage -Level Verbose -FunctionName 'Export-TmfRoleDefinition' -Message "Exporting $($roleDefinitionsExport.Count) role definition(s)"
         if ($OutPath) {
-            Write-TmfExportFile -OutPath $OutPath -ParentPath 'roleManagement' -ResourceName $resourceName -Data $roleDefinitionsExport
+            if ($roleDefinitionsExport) {
+                if ($Append) {
+                    Write-TmfExportFile -OutPath $OutPath -ParentPath 'roleManagement' -ResourceName $resourceName -Data $roleDefinitionsExport -Append
+                }
+                else {
+                    Write-TmfExportFile -OutPath $OutPath -ParentPath 'roleManagement' -ResourceName $resourceName -Data $roleDefinitionsExport
+                }
+            }            
         } else {
             return $roleDefinitionsExport
         }

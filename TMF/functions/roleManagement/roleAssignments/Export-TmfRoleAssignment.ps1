@@ -1,31 +1,35 @@
 
+<#
+.SYNOPSIS
+Exports role assignments (active and eligible) into TMF configuration objects or JSON.
+.DESCRIPTION
+Retrieves directory role assignments and eligibility schedules (optionally AzureResources/AADGroup scoping placeholder) and converts them to TMF shape including principal, role and scope metadata. Returns objects unless -OutPath is supplied.
+.PARAMETER SpecificResources
+Optional list of IDs, principal display names, or role definition display names (comma separated accepted) to filter.
+.PARAMETER Scope
+AzureResources | AzureAD | AADGroup (default AzureAD).
+.PARAMETER OutPath
+Root folder to write export; when omitted objects are returned.
+.PARAMETER Append
+Add content to an existing file
+.PARAMETER ForceBeta
+Use beta Graph endpoint for retrieval (experimental; current retrieval uses directory scope endpoints).
+.PARAMETER Cmdlet
+Internal pipeline parameter; do not supply manually.
+.EXAMPLE
+Export-TmfRoleAssignment -Scope AzureAD -OutPath C:\temp\tmf
+.EXAMPLE
+Export-TmfRoleAssignment -Scope AzureResources -SpecificResources Owner
+NOTE: Parameter `-OutPutPath` is deprecated; retained as alias.
+#>
 function Export-TmfRoleAssignment {
-    <#
-    .SYNOPSIS
-    Exports role assignments (active and eligible) into TMF configuration objects or JSON.
-    .DESCRIPTION
-    Retrieves directory role assignments and eligibility schedules (optionally AzureResources/AADGroup scoping placeholder) and converts them to TMF shape including principal, role and scope metadata. Returns objects unless -OutPath is supplied.
-    .PARAMETER SpecificResources
-    Optional list of IDs, principal display names, or role definition display names (comma separated accepted) to filter.
-    .PARAMETER Scope
-    AzureResources | AzureAD | AADGroup (default AzureAD).
-    .PARAMETER OutPath
-    Root folder to write export; when omitted objects are returned.
-    .PARAMETER ForceBeta
-    Use beta Graph endpoint for retrieval (experimental; current retrieval uses directory scope endpoints).
-    .PARAMETER Cmdlet
-    Internal pipeline parameter; do not supply manually.
-    .EXAMPLE
-    Export-TmfRoleAssignment -Scope AzureAD -OutPath C:\temp\tmf
-    .EXAMPLE
-    Export-TmfRoleAssignment -Scope AzureResources -SpecificResources Owner
-    NOTE: Parameter `-OutPutPath` is deprecated; retained as alias.
-    #>
+    
 
     [CmdletBinding()] param(
         [string[]] $SpecificResources,
         [ValidateSet('AzureResources', 'AzureAD', 'AADGroup')] [string] $Scope,
         [Alias('OutPutPath')] [string] $OutPath,
+        [switch] $Append,
         [switch] $ForceBeta,
         [System.Management.Automation.PSCmdlet] $Cmdlet = $PSCmdlet
     )
@@ -220,7 +224,14 @@ function Export-TmfRoleAssignment {
     end {
         Write-PSFMessage -Level Verbose -FunctionName 'Export-TmfRoleAssignment' -Message "Exporting $($roleAssignmentsExport.Count) role assignment(s)"
         if ($OutPath) {
-            Write-TmfExportFile -OutPath $OutPath -ParentPath 'roleManagement' -ResourceName $resourceName -Data $roleAssignmentsExport
+            if ($roleAssignmentsExport) {
+                if ($Append) {
+                    Write-TmfExportFile -OutPath $OutPath -ParentPath 'roleManagement' -ResourceName $resourceName -Data $roleAssignmentsExport -Append
+                }
+                else {
+                    Write-TmfExportFile -OutPath $OutPath -ParentPath 'roleManagement' -ResourceName $resourceName -Data $roleAssignmentsExport
+                }
+            }
         } else {
             return $roleAssignmentsExport
         }

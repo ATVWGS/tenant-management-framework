@@ -7,6 +7,8 @@ Retrieves named locations (v1.0 by default; beta when -ForceBeta) and converts t
 Optional list of named location IDs or display names (comma separated accepted) to filter.
 .PARAMETER OutPath
 Root folder to write the export. When omitted, objects are returned instead of writing files. Legacy alias -OutPutPath accepted (deprecated).
+.PARAMETER Append
+Add content to an existing file
 .PARAMETER ForceBeta
 Use beta Graph endpoint for retrieval (may expose additional properties).
 .PARAMETER Cmdlet
@@ -20,6 +22,7 @@ function Export-TmfNamedLocation {
     [CmdletBinding()] param(
         [string[]] $SpecificResources,
         [Alias('OutPutPath')] [string] $OutPath,
+        [switch] $Append,
         [switch] $ForceBeta,
         [System.Management.Automation.PSCmdlet] $Cmdlet = $PSCmdlet
     )
@@ -75,7 +78,14 @@ function Export-TmfNamedLocation {
     end {
         Write-PSFMessage -Level Verbose -FunctionName 'Export-TmfNamedLocation' -Message "Exporting $($namedLocationsExport.Count) named location(s). ForceBeta=$ForceBeta"
         if ($OutPath) {
-            Write-TmfExportFile -OutPath $OutPath -ResourceName $resourceName -Data $namedLocationsExport
+            if ($namedLocationsExport) {
+                if ($Append) {
+                    Write-TmfExportFile -OutPath $OutPath -ResourceName $resourceName -Data $namedLocationsExport -Append
+                }
+                else {
+                    Write-TmfExportFile -OutPath $OutPath -ResourceName $resourceName -Data $namedLocationsExport
+                }
+            }
         } else {
             return $namedLocationsExport
         }

@@ -9,6 +9,8 @@ Optional list of localization IDs or display names (comma separated accepted). I
 Root folder to write export; when omitted objects are returned.
 .PARAMETER ForceBeta
 Use beta Graph endpoint for retrieval.
+.PARAMETER Append
+Add content to an existing file
 .PARAMETER Cmdlet
 Internal pipeline parameter; do not supply manually.
 .EXAMPLE
@@ -20,6 +22,7 @@ function Export-TmfOrganizationalBranding {
     [CmdletBinding()] param(
         [string[]] $SpecificResources,
         [Alias('OutPutPath')] [string] $OutPath,
+        [switch] $Append,
         [switch] $ForceBeta,
         [System.Management.Automation.PSCmdlet] $Cmdlet = $PSCmdlet
     )
@@ -73,7 +76,14 @@ function Export-TmfOrganizationalBranding {
     end {
         Write-PSFMessage -Level Verbose -FunctionName 'Export-TmfOrganizationalBranding' -Message "Exporting $($exports.Count) branding record(s)"
         if ($OutPath) {
-            Write-TmfExportFile -OutPath $OutPath -ResourceName $resourceName -Data $exports
+            if ($exports) {
+                if ($Append) {
+                    Write-TmfExportFile -OutPath $OutPath -ResourceName $resourceName -Data $exports -Append
+                }
+                else {
+                    Write-TmfExportFile -OutPath $OutPath -ResourceName $resourceName -Data $exports
+                }
+            }
         } else {
             return $exports
         }

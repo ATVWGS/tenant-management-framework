@@ -7,6 +7,8 @@ Retrieves customSecurityAttributeDefinitions (v1.0) and outputs TMF objects. Ret
 Optional list of definition display names or internal names (comma separated accepted) to filter.
 .PARAMETER OutPath
 Root folder to write export; when omitted objects are returned. (Legacy alias: -OutPutPath)
+.PARAMETER Append
+Add content to existing file
 .PARAMETER ForceBeta
 Use beta endpoint for retrieval.
 .PARAMETER Cmdlet
@@ -102,10 +104,23 @@ function Export-TmfCustomSecurityAttributeDefinition {
     end {
         if (-not $OutPath) {
             return $export
-        }; $root = Join-Path $OutPath 'customSecurityAttributes'; if (-not (Test-Path $root)) {
+        }
+        <#$root = Join-Path $OutPath 'customSecurityAttributes'
+        if (-not (Test-Path $root)) {
             New-Item -Path $OutPath -Name 'customSecurityAttributes' -ItemType Directory -Force | Out-Null
-        }; $path = Join-Path $root $resourceName; if (-not (Test-Path $path)) {
+        }
+        $path = Join-Path $root $resourceName
+        if (-not (Test-Path $path)) {
             New-Item -Path $root -Name $resourceName -ItemType Directory -Force | Out-Null
-        }; $export | ConvertTo-Json -Depth 15 | Out-File -FilePath (Join-Path $path "$resourceName.json") -Encoding utf8 -Force
+        }#>
+        if ($export) {
+            if ($Append) {
+                Write-TmfExportFile -OutPath $OutPath -ParentPath 'customSecurityAttributes' -ResourceName $resourceName -Data $export -Append
+            }
+            else {
+                Write-TmfExportFile -OutPath $OutPath -ParentPath 'customSecurityAttributes' -ResourceName $resourceName -Data $export
+            }
+        }
+        #$export | ConvertTo-Json -Depth 15 | Out-File -FilePath (Join-Path $path "$resourceName.json") -Encoding utf8 -Force
     }
 }

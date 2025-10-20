@@ -1,30 +1,33 @@
+<#
+.SYNOPSIS
+Exports role management policies (PIM) into TMF configuration objects or JSON.
+.DESCRIPTION
+Retrieves role management policy assignments and policies (directory scope only) and converts them to TMF shape including rules. Returns objects unless -OutPath is supplied.
+.PARAMETER SpecificResources
+Optional list of policy assignment IDs or role definition display names (comma separated accepted) to filter.
+.PARAMETER Scope
+AzureResources | AzureAD | AADGroup (default AzureAD).
+.PARAMETER OutPath
+Root folder to write export; when omitted objects are returned.
+.PARAMETER Append
+Add content to an existing file
+.PARAMETER ForceBeta
+Use beta Graph endpoint for retrieval.
+.PARAMETER Cmdlet
+Internal pipeline parameter; do not supply manually.
+.EXAMPLE
+Export-TmfRoleManagementPolicy -Scope AzureAD -OutPath C:\temp\tmf
+.EXAMPLE
+Export-TmfRoleManagementPolicy -Scope AzureResources -SpecificResources Global Reader
+NOTE: Parameter `-OutPutPath` is deprecated; retained as alias.
+#>
 function Export-TmfRoleManagementPolicy {
-    <#
-    .SYNOPSIS
-    Exports role management policies (PIM) into TMF configuration objects or JSON.
-    .DESCRIPTION
-    Retrieves role management policy assignments and policies (directory scope only) and converts them to TMF shape including rules. Returns objects unless -OutPath is supplied.
-    .PARAMETER SpecificResources
-    Optional list of policy assignment IDs or role definition display names (comma separated accepted) to filter.
-    .PARAMETER Scope
-    AzureResources | AzureAD | AADGroup (default AzureAD).
-    .PARAMETER OutPath
-    Root folder to write export; when omitted objects are returned.
-    .PARAMETER ForceBeta
-    Use beta Graph endpoint for retrieval.
-    .PARAMETER Cmdlet
-    Internal pipeline parameter; do not supply manually.
-    .EXAMPLE
-    Export-TmfRoleManagementPolicy -Scope AzureAD -OutPath C:\temp\tmf
-    .EXAMPLE
-    Export-TmfRoleManagementPolicy -Scope AzureResources -SpecificResources Global Reader
-    NOTE: Parameter `-OutPutPath` is deprecated; retained as alias.
-    #>
 
     [CmdletBinding()] param(
         [string[]] $SpecificResources,
         [ValidateSet('AzureResources', 'AzureAD', 'AADGroup')] [string] $Scope,
         [Alias('OutPutPath')] [string] $OutPath,
+        [switch] $Append,
         [switch] $ForceBeta,
         [System.Management.Automation.PSCmdlet] $Cmdlet = $PSCmdlet
     )
@@ -223,9 +226,22 @@ function Export-TmfRoleManagementPolicy {
         if (-not $OutPath) {
             return $roleManagementPoliciesExport
         }
-        Write-TmfExportFile -OutPath $OutPath -ParentPath 'roleManagement' -ResourceName $resourceName -Data $roleManagementPoliciesExport
+        if ($roleManagementPoliciesExport) {
+            if ($Append) {
+                Write-TmfExportFile -OutPath $OutPath -ParentPath 'roleManagement' -ResourceName $resourceName -Data $roleManagementPoliciesExport -Append
+            }
+            else {
+                Write-TmfExportFile -OutPath $OutPath -ParentPath 'roleManagement' -ResourceName $resourceName -Data $roleManagementPoliciesExport
+            }
+        }
+        
         if ($roleManagementPolicyRuleTemplatesExport) {
-            Write-TmfExportFile -OutPath $OutPath -ParentPath 'roleManagement' -ResourceName $templateName -Data $roleManagementPolicyRuleTemplatesExport
+            if ($Append) {
+                Write-TmfExportFile -OutPath $OutPath -ParentPath 'roleManagement' -ResourceName $templateName -Data $roleManagementPolicyRuleTemplatesExport -Append
+            }
+            else {
+                Write-TmfExportFile -OutPath $OutPath -ParentPath 'roleManagement' -ResourceName $templateName -Data $roleManagementPolicyRuleTemplatesExport
+            }
         }
     }
 }

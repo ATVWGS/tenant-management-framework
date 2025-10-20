@@ -7,6 +7,8 @@ Retrieves conditional access policies (v1.0 by default; beta when -ForceBeta or 
 Optional list of policy IDs or display names (comma separated accepted) to filter.
 .PARAMETER OutPath
 Root folder to write the export. When omitted, objects are returned instead of writing files.
+.PARAMETER Append
+Add content to existing file
 .PARAMETER ForceBeta
 Use beta Graph endpoint for retrieval (may expose additional properties).
 .PARAMETER Cmdlet
@@ -20,6 +22,7 @@ function Export-TmfConditionalAccessPolicy {
     [CmdletBinding()] param(
         [string[]] $SpecificResources,
         [Alias('OutPutPath')] [string] $OutPath,
+        [switch] $Append,
         [switch] $ForceBeta,
         [System.Management.Automation.PSCmdlet] $Cmdlet = $PSCmdlet
     )
@@ -186,7 +189,9 @@ function Export-TmfConditionalAccessPolicy {
                     }
                 }
                 if ($policy.grantControls.termsOfUse) {
-                    $obj.termsOfUse = @(Resolve-Agreement -InputReference $policy.grantControls.termsOfUse -DontFailIfNotExisting -DisplayName -Cmdlet $Cmdlet) 
+                    $ToU = @()
+                    $ToU += Resolve-Agreement -InputReference $policy.grantControls.termsOfUse -DontFailIfNotExisting -DisplayName -Cmdlet $Cmdlet
+                    $obj.termsOfUse = $ToU
                 }
                 if ($policy.grantControls.operator) {
                     $obj.operator = $policy.grantControls.operator
@@ -423,7 +428,13 @@ function Export-TmfConditionalAccessPolicy {
         if (-not (Test-Path -LiteralPath (Join-Path $OutPath $resourceName))) {
             New-Item -Path $OutPath -Name $resourceName -ItemType Directory -Force | Out-Null 
         }
-        $policiesExport | ConvertTo-Json -Depth 15 | Out-File -FilePath (Join-Path (Join-Path $OutPath $resourceName) 'policies.json') -Encoding utf8 -Force
-        # TODO: Add Pester tests (CI-002) for deprecation warning + export shape
+        if ($policiesExport) {
+            if ($Append) {
+                Write-TmfExportFile -OutPath $OutPath -ResourceName $resourceName -Data $policiesExport -Append
+            }
+            else {
+                Write-TmfExportFile -OutPath $OutPath -ResourceName $resourceName -Data $policiesExport
+            }
+        }
     }
 }

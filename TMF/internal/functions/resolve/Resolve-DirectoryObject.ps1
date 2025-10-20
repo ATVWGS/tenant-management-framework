@@ -155,6 +155,10 @@
 		}
 		$resp1 = $null
 		try {
+			foreach ($item in $InputReference) {
+				Write-PSFMessage -Level Verbose -Message $Item
+			}
+			
 			$resp1 = Invoke-MgGraphRequest -Method POST -Uri ("$script:graphBaseUrl/directoryObjects/getByIds") -Body ($body | ConvertTo-Json) -ContentType 'application/json'
 		} catch {
 			Write-PSFMessage -Level Warning -Message ("getByIds single lookup failed for '{0}': {1}" -f $single, $_.Exception.Message) -Tag 'failed', 'directoryObject', 'single' -ErrorRecord $_

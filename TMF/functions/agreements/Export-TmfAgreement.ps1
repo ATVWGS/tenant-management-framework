@@ -8,6 +8,8 @@ Retrieves agreements (v1.0) with optional fallback listing and downloads localiz
 Optional list of agreement IDs or display names (comma separated accepted) to filter.
 .PARAMETER OutPath
 Root folder to write export; when omitted objects are returned (files not downloaded). Legacy alias -OutPutPath is deprecated.
+.PARAMETER Append
+Add content to existing file
 .PARAMETER ForceBeta
 Use beta endpoint for metadata retrieval (still attempts v1.0 first where stable); file strategies continue to fall back as needed.
 .PARAMETER AllowBetaContentFallback
@@ -25,6 +27,7 @@ function Export-TmfAgreement {
     [CmdletBinding()] param(
         [string[]] $SpecificResources,
         [Alias('OutPutPath')] [string] $OutPath,
+        [switch] $Append,
         [switch] $ForceBeta,
         [switch] $AllowBetaContentFallback,
         [switch] $ContinueOnListFailure,
@@ -87,7 +90,7 @@ function Export-TmfAgreement {
         foreach ($agreement in $allAgreements) {
             $obj = [ordered]@{}
             foreach ($p in $agreement.GetEnumerator()) {
-                if ($p.Value -and $p.Key -ne "files") {
+                if ($p.Value -and ($p.Key -ne "files" -and $p.Key -ne "id")) {
                     $obj[$p.Key] = $p.Value
                 }
             }
@@ -163,7 +166,13 @@ function Export-TmfAgreement {
         if (-not (Test-Path $resourceFolderPath)) {
             New-Item -Path $resourceFolderPath -ItemType Directory -Force | Out-Null 
         }
-        $agreementsExport | ConvertTo-Json -Depth 15 | Out-File -FilePath (Join-Path $resourceFolderPath "$resourceName.json") -Encoding utf8 -Force
-        Write-PSFMessage -Level Verbose -String 'TMF.Export.Completed' -StringValues $resourceName
+        if ($agreementsExport) {
+            if ($Append) {
+                Write-TmfExportFile -OutPath $OutPath -ResourceName $resourceName -Data $agreementsExport -Append
+            }
+            else {
+                Write-TmfExportFile -OutPath $OutPath -ResourceName $resourceName -Data $agreementsExport
+            }
+        }
     }
 }

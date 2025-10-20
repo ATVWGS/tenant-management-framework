@@ -5,6 +5,8 @@ Retrieves the crossTenantAccessPolicy singleton (v1.0 by default; beta with -For
 Ignored (singleton) but accepted for consistency; wildcard accepted.
 .PARAMETER OutPath
 Root folder to write export; when omitted the object is returned. (Legacy alias: -OutPutPath)
+.PARAMETER Append
+Add content to existing file
 .PARAMETER ForceBeta
 Use beta endpoint (always) or as fallback when v1.0 retrieval fails.
 .PARAMETER Cmdlet
@@ -18,6 +20,7 @@ function Export-TmfCrossTenantAccessPolicy {
     [CmdletBinding()] param(
         [string[]] $SpecificResources,
         [Alias('OutPutPath')] [string] $OutPath,
+        [switch] $Append,
         [switch] $ForceBeta,
         [System.Management.Automation.PSCmdlet] $Cmdlet = $PSCmdlet
     )
@@ -54,7 +57,12 @@ function Export-TmfCrossTenantAccessPolicy {
     end {
         if ($OutPath) {
             if ($exports.Count -gt 0) {
-                Write-TmfExportFile -OutPath $OutPath -ParentPath 'crossTenantAccess' -ResourceName $resourceName -Data $exports 
+                if ($Append) {
+                    Write-TmfExportFile -OutPath $OutPath -ParentPath 'crossTenantAccess' -ResourceName $resourceName -Data $exports -Append
+                }
+                else {
+                    Write-TmfExportFile -OutPath $OutPath -ParentPath 'crossTenantAccess' -ResourceName $resourceName -Data $exports
+                }                
             }
         } else {
             return $exports

@@ -7,6 +7,8 @@ Retrieves administrative units (optionally filtered) including users, groups, de
 Optional list of AU display names to export (comma separated accepted).
 .PARAMETER OutPath
 Root folder to write export; when omitted objects are returned. (Legacy alias: -OutPutPath)
+.PARAMETER Append
+Add content to existing file
 .PARAMETER ForceBeta
 Use beta endpoint for retrieval.
 .PARAMETER IncludeMembers
@@ -22,6 +24,7 @@ function Export-TmfAdministrativeUnit {
     [CmdletBinding()] param(
         [string[]] $SpecificResources,
         [Alias('OutPutPath')] [string] $OutPath,
+        [switch] $Append,
         [switch] $ForceBeta,
         [switch] $IncludeMembers,
         [System.Management.Automation.PSCmdlet] $Cmdlet = $PSCmdlet
@@ -154,6 +157,14 @@ function Export-TmfAdministrativeUnit {
         if (-not $OutPath) {
             return $administrativeUnitsExport 
         }
-        Write-TmfExportFile -OutPath $OutPath -ResourceName $resourceName -Data $administrativeUnitsExport
+        if ($administrativeUnitsExport) {
+            if ($Append) {
+                Write-TmfExportFile -OutPath $OutPath -ResourceName $resourceName -Data $administrativeUnitsExport -Append
+            }
+            else {
+                Write-TmfExportFile -OutPath $OutPath -ResourceName $resourceName -Data $administrativeUnitsExport
+            }
+        }
+        
     }
 }

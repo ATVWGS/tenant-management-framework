@@ -7,6 +7,8 @@ Retrieves authenticationContextClassReferences (v1.0 with beta fallback) merging
 Optional list of IDs or display names (comma separated accepted) to filter.
 .PARAMETER OutPath
 Root folder to write export; when omitted objects are returned. (Legacy alias: -OutPutPath)
+.PARAMETER Append
+Add content to existing file
 .PARAMETER ForceBeta
 Force beta endpoint usage.
 .PARAMETER Cmdlet
@@ -20,6 +22,7 @@ function Export-TmfAuthenticationContextClassReference {
     [CmdletBinding()] param(
         [string[]] $SpecificResources,
         [Alias('OutPutPath')] [string] $OutPath,
+        [switch] $Append,
         [switch] $ForceBeta,
         [System.Management.Automation.PSCmdlet] $Cmdlet = $PSCmdlet
     )
@@ -126,6 +129,13 @@ function Export-TmfAuthenticationContextClassReference {
         if (-not (Test-Path -LiteralPath $targetDir)) {
             New-Item -Path $OutPath -Name $resourceName -ItemType Directory -Force | Out-Null 
         }
-        $accrExport | ConvertTo-Json -Depth 15 | Out-File -FilePath (Join-Path $targetDir "$resourceName.json") -Encoding utf8 -Force
+        if ($accrExport) {
+            if ($Append) {
+                Write-TmfExportFile -OutPath $OutPath -ResourceName $resourceName -Data $accrExport -Append
+            }
+            else {
+                Write-TmfExportFile -OutPath $OutPath -ResourceName $resourceName -Data $accrExport
+            }
+        }
     }
 }

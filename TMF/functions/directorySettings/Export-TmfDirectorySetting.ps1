@@ -7,6 +7,8 @@ Retrieves directory settings, merges with template metadata to cast values, and 
 Optional list of setting IDs or display names (comma separated accepted) to filter.
 .PARAMETER OutPath
 Root folder to write export; when omitted objects are returned. (Legacy alias: -OutPutPath)
+.PARAMETER Append
+Add content to existing file
 .PARAMETER ForceBeta
 Use beta Graph endpoint for retrieval.
 .PARAMETER Cmdlet
@@ -20,6 +22,7 @@ function Export-TmfDirectorySetting {
     [CmdletBinding()] param(
         [string[]] $SpecificResources,
         [Alias('OutPutPath')] [string] $OutPath,
+        [switch] $Append,
         [switch] $ForceBeta = $true,
         [System.Management.Automation.PSCmdlet] $Cmdlet = $PSCmdlet
     )
@@ -100,7 +103,14 @@ function Export-TmfDirectorySetting {
     end {
         Write-PSFMessage -Level Verbose -FunctionName 'Export-TmfDirectorySetting' -Message "Exporting $($directorySettingsExport.Count) directory setting(s)"
         if ($OutPath) {
-            Write-TmfExportFile -OutPath $OutPath -ResourceName $resourceName -Data $directorySettingsExport
+            if ($directorySettingsExport) {
+                if ($Append) {
+                    Write-TmfExportFile -OutPath $OutPath -ResourceName $resourceName -Data $directorySettingsExport -Append
+                }
+                else {
+                    Write-TmfExportFile -OutPath $OutPath -ResourceName $resourceName -Data $directorySettingsExport
+                }
+            }
         } else {
             return $directorySettingsExport
         }

@@ -1,35 +1,39 @@
+<#
+.SYNOPSIS
+Exports the tenant authentication methods policy into TMF configuration objects or JSON.
+.DESCRIPTION
+Retrieves the singleton authenticationMethodsPolicy (v1.0 by default; beta when -ForceBeta for fallbacks) and its authenticationMethodConfigurations, converting to the TMF shape. Returns object unless -OutPath is supplied.
+.PARAMETER SpecificResources
+Optional filter by display name (singleton semantics; rarely needed).
+.PARAMETER OutPath
+Root folder to write the export. When omitted, object is returned instead of writing files.
+.PARAMETER Append
+Add content to an existing file
+.PARAMETER ForceBeta
+Use beta Graph endpoint for initial retrieval (fallback to beta already occurs when v1.0 lacks detail).
+.PARAMETER Cmdlet
+Internal pipeline parameter; do not supply manually.
+.EXAMPLE
+Export-TmfAuthenticationMethodsPolicy -OutPath C:\temp\tmf
+.EXAMPLE
+Export-TmfAuthenticationMethodsPolicy | ConvertTo-Json -Depth 15
+#>
 function Export-TmfAuthenticationMethodsPolicy {
-    <#
-    .SYNOPSIS
-    Exports the tenant authentication methods policy into TMF configuration objects or JSON.
-    .DESCRIPTION
-    Retrieves the singleton authenticationMethodsPolicy (v1.0 by default; beta when -ForceBeta for fallbacks) and its authenticationMethodConfigurations, converting to the TMF shape. Returns object unless -OutPath is supplied.
-    .PARAMETER SpecificResources
-    Optional filter by display name (singleton semantics; rarely needed).
-    .PARAMETER OutPath
-    Root folder to write the export. When omitted, object is returned instead of writing files.
-    .PARAMETER ForceBeta
-    Use beta Graph endpoint for initial retrieval (fallback to beta already occurs when v1.0 lacks detail).
-    .PARAMETER Cmdlet
-    Internal pipeline parameter; do not supply manually.
-    .EXAMPLE
-    Export-TmfAuthenticationMethodsPolicy -OutPath C:\temp\tmf
-    .EXAMPLE
-    Export-TmfAuthenticationMethodsPolicy | ConvertTo-Json -Depth 15
-    #>
+
 
     [CmdletBinding()] param(
         [string[]] $SpecificResources,
         [Alias('OutPutPath')] [string] $OutPath,
+        [switch] $Append,
         [switch] $ForceBeta = $true,
         [System.Management.Automation.PSCmdlet] $Cmdlet = $PSCmdlet
     )
 
     begin {
         Test-GraphConnection -Cmdlet $Cmdlet
-        $resourceFolder = 'policies/authenticationMethodsPolicies'
-        $fileName = 'authenticationMethodsPolicies.json'
-
+        $resourceName = 'authenticationMethodsPolicies'
+        $parentName = 'policies'
+  
         function Convert-AuthenticationMethodsPolicy {
             param(
                 [Parameter(Mandatory)] [object] $policy
@@ -212,13 +216,13 @@ function Export-TmfAuthenticationMethodsPolicy {
         if (-not $OutPath) {
             return @($exportObject)
         }
-        $targetDir = Join-Path -Path $OutPath -ChildPath $resourceFolder
-        if (-not (Test-Path -LiteralPath $targetDir)) {
-            if (-not (Test-Path -LiteralPath (Join-Path $OutPath 'policies'))) {
-                New-Item -ItemType Directory -Path (Join-Path $OutPath 'policies') -Force | Out-Null
-            }; New-Item -ItemType Directory -Path $targetDir -Force | Out-Null
+        if ($exportObject) {
+            if ($Append) {
+                Write-TmfExportFile -OutPath $OutPath -ParentPath $parentName -ResourceName $resourceName -Data @($exportObject) -Append
+            }
+            else {
+                Write-TmfExportFile -OutPath $OutPath -ParentPath $parentName -ResourceName $resourceName -Data @($exportObject)
+            }
         }
-        @($exportObject) | ConvertTo-Json -Depth 15 | Out-File -FilePath (Join-Path $targetDir $fileName) -Encoding utf8 -Force
-        # TODO: Add Pester tests (CI-002)
     }
 }

@@ -7,6 +7,8 @@ Retrieves partner settings from Microsoft Graph (v1.0 by default; beta when -For
 Optional list of partner tenant IDs (comma separated accepted) to filter.
 .PARAMETER OutPath
 Root folder to write the export. When omitted, objects are returned instead of writing files. (Legacy alias: -OutPutPath)
+.PARAMETER Append
+Add content to existing file
 .PARAMETER ForceBeta
 Use beta Graph endpoint for retrieval (may expose additional properties).
 .PARAMETER Cmdlet
@@ -20,6 +22,7 @@ function Export-TmfCrossTenantAccessPartnerSetting {
     [CmdletBinding()] param(
         [string[]] $SpecificResources,
         [Alias('OutPutPath')] [string] $OutPath,
+        [switch] $Append,
         [switch] $ForceBeta,
         [System.Management.Automation.PSCmdlet] $Cmdlet = $PSCmdlet
     )
@@ -132,7 +135,14 @@ function Export-TmfCrossTenantAccessPartnerSetting {
     end {
         Write-PSFMessage -Level Verbose -FunctionName 'Export-TmfCrossTenantAccessPartnerSetting' -Message "Exporting $($exports.Count) partner setting(s). ForceBeta=$ForceBeta"
         if ($OutPath) {
-            Write-TmfExportFile -OutPath $OutPath -ParentPath 'crossTenantAccess' -ResourceName $resourceName -Data $exports
+            if ($exports) {
+                if ($Append) {
+                    Write-TmfExportFile -OutPath $OutPath -ParentPath 'crossTenantAccess' -ResourceName $resourceName -Data $exports -Append
+                }
+                else {
+                    Write-TmfExportFile -OutPath $OutPath -ParentPath 'crossTenantAccess' -ResourceName $resourceName -Data $exports
+                }
+            }            
         } else {
             return $exports
         }

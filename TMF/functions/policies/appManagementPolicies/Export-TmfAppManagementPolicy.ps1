@@ -1,26 +1,30 @@
+<#
+.SYNOPSIS
+    Exports app management policies from the tenant.
+.DESCRIPTION
+    Retrieves appManagementPolicies collection from Microsoft Graph and converts them
+    into the TMF desired configuration shape. Writes to policies/appManagementPolicies/appManagementPolicies.json
+    when OutPutPath is provided, or returns the objects when omitted.
+.PARAMETER SpecificResources
+    Optional filter by display name. Can include wildcards; matches are applied client-side.
+.PARAMETER OutPath
+    Destination root folder to write the exported configuration. (Legacy alias: -OutPutPath)
+.PARAMETER Append
+Add content to an existing file
+.PARAMETER Cmdlet
+    The invoking cmdlet. Defaults to the current $PSCmdlet.
+.EXAMPLE
+    Export-TmfAppManagementPolicy -OutPath "C:\Temp\tmf-config"
+.EXAMPLE
+    Export-TmfAppManagementPolicy | ConvertTo-Json -Depth 15
+#>
 function Export-TmfAppManagementPolicy {
-    <#
-        .SYNOPSIS
-            Exports app management policies from the tenant.
-        .DESCRIPTION
-            Retrieves appManagementPolicies collection from Microsoft Graph and converts them
-            into the TMF desired configuration shape. Writes to policies/appManagementPolicies/appManagementPolicies.json
-            when OutPutPath is provided, or returns the objects when omitted.
-        .PARAMETER SpecificResources
-            Optional filter by display name. Can include wildcards; matches are applied client-side.
-        .PARAMETER OutPath
-            Destination root folder to write the exported configuration. (Legacy alias: -OutPutPath)
-        .PARAMETER Cmdlet
-            The invoking cmdlet. Defaults to the current $PSCmdlet.
-        .EXAMPLE
-            Export-TmfAppManagementPolicy -OutPath "C:\Temp\tmf-config"
-        .EXAMPLE
-            Export-TmfAppManagementPolicy | ConvertTo-Json -Depth 15
-    #>
+    
     [CmdletBinding()]
     param(
         [string[]] $SpecificResources,
         [Alias('OutPutPath')] [string] $OutPath,
+        [switch] $Append,
         [switch] $ForceBeta,
         [System.Management.Automation.PSCmdlet] $Cmdlet = $PSCmdlet
     )
@@ -123,7 +127,12 @@ function Export-TmfAppManagementPolicy {
             return $export
         }
         if ($export) {
-            Write-TmfExportFile -OutPath $OutPath -ParentPath $parentName -ResourceName $resourceName -Data $export
+            if ($Append) {
+                Write-TmfExportFile -OutPath $OutPath -ParentPath $parentName -ResourceName $resourceName -Data $export -Append
+            }
+            else {
+                Write-TmfExportFile -OutPath $OutPath -ParentPath $parentName -ResourceName $resourceName -Data $export
+            }
         }        
     }
 }

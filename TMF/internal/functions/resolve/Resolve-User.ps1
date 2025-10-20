@@ -174,7 +174,7 @@
 					}
 				}
 				try {
-					$resolved = Resolve-DirectoryObject -InputReference $InputReference -Types user -ReturnObjects -DontFailIfNotExisting:$DontFailIfNotExisting
+					$resolved = Resolve-DirectoryObject -InputReference $InputReference -Types user -ReturnObjects -DontFailIfNotExisting
 					if ($resolved -and $resolved -isnot [string]) {
 						$fullObj = [pscustomobject]@{ id = $resolved.id; displayName = $resolved.displayName; userPrincipalName = $resolved.userPrincipalName }
 						Add-TmfCacheEntries -CacheName 'userDetailCache' -Objects @($fullObj) -KeyProperties id, displayName, userPrincipalName

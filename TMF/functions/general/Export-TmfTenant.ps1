@@ -1,24 +1,23 @@
+<#
+.SYNOPSIS
+Exports all supported resource type resources from the connected Tenant.
+.DESCRIPTION
+This command exports all supported resource type resources from the Tenant you are connected to.
+You can connect to a Tenant using Connect-MgGraph.
+.PARAMETER Exclude
+Exclude resources from export.
+For example: -Exclude groups, users
+.PARAMETER resourceTypes
+Perform export for entered resource types only.
+For example: -resourceTypes groups,roleAssignments
+.PARAMETER Append
+Add content to an existing file
+.PARAMETER OutPath
+Root folder to write export; when omitted objects are returned.
+#>
 function Export-TmfTenant
 {
-	<#
-		.SYNOPSIS
-			Exports all supported resource type resources from the connected Tenant.
-		
-		.DESCRIPTION
-			This command exports all supported resource type resources from the Tenant you are connected to.
-			You can connect to a Tenant using Connect-MgGraph.
-
-		.PARAMETER Exclude
-			Exclude resources from export.
-			For example: -Exclude groups, users
-
-		.PARAMETER resourceTypes
-			Perform export for entered resource types only.
-			For example: -resourceTypes groups,roleAssignments
-        
-        .PARAMETER OutPath
-            Root folder to write export; when omitted objects are returned.
-	#>
+	
 	[CmdletBinding(DefaultParameterSetName = 'Exclude')]
 	Param (
 		[Parameter(ParameterSetName = 'Exclude')]
@@ -35,6 +34,7 @@ function Export-TmfTenant
 
 		})]
 		[string[]] $resourceTypes,
+		[switch] $Append,
         [string] $OutPath
 	)
 	
@@ -46,11 +46,19 @@ function Export-TmfTenant
 	process
 	{
 		Write-PSFMessage -Level Host -FunctionName "Export-TmfTenant" -String "TMF.TenantInformation" -StringValues $tenant.displayName, $tenant.Id
+		if ($Append) {
+			$appendSupportingCommands = Get-Command -Module TMF -ParameterName "Append"
+		}
 		if ($resourceTypes) {
             if ($OutPath) {
                 foreach ($resourceType in ($script:supportedResources.GetEnumerator() | Where-Object {$_.Value.exportFunction -and $_.Name -in $resourceTypes} | Sort-Object {$_.Value.weight})) {
                     Write-PSFMessage -Level Host -FunctionName "Export-TmfTenant" -String 'TMF.StartingExportForResource' -StringValues $resourceType.Name
-                    & $resourceType.Value["exportFunction"] -Cmdlet $PSCmdlet -OutPath $OutPath
+					if ($Append -and ($resourceType.Value["exportFunction"] -in $appendSupportingCommands)) {
+						& $resourceType.Value["exportFunction"] -Cmdlet $PSCmdlet -OutPath $OutPath -Append
+					}
+					else {
+						& $resourceType.Value["exportFunction"] -Cmdlet $PSCmdlet -OutPath $OutPath
+					}                    
                 }
             }
             else {
@@ -65,7 +73,12 @@ function Export-TmfTenant
             if ($OutPath) {
                 foreach ($resourceType in ($script:supportedResources.GetEnumerator() | Where-Object {$_.Value.exportFunction -and $_.Name -notin $Exclude} | Sort-Object {$_.Value.weight})) {
                     Write-PSFMessage -Level Host -FunctionName "Export-TmfTenant" -String 'TMF.StartingExportForResource' -StringValues $resourceType.Name
-                    & $resourceType.Value["exportFunction"] -Cmdlet $PSCmdlet -OutPath $OutPath
+                    if ($Append -and ($resourceType.Value["exportFunction"] -in $appendSupportingCommands)) {
+						& $resourceType.Value["exportFunction"] -Cmdlet $PSCmdlet -OutPath $OutPath -Append
+					}
+					else {
+						& $resourceType.Value["exportFunction"] -Cmdlet $PSCmdlet -OutPath $OutPath
+					}  
                 }
             }
             else {

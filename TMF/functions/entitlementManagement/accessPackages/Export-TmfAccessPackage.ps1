@@ -1,3 +1,23 @@
+<#
+.SYNOPSIS
+Exports accessPackages, accessPackageResources and accessPackageAssignmentPolicies into TMF configuration.
+.DESCRIPTION
+Retrieves access packages and referenced resources/assignmentPolicies and outputs TMF objects. Returns objects unless -OutPath supplied.
+.PARAMETER SpecificResources
+Optional list of setting IDs or display names (comma separated accepted) to filter.
+.PARAMETER OutPath
+Root folder to write export; when omitted objects are returned. (Legacy alias: -OutPutPath)
+.PARAMETER Append
+Add content to existing file
+.PARAMETER ForceBeta
+Use beta Graph endpoint for retrieval.
+.PARAMETER Cmdlet
+Internal pipeline parameter; do not supply manually.
+.EXAMPLE
+Export-TmfAccessPackage -OutPutPath C:\temp\tmf
+.EXAMPLE
+Export-TmfAccessPackage -SpecificResources AccessPackageName
+#>
 function Export-TmfAccessPackage {
     [CmdletBinding()] param(
         [string[]]$SpecificResources,
@@ -21,7 +41,7 @@ function Export-TmfAccessPackage {
                     $roleScopes += [ordered]@{
                         resourceRole       = $role.displayName
                         originSystem       = $role.originSystem
-                        resourceIdentifier = (Resolve-DirectoryObject -InputReference $scope.originId -ReturnObjects).displayName
+                        resourceIdentifier = (Resolve-DirectoryObject -InputReference $scope.originId -ReturnObjects -DontFailIfNotExisting).displayName
                     }
                 }
             }
@@ -49,19 +69,19 @@ function Export-TmfAccessPackage {
                                     switch ($Approver."@odata.type") {
                                         "#microsoft.graph.singleUser" {
                                             $primaryApprovers += @{
-                                                reference = Resolve-User -InputReference $Approver.UserId -UserPrincipalName
+                                                reference = Resolve-User -InputReference $Approver.UserId -UserPrincipalName -DontFailIfNotExisting
                                                 type = "singleUser"
                                             }
                                         }
                                         "#microsoft.graph.singleServicePrincipal" {
                                             $primaryApprovers += @{
-                                                reference = Resolve-ServicePrincipal -InputReference $Approver.ServicePrincipalId -DisplayName
+                                                reference = Resolve-ServicePrincipal -InputReference $Approver.ServicePrincipalId -DisplayName -DontFailIfNotExisting
                                                 type = "singleServicePrincipal"
                                             }
                                         }
                                         "#microsoft.graph.groupMembers" {
                                             $primaryApprovers += @{
-                                                reference = Resolve-Group -InputReference $Approver.GroupId -DisplayName
+                                                reference = Resolve-Group -InputReference $Approver.GroupId -DisplayName -DontFailIfNotExisting
                                                 type = "groupMembers"
                                             }
                                         }
@@ -74,19 +94,19 @@ function Export-TmfAccessPackage {
                                     switch ($Approver."@odata.type") {
                                         "#microsoft.graph.singleUser" {
                                             $fallbackPrimaryApprovers += @{
-                                                reference = Resolve-User -InputReference $Approver.UserId -UserPrincipalName
+                                                reference = Resolve-User -InputReference $Approver.UserId -UserPrincipalName -DontFailIfNotExisting
                                                 type = "singleUser"
                                             }
                                         }
                                         "#microsoft.graph.singleServicePrincipal" {
                                             $fallbackPrimaryApprovers += @{
-                                                reference = Resolve-ServicePrincipal -InputReference $Approver.ServicePrincipalId -DisplayName
+                                                reference = Resolve-ServicePrincipal -InputReference $Approver.ServicePrincipalId -DisplayName -DontFailIfNotExisting
                                                 type = "singleServicePrincipal"
                                             }
                                         }
                                         "#microsoft.graph.groupMembers" {
                                             $fallbackPrimaryApprovers += @{
-                                                reference = Resolve-Group -InputReference $Approver.GroupId -DisplayName
+                                                reference = Resolve-Group -InputReference $Approver.GroupId -DisplayName -DontFailIfNotExisting
                                                 type = "groupMembers"
                                             }
                                         }
@@ -99,19 +119,19 @@ function Export-TmfAccessPackage {
                                     switch ($Approver."@odata.type") {
                                         "#microsoft.graph.singleUser" {
                                             $escalationApprovers += @{
-                                                reference = Resolve-User -InputReference $Approver.UserId -UserPrincipalName
+                                                reference = Resolve-User -InputReference $Approver.UserId -UserPrincipalName -DontFailIfNotExisting
                                                 type = "singleUser"
                                             }
                                         }
                                         "#microsoft.graph.singleServicePrincipal" {
                                             $escalationApprovers += @{
-                                                reference = Resolve-ServicePrincipal -InputReference $Approver.ServicePrincipalId -DisplayName
+                                                reference = Resolve-ServicePrincipal -InputReference $Approver.ServicePrincipalId -DisplayName -DontFailIfNotExisting
                                                 type = "singleServicePrincipal"
                                             }
                                         }
                                         "#microsoft.graph.groupMembers" {
                                             $escalationApprovers += @{
-                                                reference = Resolve-Group -InputReference $Approver.UserId -DisplayName
+                                                reference = Resolve-Group -InputReference $Approver.UserId -DisplayName -DontFailIfNotExisting
                                                 type = "groupMembers"
                                             }
                                         }
@@ -124,19 +144,19 @@ function Export-TmfAccessPackage {
                                     switch ($Approver."@odata.type") {
                                         "#microsoft.graph.singleUser" {
                                             $fallbackEscalationApprovers += @{
-                                                reference = Resolve-User -InputReference $Approver.UserId -UserPrincipalName
+                                                reference = Resolve-User -InputReference $Approver.UserId -UserPrincipalName -DontFailIfNotExisting
                                                 type = "singleUser"
                                             }
                                         }
                                         "#microsoft.graph.singleServicePrincipal" {
                                             $fallbackEscalationApprovers += @{
-                                                reference = Resolve-ServicePrincipal -InputReference $Approver.ServicePrincipalId -DisplayName
+                                                reference = Resolve-ServicePrincipal -InputReference $Approver.ServicePrincipalId -DisplayName -DontFailIfNotExisting
                                                 type = "singleServicePrincipal"
                                             }
                                         }
                                         "#microsoft.graph.groupMembers" {
                                             $fallbackEscalationApprovers += @{
-                                                reference = Resolve-Group -InputReference $Approver.UserId -DisplayName
+                                                reference = Resolve-Group -InputReference $Approver.UserId -DisplayName -DontFailIfNotExisting
                                                 type = "groupMembers"
                                             }
                                         }
@@ -258,7 +278,14 @@ function Export-TmfAccessPackage {
     }
     end {
         if ($OutPath) {
-            Write-TmfExportFile -OutPath $OutPath -ParentPath 'entitlementManagement' -ResourceName $resourceName -Data $export
+            if ($export) {
+                if ($Append) {
+                    Write-TmfExportFile -OutPath $OutPath -ParentPath 'entitlementManagement' -ResourceName $resourceName -Data $export -Append
+                }
+                else {
+                    Write-TmfExportFile -OutPath $OutPath -ParentPath 'entitlementManagement' -ResourceName $resourceName -Data $export
+                }
+            }            
         } else {
             return $export 
         }

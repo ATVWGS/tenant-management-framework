@@ -77,7 +77,13 @@ function Write-TmfExportFile {
 
     try {
         if ($Append) {
-            $existingData = Get-Content -Path $filePath | ConvertFrom-Json -Depth $Depth
+            $existingData = @()
+            try {
+                $existingData += Get-Content -Path $filePath | ConvertFrom-Json -Depth $Depth
+            }
+            catch {
+                Write-PSFMessage -Level Verbose -Message "File ($filePath) to append doesn't exist."
+            }            
             $combinedExport = $existingData
             $combinedExport += $Data
             $combinedExport | ConvertTo-Json -Depth $Depth | Out-File -FilePath $filePath -Encoding $Encoding -Force

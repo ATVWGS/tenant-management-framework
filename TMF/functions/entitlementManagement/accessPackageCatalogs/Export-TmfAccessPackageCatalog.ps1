@@ -1,3 +1,23 @@
+<#
+.SYNOPSIS
+Exports access package catalogs into TMF configuration.
+.DESCRIPTION
+Retrieves access package catalogs and outputs TMF objects. Returns objects unless -OutPutPath supplied.
+.PARAMETER SpecificResources
+Optional list of setting IDs or display names (comma separated accepted) to filter.
+.PARAMETER OutPath
+Root folder to write export; when omitted objects are returned. (Legacy alias: -OutPutPath)
+.PARAMETER Append
+Add content to existing file
+.PARAMETER ForceBeta
+Use beta Graph endpoint for retrieval.
+.PARAMETER Cmdlet
+Internal pipeline parameter; do not supply manually.
+.EXAMPLE
+Export-TmfAccessPackageCatalog -OutPutPath C:\temp\tmf
+.EXAMPLE
+Export-TmfAccessPackageCatalog -SpecificResources CatalogName
+#>
 function Export-TmfAccessPackageCatalog {
     [CmdletBinding()] param(
         [string[]]$SpecificResources,
@@ -48,8 +68,16 @@ function Export-TmfAccessPackageCatalog {
     }
     end {
         if ($OutPath) {
-            Write-TmfExportFile -OutPath $OutPath -ParentPath 'entitlementManagement' -ResourceName $resourceName -Data $export
-        } else {
+            if ($export) {
+                if ($Append) {
+                    Write-TmfExportFile -OutPath $OutPath -ParentPath 'entitlementManagement' -ResourceName $resourceName -Data $export -Append
+                }
+                else {
+                    Write-TmfExportFile -OutPath $OutPath -ParentPath 'entitlementManagement' -ResourceName $resourceName -Data $export
+                }
+            }            
+        } 
+        else {
             return $export 
         }
     }

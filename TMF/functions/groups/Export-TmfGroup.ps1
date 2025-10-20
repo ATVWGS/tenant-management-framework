@@ -151,12 +151,14 @@ function Export-TmfGroup {
     end {
         Write-PSFMessage -Level Verbose -FunctionName 'Export-TmfGroup' -Message "Exporting $($groupsExport.Count) group(s). ForceBeta=$ForceBeta"
         if ($OutPath) {
-            if ($Append) {
-                Write-TmfExportFile -OutPath $OutPath -ResourceName $resourceName -Data $groupsExport -Append
-            }
-            else {
-                Write-TmfExportFile -OutPath $OutPath -ResourceName $resourceName -Data $groupsExport
-            }            
+            if ($groupsExport) {
+                if ($Append) {
+                    Write-TmfExportFile -OutPath $OutPath -ResourceName $resourceName -Data $groupsExport -Append
+                }
+                else {
+                    Write-TmfExportFile -OutPath $OutPath -ResourceName $resourceName -Data $groupsExport
+                } 
+            }                       
         } else {
             return $groupsExport
         }
