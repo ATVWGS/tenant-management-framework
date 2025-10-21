@@ -21,7 +21,7 @@
 			if ($InputReference -match $script:guidRegex) {
 				$response = (Invoke-MgGraphRequest -Method GET -Uri ("$script:graphBaseUrl/directoryRoles?`$filter=id eq '{0}'" -f $InputReference)).Value
 				if ($DisplayName) {
-					$role = $reponse.displayName	
+					$role = $response.displayName	
 				}
 				elseif ($Expand) {
 					$role = [pscustomObject]@{id = $response.id; displayName = $response.displayName; roleTemplateId = $response.roleTemplateId}
@@ -36,7 +36,7 @@
 			else {
 				$response = (Invoke-MgGraphRequest -Method GET -Uri ("$script:graphBaseUrl/directoryRoles/?`$filter=displayName eq '{0}'" -f $InputReference)).Value
 				if ($DisplayName) {
-					$role = $reponse.displayName	
+					$role = $response.displayName
 				}
 				elseif ($Expand) {
 					if ($response) {

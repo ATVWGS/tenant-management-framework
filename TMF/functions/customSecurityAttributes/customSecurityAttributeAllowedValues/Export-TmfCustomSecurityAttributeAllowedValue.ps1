@@ -185,8 +185,13 @@ Export-TmfCustomSecurityAttributeAllowedValue -OutPath C:\config -EmitStandalone
                 $def.allowedValues = @($def.allowedValues | Sort-Object -Property displayName -Unique) 
             }
             $definitionsFromFile = @($index.Values | Sort-Object -Property displayName)
-            ($definitionsFromFile | ConvertTo-Json -Depth 15) | Out-File -FilePath $definitionsFile -Encoding utf8 -Force
-            Write-PSFMessage -Level Verbose -FunctionName 'Export-TmfCustomSecurityAttributeAllowedValue' -Message ("Merged allowedValues into definitions file ({0} definitions)." -f $definitionsFromFile.Count)
+            if ($definitionsFromFile) {
+                ($definitionsFromFile | ConvertTo-Json -Depth 15) | Out-File -FilePath $definitionsFile -Encoding utf8 -Force
+                Write-PSFMessage -Level Verbose -FunctionName 'Export-TmfCustomSecurityAttributeAllowedValue' -Message ("Merged allowedValues into definitions file ({0} definitions)." -f $definitionsFromFile.Count)
+            }
+            else {
+                Write-PSFMessage -Level Verbose -FunctionName 'Export-TmfCustomSecurityAttributeAllowedValue' -Message "No data in customSecurityAttributeDefinitions found."
+            }
         }
     }
 }

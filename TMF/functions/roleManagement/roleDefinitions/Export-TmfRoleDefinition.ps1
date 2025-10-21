@@ -41,8 +41,6 @@ function Export-TmfRoleDefinition {
         function Convert-RoleDefinition {
             param([object]$roleDef, [string]$definitionScope) $obj = [ordered]@{present = $true; displayName = $roleDef.displayName }; if ($roleDef.PSObject.Members.Match('description') -and $roleDef.description) {
                 $obj.description = $roleDef.description
-            }; if ($roleDef.PSObject.Members.Match('id') -and $roleDef.id) {
-                $obj.id = $roleDef.id
             }; if ($roleDef.PSObject.Members.Match('isBuiltIn')) {
                 $obj.isBuiltIn = $roleDef.isBuiltIn
             }; if ($roleDef.PSObject.Members.Match('isEnabled')) {
