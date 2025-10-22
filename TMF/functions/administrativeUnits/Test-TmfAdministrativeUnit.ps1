@@ -202,7 +202,8 @@ function Test-TmfAdministrativeUnit
 											role = Resolve-DirectoryRole -InputReference $_.role -Cmdlet $Cmdlet
 										}
 									}									
-
+									Write-PSFMessage -Level Verbose -Message "definitionId: $($identityId)"
+									Write-PSFMessage -Level Verbose -Message "resourceId: $($resourceScopedRoleMembers.identity)"
 									$dummy = Compare-ResourceList -ReferenceList ($resourceScopedRoleMembers | Select-Object role, identity | Foreach-Object {$_ | ConvertTo-Json -Compress}) `
 														-DifferenceList ($definitionScopedRoleMembers | Select-Object role, identity | Foreach-Object {$_ | ConvertTo-Json -Compress}) `
 														-Cmdlet $PSCmdlet

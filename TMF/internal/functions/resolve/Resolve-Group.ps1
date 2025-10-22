@@ -158,6 +158,8 @@
 				$fullObj = (Invoke-MgGraphRequest -Method GET -Uri ("$script:graphBaseUrl/groups/?`$filter=displayName eq '{0}'&`$select=id,displayName,mailNickname" -f $InputReference)).value | Select-Object -First 1
 				$resolvedId = $fullObj.id
 			}
+			# Undo Url encoding for returns
+			$InputReference = [System.Web.HttpUtility]::UrlDecode($InputReference)
 			if (-not $resolvedId -and $SearchInDesiredConfiguration) {
 				if ($InputReference -in $script:desiredConfiguration['groups'].displayName) {
 					$resolvedId = $InputReference

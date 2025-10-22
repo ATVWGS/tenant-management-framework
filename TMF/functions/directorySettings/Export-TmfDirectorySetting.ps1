@@ -41,21 +41,21 @@ function Export-TmfDirectorySetting {
             param([string]$Value, [string]$Type) if ($null -eq $Value) {
                 return $null 
             }; switch ($Type) {
-                'Bool' {
-                    return [bool]$Value 
-                } 'Boolean' {
-                    return [bool]$Value 
-                } 'Int' {
+                'System.Bool' {
+                    return [System.Convert]::ToBoolean($Value)
+                } 'System.Boolean' {
+                    return [System.Convert]::ToBoolean($Value)
+                } 'System.Int' {
                     return [int]$Value 
-                } 'Int32' {
+                } 'System.Int32' {
                     return [int]$Value 
-                } 'Int64' {
+                } 'System.Int64' {
                     return [int64]$Value 
-                } 'Integer' {
+                } 'System.Integer' {
                     return [int]$Value 
                 } default {
                     if ($Value -match '^(?i:true|false)$') {
-                        return [bool]$Value 
+                        return [System.Convert]::ToBoolean($Value) 
                     } elseif ($Value -match '^[-]?\d+$') {
                         return [int]$Value 
                     }; return $Value 
@@ -65,7 +65,9 @@ function Export-TmfDirectorySetting {
         function Convert-DirectorySetting {
             param([object]$Setting) $template = $templates | Where-Object { $_.id -eq $Setting.templateId }; $export = [ordered]@{ displayName = $Setting.displayName; present = $true }; foreach ($tVal in $template.values) {
                 $current = $Setting.values | Where-Object { $_.name -eq $tVal.name }; if ($current) {
+                    Write-PSFMessage -Level Verbose -Message "Property: $($tVal.name), currentValue: $($current.value)"
                     $export[$tVal.name] = Convert-Value -Value $current.value -Type $tVal.type 
+                    Write-PSFMessage -Level Verbose -Message "Property: $($tVal.name), convertedValue: $($export[$tval.name])"
                 } 
             }; return $export 
         }
