@@ -41,7 +41,17 @@ function Export-TmfAccessPackage {
                     $roleScopes += [ordered]@{
                         resourceRole       = $role.displayName
                         originSystem       = $role.originSystem
-                        resourceIdentifier = (Resolve-DirectoryObject -InputReference $scope.originId -ReturnObjects -DontFailIfNotExisting).displayName
+                        resourceType       = switch ($role.originSystem) {
+                                             "AADGroup" {"AADGroup"}
+                                             "AADApplication" {"Application"}
+                                             "SharePointOnline" {"Sharepoint Online Site"}
+                        }
+                        resourceIdentifier = if ($role.originSystem -ne "SharePointOnline") {
+                                                (Resolve-DirectoryObject -InputReference $scope.originId -ReturnObjects -DontFailIfNotExisting).displayName
+                                             }
+                                             else {
+                                                $scope.originId
+                                             }                        
                     }
                 }
             }

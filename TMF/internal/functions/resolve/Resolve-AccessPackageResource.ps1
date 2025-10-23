@@ -13,8 +13,15 @@ function Resolve-AccessPackageResource {
 	process { try {
 		if ($Expand -and $script:accessPackageResourceDetailCache.ContainsKey($InputReference)) { return $script:accessPackageResourceDetailCache[$InputReference] }
 		$detail = $null; $resId = $null; $originId = $null
-		$filterField = ($InputReference -match $script:guidRegex) ? 'originId' : 'displayName'
-		$detail = (Invoke-MgGraphRequest -Method GET -Uri ("$script:graphBaseUrl/identityGovernance/entitlementManagement/accessPackageCatalogs/{0}/accessPackageResources?`$filter=$filterField eq '{1}'" -f $CatalogId,$InputReference)).value | Select-Object -First 1
+		$filterField = if ($InputReference -match $script:guidRegex) {'originId'} else {'displayName'}
+		$searchText = if ($filterField -eq "displayName" -and $InputReference -match "sharepoint.com") {
+							$InputReference.split("sites/")[1]
+					  }
+					  else {
+						$InputReference
+					  }
+
+		$detail = (Invoke-MgGraphRequest -Method GET -Uri ("$script:graphBaseUrl/identityGovernance/entitlementManagement/accessPackageCatalogs/{0}/accessPackageResources?`$filter=$filterField eq '{1}'" -f $CatalogId,$searchText)).value | Select-Object -First 1
 		if ($detail) { $resId = $detail.id; $originId = $detail.originId }
 		if (-not $resId -and $SearchInDesiredConfiguration) {
 			$catalogName = (Invoke-MgGraphRequest -Method GET -Uri ("$script:graphBaseUrl/identityGovernance/entitlementManagement/accessPackageCatalogs/{0}?`$select=displayName" -f $CatalogId)).displayName

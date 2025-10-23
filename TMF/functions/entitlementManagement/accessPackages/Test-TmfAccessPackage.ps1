@@ -154,7 +154,7 @@ function Test-TmfAccessPackage
 												
 												if ($accessPackageResourceId -match $script:guidRegex) {
 													$roleOriginIds += [pscustomObject]@{
-																					"id" = (Invoke-MgGraphRequest -Method GET -Uri ("$script:graphBaseUrl/identityGovernance/entitlementManagement/catalogs/{0}/accessPackageResourceRoles?`$filter=(originSystem eq 'AadApplication' and accessPackageResource/id eq '{1}' and displayname eq '{2}')" -f $catalogID,$accessPackageResourceId,$roleScope.resourceRole)).value.originId
+																					"id" = (Invoke-MgGraphRequest -Method GET -Uri ("$script:graphBaseUrl/identityGovernance/entitlementManagement/accessPackageCatalogs/{0}/accessPackageResourceRoles?`$filter=(originSystem eq 'AadApplication' and accessPackageResource/id eq '{1}' and displayname eq '{2}')" -f $catalogID,$accessPackageResourceId,$roleScope.resourceRole)).value.originId
 																					"roleDisplayName" = $roleScope.displayName
 																					"resourceType" = $roleScope.resourceType
 													}																					
@@ -165,6 +165,16 @@ function Test-TmfAccessPackage
 														"roleDisplayName" = $roleScope.displayName
 														"resourceType" = $roleScope.resourceType
 													}
+												}
+											}
+											"Sharepoint Online Site" {
+												$catalogID = Resolve-AccessPackageCatalog -InputReference $definition.catalog
+												$accessPackageResourceId = Resolve-AccessPackageResource -InputReference $roleScope.resourceIdentifier -CatalogId $catalogID -SearchInDesiredConfiguration
+
+												$roleOriginIds += [pscustomObject]@{
+													"id" = (Invoke-MgGraphRequest -Method GET -Uri ("$script:graphBaseUrl/identityGovernance/entitlementManagement/accessPackageCatalogs/{0}/accessPackageResourceRoles?`$filter=(originSystem eq 'SharePointOnline' and displayname eq '{1}')" -f $catalogID,$roleScope.resourceRole)).value.originId
+													"roleDisplayName" = $roleScope.resourceRole
+													"resourceType" = $roleScope.resourceType
 												}
 											}
 										}

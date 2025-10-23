@@ -154,7 +154,7 @@ Export-TmfCustomSecurityAttributeAllowedValue -OutPath C:\config -EmitStandalone
                 } 
             }
             foreach ($gdef in $graphDefs) {
-                $id = $gdef.id
+                $id = $gdef.id.split("_")[1]
                 if (-not $index.ContainsKey($id)) {
                     $new = [pscustomobject]@{
                         displayName             = $id
@@ -177,8 +177,8 @@ Export-TmfCustomSecurityAttributeAllowedValue -OutPath C:\config -EmitStandalone
                 $index[$def].allowedValues = @() 
             }
             foreach ($val in $export) {
-                if ($index.ContainsKey($val.attributeId)) {
-                    $index[$val.attributeId].allowedValues += [pscustomobject]@{ displayName = $val.id; isActive = $val.isActive }
+                if ($index.ContainsKey($val.attributeId.split("_")[1])) {
+                    $index[$val.attributeId.split("_")[1]].allowedValues += [pscustomobject]@{ displayName = $val.id; isActive = $val.isActive }
                 }
             }
             foreach ($def in $index.Values) {

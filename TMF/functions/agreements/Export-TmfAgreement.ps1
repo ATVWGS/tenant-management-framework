@@ -90,7 +90,10 @@ function Export-TmfAgreement {
         foreach ($agreement in $allAgreements) {
             $obj = [ordered]@{}
             foreach ($p in $agreement.GetEnumerator()) {
-                if ($p.Value -and ($p.Key -ne "files" -and $p.Key -ne "id")) {
+                <#if ($p.Value -and ($p.Key -ne "files" -and $p.Key -ne "id")) {
+                    $obj[$p.Key] = $p.Value
+                }#>
+                if ($p.Key -ne "files" -and $p.Key -ne "id" -and $null -ne $p.Value) {
                     $obj[$p.Key] = $p.Value
                 }
             }

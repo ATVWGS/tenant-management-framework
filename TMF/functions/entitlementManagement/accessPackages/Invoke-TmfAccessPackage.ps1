@@ -104,7 +104,24 @@ function Invoke-TmfAccessPackage
 							"Application" {
 								$catalogID = Resolve-AccessPackageCatalog -InputReference $result.DesiredConfiguration.catalog
 								$accessPackageResourceId = Resolve-AccessPackageResource -InputReference $roleScope.resourceIdentifier -CatalogId $catalogID
-								$roleOriginId = (Invoke-MgGraphRequest -Method GET -Uri ("$script:graphBaseUrl/identityGovernance/entitlementManagement/catalogs/{0}/accessPackageResourceRoles?`$filter=(originSystem eq 'AadApplication' and accessPackageResource/id eq '{1}' and displayname eq '{2}')" -f $catalogID,$accessPackageResourceId,$roleScope.resourceRole)).value.originId
+								$roleOriginId = (Invoke-MgGraphRequest -Method GET -Uri ("$script:graphBaseUrl/identityGovernance/entitlementManagement/accessPackageCatalogs/{0}/accessPackageResourceRoles?`$filter=(originSystem eq 'AadApplication' and accessPackageResource/id eq '{1}' and displayname eq '{2}')" -f $catalogID,$accessPackageResourceId,$roleScope.resourceRole)).value.originId
+							}
+							"Sharepoint Online Site" {
+								$catalogID = Resolve-AccessPackageCatalog -InputReference $result.DesiredConfiguration.catalog
+								$roleOriginId = (Invoke-MgGraphRequest -Method GET -Uri ("$script:graphBaseUrl/identityGovernance/entitlementManagement/accessPackageCatalogs/{0}/accessPackageResourceRoles?`$filter=(originSystem eq 'SharePointOnline' and displayname eq '{1}')" -f $catalogID,$roleScope.resourceRole)).value.originId
+							}
+						}
+						if ($roleScope.resourceType -eq "Sharepoint Online Site") {
+							$accessPackageResourceScope = @{
+							"isRootScope" = $true
+							"originId" = $roleScope.originId()
+							"originSystem" = $roleScope.originSystem
+							}
+						}
+						else {
+							$accessPackageResourceScope = @{
+							"originId" = $roleScope.originId()
+							"originSystem" = $roleScope.originSystem
 							}
 						}
 						$requestBody = @{
@@ -119,10 +136,7 @@ function Invoke-TmfAccessPackage
 									"originSystem" = $roleScope.originSystem
 								}
 							}
-							"accessPackageResourceScope" = @{
-								"originId" = $roleScope.originId()
-								"originSystem" = $roleScope.originSystem
-							}
+							"accessPackageResourceScope" = $accessPackageResourceScope
 						}
 						try {
 							$requestBody = $requestBody | ConvertTo-Json -ErrorAction Stop -Depth 8
@@ -173,8 +187,26 @@ function Invoke-TmfAccessPackage
 														$roleScope = $result.DesiredConfiguration.accessPackageResourceRoleScopes | Where-Object {$_.displayName -eq $roleDisplayName}
 														$roleScopeOriginId = $roleOriginId
 													}
+													"Sharepoint Online Site" {
+														$roleScope = $result.DesiredConfiguration.accessPackageResourceRoleScopes | Where-Object {$_.resourceRole -eq $roleDisplayName}
+														$roleScopeOriginId = $roleOriginId
+													}
 												}
 												
+												if ($_.resourceType -eq "Sharepoint Online Site") {
+													$accessPackageResourceScope = @{
+													"isRootScope" = $true
+													"originId" = $roleScope.originId()
+													"originSystem" = $roleScope.originSystem
+													}
+												}
+												else {
+													$accessPackageResourceScope = @{
+													"originId" = $roleScope.originId()
+													"originSystem" = $roleScope.originSystem
+													}
+												}
+
 												$body = @{
 													"accessPackageResourceRole" = @{
 														"originId" = $roleScopeOriginId
@@ -187,10 +219,7 @@ function Invoke-TmfAccessPackage
 															"originSystem" = $roleScope.originSystem
 														}
 													}
-													"accessPackageResourceScope" = @{
-														"originId" = $roleScope.originId()
-														"originSystem" = $roleScope.originSystem
-													}
+													"accessPackageResourceScope" = $accessPackageResourceScope
 												} | ConvertTo-Json -ErrorAction Stop
 												Write-PSFMessage -Level Verbose -String "TMF.Invoke.SendingRequestWithBody" -StringValues $method, $url, $body
 												Invoke-MgGraphRequest -Method $method -Uri $url -Body $body | Out-Null

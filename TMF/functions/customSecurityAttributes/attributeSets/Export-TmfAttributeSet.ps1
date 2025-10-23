@@ -87,7 +87,7 @@ Export-TmfAttributeSet -SpecificResources AttributeSet1
                     Write-TmfExportFile -OutPath $OutPath -ParentPath 'customSecurityAttributes' -ResourceName $resourceName -Data $export -Append
                 }
                 else {
-                    Write-TmfExportFile -OutPath $OutPath -ParentPath 'customSecurityAttributes' -ResourceName $resourceName -Data $export -Append
+                    Write-TmfExportFile -OutPath $OutPath -ParentPath 'customSecurityAttributes' -ResourceName $resourceName -Data $export
                 }
             }
             #$export | ConvertTo-Json -Depth 15 | Out-File -FilePath (Join-Path $path "$resourceName.json") -Encoding utf8 -Force

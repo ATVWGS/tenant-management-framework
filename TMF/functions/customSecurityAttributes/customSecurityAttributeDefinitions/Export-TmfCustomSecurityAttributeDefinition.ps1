@@ -36,7 +36,7 @@ function Export-TmfCustomSecurityAttributeDefinition {
         }
         $export = @()
         function Convert-Definition {
-            param([object]$d, [object[]]$vals) [ordered]@{ displayName = $d.id; description = $d.description; attributeSet = $d.attributeSet; name = $d.name; isCollection = $d.isCollection; isSearchable = $d.isSearchable; status = $d.status; type = $d.type; usePreDefinedValuesOnly = $d.usePreDefinedValuesOnly; allowedValues = $vals; present = $true }
+            param([object]$d, [object[]]$vals) [ordered]@{ displayName = $d.id -replace "$($d.attributeSet)_", ""; description = $d.description; attributeSet = $d.attributeSet; name = $d.name; isCollection = $d.isCollection; isSearchable = $d.isSearchable; status = $d.status; type = $d.type; usePreDefinedValuesOnly = $d.usePreDefinedValuesOnly; allowedValues = $vals; present = $true }
         }
         function Get-AllDefinitions {
             param(
