@@ -6,6 +6,7 @@ function Register-TmfAccessReview
 		[string] $displayName,
 		[object] $scope,
 		[object[]] $reviewers,
+		[object[]] $fallbackReviewers,
 		[object] $settings,
 		[bool] $present = $true,
 		[string] $sourceConfig = "<Custom>",
@@ -37,9 +38,10 @@ function Register-TmfAccessReview
 			sourceConfig = $sourceConfig
 			sourceFile = $sourceFile
 			reviewers = @()
+			fallbackReviewers = @()
 		}
 		
-		"scope", "reviewers", "settings" | ForEach-Object {
+		"scope", "reviewers", "fallbackReviewers", "settings" | ForEach-Object {
 			if ($PSBoundParameters.ContainsKey($_)) {
 				if ($script:supportedResources[$resourceName]["validateFunctions"].ContainsKey($_)) {
 					
@@ -52,6 +54,18 @@ function Register-TmfAccessReview
 								$validated = & $script:supportedResources[$resourceName]["validateFunctions"][$property] @validated -Cmdlet $Cmdlet
 								$object.reviewers += $validated
 							}
+						}
+						"fallbackReviewers" {
+							$fallbackReviewers = $PSBoundParameters[$_]
+							$property = "fallbackReviewers"
+							Write-PSFMessage -Level Verbose -Message "FallbackReviewers: $fallbackReviewers"
+							if ($fallbackReviewers -notlike "") {
+								for ($i=0; $i -lt $fallbackReviewers.count;$i++) {
+									$validated = $PSBoundParameters[$property][$i] | ConvertTo-PSFHashtable -Include $($script:supportedResources[$resourceName]["validateFunctions"][$property].Parameters.Keys)
+									$validated = & $script:supportedResources[$resourceName]["validateFunctions"][$property] @validated -Cmdlet $Cmdlet
+									$object.fallbackReviewers += $validated
+								}
+							}							
 						}
 						"scope" {
 							if ($scope.subScope) {
@@ -76,8 +90,13 @@ function Register-TmfAccessReview
 								}
 							}
 							else {
-								$validated = $PSBoundParameters[$_] | ConvertTo-PSFHashtable -Include $($script:supportedResources[$resourceName]["validateFunctions"][$_].Parameters.Keys)
-								$validated = & $script:supportedResources[$resourceName]["validateFunctions"][$_] @validated -Cmdlet $Cmdlet
+								if ($scope.reference) {
+									$validated = $PSBoundParameters[$_] | ConvertTo-PSFHashtable -Include $($script:supportedResources[$resourceName]["validateFunctions"][$_].Parameters.Keys)
+									$validated = & $script:supportedResources[$resourceName]["validateFunctions"][$_] @validated -Cmdlet $Cmdlet
+								}
+								else {
+									$validated = $PSBoundParameters[$_]
+								}								
 								Add-Member -InputObject $object -MemberType NoteProperty -Name $_ -Value $validated
 							}
 						}

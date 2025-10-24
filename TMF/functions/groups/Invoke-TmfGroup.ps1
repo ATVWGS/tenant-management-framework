@@ -141,6 +141,7 @@
 									"externalId" = $resource.id
 								}
 								$requestBody = $requestBody | ConvertTo-Json -ErrorAction Stop
+								Start-Sleep -Seconds 10 # Wait for group creation
 								Write-PSFMessage -Level Verbose -String "TMF.Invoke.SendingRequestWithBody" -StringValues $requestMethod, $requestUrl, $requestBody
 								Invoke-MgGraphRequest -Method $requestMethod -Uri $requestUrl -Body $requestBody | Out-Null
 							}

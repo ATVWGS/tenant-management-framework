@@ -5,6 +5,8 @@ function Resolve-SubscribedSku
 		[Parameter(Mandatory = $true)]
 		[string] $InputReference,
 		[switch] $DontFailIfNotExisting,
+		[switch] $Expand, # Return object { skuId, skuPartNumber, servicePlans }
+		[switch] $DisplayName, # Return skuPartNumber
 		[System.Management.Automation.PSCmdlet]
 		$Cmdlet = $PSCmdlet
 	)
@@ -21,21 +23,15 @@ function Resolve-SubscribedSku
                                                             @{n = "servicePlans"; e = {$_["servicePlans"]}}, @{n = "skuId"; e = {$_["skuId"]}}
 			}
 
-			if ($InputReference -match $script:guidRegex) {
-				$sku = $script:cache["allSubscribedSkus"] | Where-Object { $_.skuId -eq $InputReference } | Select-Object skuId, servicePlans
- 			}
-			else {
-				$sku = $script:cache["allSubscribedSkus"] | Where-Object { $_.skuPartNumber -eq $InputReference } | Select-Object skuId, servicePlans
-			}
-
-			if (-Not $sku -and -Not $DontFailIfNotExisting) { throw "Cannot find subscribedSkus $InputReference" } 
-			elseif (-Not $sku -and $DontFailIfNotExisting) { return }
-
+			if ($InputReference -match $script:guidRegex) { $sku = $script:cache["allSubscribedSkus"] | Where-Object { $_.skuId -eq $InputReference } | Select-Object -First 1 }
+			else { $sku = $script:cache["allSubscribedSkus"] | Where-Object { $_.skuPartNumber -eq $InputReference } | Select-Object -First 1 }
+			if (-Not $sku -and -Not $DontFailIfNotExisting) { throw "Cannot find subscribedSkus $InputReference" } elseif (-Not $sku -and $DontFailIfNotExisting) { return $InputReference }
 			if ($sku.count -gt 1) { throw "Got multiple subscribedSkus for $InputReference" }
-			return $sku
+			if (-not $Expand) { if ($DisplayName) { return ($sku.skuPartNumber ?? $InputReference) } return $sku.skuId }
+			return [pscustomobject]@{ skuId=$sku.skuId; skuPartNumber=$sku.skuPartNumber; servicePlans=$sku.servicePlans }
 		}
 		catch {
-			Write-PSFMessage -Level Warning -String 'TMF.CannotResolveResource' -StringValues "SubscribedSku" -Tag 'failed' -ErrorRecord $_
+			Write-PSFMessage -Level Warning -Message ("Cannot resolve SubscribedSku resource for input '{0}'. Searched tenant & desired configuration. Error: {1}" -f $InputReference,$_.Exception.Message) -Tag 'failed' -ErrorRecord $_
 			$Cmdlet.ThrowTerminatingError($_)				
 		}			
 	}

@@ -1,11 +1,10 @@
-function Invoke-TmfAccessPackageResource
-{
+function Invoke-TmfAccessPackageResource {
 	<#
 		.SYNOPSIS
 			Performs the required actions for a resource type against the connected Tenant.
 	#>
 	[CmdletBinding()]
-	Param (
+	param (
 		[string[]] $SpecificResources,
 		[string[]] $SourceFile,
 		[string[]] $SourceConfig,
@@ -13,9 +12,8 @@ function Invoke-TmfAccessPackageResource
 		[System.Management.Automation.PSCmdlet]
 		$Cmdlet = $PSCmdlet
 	)
-	
-	begin
-	{
+
+	begin {
 		$resourceName = "accessPackageResources"
 		if (!$script:desiredConfiguration[$resourceName]) {
 			Stop-PSFFunction -String "TMF.NoDefinitions" -StringValues "AccessPackageResource"
@@ -32,43 +30,37 @@ function Invoke-TmfAccessPackageResource
 			$cmdlet.ThrowTerminatingError($recordObject)
 		}
 	}
-	process
-	{
-		if (Test-PSFFunctionInterrupt) { return }
+	process {
+		if (Test-PSFFunctionInterrupt) {
+			return 
+  }
 		if (-not $Confirm) {
 			Write-PSFMessage -Level Host -FunctionName "Invoke-TmfAccessPackageResource" -String "TMF.TenantInformation" -StringValues $tenant.displayName, $tenant.Id
-			if ((Read-Host "Is this the correct tenant? [y/n]") -notin @("y","Y"))	{
+			if ((Read-Host "Is this the correct tenant? [y/n]") -notin @("y", "Y"))	{
 				Write-PSFMessage -Level Error -String "TMF.UserCanceled"
 				throw "Connected to the wrong tenant."
 			}
 			if ($SpecificResources) {
 				Write-PSFMessage -Level Host -FunctionName "Invoke-TmfAccessPackageResource" -String "TMF.Invoke.Confirmed" -StringValues "accessPackageResource configuration for resources: $($SpecificResources -join ",")"
 				$testResults = Test-TmfAccessPackageResource -SpecificResources $SpecificResources -RawOutput -Cmdlet $Cmdlet
-			}
-			elseif ($SourceFile) {
+			} elseif ($SourceFile) {
 				Write-PSFMessage -Level Host -FunctionName "Invoke-TmfAccessPackageResource" -String "TMF.Invoke.Confirmed" -StringValues "accessPackageResource configuration for SourceFile(s): $($SourceFile -join ",")"
 				$testResults = Test-TmfAccessPackageResource -SourceFile $SourceFile -RawOutput -Cmdlet $Cmdlet
-			}
-			elseif ($SourceConfig) {
+			} elseif ($SourceConfig) {
 				Write-PSFMessage -Level Host -FunctionName "Invoke-TmfAccessPackageResource" -String "TMF.Invoke.Confirmed" -StringValues "accessPackageResource configuration for SourceConfig(s): $($SourceConfig -join ",")"
 				$testResults = Test-TmfAccessPackageResource -SourceConfig $SourceConfig -RawOutput -Cmdlet $Cmdlet
-			}
-			else {
+			} else {
 				Write-PSFMessage -Level Host -FunctionName "Invoke-TmfAccessPackageResource" -String "TMF.Invoke.Confirmed" -StringValues "all accessPackageResource configurations"
 				$testResults = Test-TmfAccessPackageResource -RawOutput -Cmdlet $Cmdlet
 			}
-		}
-		else {
+		} else {
 			if ($SpecificResources) {
 				$testResults = Test-TmfAccessPackageResource -SpecificResources $SpecificResources -RawOutput -Cmdlet $Cmdlet
-			}
-			elseif ($SourceFile) {
+			} elseif ($SourceFile) {
 				$testResults = Test-TmfAccessPackageResource -SourceFile $SourceFile -RawOutput -Cmdlet $Cmdlet
-			}
-			elseif ($SourceConfig) {
+			} elseif ($SourceConfig) {
 				$testResults = Test-TmfAccessPackageResource -SourceConfig $SourceConfig -RawOutput -Cmdlet $Cmdlet
-			}
-			else {
+			} else {
 				$testResults = Test-TmfAccessPackageResource -RawOutput -Cmdlet $Cmdlet
 			}
 		}
@@ -82,22 +74,21 @@ function Invoke-TmfAccessPackageResource
 
 					$requestBody = @{
 						"accessPackageResource" = @{
-							"displayName" = $result.DesiredConfiguration.displayName
-							"description" = $result.DesiredConfiguration.description
+							"displayName"  = $result.DesiredConfiguration.displayName
+							"description"  = $result.DesiredConfiguration.description
 							"resourceType" = $result.DesiredConfiguration.resourceType
 							"originSystem" = $result.DesiredConfiguration.originSystem
-							"originId" = $result.DesiredConfiguration.originId()
-						}						
-						"justification" = "Resource is required for an Access Package managed by the Tenant Managment Framework"						
-						"requestType" = "AdminAdd"
-						"catalogId" = $result.DesiredConfiguration.catalogId()
+							"originId"     = $result.DesiredConfiguration.originId()
+						}
+						"justification"         = "Resource is required for an Access Package managed by the Tenant Managment Framework"
+						"requestType"           = "AdminAdd"
+						"catalogId"             = $result.DesiredConfiguration.catalogId()
 					}
 					try {
 						$requestBody = $requestBody | ConvertTo-Json -ErrorAction Stop -Depth 8
 						Write-PSFMessage -Level Verbose -String "TMF.Invoke.SendingRequestWithBody" -StringValues $requestMethod, $requestUrl, $requestBody
 						Invoke-MgGraphRequest -Method $requestMethod -Uri $requestUrl -Body $requestBody | Out-Null
-					}
-					catch {
+					} catch {
 						Write-PSFMessage -Level Error -String "TMF.Invoke.ActionFailed" -StringValues $result.Tenant, $result.ResourceType, $result.ResourceName, $result.ActionType
 						throw $_
 					}
@@ -108,36 +99,35 @@ function Invoke-TmfAccessPackageResource
 
 					$requestBody = @{
 						"accessPackageResource" = @{
-							"displayName" = $result.DesiredConfiguration.displayName
-							"description" = $result.DesiredConfiguration.description
+							"displayName"  = $result.DesiredConfiguration.displayName
+							"description"  = $result.DesiredConfiguration.description
 							"resourceType" = $result.DesiredConfiguration.resourceType
 							"originSystem" = $result.DesiredConfiguration.originSystem
-							"originId" = $result.DesiredConfiguration.originId()
-						}						
-						"justification" = "Resource is not longer required for an Access Package managed by the Tenant Managment Framework"						
-						"requestType" = "AdminRemove"
-						"catalogId" = $result.DesiredConfiguration.catalogId()
+							"originId"     = $result.DesiredConfiguration.originId()
+						}
+						"justification"         = "Resource is not longer required for an Access Package managed by the Tenant Managment Framework"
+						"requestType"           = "AdminRemove"
+						"catalogId"             = $result.DesiredConfiguration.catalogId()
 					}
 					try {
 						$requestBody = $requestBody | ConvertTo-Json -ErrorAction Stop -Depth 8
 						Write-PSFMessage -Level Verbose -String "TMF.Invoke.SendingRequestWithBody" -StringValues $requestMethod, $requestUrl, $requestBody
 						Invoke-MgGraphRequest -Method $requestMethod -Uri $requestUrl -Body $requestBody | Out-Null
-					}
-					catch {
+					} catch {
 						Write-PSFMessage -Level Error -String "TMF.Invoke.ActionFailed" -StringValues $result.Tenant, $result.ResourceType, $result.ResourceName, $result.ActionType
 						throw $_
 					}
 				}
-				"NoActionRequired" { }
+				"NoActionRequired" { 
+    }
 				default {
 					Write-PSFMessage -Level Warning -String "TMF.Invoke.ActionTypeUnknown" -StringValues $result.ActionType
-				}				
+				}
 			}
 			Write-PSFMessage -Level Host -String "TMF.Invoke.ActionCompleted" -StringValues $result.Tenant, $result.ResourceType, $result.ResourceName, (Get-ActionColor -Action $result.ActionType), $result.ActionType
-		}		
+		}
 	}
-	end
-	{
-		Load-TmfConfiguration -Cmdlet $Cmdlet
+	end {
+		Import-TmfConfiguration -Cmdlet $Cmdlet
 	}
 }

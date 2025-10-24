@@ -12,7 +12,7 @@ function Validate-AssignedLicense
 	
 	begin
 	{
-		$sku = Resolve-SubscribedSku -InputReference $skuId -Cmdlet $Cmdlet		
+		$sku = Resolve-SubscribedSku -InputReference $skuId -Expand -Cmdlet $Cmdlet		
 	}
 	process
 	{
@@ -21,12 +21,16 @@ function Validate-AssignedLicense
 		$hashtable = @{
             skuId = $sku.skuId
         }
-
-		if ($sku.servicePlans.GetType().Name -eq "Object[]") {
-			$servicePlans = $sku.servicePlans
+		if ($sku.servicePlans) {
+			if ($sku.servicePlans.GetType().Name -eq "Object[]") {
+				$servicePlans = $sku.servicePlans
+			}
+			else {
+				$servicePlans = $sku.servicePlans.value
+			}
 		}
 		else {
-			$servicePlans = $sku.servicePlans.value
+			$servicePlans = @()
 		}
 
         $hashtable["disabledPlans"] = @($disabledPlans | ForEach-Object {

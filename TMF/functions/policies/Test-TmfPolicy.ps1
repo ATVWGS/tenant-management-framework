@@ -7,7 +7,7 @@ function Test-TmfPolicy
 	{
 		Test-GraphConnection -Cmdlet $PSCmdlet
 		$tenant = (Invoke-MgGraphRequest -Method GET -Uri ("$script:graphBaseUrl/organization?`$select=displayname,id")).value
-		$policyResources = @("authenticationFlowsPolicies", "authenticationMethodsPolicies", "authorizationPolicies")
+		$policyResources = @("appManagementPolicies", "authenticationFlowsPolicies", "authenticationMethodsPolicies", "authenticationStrengthPolicies", "authorizationPolicies", "tenantAppManagementPolicies")
 	}
 	process
 	{

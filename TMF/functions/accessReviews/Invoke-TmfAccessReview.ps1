@@ -86,6 +86,7 @@ function Invoke-TmfAccessReview {
 						"displayName" = $result.DesiredConfiguration.displayName
 						"scope" = $result.DesiredConfiguration.scope
 						"reviewers" = $result.DesiredConfiguration.reviewers
+						"fallbackReviewers" = $result.DesiredConfiguration.fallbackReviewers
                         "settings" = $result.DesiredConfiguration.settings
 					}
                     try {
@@ -118,6 +119,7 @@ function Invoke-TmfAccessReview {
 						"displayName" = $result.DesiredConfiguration.displayName
 						"scope" = $result.DesiredConfiguration.scope
 						"reviewers" = $result.DesiredConfiguration.reviewers
+						"fallbackReviewers" = $result.DesiredConfiguration.fallbackReviewers
                         "settings" = $result.DesiredConfiguration.settings
 					}
                     $requestBody = $requestBody | ConvertTo-Json -Depth 4

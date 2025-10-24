@@ -78,10 +78,12 @@ function Register-TmfAccessPackageAssignmentPolicy
 		"reviewSettings", "requestApprovalSettings", "requestorSettings", "specificAllowedTargets", "expiration", "automaticRequestSettings" | ForEach-Object {
 			if ($PSBoundParameters.ContainsKey($_)) {
 				if ($script:supportedResources[$resourceName]["validateFunctions"].ContainsKey($_)) {
-					if ($_ -eq "specificAllowedTargets") {
-						$validated = $PSBoundParameters[$_] | ForEach-Object {
-							$temp = $_ | ConvertTo-PSFHashtable -Include $($script:supportedResources[$resourceName]["validateFunctions"]["specificAllowedTargets"].Parameters.Keys)
-							& $script:supportedResources[$resourceName]["validateFunctions"]["specificAllowedTargets"] @temp -Cmdlet $Cmdlet
+					if ($PSBoundParameters[$_].GetType().Name -eq "Object[]") {
+						$validated = @()
+						$property = $_
+						foreach ($value in $PSBoundParameters[$property]) {
+							$dummy = $value | ConvertTo-PSFHashtable -Include $($script:supportedResources[$resourceName]["validateFunctions"][$property].Parameters.Keys)
+							$validated += & $script:supportedResources[$resourceName]["validateFunctions"][$property] @dummy -Cmdlet $Cmdlet
 						}
 					}
 					else {

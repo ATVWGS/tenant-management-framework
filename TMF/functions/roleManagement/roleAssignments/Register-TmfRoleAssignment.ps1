@@ -32,7 +32,7 @@ function Register-TmfRoleAssignment {
         [string] $groupReference,
         [Parameter(Mandatory = $true, ParameterSetName = "AzureAD")]
         [Parameter(Mandatory = $true, ParameterSetName = "AADGroup")]
-        [ValidateSet('directory', 'administrativeUnit', 'group')]
+        [ValidateSet('directory', 'administrativeUnit', 'application', 'group')]
         [string] $directoryScopeType,
         [Parameter(Mandatory = $true, ParameterSetName = "AzureAD")]
         [Parameter(Mandatory = $true, ParameterSetName = "AzureResources")]

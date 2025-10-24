@@ -99,7 +99,7 @@ function Test-TmfDirectoryRole {
 				if ($definition.roleID) {
 					$result["GraphResource"] = $definition.roleID
 					try {
-						$roleMembers = (Invoke-MgGraphRequest -Method GET -Uri ("$script:graphBaseUrl/directoryRoles/{0}/members" -f $definition.roleID)).Value
+						$roleMembers = (Invoke-MgGraphRequest -Method GET -Uri ("$script:graphBaseUrl1/directoryRoles/{0}/members" -f $definition.roleID)).Value
 					}
 					catch {
 						Write-PSFMessage -Level Warning -String 'TMF.Error.QueryWithFilterFailed' -StringValues $filter -Tag 'failed'

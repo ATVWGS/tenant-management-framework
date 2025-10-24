@@ -40,8 +40,8 @@ function Resolve-AzureRoleDefinition {
             return $role
         }
         catch {
-            Write-PSFMessage -Level Warning -String 'TMF.CannotResolveResource' -StringValues "RoleDefinition" -Tag 'failed' -ErrorRecord $_
-			$Cmdlet.ThrowTerminatingError($_)
+            Write-PSFMessage -Level Warning -Message ("Cannot resolve RoleDefinition resource for input '{0}'. Searched tenant & desired configuration. Error: {1}" -f $InputReference,$_.Exception.Message) -Tag 'failed' -ErrorRecord $_
+            $Cmdlet.ThrowTerminatingError($_)
         }
     }
 }

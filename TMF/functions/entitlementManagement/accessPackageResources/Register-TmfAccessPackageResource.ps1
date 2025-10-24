@@ -84,6 +84,9 @@ function Register-TmfAccessPackageResource
 				"Application" {
 					$originId = $this.originId(); if ($originId) { "{0}" -f $this.resourceRole}
 				}
+				"SharePoint Online Site" {
+					$originId = $this.originId(); if ($originId) { "{0}" -f $this.resourceRole}
+				}
 			}
 		}
 		Add-Member -InputObject $object -MemberType ScriptMethod -Name Properties -Value { ($this | Get-Member -MemberType NoteProperty).Name }

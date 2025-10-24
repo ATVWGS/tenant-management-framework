@@ -340,6 +340,7 @@ function Invoke-TmfRoleAssignment {
                                 switch ($result.DesiredConfiguration.directoryScopeType) {
                                     "directory" {$directoryScopeId="/"}
                                     "administrativeUnit" {$directoryScopeId=Resolve-AdministrativeUnit -InputReference $result.DesiredConfiguration.directoryScopeReference -SearchInDesiredConfiguration}
+                                    "application" {$directoryScopeId=((Resolve-Application -InputReference $definition.directoryScopeReference -SearchInDesiredConfiguration -Expand).servicePrincipalId)}
                                 }
                                 switch ($result.DesiredConfiguration.principalType) {
                                     "group" { $principalId = Resolve-Group -InputReference $result.DesiredConfiguration.principalReference}
@@ -425,6 +426,7 @@ function Invoke-TmfRoleAssignment {
                                 switch ($result.DesiredConfiguration.directoryScopeType) {
                                     "directory" {$directoryScopeId="/"}
                                     "administrativeUnit" {$directoryScopeId=Resolve-AdministrativeUnit -InputReference $result.DesiredConfiguration.directoryScopeReference -SearchInDesiredConfiguration}
+                                    "application" {$directoryScopeId=((Resolve-Application -InputReference $definition.directoryScopeReference -SearchInDesiredConfiguration -Expand).servicePrincipalId)}
                                 }
                                 $roleDefinitionId = Resolve-DirectoryRoleDefinition -InputReference $result.DesiredConfiguration.roleReference
                                 switch ($result.DesiredConfiguration.expirationType) {
@@ -503,6 +505,7 @@ function Invoke-TmfRoleAssignment {
                             switch ($result.DesiredConfiguration.directoryScopeType) {
                                 "directory" {$directoryScopeId="/"}
                                 "administrativeUnit" {$directoryScopeId=Resolve-AdministrativeUnit -InputReference $result.DesiredConfiguration.directoryScopeReference -SearchInDesiredConfiguration}
+                                "application" {$directoryScopeId=((Resolve-Application -InputReference $definition.directoryScopeReference -SearchInDesiredConfiguration -Expand).servicePrincipalId)}
                             }
                             $roleDefinitionId = Resolve-DirectoryRoleDefinition -InputReference $result.DesiredConfiguration.roleReference
                             try {
