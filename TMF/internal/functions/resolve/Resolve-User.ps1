@@ -193,9 +193,9 @@
 						throw
 					}
 				}
-			} elseif ($InputReference -match $script:upnRegex) {
+			} elseif ($InputReference -match $script:upnRegex -or $InputReference -match "#EXT#") {
 				try {
-					$fullObj = (Invoke-MgGraphRequest -Method GET -Uri ("$script:graphBaseUrl/users?`$filter=userPrincipalName eq '{0}'&`$select=id,displayName,userPrincipalName" -f $InputReference)).value | Select-Object -First 1; $resolvedId = $fullObj.id
+					$fullObj = (Invoke-MgGraphRequest -Method GET -Uri ("$script:graphBaseUrl/users?`$filter=userPrincipalName eq '{0}'&`$select=id,displayName,userPrincipalName" -f [System.Web.HttpUtility]::UrlEncode($InputReference))).value | Select-Object -First 1; $resolvedId = $fullObj.id
 				} catch {
 					if ($DontFailIfNotExisting) {
 						Write-PSFMessage -Level Warning -Message ("Cannot resolve User (UPN) '{0}': {1}" -f $InputReference, $_.Exception.Message) -Tag failed -ErrorRecord $_; return $InputReference

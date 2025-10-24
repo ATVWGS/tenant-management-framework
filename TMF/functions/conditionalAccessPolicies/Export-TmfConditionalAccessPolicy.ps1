@@ -112,6 +112,9 @@ function Export-TmfConditionalAccessPolicy {
                     if ($policy.conditions.applications.excludeApplications) {
                         $obj.excludeApplications = _ResolveWithSentinels -Values $policy.conditions.applications.excludeApplications -Sentinels $appSentinels -Resolver { param($vals) (Resolve-Application -InputReference $vals -DontFailIfNotExisting -DisplayName -Cmdlet $Cmdlet) }
                     }
+                    if ($policy.conditions.applications.applicationFilter) {
+                        $obj.applicationFilter = $policy.conditions.applications.applicationFilter
+                    }
                 }
                 if ($policy.conditions.locations) {
                     if ($policy.conditions.locations.includeLocations) {
