@@ -35,7 +35,7 @@
 						} elseif ($DisplayName) {
 							$detail.displayName
 						} elseif ($ReturnObjectId) {
-							($detail.applicationObjectId ?? $detail.servicePrincipalId ?? $detail.appId)
+							($detail.applicationObjectId)
 						} else {
 							$detail.appId
 						}
@@ -110,9 +110,9 @@
 					if ($Expand) {
 						return $detail
 					} elseif ($DisplayName) {
-						return ($detail.displayName ?? $one)
+						return ($detail.displayNam)
 					} elseif ($ReturnObjectId) {
-						return ($detail.applicationObjectId ?? $detail.servicePrincipalId ?? $detail.appId)
+						return ($detail.applicationObjectId)
 					} else {
 						return $detail.appId
 					}
@@ -136,9 +136,9 @@
 					return $script:applicationDetailCache[$InputReference]
 				} else {
 					if ($DisplayName) {
-						return ($script:applicationDetailCache[$InputReference].displayName ?? $InputReference)
+						return ($script:applicationDetailCache[$InputReference].displayName)
 					}; if ($ReturnObjectId) {
-						return ($script:applicationDetailCache[$InputReference].applicationObjectId ?? $script:applicationDetailCache[$InputReference].servicePrincipalId ?? $script:applicationDetailCache[$InputReference].appId)
+						return ($script:applicationDetailCache[$InputReference].applicationObjectId)
 					}; return $script:applicationDetailCache[$InputReference].appId
 				}
 			}
@@ -213,11 +213,11 @@
 
 			if (-not $Expand) {
 				if ($DisplayName) {
-					return (($spObj.displayName ?? $appRegObj.displayName) ?? $InputReference)
+					return $spObj.displayName
 				}
 				if ($ReturnObjectId) {
 					# Prefer application registration object id; fallback to service principal id; else appId
-					return ($appRegId ?? $spId ?? $appId)
+					return $appRegId
 				}
 				return $appId
 			}
@@ -234,7 +234,7 @@
 					$appRegId = $appRegObj.id
 				}
 			}
-			$detail = [pscustomobject]@{ appId = $appId; servicePrincipalId = $spId; applicationObjectId = $appRegId; displayName = ($spObj.displayName ?? $appRegObj.displayName) }
+			$detail = [pscustomobject]@{ appId = $appId; servicePrincipalId = $spId; applicationObjectId = $appRegId; displayName = $spObj.displayName }
 			# Cache by identifiers
 			foreach ($key in @($detail.appId, $detail.servicePrincipalId, $detail.applicationObjectId, $detail.displayName)) {
 				if ($key -and -not $script:applicationDetailCache.ContainsKey($key)) {

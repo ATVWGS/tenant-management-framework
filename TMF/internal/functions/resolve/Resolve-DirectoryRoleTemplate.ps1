@@ -39,7 +39,7 @@
 					if ($Expand) {
 						$results += [pscustomobject]@{ id = $roleTemplate.id; displayName = $roleTemplate.displayName }
 					} elseif ($DisplayName) {
-						$results += ($roleTemplate.displayName ?? $ref)
+						$results += ($roleTemplate.displayName)
 					} else {
 						$results += $roleTemplate.id
 					}

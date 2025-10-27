@@ -21,6 +21,7 @@ Export-TmfAccessReview -SpecificResources "Review 1","abcd-1234" | ConvertTo-Jso
 Export-TmfAccessReview -SpecificResources "ca314f7f-9bec-4914-ab25-c1fc936c739b","Review 2" -groups "ca219f7f-9bec-4914-ab25-c1fc936c739f","MyDistinctGroupName", "MyGroupNamePrefix*" -OutPath C:\temp\tmf
 #>
 function Export-TmfAccessReview {
+    [Diagnostics.CodeAnalysis.SuppressMessageAttribute("PSAvoidGlobalVars")]
     [CmdletBinding()] param(
         [string[]] $SpecificResources,
         [string[]] $groups,

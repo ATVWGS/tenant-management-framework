@@ -42,7 +42,7 @@
     'TMF.Export.FileDownloadFailed' = 'Failed to download export file {0}. Error: {1}'
     'TMF.Export.FileDownloadSuccess' = 'Successfully downloaded export file {0}.'
     'TMF.Export.DownloadingFile' = 'Downloading export file {0}...'
-    'TMF.Export.LocalizationsNotFound' = 'No localizations found for export file {0}.'
+    'TMF.Export.LocalizationsRetrievalFailed' = 'Failed to get localizations for {0}: {1}.'
     'TMF.Export.TryingLegacyFilesAPI' = 'Trying to use legacy files API for export file {0}.'
     'TMF.Export.FileRetrievalFailed' = 'Failed to retrieve export file {0}. Error: {1}'
     'TMF.Export.ResourceProcessed' = 'Export file {0} has been processed successfully.'

@@ -37,7 +37,7 @@
 			elseif (-Not $roleDefinition -and $DontFailIfNotExisting) { return }
 
 			if ($roleDefinition.count -gt 1) { throw "Got multiple directory/roleDefinitions for $InputReference" }
-			if (-not $Expand) { if ($DisplayName) { return ($detail.displayName ?? $InputReference) } return $roleDefinition }
+			if (-not $Expand) { if ($DisplayName) { return ($detail.displayName) } return $roleDefinition }
 			return [pscustomobject]@{ id=$roleDefinition; displayName=$detail.displayName }
 		}
 		catch {

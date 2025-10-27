@@ -32,7 +32,7 @@ function Resolve-ConnectedOrganization
 			elseif (-Not $org -and $DontFailIfNotExisting) { return }
 
 			if ($org.count -gt 1) { throw "Got multiple connectedOrganizations for $InputReference" }
-			if (-not $Expand) { if ($DisplayName) { return ($detail.displayName ?? $InputReference) } return $org }
+			if (-not $Expand) { if ($DisplayName) { return $detail.displayName } return $org }
 			return [pscustomobject]@{ id=$org; displayName=$detail.displayName }
 		}
 		catch {

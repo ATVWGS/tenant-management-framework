@@ -113,7 +113,7 @@
 					if ($Expand) {
 						return $script:groupDetailCache[$one]
 					} elseif ($DisplayName) {
-						return ($script:groupDetailCache[$one].displayName ?? $one)
+						return ($script:groupDetailCache[$one].displayName)
 					} else {
 						return $script:groupDetailCache[$one].id
 					}
@@ -127,7 +127,7 @@
 				return $script:groupDetailCache[$InputReference].id
 			}
 			if (-not $Expand -and $DisplayName -and $script:groupDetailCache.ContainsKey($InputReference)) {
-				return ($script:groupDetailCache[$InputReference].displayName ?? $InputReference)
+				return ($script:groupDetailCache[$InputReference].displayName)
 			}
 			if ($InputReference -eq 'All') {
 				if ($Expand) {
@@ -140,7 +140,7 @@
 					if ($Expand) {
 						return $script:groupDetailCache[$InputReference]
 					} elseif ($DisplayName) {
-						return ($script:groupDetailCache[$InputReference].displayName ?? $InputReference)
+						return ($script:groupDetailCache[$InputReference].displayName)
 					} else {
 						return $script:groupDetailCache[$InputReference].id
 					}
@@ -174,7 +174,7 @@
 			}
 			if (-not $Expand) {
 				if ($DisplayName) {
-					return ($fullObj.displayName ?? $InputReference)
+					return ($fullObj.displayName)
 				}; return $resolvedId
 			}
 			$detail = [pscustomobject]@{ id = $resolvedId; displayName = $fullObj.displayName; mailNickname = $fullObj.mailNickname }

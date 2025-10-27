@@ -88,7 +88,7 @@
 					if ($Expand) {
 						return $script:servicePrincipalDetailCache[$one]
 					} elseif ($DisplayName) {
-						return ($script:servicePrincipalDetailCache[$one].displayName ?? $one)
+						return ($script:servicePrincipalDetailCache[$one].displayName)
 					} else {
 						return $script:servicePrincipalDetailCache[$one].id
 					}
@@ -105,7 +105,7 @@
 				return $script:servicePrincipalDetailCache[$InputReference].id
 			}
 			if (-not $Expand -and $DisplayName -and $script:servicePrincipalDetailCache.ContainsKey($InputReference)) {
-				return ($script:servicePrincipalDetailCache[$InputReference].displayName ?? $InputReference)
+				return ($script:servicePrincipalDetailCache[$InputReference].displayName)
 			}
 			$spId = $null; $detail = $null
 			if ($InputReference -match $script:guidRegex) {
@@ -139,7 +139,7 @@
 			}
 			if (-not $Expand) {
 				if ($DisplayName) {
-					return ($detail.displayName ?? $InputReference)
+					return ($detail.displayName)
 				}; return $spId
 			}
 			if (-not $detail) {

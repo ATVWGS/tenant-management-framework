@@ -57,7 +57,7 @@ function Resolve-AccessPackage {
 			}
 			if (-not $Expand) {
 				if ($DisplayName) {
-					return ($detail.displayName ?? $InputReference)
+					return $detail.displayName
 				} return $pkgId
 			}
 			$obj = [pscustomobject]@{ id = $pkgId; displayName = $detail.displayName }

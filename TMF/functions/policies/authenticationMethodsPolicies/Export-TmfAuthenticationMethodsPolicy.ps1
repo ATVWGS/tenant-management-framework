@@ -20,6 +20,7 @@ Export-TmfAuthenticationMethodsPolicy | ConvertTo-Json -Depth 15
 #>
 function Export-TmfAuthenticationMethodsPolicy {
 
+    [Diagnostics.CodeAnalysis.SuppressMessageAttribute("PSAvoidDefaultValueSwitchParameter")]
 
     [CmdletBinding()] param(
         [string[]] $SpecificResources,

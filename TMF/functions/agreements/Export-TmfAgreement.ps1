@@ -113,6 +113,7 @@ function Export-TmfAgreement {
                         } 
                     } 
                 } catch { 
+                    Write-PSFMessage -Level Warning -String 'TMF.Export.LocalizationsRetrievalFailed' -StringValues $agreement.displayName, $_.Exception.Message 
                 }
                 if ($localizations) {
                     foreach ($loc in $localizations) {

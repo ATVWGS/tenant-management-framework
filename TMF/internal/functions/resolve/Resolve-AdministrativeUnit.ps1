@@ -28,7 +28,7 @@ function Resolve-AdministrativeUnit {
 			}
 			if (-not $auId -and $SearchInDesiredConfiguration) { if ($InputReference -in $script:desiredConfiguration['administrativeUnits'].displayName) { $auId = $InputReference } }
 			if (-not $auId) { if ($DontFailIfNotExisting) { return $InputReference } else { throw "Cannot find administrativeUnit $InputReference" } }
-			if (-not $Expand) { if ($DisplayName) { return ($detail.displayName ?? $InputReference) } return $auId }
+			if (-not $Expand) { if ($DisplayName) { return $detail.displayName } return $auId }
 			$obj = [pscustomobject]@{ id=$auId; displayName=$detail.displayName }
 			foreach ($k in @($obj.id,$obj.displayName)) { if ($k -and -not $script:administrativeUnitDetailCache.ContainsKey($k)) { $script:administrativeUnitDetailCache[$k] = $obj } }
 			return $obj

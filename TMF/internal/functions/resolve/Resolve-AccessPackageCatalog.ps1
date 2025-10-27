@@ -40,7 +40,7 @@ function Resolve-AccessPackageCatalog {
 			}
 			if (-not $Expand) {
 				if ($DisplayName) {
-					return ($detail.displayName ?? $InputReference)
+					return $detail.displayName
 				} return $catId
 			}
 			$obj = [pscustomobject]@{ id = $catId; displayName = $detail.displayName }
