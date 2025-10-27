@@ -1,4 +1,4 @@
-<#
+﻿<#
 .SYNOPSIS
 Exports role management policies (PIM) into TMF configuration objects or JSON.
 .DESCRIPTION
@@ -19,7 +19,6 @@ Internal pipeline parameter; do not supply manually.
 Export-TmfRoleManagementPolicy -Scope AzureAD -OutPath C:\temp\tmf
 .EXAMPLE
 Export-TmfRoleManagementPolicy -Scope AzureResources -SpecificResources Global Reader
-NOTE: Parameter `-OutPutPath` is deprecated; retained as alias.
 #>
 function Export-TmfRoleManagementPolicy {
 
@@ -128,7 +127,6 @@ function Export-TmfRoleManagementPolicy {
             $filters = @()
             switch ($policyScope) {
                 'AzureAD' {
-                    #$filters += "scopeId eq '/' and scopeType eq 'DirectoryRole'"; 
                     $filters += "scopeId eq '/' and scopeType eq 'Directory'"
                 }
                 'AzureResources' {
@@ -201,7 +199,6 @@ function Export-TmfRoleManagementPolicy {
                         else {
                             $roleManagementPoliciesExport += $result
                         }
-                        #$roleManagementPoliciesExport += Convert-RoleManagementPolicy $m $policyScope
                     }
                 } else {
                     Write-PSFMessage -Level Warning -FunctionName 'Export-TmfRoleManagementPolicy' -String 'TMF.Export.NotFound' -StringValues $idOrName, $resourceName, $tenant.displayName
@@ -218,7 +215,6 @@ function Export-TmfRoleManagementPolicy {
                 else {
                     $roleManagementPoliciesExport += $result
                 }
-                #$roleManagementPoliciesExport += Convert-RoleManagementPolicy $policy $policyScope
             }
         }
     }

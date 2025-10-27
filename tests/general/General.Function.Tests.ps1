@@ -38,6 +38,12 @@ Describe 'General.Function.Tests' {
                     "Compare" {
                         $ignoredRules += "PSUseSingularNouns"
                     }
+                    "Resolve" {
+                        $ignoredRules += "PSUseSingularNouns"
+                    }
+                    "Export" {
+                        $ignoredRules += "PSUseSingularNouns"
+                    }
                 }
                 # Skip rules based on function name
                 switch ($baseName) {

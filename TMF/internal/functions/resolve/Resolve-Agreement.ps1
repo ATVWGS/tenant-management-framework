@@ -87,7 +87,7 @@
 					if ($Expand) {
 						return $script:agreementDetailCache[$one]
 					} elseif ($DisplayName) {
-						return ($script:agreementDetailCache[$one].displayName ?? $one)
+						return ($script:agreementDetailCache[$one].displayName)
 					} else {
 						return $script:agreementDetailCache[$one].id
 					}
@@ -104,7 +104,7 @@
 				return $script:agreementDetailCache[$InputReference].id
 			}
 			if (-not $Expand -and $DisplayName -and $script:agreementDetailCache.ContainsKey($InputReference)) {
-				return ($script:agreementDetailCache[$InputReference].displayName ?? $InputReference)
+				return ($script:agreementDetailCache[$InputReference].displayName)
 			}
 			$agreementId = $null; $detail = $null
 			if ($InputReference -match $script:guidRegex) {
@@ -134,7 +134,7 @@
 			}
 			if (-not $Expand) {
 				if ($DisplayName) {
-					return ($detail.displayName ?? $InputReference)
+					return $detail.displayName
 				}; return $agreementId
 			}
 			if (-not $detail) {

@@ -27,7 +27,7 @@ function Resolve-SubscribedSku
 			else { $sku = $script:cache["allSubscribedSkus"] | Where-Object { $_.skuPartNumber -eq $InputReference } | Select-Object -First 1 }
 			if (-Not $sku -and -Not $DontFailIfNotExisting) { throw "Cannot find subscribedSkus $InputReference" } elseif (-Not $sku -and $DontFailIfNotExisting) { return $InputReference }
 			if ($sku.count -gt 1) { throw "Got multiple subscribedSkus for $InputReference" }
-			if (-not $Expand) { if ($DisplayName) { return ($sku.skuPartNumber ?? $InputReference) } return $sku.skuId }
+			if (-not $Expand) { if ($DisplayName) { return ($sku.skuPartNumber) } return $sku.skuId }
 			return [pscustomobject]@{ skuId=$sku.skuId; skuPartNumber=$sku.skuPartNumber; servicePlans=$sku.servicePlans }
 		}
 		catch {

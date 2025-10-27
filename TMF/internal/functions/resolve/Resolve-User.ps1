@@ -1,5 +1,4 @@
-﻿function Resolve-User {
-	<#
+﻿<#
 	.SYNOPSIS
 	Resolves one or more users (id / GUID, UPN, displayName, special tokens) with caching and optional object expansion.
 	.DESCRIPTION
@@ -15,8 +14,9 @@
 	Limitations / Notes:
 		- displayName -> id lookup still requires filtered endpoint; /directoryObjects/getByIds cannot perform name search.
 		- For GUIDs we always retrieve detail once (even if only id requested) to warm cache for potential later displayName requests.
-	# TODO: Add Pester tests (CI-002, CI-005, POW-FUNC-028) covering: (a) GUID bulk path via Resolve-DirectoryObject, (b) non-GUID batch filters, (c) mixed cached + uncached, (d) order preservation, (e) scalar vs array return, (f) DontFailIfNotExisting echo semantics.
 	#>
+function Resolve-User {
+	
 
 	[CmdletBinding()]
 	param (
@@ -139,7 +139,7 @@
 					if ($Expand) {
 						return $script:userDetailCache[$one]
 					} elseif ($UserPrincipalName) {
-						return ($script:userDetailCache[$one].userPrincipalName ?? $one)
+						return ($script:userDetailCache[$one].userPrincipalName)
 					} else {
 						return $script:userDetailCache[$one].id
 					}
@@ -154,7 +154,7 @@
 				return $script:userDetailCache[$InputReference].id
 			}
 			if (-not $Expand -and $UserPrincipalName -and $script:userDetailCache.ContainsKey($InputReference)) {
-				return ($script:userDetailCache[$InputReference].userPrincipalName ?? $InputReference)
+				return ($script:userDetailCache[$InputReference].userPrincipalName)
 			}
 			if ($InputReference -in @('None', 'All', 'GuestsOrExternalUsers')) {
 				if ($Expand) {
@@ -168,7 +168,7 @@
 					if ($Expand) {
 						return $script:userDetailCache[$InputReference]
 					} elseif ($UserPrincipalName) {
-						return ($script:userDetailCache[$InputReference].userPrincipalName ?? $InputReference)
+						return ($script:userDetailCache[$InputReference].userPrincipalName)
 					} else {
 						return $script:userDetailCache[$InputReference].id
 					}
@@ -228,7 +228,7 @@
 			}
 			if (-not $Expand) {
 				if ($UserPrincipalName) {
-					return ($fullObj.userPrincipalName ?? $InputReference)
+					return ($fullObj.userPrincipalName)
 				}; return $resolvedId
 			}
 			if (-not $fullObj) {

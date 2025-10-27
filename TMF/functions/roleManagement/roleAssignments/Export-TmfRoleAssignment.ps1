@@ -161,6 +161,7 @@ function Export-TmfRoleAssignment {
                 try {
                     $roleDefResp = Invoke-MgGraphRequest -Method GET -Uri "$apiBase/roleManagement/directory/roleDefinitions/$($item.roleDefinitionId)"; $item | Add-Member -MemberType NoteProperty -Name roleDefinition -Value $roleDefResp -Force
                 } catch {
+                    Write-PSFMessage -Level Warning -FunctionName 'Export-TmfRoleAssignment' -Message "Role retrieval error: $($_.Exception.Message)"
                 }
                 $item | Add-Member -MemberType NoteProperty -Name assignmentState -Value Active -Force; $activeAssignments += $item
             }
@@ -169,6 +170,7 @@ function Export-TmfRoleAssignment {
                 try {
                     $roleDefResp = Invoke-MgGraphRequest -Method GET -Uri "$apiBase/roleManagement/directory/roleDefinitions/$($item.roleDefinitionId)"; $item | Add-Member -MemberType NoteProperty -Name roleDefinition -Value $roleDefResp -Force
                 } catch {
+                    Write-PSFMessage -Level Warning -FunctionName 'Export-TmfRoleAssignment' -Message "Role retrieval error: $($_.Exception.Message)"
                 }
                 $item | Add-Member -MemberType NoteProperty -Name assignmentState -Value Eligible -Force; $eligibleAssignments += $item
             }

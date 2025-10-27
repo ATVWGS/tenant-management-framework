@@ -28,9 +28,9 @@ function Resolve-AccessPackageResource {
 			$dn = "$catalogName - $InputReference"; if ($dn -in $script:desiredConfiguration['accessPackageResources'].displayName) { $resId = $InputReference }
 		}
 		if (-not $resId) { if ($DontFailIfNotExisting) { return $InputReference } else { throw "Cannot find accessPackageResource $InputReference" } }
-		if (-not $Expand) { if ($DisplayName) { return ($detail.displayName ?? $InputReference) } return $resId }
+		if (-not $Expand) { if ($DisplayName) { return $detail.displayName } return $resId }
 		if (-not $detail -and $resId) { $detail = Invoke-MgGraphRequest -Method GET -Uri ("$script:graphBaseUrl/identityGovernance/entitlementManagement/accessPackageCatalogs/{0}/accessPackageResources/{1}?`$select=id,displayName,originId" -f $CatalogId,$resId) }
-		$obj = [pscustomobject]@{ id=$resId; displayName=$detail.displayName; originId=($detail.originId ?? $originId) }
+		$obj = [pscustomobject]@{ id=$resId; displayName=$detail.displayName; originId=($detail.originId) }
 		foreach ($k in @($obj.id,$obj.displayName,$obj.originId)) { if ($k -and -not $script:accessPackageResourceDetailCache.ContainsKey($k)) { $script:accessPackageResourceDetailCache[$k] = $obj } }
 		return $obj
 	} catch { if ($DontFailIfNotExisting) { Write-PSFMessage -Level Warning -Message ("Cannot resolve AccessPackageResource resource for input '{0}'. Searched tenant & desired configuration. Error: {1}" -f $InputReference,$_.Exception.Message) -Tag failed -ErrorRecord $_; return $InputReference } else { Write-PSFMessage -Level Warning -Message ("Cannot resolve AccessPackageResource resource for input '{0}'. Searched tenant & desired configuration. Error: {1}" -f $InputReference,$_.Exception.Message) -Tag failed -ErrorRecord $_; $Cmdlet.ThrowTerminatingError($_) } } }

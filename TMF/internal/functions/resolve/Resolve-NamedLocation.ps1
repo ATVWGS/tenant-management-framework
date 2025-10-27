@@ -66,7 +66,7 @@
 					if ($Expand) {
 						return $script:namedLocationDetailCache[$one]
 					} elseif ($DisplayName) {
-						return ($script:namedLocationDetailCache[$one].displayName ?? $one)
+						return ($script:namedLocationDetailCache[$one].displayName)
 					} else {
 						return $script:namedLocationDetailCache[$one].id
 					}
@@ -92,7 +92,7 @@
 				return $script:namedLocationDetailCache[$InputReference].id
 			}
 			if (-not $Expand -and $DisplayName -and $script:namedLocationDetailCache.ContainsKey($InputReference)) {
-				return ($script:namedLocationDetailCache[$InputReference].displayName ?? $InputReference)
+				return ($script:namedLocationDetailCache[$InputReference].displayName)
 			}
 			$nlId = $null; $detail = $null
 			if ($InputReference -match $script:guidRegex) {
@@ -132,7 +132,7 @@
 			}
 			if (-not $Expand) {
 				if ($DisplayName) {
-					return ($detail.displayName ?? $InputReference)
+					return ($detail.displayName)
 				}
 				return $nlId
 			}

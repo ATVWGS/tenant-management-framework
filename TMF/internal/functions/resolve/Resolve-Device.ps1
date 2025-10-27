@@ -25,7 +25,7 @@ function Resolve-Device {
 				$deviceId = $detail.id
 			}
 			if (-not $deviceId) { if ($DontFailIfNotExisting) { return $InputReference } else { throw "Cannot find device $InputReference" } }
-			if (-not $Expand) { if ($DisplayName) { return ($detail.displayName ?? $InputReference) } return $deviceId }
+			if (-not $Expand) { if ($DisplayName) { return $detail.displayName } return $deviceId }
 			$obj = [pscustomobject]@{ id=$deviceId; displayName=$detail.displayName; deviceId=$detail.deviceId }
 			foreach ($k in @($obj.id,$obj.displayName,$obj.deviceId)) { if ($k -and -not $script:deviceDetailCache.ContainsKey($k)) { $script:deviceDetailCache[$k] = $obj } }
 			return $obj
