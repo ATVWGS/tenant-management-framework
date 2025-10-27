@@ -76,6 +76,7 @@ function Export-TmfAgreement {
                     $igListSucceeded = $true 
                 } 
             } catch { 
+                Write-PSFMessage -Level Verbose -Message "Fallback retrieval through identityGovernance path failed: $($Error[0].Exception)"
             } if (-not $ContinueOnListFailure -and -not $igListSucceeded) {
                 throw 
             } elseif (-not $igListSucceeded) {
@@ -90,9 +91,6 @@ function Export-TmfAgreement {
         foreach ($agreement in $allAgreements) {
             $obj = [ordered]@{}
             foreach ($p in $agreement.GetEnumerator()) {
-                <#if ($p.Value -and ($p.Key -ne "files" -and $p.Key -ne "id")) {
-                    $obj[$p.Key] = $p.Value
-                }#>
                 if ($p.Key -ne "files" -and $p.Key -ne "id" -and $null -ne $p.Value) {
                     $obj[$p.Key] = $p.Value
                 }
