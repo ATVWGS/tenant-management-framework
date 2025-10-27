@@ -45,18 +45,6 @@ foreach ($function in (Get-ChildItem "$ModuleRoot\functions" -Recurse -File -Fil
 {
 	. Import-ModuleFile -Path $function.FullName
 }
-
-# Wrapper plural alias style function for consistency with other resources
-function Export-TmfUsers {
-	[CmdletBinding(DefaultParameterSetName='Default')]
-	Param(
-		[string[]] $SpecificResources,
-		[string] $OutPutPath,
-		[switch] $ForceBeta,
-		[System.Management.Automation.PSCmdlet] $Cmdlet = $PSCmdlet
-	)
-	return Export-TmfUser @PSBoundParameters
-}
 #endregion Load functions
 
 # Perform Actions after loading the module contents
