@@ -19,6 +19,7 @@ Export-TmfDirectorySetting -OutPutPath C:\temp\tmf
 Export-TmfDirectorySetting -SpecificResources Group.Unified
 #>
 function Export-TmfDirectorySetting {
+    [Diagnostics.CodeAnalysis.SuppressMessageAttribute("PSAvoidDefaultValueSwitchParameter")]
     [CmdletBinding()] param(
         [string[]] $SpecificResources,
         [Alias('OutPutPath')] [string] $OutPath,

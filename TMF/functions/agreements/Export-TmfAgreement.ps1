@@ -47,9 +47,9 @@ function Export-TmfAgreement {
         $graphIGBeta = "$graphBeta/identityGovernance/termsOfUse"
         try {
             $ctx = Get-MgContext -ErrorAction Stop; if ($ctx -and $ctx.Scopes -and -not ($ctx.Scopes | Where-Object { $_ -like 'Agreement.*' })) {
-                Write-PSFMessage -Level Verbose -Message 'Current token scopes lack Agreement.*; downloads may fail.' 
             } 
         } catch { 
+            Write-PSFMessage -Level Verbose -Message 'Current token scopes lack Agreement.*; downloads may fail.' 
         }
     }
     process {

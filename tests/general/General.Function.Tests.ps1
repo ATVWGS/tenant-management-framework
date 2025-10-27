@@ -38,6 +38,9 @@ Describe 'General.Function.Tests' {
                     "Compare" {
                         $ignoredRules += "PSUseSingularNouns"
                     }
+                    "Resolve" {
+                        $ignoredRules += "PSUseSingularNouns"
+                    }
                     "Export" {
                         $ignoredRules += "PSUseSingularNouns"
                     }
