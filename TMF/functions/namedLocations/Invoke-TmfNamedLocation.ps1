@@ -3,6 +3,9 @@
 	[CmdletBinding()]
 	Param (
 		[string[]] $SpecificResources,
+		[string[]] $SourceFile,
+		[string[]] $SourceConfig,
+		[switch] $Confirm = $false,
 		[System.Management.Automation.PSCmdlet]
 		$Cmdlet = $PSCmdlet
 	)
@@ -16,15 +19,55 @@
 			return
 		}
 		Test-GraphConnection -Cmdlet $Cmdlet
+		$tenant = (Invoke-MgGraphRequest -Method GET -Uri ("$script:graphBaseUrl/organization?`$select=displayname,id")).value
+
+		if (($SpecificResources -and $SourceFile -and $SourceConfig) -or ($SpecificResources -and $SourceFile) -or ($SourceFile -and $SourceConfig)) {
+			$exception = New-Object System.Data.DataException("Multiple filters are not supported. You can only filter by one type, sourceFile or sourceConfig or specificResources!")
+			$errorID = "MultipleFiltersNotSupported"
+			$category = [System.Management.Automation.ErrorCategory]::NotSpecified
+			$recordObject = New-Object System.Management.Automation.ErrorRecord($exception, $errorID, $category, $Cmdlet)
+			$cmdlet.ThrowTerminatingError($recordObject)
+		}
 	}
 	process
 	{
 		if (Test-PSFFunctionInterrupt) { return }
-		if ($SpecificResources) {
-        	$testResults = Test-TmfNamedLocation -SpecificResources $SpecificResources -Cmdlet $Cmdlet
+		if (-not $Confirm) {
+			Write-PSFMessage -Level Host -FunctionName "Invoke-TmfNamedLocation" -String "TMF.TenantInformation" -StringValues $tenant.displayName, $tenant.Id
+			if ((Read-Host "Is this the correct tenant? [y/n]") -notin @("y","Y"))	{
+				Write-PSFMessage -Level Error -String "TMF.UserCanceled"
+				throw "Connected to the wrong tenant."
+			}
+			if ($SpecificResources) {
+				Write-PSFMessage -Level Host -FunctionName "Invoke-TmfNamedLocation" -String "TMF.Invoke.Confirmed" -StringValues "namedlocation configuration for resources: $($SpecificResources -join ",")"
+				$testResults = Test-TmfNamedLocation -SpecificResources $SpecificResources -RawOutput -Cmdlet $Cmdlet
+			}
+			elseif ($SourceFile) {
+				Write-PSFMessage -Level Host -FunctionName "Invoke-TmfNamedLocation" -String "TMF.Invoke.Confirmed" -StringValues "namedlocation configuration for SourceFile(s): $($SourceFile -join ",")"
+				$testResults = Test-TmfNamedLocation -SourceFile $SourceFile -RawOutput -Cmdlet $Cmdlet
+			}
+			elseif ($SourceConfig) {
+				Write-PSFMessage -Level Host -FunctionName "Invoke-TmfNamedLocation" -String "TMF.Invoke.Confirmed" -StringValues "namedlocation configuration for SourceConfig(s): $($SourceConfig -join ",")"
+				$testResults = Test-TmfNamedLocation -SourceConfig $SourceConfig -RawOutput -Cmdlet $Cmdlet
+			}
+			else {
+				Write-PSFMessage -Level Host -FunctionName "Invoke-TmfNamedLocation" -String "TMF.Invoke.Confirmed" -StringValues "all namedlocation configurations"
+				$testResults = Test-TmfNamedLocation -RawOutput -Cmdlet $Cmdlet
+			}
 		}
 		else {
-			$testResults = Test-TmfNamedLocation -Cmdlet $Cmdlet
+			if ($SpecificResources) {
+				$testResults = Test-TmfNamedLocation -SpecificResources $SpecificResources -RawOutput -Cmdlet $Cmdlet
+			}
+			elseif ($SourceFile) {
+				$testResults = Test-TmfNamedLocation -SourceFile $SourceFile -RawOutput -Cmdlet $Cmdlet
+			}
+			elseif ($SourceConfig) {
+				$testResults = Test-TmfNamedLocation -SourceConfig $SourceConfig -RawOutput -Cmdlet $Cmdlet
+			}
+			else {
+				$testResults = Test-TmfNamedLocation -RawOutput -Cmdlet $Cmdlet
+			}
 		}
 
 		foreach ($result in $testResults) {

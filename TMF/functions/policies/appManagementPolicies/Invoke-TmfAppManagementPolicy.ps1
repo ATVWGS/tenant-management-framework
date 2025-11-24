@@ -6,6 +6,9 @@ function Invoke-TmfAppManagementPolicy {
 	[CmdletBinding()]
 	Param (
         [string[]] $SpecificResources,
+        [string[]] $SourceFile,
+		[string[]] $SourceConfig,
+        [switch] $Confirm = $false,
 		[System.Management.Automation.PSCmdlet]
 		$Cmdlet = $PSCmdlet
 	)
@@ -18,16 +21,55 @@ function Invoke-TmfAppManagementPolicy {
 			return
 		}
 		Test-GraphConnection -Cmdlet $Cmdlet
+        $tenant = (Invoke-MgGraphRequest -Method GET -Uri ("$script:graphBaseUrl/organization?`$select=displayname,id")).value
+
+        if (($SpecificResources -and $SourceFile -and $SourceConfig) -or ($SpecificResources -and $SourceFile) -or ($SourceFile -and $SourceConfig)) {
+			$exception = New-Object System.Data.DataException("Multiple filters are not supported. You can only filter by one type, sourceFile or sourceConfig or specificResources!")
+			$errorID = "MultipleFiltersNotSupported"
+			$category = [System.Management.Automation.ErrorCategory]::NotSpecified
+			$recordObject = New-Object System.Management.Automation.ErrorRecord($exception, $errorID, $category, $Cmdlet)
+			$cmdlet.ThrowTerminatingError($recordObject)
+		}
 	}
 	process
 	{
         if(Test-PSFFunctionInterrupt) {return}
-        
-        if ($SpecificResources) {
-            $testResults = Test-TmfAppManagementPolicy -SpecificResources $SpecificResources -Cmdlet $Cmdlet
+        if (-not $Confirm) {
+			Write-PSFMessage -Level Host -FunctionName "Invoke-TmfAppManagementPolicy" -String "TMF.TenantInformation" -StringValues $tenant.displayName, $tenant.Id
+			if ((Read-Host "Is this the correct tenant? [y/n]") -notin @("y","Y"))	{
+				Write-PSFMessage -Level Error -String "TMF.UserCanceled"
+				throw "Connected to the wrong tenant."
+			}
+            if ($SpecificResources) {
+                Write-PSFMessage -Level Host -FunctionName "Invoke-TmfAppManagementPolicy" -String "TMF.Invoke.Confirmed" -StringValues "appManagementPolicy configuration for resources: $($SpecificResources -join ",")"
+                $testResults = Test-TmfAppManagementPolicy -SpecificResources $SpecificResources -RawOutput -Cmdlet $Cmdlet
+            }
+            elseif ($SourceFile) {
+                Write-PSFMessage -Level Host -FunctionName "Invoke-TmfAppManagementPolicy" -String "TMF.Invoke.Confirmed" -StringValues "appManagementPolicy configuration for SourceFile(s): $($SourceFile -join ",")"
+                $testResults = Test-TmfAppManagementPolicy -SourceFile $SourceFile -RawOutput -Cmdlet $Cmdlet
+            }
+            elseif ($SourceConfig) {
+                Write-PSFMessage -Level Host -FunctionName "Invoke-TmfAppManagementPolicy" -String "TMF.Invoke.Confirmed" -StringValues "appManagementPolicy configuration for SourceConfig(s): $($SourceConfig -join ",")"
+                $testResults = Test-TmfAppManagementPolicy -SourceConfig $SourceConfig -RawOutput -Cmdlet $Cmdlet
+            }
+            else {
+                Write-PSFMessage -Level Host -FunctionName "Invoke-TmfAppManagementPolicy" -String "TMF.Invoke.Confirmed" -StringValues "all appManagementPolicy configurations"
+                $testResults = Test-TmfAppManagementPolicy -RawOutput -Cmdlet $Cmdlet
+            }
         }
         else {
-            $testResults = Test-TmfAppManagementPolicy -Cmdlet $Cmdlet
+            if ($SpecificResources) {
+                $testResults = Test-TmfAppManagementPolicy -SpecificResources $SpecificResources -RawOutput -Cmdlet $Cmdlet
+            }
+            elseif ($SourceFile) {
+                $testResults = Test-TmfAppManagementPolicy -SourceFile $SourceFile -RawOutput -Cmdlet $Cmdlet
+            }
+            elseif ($SourceConfig) {
+                $testResults = Test-TmfAppManagementPolicy -SourceConfig $SourceConfig -RawOutput -Cmdlet $Cmdlet
+            }
+            else {
+                $testResults = Test-TmfAppManagementPolicy -RawOutput -Cmdlet $Cmdlet
+            }
         }
         		
         foreach ($result in $testResults) {

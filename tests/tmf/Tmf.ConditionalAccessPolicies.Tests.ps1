@@ -35,7 +35,7 @@ Describe 'Tmf.ConditionalAccessPolicies.Groups.Invoke.Creation' {
     }
 
     It "should successfully invoke the TMF configuration" {
-        { Invoke-TmfGroup -Verbose } | Should -Not -Throw
+        { Invoke-TmfGroup -Confirm -Verbose } | Should -Not -Throw
     }
 }
 
@@ -56,7 +56,7 @@ Describe 'Tmf.ConditionalAccessPolicies.Invoke.Creation' {
     }
 
     It "should successfully invoke the TMF configuration" {
-        { Invoke-TmfConditionalAccessPolicy -Verbose } | Should -Not -Throw
+        { Invoke-TmfConditionalAccessPolicy -Confirm -Verbose } | Should -Not -Throw
     }
 }
 
@@ -102,7 +102,7 @@ Describe 'Tmf.ConditionalAccessPolicies.Invoke.Deletion' {
     }
 
     It "should successfully invoke the conditionalAccessPolicy configuration" {
-        { Invoke-TmfConditionalAccessPolicy -Verbose } | Should -Not -Throw
+        { Invoke-TmfConditionalAccessPolicy -Confirm -Verbose } | Should -Not -Throw
     }
 }
 
@@ -146,7 +146,7 @@ Describe 'Tmf.RoleManagement.Groups.Invoke.Deletion' {
     }
 
     It "should successfully invoke the TMF configuration" {
-        { Invoke-TmfGroup -Verbose } | Should -Not -Throw
+        { Invoke-TmfGroup -Confirm -Verbose } | Should -Not -Throw
     }
 
     $testCases = $global:definitions["groups"] | Foreach-Object {

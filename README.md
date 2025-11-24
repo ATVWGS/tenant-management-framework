@@ -32,6 +32,11 @@ configurations
 - Less prone to human error
 - Increased efficiency
 
+## 1.3. Changes in v2.0
+- automatic beautify of TMF test results (to get the legacy output add -RawOutput to test function calls)
+- Export functions for all supported resource types
+- Filtering on sourceFile
+
 # 2. Getting started
 ## 2.1. Installation
 Checkout the [Powershell Gallery](https://www.powershellgallery.com/packages/TMF/)!
@@ -247,12 +252,9 @@ The *example.md* file contains example resource instances and further informatio
 │           roleManagementPolicyRuleTemplates.json
 │           example.md
 │
-├───stringMappings
-│       stringMappings.json
-│
-└───users
-        example.md
-        users.json
+└───stringMappings
+        stringMappings.json
+
 ```
 
 ### 2.4.3. How can I create a configuration?
@@ -335,6 +337,7 @@ stringMappings                 {}
 
 # You can also checkout single resource definitions
 PS> (Get-TmfDesiredConfiguration)["groups"]
+PS> Get-TmfDesiredConfiguration -resourceTypes groups
 
 displayName     : Some group
 description     : This is a security group
@@ -349,6 +352,7 @@ members         : {max.mustermann@example.org}
 
 # Filtering is also possible with Where-Object
 (Get-TmfDesiredConfiguration)["groups"] | Where-Object {$_.displayName -eq "Some group"}
+PS> Get-TmfDesiredConfiguration -resourceTypes groups | Where-Object {$_.displayName -eq "Some group"}
 
 displayName     : Some group
 description     : This is a security group
@@ -369,34 +373,18 @@ If you want to only test your configured groups, you can use *Test-TmfGroup*. Th
 
 ```powershell
 PS> Test-TmfGroup
-
-ActionType           : Create
-ResourceType         : Group
-ResourceName         : Example group
-Changes              :
-Tenant               : TENANT_NAME
-TenantId             : d369908f-8803-46bc-90cb-3c82854ddf93
-DesiredConfiguration : @{displayName=Example group; description=This is an example security group; groupTypes=System.String[]; securityEnabled=True; mailEnabled=False; mailNickname=someGroupForMembers;
-                       present=True; sourceConfig=Example Configuration}
-GraphResource        :
+[20:37:34][TMF] [Tenant: TENANT_NAME][Group Resource: Example group] Required Action (Create)
+[20:37:34][TMF] [Tenant: TENANT_NAME][Group Resource: Test group] Required Action (Create)
 ```
 
-The resource type specific test functions always return test result objects. These objects show you, which actions are required in your tenant, to achive the desired configuration.
+The resource type specific test functions always return beautyfied test results. 
 
 Additionally you can test only specific resources of a resource type group by adding the -specificResources parameter. This parameter accepts a string array including wildcards.
 
 ```powershell
 PS> Test-TmfGroup -specificResources "Example *"
+[20:37:34][TMF] [Tenant: TENANT_NAME][Group Resource: Example group] Required Action (Create)
 
-ActionType           : Create
-ResourceType         : Group
-ResourceName         : Example group
-Changes              :
-Tenant               : TENANT_NAME
-TenantId             : d369908f-8803-46bc-90cb-3c82854ddf93
-DesiredConfiguration : @{displayName=Example group; description=This is an example security group; groupTypes=System.String[]; securityEnabled=True; mailEnabled=False; mailNickname=someGroupForMembers;
-                       present=True; sourceConfig=Example Configuration}
-GraphResource        :
 ```
 
 You can test all available resource types using *Test-TmfTenant*. The *Test-TmfTenant* function and also all resource type group (eg. *Test-TmfEntitlementManagement*) functions automatically beautify the test results.
@@ -409,12 +397,19 @@ PS> Test-TmfTenant
 [20:35:52][TMF] [Tenant: TENANT_NAME][Group Resource: Example group] Required Action (Create)
 ```
 
-With *Beautify-TmfTestResult* you are able to beautify the results of any resouce type specific test command.
+With *-RawOutput* you are able to get the raw results of any resouce type specific test command. These objects show you, which actions are required in your tenant, to achive the desired configuration.
 
 ```powershell
-PS> Test-TmfGroup | Beautify-TmfTestResult
-
-[20:37:34][TMF] [Tenant: TENANT_NAME][Group Resource: Example group] Required Action (Create)
+PS> Test-TmfGroup -SpecificResources "Example group" -RawOutput
+ActionType           : Update
+ResourceType         : Group
+ResourceName         : Example group
+Changes              : {@{Property=description; Actions=System.Collections.Hashtable}}
+Tenant               : TENANT_NAME
+TenantId             : d369908f-8803-46bc-90cb-3c82854ddf93
+DesiredConfiguration : @{displayName=Example group; description=This is an example security group; groupTypes=System.String[]; securityEnabled=True; mailEnabled=False; mailNickname=someGroupForMembers;
+                       present=True; sourceConfig=Example Configuration}
+GraphResource        : {GraphResourceId}
 ```
 
 ### 2.5.4. Invoke-Tmf* - Perform actions against Graph
@@ -456,6 +451,130 @@ A resource must be registered before the Tenant Management Framework can test it
 
 *The displayName property must be uniqe in the desired configuration!* Resources are searched by the displayName.
 
+### 2.5.6. Export-Tmf* - Export resources in TMF readable format
+You can use the export functions to export your current tenant configuration into a TMF readable and usable format.
+
+#### 2.5.6.1. Standard parameters
+- OutPath
+
+By adding the parameter -OutPath you will get the export in json-Format, without the -OutPath parameter you will get objects directly in the shell.
+
+- Append
+
+The parameter -Append can be used to add filtered exports to already existing configuration files in the OutPath directory
+
+- SpecificResources (string[])
+
+The parameter -SpecificResources can be used to filter the export by displayName or id
+
+#### 2.5.6.2. Examples
+
+Here are some examples how to use the export functions and how to apply filtering:
+
+### accessReviews:
+
+Export all access reviews from the tenant to target path
+```powershell
+PS> Export-TmfAccessReview -OutPath "C:\TmfConfig"
+```
+
+Export specific access reviews from the tenant
+```powershell
+PS> Export-TmfAccessReview -SpecificResources "AccessReview1","AccessReview2","11787d7c-2cfb-4801-95ff-a90b8d8d5259"
+```
+
+Export access reviews for specific groups from the tenant (wildcard supported) and append to existing file
+```powershell
+PS> Export-TmfAccessReview -groups "group1","group2","myGroupPrefix*" -OutPath "C:\TmfConfig" -Append
+```
+
+### administrativeUnits
+
+Export all administrativeUnits from the tenant to target path
+```powershell
+PS> Export-TmfAdministrativeUnit -OutPath "C:\TmfConfig"
+```
+
+### customSecurityAttributes
+
+This cmdlet exports attributeSets, customSecurityAttributeDefinitions and their corresponding customSecurityAttributeAllowedValues
+```powershell
+PS> Export-TmfCustomSecurityAttribute -OutPath "C:\TmfConfig"
+```
+
+### entitlementManagement
+
+This cmdlet exports accessPackages, catalogs, accessPackageResources and accessPackageAssignmentPolicies
+```powershell
+PS> Export-TmfEntitlementManagement -OutPath "C:\TmfConfig"
+```
+
+Also available are the following cmdlets:
+
+Exports access package catalogs
+```powershell
+PS> Export-TmfAccessPackageCatalog -OutPath "C:\TmfConfig"
+```
+Exports accessPackages, accessPackageResources and accessPackageAssignmentPolicies
+```powershell
+PS> Export-TmfAccessPackage -OutPath "C:\TmfConfig"
+```
+
+### groups
+Exports specific groups based on wildcard to target path (wildcard for parameter -SpecificResources is only supported for groups!)
+```powershell
+PS> Export-TmfGroup -SpecificResources "searchPattern*" -OutPath "C:\TmfConfig"
+```
+
+### policies
+Exports all policy types (except Conditional Access Policies) 
+```powershell
+PS> Export-TmfPolicy
+```
+Single policy types can also be exported separately, e.g.
+```powershell
+PS> Export-TmfAuthenticationStrengthPolicy
+```
+
+### roleManagement
+Exports roleAssignments, roleDefinitions, roleManagementPolicies and creates roleManagementPolicyRuleTemplates for each roleManagementPolicy
+```powershell
+PS> Export-TmfRoleManagment
+```
+
+Exports roleAssignments, roleDefinitions, roleManagementPolicies and creates roleManagementPolicyRuleTemplates for scope AzureAD (Supported Scopes: AzureResources | AzureAD | AADGroup)
+```powershell
+PS> Export-TmfRoleManagment -Scope AzureAD
+```
+
+
+Single roleManagement resource types can also be exported separately, e.g.
+```powershell
+PS> Export-TmfRoleAssignment -Scope AADGroup
+```
+
+```powershell
+PS> Export-TmfRoleDefinition -SpecificResources "some role displayname"
+```
+
+### Export all or specific TMF supported resource types
+
+Exports all supported resource types to target path
+```powershell
+PS> Export-TmfTenant -OutPath "C:\TMFconfig"
+```
+
+Exports specific resourceTypes to target path
+```powershell
+PS> Export-TmfTenant -resourceTypes "administrativeUnits","organizationalBrandings" -OutPath "C:\TMFconfig"
+```
+
+Exports all resourceTypes except the exluded to target path
+```powershell
+PS> Export-TmfTenant -Exclude "groups","roleManagementPolicies" -OutPath "C:\TMFconfig"
+```
+
+The parameters resourceTypes and Exclude cannot be combined!
 
 ## 2.6. Resources types
 The supported resources are based on the endpoints and resource types provided by [Microsoft Graph](https://developer.microsoft.com/en-us/graph).

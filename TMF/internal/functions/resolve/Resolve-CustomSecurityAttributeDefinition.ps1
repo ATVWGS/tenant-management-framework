@@ -6,6 +6,8 @@ function Resolve-CustomSecurityAttributeDefinition
 		[string] $InputReference,
 		[switch] $DontFailIfNotExisting,
 		[switch] $SearchInDesiredConfiguration,
+		[switch] $Expand, # Return object { id, displayName }
+		[switch] $DisplayName,
 		[System.Management.Automation.PSCmdlet]
 		$Cmdlet = $PSCmdlet
 	)
@@ -15,27 +17,11 @@ function Resolve-CustomSecurityAttributeDefinition
 	}
 	process
 	{			
-		try {
-			$customSecurityAttributeDefinition = (Invoke-MgGraphRequest -Method GET -Uri ("$script:graphBaseUrl/directory/customSecurityAttributeDefinitions/{0}" -f $InputReference)).Id
-
-			if ($customSecurityAttributeDefinition.count -gt 1) { throw "Got multiple customSecurityAttributeDefinitions for $InputReference" }
-		}
-		catch {
-			$failed = $true
-		}
-		finally {
-			if ($SearchInDesiredConfiguration) {
-				if ($InputReference -in $script:desiredConfiguration["customSecurityAttributeDefinitions"].displayName) {
-					$customSecurityAttributeDefinition = $InputReference
-				}
-			}
-			else {
-				if (-Not $DontFailIfNotExisting) { 
-					Write-PSFMessage -Level Warning -String 'TMF.CannotResolveResource' -StringValues "customSecurityAttributeDefinition" -Tag 'failed' -ErrorRecord $_
-					$Cmdlet.ThrowTerminatingError($_)
-				}				
-			}			
-		}
-		return $customSecurityAttributeDefinition
+		$detail = $null; $id = $null
+		try { $detail = Invoke-MgGraphRequest -Method GET -Uri ("$script:graphBaseUrl/directory/customSecurityAttributeDefinitions/{0}?`$select=id,displayName" -f $InputReference); $id = $detail.id } catch { $id=$null }
+		if (-not $id -and $SearchInDesiredConfiguration) { if ($InputReference -in $script:desiredConfiguration['customSecurityAttributeDefinitions'].displayName) { $id = $InputReference } }
+		if (-not $id) { if ($DontFailIfNotExisting) { return $InputReference } else { Write-PSFMessage -Level Warning -Message ("Cannot resolve customSecurityAttributeDefinition resource for input '{0}'. Searched tenant & desired configuration." -f $InputReference) -Tag failed; $Cmdlet.ThrowTerminatingError($_) } }
+		if (-not $Expand) { if ($DisplayName) { return $detail.displayName } return $id }
+		return [pscustomobject]@{ id=$id; displayName=$detail.displayName }
 	}
 }

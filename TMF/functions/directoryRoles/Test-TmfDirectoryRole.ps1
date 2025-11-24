@@ -9,6 +9,9 @@ function Test-TmfDirectoryRole {
 	[CmdletBinding()]
 	Param (
 		[string[]] $SpecificResources,
+		[string[]] $SourceFile,
+		[string[]] $SourceConfig,
+		[switch] $RawOutput,
 		[System.Management.Automation.PSCmdlet]
 		$Cmdlet = $PSCmdlet
 	)
@@ -18,6 +21,14 @@ function Test-TmfDirectoryRole {
 		Test-GraphConnection -Cmdlet $Cmdlet
 		$resourceName = "DirectoryRoles"
 		$tenant = (Invoke-MgGraphRequest -Method GET -Uri ("$script:graphBaseUrl/organization?`$select=displayname,id")).value
+
+		if (($SpecificResources -and $SourceFile -and $SourceConfig) -or ($SpecificResources -and $SourceFile) -or ($SourceFile -and $SourceConfig)) {
+			$exception = New-Object System.Data.DataException("Multiple filters are not supported. You can only filter by one type, sourceFile or sourceConfig or specificResources!")
+			$errorID = "MultipleFiltersNotSupported"
+			$category = [System.Management.Automation.ErrorCategory]::NotSpecified
+			$recordObject = New-Object System.Management.Automation.ErrorRecord($exception, $errorID, $category, $Cmdlet)
+			$cmdlet.ThrowTerminatingError($recordObject)
+		}
 	}
 	process
 	{
@@ -54,6 +65,16 @@ function Test-TmfDirectoryRole {
 			}
 			$definitions = $definitions | Sort-Object -Property displayName -Unique
 		}
+		elseif ($SourceFile) {
+			foreach ($file in $SourceFile) {
+				$definitions += $script:desiredConfiguration[$resourceName] | Where-Object {$_.sourceFile -eq $file}
+			}
+		}
+		elseif ($SourceConfig) {
+			foreach ($config in $SourceConfig) {
+				$definitions += $script:desiredConfiguration[$resourceName] | Where-Object {$_.sourceConfig -eq $config}
+			}					
+		}
 		else {
 			$definitions = $script:desiredConfiguration[$resourceName]
 		}
@@ -78,7 +99,7 @@ function Test-TmfDirectoryRole {
 				if ($definition.roleID) {
 					$result["GraphResource"] = $definition.roleID
 					try {
-						$roleMembers = (Invoke-MgGraphRequest -Method GET -Uri ("$script:graphBaseUrl/directoryRoles/{0}/members" -f $definition.roleID)).Value
+						$roleMembers = (Invoke-MgGraphRequest -Method GET -Uri ("$script:graphBaseUrl1/directoryRoles/{0}/members" -f $definition.roleID)).Value
 					}
 					catch {
 						Write-PSFMessage -Level Warning -String 'TMF.Error.QueryWithFilterFailed' -StringValues $filter -Tag 'failed'
@@ -120,7 +141,13 @@ function Test-TmfDirectoryRole {
 			else {
 				$result = New-TestResult @result -ActionType "NoActionRequired"
 			}
-            $result
+
+            if ($RawOutput) {
+				$result
+			}
+			else {
+				$result | Beautify-TmfTestResult
+			}
         }
 
     }

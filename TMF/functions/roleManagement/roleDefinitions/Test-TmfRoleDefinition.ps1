@@ -11,6 +11,9 @@ function Test-TmfRoleDefinition
 	Param (
         [ValidateSet('AzureResources', 'AzureAD')]
         [string] $scope,
+        [string[]] $SourceFile,
+		[string[]] $SourceConfig,
+        [switch] $RawOutput,
 		[System.Management.Automation.PSCmdlet]
 		$Cmdlet = $PSCmdlet
 	)
@@ -20,14 +23,38 @@ function Test-TmfRoleDefinition
         Test-GraphConnection -Cmdlet $Cmdlet
 		$resourceName = "roleDefinitions"
         $tenant = (Invoke-MgGraphRequest -Method GET -Uri ("$script:graphBaseUrl/organization?`$select=displayname,id")).value
+
+        if (($scope -and $SourceFile -and $SourceConfig) -or ($scope -and $SourceFile) -or ($SourceFile -and $SourceConfig)) {
+			$exception = New-Object System.Data.DataException("Multiple filters are not supported. You can only filter by one type, sourceFile or sourceConfig or scope!")
+			$errorID = "MultipleFiltersNotSupported"
+			$category = [System.Management.Automation.ErrorCategory]::NotSpecified
+			$recordObject = New-Object System.Management.Automation.ErrorRecord($exception, $errorID, $category, $Cmdlet)
+			$cmdlet.ThrowTerminatingError($recordObject)
+		}
 	}
 	process 
     {
-        switch ($scope) {
-            "AzureAD" {$definitions = $script:desiredConfiguration[$resourceName] | Where-Object {($_ |get-member -MemberType noteproperty).Name -notcontains "subscriptionReference"}}
-            "AzureResources" {$definitions = $script:desiredConfiguration[$resourceName] | Where-Object {($_ |get-member -MemberType noteproperty).Name -contains "subscriptionReference"}}
-            default {$definitions = $script:desiredConfiguration[$resourceName]}
-        }        
+        $definitions = @()
+
+        if ($scope) {
+            switch ($scope) {
+                "AzureAD" {$definitions = $script:desiredConfiguration[$resourceName] | Where-Object {($_ |get-member -MemberType noteproperty).Name -notcontains "subscriptionReference"}}
+                "AzureResources" {$definitions = $script:desiredConfiguration[$resourceName] | Where-Object {($_ |get-member -MemberType noteproperty).Name -contains "subscriptionReference"}}
+            }        
+        }
+        elseif ($SourceFile) {
+			foreach ($file in $SourceFile) {
+				$definitions += $script:desiredConfiguration[$resourceName] | Where-Object {$_.sourceFile -eq $file}
+			}
+		}
+		elseif ($SourceConfig) {
+			foreach ($config in $SourceConfig) {
+				$definitions += $script:desiredConfiguration[$resourceName] | Where-Object {$_.sourceConfig -eq $config}
+			}					
+		}
+		else {
+			$definitions = $script:desiredConfiguration[$resourceName]
+		}
 
 		foreach ($definition in $definitions) {
 			foreach ($property in $definition.Properties()) {
@@ -48,6 +75,10 @@ function Test-TmfRoleDefinition
                 $roleDefinitionScope = "AzureResources"
                 Test-AzureConnection -Cmdlet $Cmdlet
                 $token = (Get-AzAccessToken -ResourceUrl $script:apiBaseUrl).Token
+                if ($token.GetType().Name -eq "SecureString") {
+                    $bstr = [System.Runtime.InteropServices.Marshal]::SecureStringToBSTR($token)
+                    $token = [System.Runtime.InteropServices.Marshal]::PtrToStringAuto($bstr)
+                }
             }
             else {
                 $roleDefinitionScope = "AzureAD"
@@ -98,7 +129,7 @@ function Test-TmfRoleDefinition
         
                             if ($definition.present) {
                                 $changes = @()
-                                foreach ($property in ($definition.Properties() | Where-Object {$_ -notin "displayname","present","subscriptionReference","sourceConfig"})) {
+                                foreach ($property in ($definition.Properties() | Where-Object {$_ -notin "displayname","present","subscriptionReference","sourceConfig", "sourceFile"})) {
                                     $change = [PSCustomObject] @{
                                         Property = $property										
                                         Actions = $null
@@ -239,7 +270,12 @@ function Test-TmfRoleDefinition
                 }
             }
             
-            $result
+            if ($RawOutput) {
+				$result
+			}
+			else {
+				$result | Beautify-TmfTestResult
+			}
         }
     }
 }

@@ -57,7 +57,7 @@ Describe 'Tmf.AdministrativeUnit.Invoke.Creation' {
     }
 
     It "should successfully invoke the TMF configuration" {
-        { Invoke-TmfTenant -DoNotRequireTenantConfirm -Verbose } | Should -Not -Throw
+        { Invoke-TmfAdministrativeUnit -Confirm -Verbose } | Should -Not -Throw
     }
 
     
@@ -95,7 +95,7 @@ Describe 'Tmf.General.Invoke.Deletion' {
     }
 
     It "should successfully invoke the TMF configuration" {
-        { Invoke-TmfAdministrativeUnit -Verbose } | Should -Not -Throw
+        { Invoke-TmfAdministrativeUnit -Confirm -Verbose } | Should -Not -Throw
     }
 
     $testCases = $global:definitions["administrativeUnits"] | Foreach-Object {

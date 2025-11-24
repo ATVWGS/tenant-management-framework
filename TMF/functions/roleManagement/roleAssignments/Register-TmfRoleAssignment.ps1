@@ -32,7 +32,7 @@ function Register-TmfRoleAssignment {
         [string] $groupReference,
         [Parameter(Mandatory = $true, ParameterSetName = "AzureAD")]
         [Parameter(Mandatory = $true, ParameterSetName = "AADGroup")]
-        [ValidateSet('directory', 'administrativeUnit', 'group')]
+        [ValidateSet('directory', 'administrativeUnit', 'application', 'group')]
         [string] $directoryScopeType,
         [Parameter(Mandatory = $true, ParameterSetName = "AzureAD")]
         [Parameter(Mandatory = $true, ParameterSetName = "AzureResources")]
@@ -59,6 +59,10 @@ function Register-TmfRoleAssignment {
         [Parameter(ParameterSetName = "AzureResources")]
         [Parameter(ParameterSetName = "AADGroup")]
         [string] $sourceConfig = "<Custom>",
+        [Parameter(ParameterSetName = "AzureAD")]
+        [Parameter(ParameterSetName = "AzureResources")]
+        [Parameter(ParameterSetName = "AADGroup")]
+        [string] $sourceFile = "<Custom>",
         [Parameter(ParameterSetName = "AzureAD")]
         [Parameter(ParameterSetName = "AzureResources")]
         [Parameter(ParameterSetName = "AADGroup")]
@@ -120,6 +124,7 @@ function Register-TmfRoleAssignment {
                     startDateTime = $startDateTime
                     expirationType = $expirationType
                     sourceConfig = $sourceConfig
+                    sourceFile = $sourceFile
                 }
         
                 "endDateTime", "duration" | ForEach-Object {
@@ -149,6 +154,7 @@ function Register-TmfRoleAssignment {
                     startDateTime = $startDateTime
                     expirationType = $expirationType
                     sourceConfig = $sourceConfig
+                    sourceFile = $sourceFile
                 }
         
                 "endDateTime", "duration" | ForEach-Object {
@@ -178,6 +184,7 @@ function Register-TmfRoleAssignment {
                     startDateTime = $startDateTime
                     expirationType = $expirationType
                     sourceConfig = $sourceConfig
+                    sourceFile = $sourceFile
                 }
         
                 if ($roleReference -notin @("member","owner")) {

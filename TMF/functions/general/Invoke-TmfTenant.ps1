@@ -16,7 +16,7 @@
 			Perform invoking for entered resource types only.
 			For example: -resourceTypes groups,roleAssignments
 
-		.PARAMETER DoNotRequireTenantConfirm
+		.PARAMETER Confirm
 			Do not ask for confirmation when invoking configurations.
 	#>
 	[CmdletBinding(DefaultParameterSetName = 'Exclude')]
@@ -37,7 +37,7 @@
 		[string[]] $resourceTypes,
 		[Parameter(ParameterSetName = 'Exclude')]
 		[Parameter(ParameterSetName = 'resourceTypes')]
-		[switch] $DoNotRequireTenantConfirm
+		[switch] $Confirm = $false
 	)
 	
 	begin
@@ -48,7 +48,7 @@
 	process
 	{
 		Write-PSFMessage -Level Host -FunctionName "Invoke-TmfTenant" -String "TMF.TenantInformation" -StringValues $tenant.displayName, $tenant.Id		
-		if (-Not $DoNotRequireTenantConfirm) {
+		if (-Not $Confirm) {
 			if ((Read-Host "Is this the correct tenant? [y/n]") -notin @("y","Y"))	{
 				Write-PSFMessage -Level Error -String "TMF.UserCanceled"
 				throw "Connected to the wrong tenant."
@@ -59,7 +59,7 @@
 			foreach ($resourceType in ($script:supportedResources.GetEnumerator() | Where-Object {$_.Value.invokeFunction -and $_.Name -in $resourceTypes} | Sort-Object {$_.Value.weight})) {			
 				if ($script:desiredConfiguration[$resourceType.Name]) {
 					Write-PSFMessage -Level Host -FunctionName "Invoke-TmfTenant" -String "TMF.StartingInvokeForResource" -StringValues $resourceType.Name					
-					& $resourceType.Value["invokeFunction"] -Cmdlet $PSCmdlet
+					& $resourceType.Value["invokeFunction"] -Cmdlet $PSCmdlet -Confirm
 				}						
 			}
 		}
@@ -67,7 +67,7 @@
 			foreach ($resourceType in ($script:supportedResources.GetEnumerator() | Where-Object {$_.Value.invokeFunction -and $_.Name -notin $Exclude} | Sort-Object {$_.Value.weight})) {			
 				if ($script:desiredConfiguration[$resourceType.Name]) {
 					Write-PSFMessage -Level Host -FunctionName "Invoke-TmfTenant" -String "TMF.StartingInvokeForResource" -StringValues $resourceType.Name					
-					& $resourceType.Value["invokeFunction"] -Cmdlet $PSCmdlet
+					& $resourceType.Value["invokeFunction"] -Cmdlet $PSCmdlet -Confirm
 				}						
 			}
 		}		

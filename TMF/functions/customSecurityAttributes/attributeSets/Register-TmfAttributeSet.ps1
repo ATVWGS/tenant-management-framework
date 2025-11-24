@@ -10,7 +10,7 @@ function Register-TmfAttributeSet
 		[int] $maxAttributesPerSet,
 		[bool] $present = $true,
 		[string] $sourceConfig = "<Custom>",
-
+		[string] $sourceFile = "<Custom>",
 		[System.Management.Automation.PSCmdlet]
 		$Cmdlet = $PSCmdlet
 	)
@@ -37,6 +37,7 @@ function Register-TmfAttributeSet
 			maxAttributesPerSet = $maxAttributesPerSet
 			present = $present
 			sourceConfig = $sourceConfig
+			sourceFile = $sourceFile
 		}
 	
 		Add-Member -InputObject $object -MemberType ScriptMethod -Name Properties -Value { ($this | Get-Member -MemberType NoteProperty).Name }

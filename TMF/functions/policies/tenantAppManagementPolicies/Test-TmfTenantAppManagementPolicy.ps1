@@ -8,7 +8,7 @@ function Test-TmfTenantAppManagementPolicy {
 	#>
 	[CmdletBinding()]
 	Param (
-        
+        [switch] $RawOutput,
 		[System.Management.Automation.PSCmdlet]
 		$Cmdlet = $PSCmdlet
 	)
@@ -63,7 +63,7 @@ function Test-TmfTenantAppManagementPolicy {
                     $result["GraphResource"] = $resource
 					if ($definition.present) {
 						$changes = @()
-						foreach ($property in ($definition.Properties() | Where-Object {$_ -notin "present", "sourceConfig"})) {
+						foreach ($property in ($definition.Properties() | Where-Object {$_ -notin "present", "sourceConfig", "sourceFile"})) {
 							$change = [PSCustomObject] @{
 								Property = $property										
 								Actions = $null
@@ -106,7 +106,12 @@ function Test-TmfTenantAppManagementPolicy {
 				}
             }
 
-			$result
+			if ($RawOutput) {
+				$result
+			}
+			else {
+				$result | Beautify-TmfTestResult
+			}
         }
     }
 

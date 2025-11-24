@@ -3,6 +3,9 @@ function Invoke-TmfAdministrativeUnit
 	[CmdletBinding()]
 	Param (
         [string[]] $SpecificResources,
+		[string[]] $SourceFile,
+		[string[]] $SourceConfig,
+        [switch] $Confirm = $false,
 		[System.Management.Automation.PSCmdlet]
 		$Cmdlet = $PSCmdlet
 	)
@@ -15,18 +18,59 @@ function Invoke-TmfAdministrativeUnit
 			return
 		}
 		Test-GraphConnection -Cmdlet $Cmdlet
+
+        $tenant = (Invoke-MgGraphRequest -Method GET -Uri ("$script:graphBaseUrl/organization?`$select=displayname,id")).value
+
+        if (($SpecificResources -and $SourceFile -and $SourceConfig) -or ($SpecificResources -and $SourceFile) -or ($SourceFile -and $SourceConfig)) {
+			$exception = New-Object System.Data.DataException("Multiple filters are not supported. You can only filter by one type, sourceFile or sourceConfig or specificResources!")
+			$errorID = "MultipleFiltersNotSupported"
+			$category = [System.Management.Automation.ErrorCategory]::NotSpecified
+			$recordObject = New-Object System.Management.Automation.ErrorRecord($exception, $errorID, $category, $Cmdlet)
+			$cmdlet.ThrowTerminatingError($recordObject)
+		}
 	}
 
     process
     {
         if(Test-PSFFunctionInterrupt) {return}
-        if ($SpecificResources) {
-        	$testResults = Test-TmfAdministrativeUnit -SpecificResources $SpecificResources -Cmdlet $Cmdlet
-		}
-		else {
-			$testResults = Test-TmfAdministrativeUnit -Cmdlet $Cmdlet
-		}
 
+        if (-not $Confirm) {
+			Write-PSFMessage -Level Host -FunctionName "Invoke-TmfAdministrativeUnit" -String "TMF.TenantInformation" -StringValues $tenant.displayName, $tenant.Id
+			if ((Read-Host "Is this the correct tenant? [y/n]") -notin @("y","Y"))	{
+				Write-PSFMessage -Level Error -String "TMF.UserCanceled"
+				throw "Connected to the wrong tenant."
+			}
+            if ($SpecificResources) {
+                Write-PSFMessage -Level Host -FunctionName "Invoke-TmfAdministrativeUnit" -String "TMF.Invoke.Confirmed" -StringValues "administrativeUnit configuration for resources: $($SpecificResources -join ",")"
+                $testResults = Test-TmfAdministrativeUnit -SpecificResources $SpecificResources -RawOutput -Cmdlet $Cmdlet
+            }
+            elseif ($SourceFile) {
+                Write-PSFMessage -Level Host -FunctionName "Invoke-TmfAdministrativeUnit" -String "TMF.Invoke.Confirmed" -StringValues "administrativeUnit configuration for SourceFile(s): $($SourceFile -join ",")"
+                $testResults = Test-TmfAdministrativeUnit -SourceFile $SourceFile -RawOutput -Cmdlet $Cmdlet
+            }
+            elseif ($SourceConfig) {
+                Write-PSFMessage -Level Host -FunctionName "Invoke-TmfAdministrativeUnit" -String "TMF.Invoke.Confirmed" -StringValues "administrativeUnit configuration for SourceConfig(s): $($SourceConfig -join ",")"
+                $testResults = Test-TmfAdministrativeUnit -SourceConfig $SourceConfig -RawOutput -Cmdlet $Cmdlet
+            }
+            else {            
+                Write-PSFMessage -Level Host -FunctionName "Invoke-TmfAdministrativeUnit" -String "TMF.Invoke.Confirmed" -StringValues "all administrativeUnit configurations"
+                $testResults = Test-TmfAdministrativeUnit -RawOutput -Cmdlet $Cmdlet
+            }
+        }
+        else {
+            if ($SpecificResources) {
+                $testResults = Test-TmfAdministrativeUnit -SpecificResources $SpecificResources -RawOutput -Cmdlet $Cmdlet
+            }
+            elseif ($SourceFile) {
+                $testResults = Test-TmfAdministrativeUnit -SourceFile $SourceFile -RawOutput -Cmdlet $Cmdlet
+            }
+            elseif ($SourceConfig) {
+                $testResults = Test-TmfAdministrativeUnit -SourceConfig $SourceConfig -RawOutput -Cmdlet $Cmdlet
+            }
+            else {
+                $testResults = Test-TmfAdministrativeUnit -RawOutput -Cmdlet $Cmdlet
+            }
+        }
         foreach ($result in $testResults) {
             Beautify-TmfTestResult -TestResult $result -FunctionName $MyInvocation.MyCommand
             switch ($result.ActionType) {
@@ -69,7 +113,16 @@ function Invoke-TmfAdministrativeUnit
                             $scopedRoleMemberships += $result.DesiredConfiguration.scopedRoleMembers | Foreach-Object {
                                 $identityId = Resolve-User -InputReference $_.identity -Cmdlet $Cmdlet -DontFailIfNotExisting
                                 if (-Not $identityId) {
-                                    $identityId = Resolve-Group -InputReference $_.identity -Cmdlet $Cmdlet
+                                    $identityId = Resolve-Group -InputReference $_.identity -Cmdlet $Cmdlet -DontFailIfNotExisting
+                                    if (-Not $identityId) {
+                                        $identityId = Resolve-ServicePrincipal -InputReference $_.identity -Cmdlet $Cmdlet -DontFailIfNotExisting
+                                        if (-Not $identityId) {
+                                            $identityId = Resolve-Application -InputReference $_.identity -ReturnObjectId -DontFailIfNotExisting -Cmdlet $Cmdlet
+                                            if (-Not $identityId) {
+                                                throw "Cannot resolve $($_.identity) as user, group, application or serviceprincipal"
+                                            }
+                                        }
+                                    }
                                 }
 
                                 @{

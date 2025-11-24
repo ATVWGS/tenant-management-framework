@@ -3,6 +3,9 @@ function Invoke-TmfRoleManagementPolicy {
 	Param (
         [ValidateSet('AzureResources', 'AzureAD', 'AADGroup')]
 		[string] $scope,
+        [string[]] $SourceFile,
+		[string[]] $SourceConfig,
+        [switch] $Confirm = $false,
 		[System.Management.Automation.PSCmdlet]
 		$Cmdlet = $PSCmdlet
 	)
@@ -14,16 +17,63 @@ function Invoke-TmfRoleManagementPolicy {
 			Stop-PSFFunction -String "TMF.NoDefinitions" -StringValues "roleManagementPolicies"
 			return
 		}
+        $tenant = (Invoke-MgGraphRequest -Method GET -Uri ("$script:graphBaseUrl/organization?`$select=displayname,id")).value
+
+        if (($scope -and $SourceFile -and $SourceConfig) -or ($scope -and $SourceFile) -or ($SourceFile -and $SourceConfig)) {
+			$exception = New-Object System.Data.DataException("Multiple filters are not supported. You can only filter by one type, sourceFile or sourceConfig or scope!")
+			$errorID = "MultipleFiltersNotSupported"
+			$category = [System.Management.Automation.ErrorCategory]::NotSpecified
+			$recordObject = New-Object System.Management.Automation.ErrorRecord($exception, $errorID, $category, $Cmdlet)
+			$cmdlet.ThrowTerminatingError($recordObject)
+		}
 	}
 
     process {
         if (Test-PSFFunctionInterrupt) { return }
-
-        if ($scope) {
-            $testResults = Test-TmfRoleManagementPolicy -scope $scope -Cmdlet $Cmdlet
+        if (-not $Confirm) {
+			Write-PSFMessage -Level Host -FunctionName "Invoke-TmfRoleManagementPolicy" -String "TMF.TenantInformation" -StringValues $tenant.displayName, $tenant.Id
+			if ((Read-Host "Is this the correct tenant? [y/n]") -notin @("y","Y"))	{
+				Write-PSFMessage -Level Error -String "TMF.UserCanceled"
+				throw "Connected to the wrong tenant."
+			}
+            if ($scope) {
+                Write-PSFMessage -Level Host -FunctionName "Invoke-TmfRoleManagementPolicy" -String "TMF.Invoke.Confirmed" -StringValues "roleManagementPolicy configuration for scope: $($scope)"
+                $testResults = Test-TmfRoleManagementPolicy -scope $scope -RawOutput -Cmdlet $Cmdlet
+            }
+            elseif ($SourceFile) {
+                Write-PSFMessage -Level Host -FunctionName "Invoke-TmfRoleManagementPolicy" -String "TMF.Invoke.Confirmed" -StringValues "roleManagementPolicy configuration for SourceFile(s): $($SourceFile -join ",")"
+                $testResults = Test-TmfRoleManagementPolicy -SourceFile $SourceFile -RawOutput -Cmdlet $Cmdlet
+            }
+            elseif ($SourceConfig) {
+                Write-PSFMessage -Level Host -FunctionName "Invoke-TmfRoleManagementPolicy" -String "TMF.Invoke.Confirmed" -StringValues "roleManagementPolicy configuration for SourceConfig(s): $($SourceConfig -join ",")"
+                $testResults = Test-TmfRoleManagementPolicy -SourceConfig $SourceConfig -RawOutput -Cmdlet $Cmdlet
+            }
+            else {
+                Write-PSFMessage -Level Host -FunctionName "Invoke-TmfRoleManagementPolicy" -String "TMF.Invoke.Confirmed" -StringValues "all roleManagementPolicy configurations"
+                $testResults = Test-TmfRoleManagementPolicy -RawOutput -Cmdlet $Cmdlet
+            }
+            if ($testResults.DesiredConfiguration.subscriptionReference) {
+                $subscriptionInfo = Get-AzContext
+                Write-PSFMessage -Level Host -FunctionName "Invoke-TmfRoleManagementPolicy" -String "TMF.SubscriptionInformation" -StringValues $subscriptionInfo.Subscription.Name, $subscriptionInfo.Subscription.Id
+                if ((Read-Host "Is this the correct subscription? [y/n]") -notin @("y","Y"))	{
+                    Write-PSFMessage -Level Error -String "TMF.UserCanceled"
+                    throw "Connected to the wrong subscription."
+                }
+            }
         }
         else {
-            $testResults = Test-TmfRoleManagementPolicy -Cmdlet $Cmdlet
+            if ($scope) {
+                $testResults = Test-TmfRoleManagementPolicy -scope $scope -RawOutput -Cmdlet $Cmdlet
+            }
+            elseif ($SourceFile) {
+                $testResults = Test-TmfRoleManagementPolicy -SourceFile $SourceFile -RawOutput -Cmdlet $Cmdlet
+            }
+            elseif ($SourceConfig) {
+                $testResults = Test-TmfRoleManagementPolicy -SourceConfig $SourceConfig -RawOutput -Cmdlet $Cmdlet
+            }
+            else {
+                $testResults = Test-TmfRoleManagementPolicy -RawOutput -Cmdlet $Cmdlet
+            }
         }
 
         foreach ($result in $testResults) {
@@ -33,6 +83,10 @@ function Invoke-TmfRoleManagementPolicy {
                 $assignmentScope = "AzureResources"
                 Test-AzureConnection -Cmdlet $Cmdlet
                 $token = (Get-AzAccessToken -ResourceUrl $script:apiBaseUrl).Token
+                if ($token.GetType().Name -eq "SecureString") {
+                    $bstr = [System.Runtime.InteropServices.Marshal]::SecureStringToBSTR($token)
+                    $token = [System.Runtime.InteropServices.Marshal]::PtrToStringAuto($bstr)
+                }
             }
             else {
                 if ($result.DesiredConfiguration.scopeType -eq "group") {

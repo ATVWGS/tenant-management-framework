@@ -11,7 +11,8 @@ function Register-TmfTenantAppManagementPolicy {
         [Parameter(Mandatory)]
         [object] $servicePrincipalRestrictions,
         [bool] $present = $true,
-        [string] $sourceConfig = "<Custom>",		
+        [string] $sourceConfig = "<Custom>",
+		[string] $sourceFile = "<Custom>",
 		[System.Management.Automation.PSCmdlet]
 		$Cmdlet = $PSCmdlet
     )
@@ -40,6 +41,7 @@ function Register-TmfTenantAppManagementPolicy {
             servicePrincipalRestrictions = $servicePrincipalRestrictions
             present = $present
 			sourceConfig = $sourceConfig
+			sourceFile = $sourceFile
 		}
        
         Add-Member -InputObject $object -MemberType ScriptMethod -Name Properties -Value { ($this | Get-Member -MemberType NoteProperty).Name }

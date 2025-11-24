@@ -4,7 +4,8 @@ function Register-TmfDirectoryRole {
 		[bool] $present = $true,	
 		[string] $displayName,
         [object[]] $members,
-			
+		[string] $sourceConfig = "<Custom>",
+		[string] $sourceFile = "<Custom>",
 		[System.Management.Automation.PSCmdlet]
 		$Cmdlet = $PSCmdlet
 	)
@@ -28,6 +29,8 @@ function Register-TmfDirectoryRole {
 		$object = [PSCustomObject] @{
 			present = $present
 			displayName = $displayName
+			sourceConfig = $sourceConfig
+			sourceFile = $sourceFile
         }
 
 		$memberIDs = @()

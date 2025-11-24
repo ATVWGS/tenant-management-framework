@@ -21,11 +21,12 @@
 		function Register-Resource {
 			Param (
 				[object[]] $Resources,
-				[string] $ResourceType
+				[string] $ResourceType,
+				[string] $SourceFile
 			)
 			if ($Resources.Count -gt 0) {
 				$Resources | Foreach-Object {
-					$resource = $_ | Add-Member -NotePropertyMembers @{sourceConfig = $configuration.Name} -PassThru | ConvertTo-PSFHashtable -Include $($script:supportedResources[$ResourceType]["registerFunction"].Parameters.Keys)
+					$resource = $_ | Add-Member -NotePropertyMembers @{sourceConfig = $configuration.Name;sourceFile = $SourceFile} -PassThru | ConvertTo-PSFHashtable -Include $($script:supportedResources[$ResourceType]["registerFunction"].Parameters.Keys)
 					# Calls the Register-Tmf(.*) function
 					& $script:supportedResources[$ResourceType]["registerFunction"] @resource -Cmdlet $PSCmdlet
 				}
@@ -70,10 +71,11 @@
 				$counter = 0
 				$definitionFiles = Get-ChildItem -Path $resourceDirectory -File -Filter "*.json" -Recurse
 				$definitionFiles | ForEach-Object {
-					Write-Progress -Id 1 -Activity "Loading $resourceTypeName" -CurrentOperation "Reading file $($_.Name)" -PercentComplete (($counter / $definitionFiles.count) * 100)
+					$fileName = $_.FullName
+					Write-Progress -Id 1 -Activity "Loading $resourceTypeName" -CurrentOperation "Reading file $($fileName)" -PercentComplete (($counter / $definitionFiles.count) * 100)
 					$content = Get-Content $_.FullName -Encoding UTF8 | Out-String
 					$content = Assert-TemplateFunctions -InputTemplate $content | ConvertFrom-Json					
-					Register-Resource -Id 1 -Resources $content -ResourceType $resourceTypeName					
+					Register-Resource -Id 1 -Resources $content -ResourceType $resourceTypeName -SourceFile $fileName
 					$counter++
 				}
 				Write-Progress -Id 1 -Activity "Loading $resourceTypeName" -Completed

@@ -11,7 +11,7 @@ function Validate-AccessReviewReviewers
 	Param (
 		[Parameter(ParameterSetName = "Default")]
 		[string] $reference,
-		[ValidateSet("singleUser", "groupMembers")]
+		[ValidateSet("singleUser", "groupMembers", "owners")]
 		[string] $type = "singleUser",
 		[System.Management.Automation.PSCmdlet]
 		$Cmdlet = $PSCmdlet
@@ -39,6 +39,10 @@ function Validate-AccessReviewReviewers
                 $id = Resolve-Group -InputReference $reference -SearchInDesiredConfiguration -DontFailIfNotExisting -Cmdlet $PSCmdlet
 				$hashtable["query"] = "/v1.0/groups/$($id)/transitiveMembers/microsoft.graph.user"
             }
+			"owners" {
+				$id = Resolve-Group -InputReference $reference -SearchInDesiredConfiguration -DontFailIfNotExisting -Cmdlet $PSCmdlet
+				$hashtable["query"] = "/v1.0/groups/$($id)/owners"
+			}
         }
 	}
 	end

@@ -5,18 +5,14 @@
 		[Parameter(Mandatory = $true)]
 		[string] $displayName,
 		[string[]] $oldNames,
-
 		[bool] $isViewingBeforeAcceptanceRequired = $true,
 		[bool] $isPerDeviceAcceptanceRequired = $false,
 		[string] $userReacceptRequiredFrequency,
-
 		[object] $termsExpiration,
 		[object[]] $files,
-
 		[bool] $present = $true,
-
 		[string] $sourceConfig = "<Custom>",
-
+		[string] $sourceFile = "<Custom>",
 		[System.Management.Automation.PSCmdlet]
 		$Cmdlet = $PSCmdlet
 	)
@@ -42,6 +38,7 @@
 			isPerDeviceAcceptanceRequired = $isPerDeviceAcceptanceRequired
 			present = $present
 			sourceConfig = $sourceConfig
+			sourceFile = $sourceFile
 		}
 
 		if ($PSBoundParameters.ContainsKey("oldNames")) {

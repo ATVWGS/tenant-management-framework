@@ -10,6 +10,9 @@ function Test-TmfAccessReview
 	[CmdletBinding()]
 	Param (
 		[string[]] $SpecificResources,
+		[string[]] $SourceFile,
+		[string[]] $SourceConfig,
+		[switch] $RawOutput,
 		[System.Management.Automation.PSCmdlet]
 		$Cmdlet = $PSCmdlet
 	)
@@ -19,6 +22,14 @@ function Test-TmfAccessReview
 		Test-GraphConnection -Cmdlet $Cmdlet
 		$resourceName = "accessReviews"
 		$tenant = (Invoke-MgGraphRequest -Method GET -Uri ("$script:graphBaseUrl/organization?`$select=displayname,id")).value
+
+		if (($SpecificResources -and $SourceFile -and $SourceConfig) -or ($SpecificResources -and $SourceFile) -or ($SourceFile -and $SourceConfig)) {
+			$exception = New-Object System.Data.DataException("Multiple filters are not supported. You can only filter by one type, sourceFile or sourceConfig or specificResources!")
+			$errorID = "MultipleFiltersNotSupported"
+			$category = [System.Management.Automation.ErrorCategory]::NotSpecified
+			$recordObject = New-Object System.Management.Automation.ErrorRecord($exception, $errorID, $category, $Cmdlet)
+			$cmdlet.ThrowTerminatingError($recordObject)
+		}
 	}
 	process
 	{
@@ -54,6 +65,16 @@ function Test-TmfAccessReview
 				}
 			}
 			$definitions = $definitions | Sort-Object -Property displayName -Unique
+		}
+		elseif ($SourceFile) {
+			foreach ($file in $SourceFile) {
+				$definitions += $script:desiredConfiguration[$resourceName] | Where-Object {$_.sourceFile -eq $file}
+			}
+		}
+		elseif ($SourceConfig) {
+			foreach ($config in $SourceConfig) {
+				$definitions += $script:desiredConfiguration[$resourceName] | Where-Object {$_.sourceConfig -eq $config}
+			}
 		}
 		else {
 			$definitions = $script:desiredConfiguration[$resourceName]
@@ -107,7 +128,7 @@ function Test-TmfAccessReview
 					$result["GraphResource"] = $resource
 					if ($definition.present) {
 						$changes = @()
-						foreach ($property in ($definition.Properties() | Where-Object {$_ -notin "displayName", "present"})) {
+						foreach ($property in ($definition.Properties() | Where-Object {$_ -notin "displayName", "present", "sourceFile", "sourceConfig"})) {
 							$change = [PSCustomObject] @{
 								Property = $property										
 								Actions = $null
@@ -120,20 +141,40 @@ function Test-TmfAccessReview
 											$change.Actions = @{"Set" = $definition.$property.$item}
 										}
 									}
-									foreach ($item in $definition.$property.recurrence.pattern.GetEnumerator().Name) {
-										if ($definition.$property.recurrence.pattern.$item -ne $resource.$property.recurrence.pattern.$item){
+									if ($definition.$property.recurrence.pattern -and $resource.$property.recurrence.pattern) {
+										foreach ($item in $definition.$property.recurrence.pattern.GetEnumerator().Name) {
+											if ($definition.$property.recurrence.pattern.$item -ne $resource.$property.recurrence.pattern.$item){
+												$change.Actions = @{"Set" = $definition.$property.recurrence.pattern}
+											}
+										}
+									}
+									else {
+										if (($definition.$property.recurrence.pattern -and (-not $resource.$property.recurrence.pattern)) -or ((-not $definition.$property.recurrence.pattern) -and $resource.$property.recurrence.pattern)) {
 											$change.Actions = @{"Set" = $definition.$property.recurrence.pattern}
 										}
 									}
+									
 									foreach ($item in $definition.$property.recurrence.range.GetEnumerator().Name) {
 										if ($definition.$property.recurrence.range.$item -ne $resource.$property.recurrence.range.$item){
-											$change.Actions = @{"Set" = $definition.$property.recurrence.range}
+											if ($null -eq $resource.$property.recurrence.range.$item -and $definition.$property.recurrence.range.$item -like "" ) {
+												#No change
+											}
+											else {
+												$change.Actions = @{"Set" = $definition.$property.recurrence.range}
+											}											
 										}
 									}
 								}
-								"reviewers" {
-									if (Compare-Object $definition.$property.query $resource.$property.query) {
-										$change.Actions = @{"Set" = $definition.$property}
+								{@("reviewers", "fallbackReviewers") -contains $_} {
+									if ($definition.$property -and $resource.$property) {
+										if (Compare-Object $definition.$property.query $resource.$property.query) {
+											$change.Actions = @{"Set" = $definition.$property}
+										}
+									}
+									else {
+										if (($definition.$property -and (-not $resource.$property)) -or ((-not $definition.$property) -and $resource.$property)) {
+											$change.Actions = @{"Set" = $definition.$property}
+										}
 									}
 								}
 								"scope" {
@@ -193,7 +234,12 @@ function Test-TmfAccessReview
 				}
 			}
 			
-			$result
+			if ($RawOutput) {
+				$result
+			}
+			else {
+				$result | Beautify-TmfTestResult
+			}
 		}
 	}
 }

@@ -36,7 +36,7 @@ Describe 'Tmf.Policies.AuthenticationStrengthPolicies.Invoke.Creation' {
     }
 
     It "should successfully invoke the TMF configuration" {
-        { Invoke-TmfAuthenticationStrengthPolicy -Verbose } | Should -Not -Throw
+        { Invoke-TmfAuthenticationStrengthPolicy -Confirm -Verbose } | Should -Not -Throw
     }
 }
 
@@ -82,7 +82,7 @@ Describe 'Tmf.Policies.Invoke.Deletion' {
     }
 
     It "should successfully invoke the authenticationStrengthPolicy definitions" {
-        { Invoke-TmfAuthenticationStrengthPolicy -Verbose } | Should -Not -Throw
+        { Invoke-TmfAuthenticationStrengthPolicy -Confirm -Verbose } | Should -Not -Throw
     }
 }
 

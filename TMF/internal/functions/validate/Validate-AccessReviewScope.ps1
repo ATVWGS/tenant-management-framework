@@ -2,7 +2,7 @@ function Validate-AccessReviewScope
 {
 	[CmdletBinding()]
 	Param (
-        [ValidateSet("group","directoryRole")]
+        [ValidateSet("group","groupGuests","directoryRole")]
         [string] $type,
 		[string] $subScope,
         [string] $reference,
@@ -27,6 +27,15 @@ function Validate-AccessReviewScope
 				}
 				$id = Resolve-Group -InputReference $reference -Cmdlet $PSCmdlet -SearchInDesiredConfiguration
 				$hashtable["query"] = "/v1.0/groups/$($id)/transitiveMembers/microsoft.graph.user"
+			}
+			"groupGuests" {
+				$hashtable = @{				
+					"@odata.type" = "#microsoft.graph.accessReviewQueryScope"
+					"queryType" = "MicrosoftGraph"
+					"queryRoot" = $null
+				}
+				$id = Resolve-Group -InputReference $reference -Cmdlet $PSCmdlet -SearchInDesiredConfiguration
+				$hashtable["query"] = "/v1.0/groups/$($id)/transitiveMembers/microsoft.graph.user/?`$count=true&`$filter=(userType eq 'Guest')"
 			}
 			"directoryRole" {
 				$id = Resolve-DirectoryRoleTemplate -InputReference $reference -Cmdlet $PSCmdlet

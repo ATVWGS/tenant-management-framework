@@ -37,7 +37,7 @@ function Resolve-AuthenticationStrengthPolicy
             return $authenticationStrengthPolicy
 		}
 		catch {
-			Write-PSFMessage -Level Warning -String 'TMF.CannotResolveResource' -StringValues "authenticationStrengthPolicy" -Tag 'failed' -ErrorRecord $_
+			Write-PSFMessage -Level Warning -Message ("Cannot resolve authenticationStrengthPolicy resource for input '{0}'. Searched tenant & desired configuration. Error: {1}" -f $InputReference,$_.Exception.Message) -Tag 'failed' -ErrorRecord $_
 			$Cmdlet.ThrowTerminatingError($_)				
 		}			
 	}

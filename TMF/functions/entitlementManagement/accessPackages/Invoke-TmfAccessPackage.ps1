@@ -7,6 +7,9 @@ function Invoke-TmfAccessPackage
 	[CmdletBinding()]
 	Param (
 		[string[]] $SpecificResources,
+		[string[]] $SourceFile,
+		[string[]] $SourceConfig,
+		[switch] $Confirm = $false,
 		[System.Management.Automation.PSCmdlet]
 		$Cmdlet = $PSCmdlet
 	)
@@ -19,15 +22,55 @@ function Invoke-TmfAccessPackage
 			return
 		}
 		Test-GraphConnection -Cmdlet $Cmdlet
+		$tenant = (Invoke-MgGraphRequest -Method GET -Uri ("$script:graphBaseUrl/organization?`$select=displayname,id")).value
+
+		if (($SpecificResources -and $SourceFile -and $SourceConfig) -or ($SpecificResources -and $SourceFile) -or ($SourceFile -and $SourceConfig)) {
+			$exception = New-Object System.Data.DataException("Multiple filters are not supported. You can only filter by one type, sourceFile or sourceConfig or specificResources!")
+			$errorID = "MultipleFiltersNotSupported"
+			$category = [System.Management.Automation.ErrorCategory]::NotSpecified
+			$recordObject = New-Object System.Management.Automation.ErrorRecord($exception, $errorID, $category, $Cmdlet)
+			$cmdlet.ThrowTerminatingError($recordObject)
+		}
 	}
 	process
 	{
 		if (Test-PSFFunctionInterrupt) { return }
-		if ($SpecificResources) {
-        	$testResults = Test-TmfAccessPackage -SpecificResources $SpecificResources -Cmdlet $Cmdlet
+		if (-not $Confirm) {
+			Write-PSFMessage -Level Host -FunctionName "Invoke-TmfAccessPackage" -String "TMF.TenantInformation" -StringValues $tenant.displayName, $tenant.Id
+			if ((Read-Host "Is this the correct tenant? [y/n]") -notin @("y","Y"))	{
+				Write-PSFMessage -Level Error -String "TMF.UserCanceled"
+				throw "Connected to the wrong tenant."
+			}
+			if ($SpecificResources) {
+				Write-PSFMessage -Level Host -FunctionName "Invoke-TmfAccessPackage" -String "TMF.Invoke.Confirmed" -StringValues "accessPackage configuration for resources: $($SpecificResources -join ",")"
+				$testResults = Test-TmfAccessPackage -SpecificResources $SpecificResources -RawOutput -Cmdlet $Cmdlet
+			}
+			elseif ($SourceFile) {
+				Write-PSFMessage -Level Host -FunctionName "Invoke-TmfAccessPackage" -String "TMF.Invoke.Confirmed" -StringValues "accessPackage configuration for SourceFile(s): $($SourceFile -join ",")"
+				$testResults = Test-TmfAccessPackage -SourceFile $SourceFile -RawOutput -Cmdlet $Cmdlet
+			}
+			elseif ($SourceConfig) {
+				Write-PSFMessage -Level Host -FunctionName "Invoke-TmfAccessPackage" -String "TMF.Invoke.Confirmed" -StringValues "accessPackage configuration for SourceConfig(s): $($SourceConfig -join ",")"
+				$testResults = Test-TmfAccessPackage -SourceConfig $SourceConfig -RawOutput -Cmdlet $Cmdlet
+			}
+			else {
+				Write-PSFMessage -Level Host -FunctionName "Invoke-TmfAccessPackage" -String "TMF.Invoke.Confirmed" -StringValues "all accessPackage configurations"
+				$testResults = Test-TmfAccessPackage -RawOutput -Cmdlet $Cmdlet
+			}
 		}
 		else {
-			$testResults = Test-TmfAccessPackage -Cmdlet $Cmdlet
+			if ($SpecificResources) {
+				$testResults = Test-TmfAccessPackage -SpecificResources $SpecificResources -RawOutput -Cmdlet $Cmdlet
+			}
+			elseif ($SourceFile) {
+				$testResults = Test-TmfAccessPackage -SourceFile $SourceFile -RawOutput -Cmdlet $Cmdlet
+			}
+			elseif ($SourceConfig) {
+				$testResults = Test-TmfAccessPackage -SourceConfig $SourceConfig -RawOutput -Cmdlet $Cmdlet
+			}
+			else {
+				$testResults = Test-TmfAccessPackage -RawOutput -Cmdlet $Cmdlet
+			}
 		}
 
 		foreach ($result in $testResults) {
@@ -63,6 +106,23 @@ function Invoke-TmfAccessPackage
 								$accessPackageResourceId = Resolve-AccessPackageResource -InputReference $roleScope.resourceIdentifier -CatalogId $catalogID
 								$roleOriginId = (Invoke-MgGraphRequest -Method GET -Uri ("$script:graphBaseUrl/identityGovernance/entitlementManagement/accessPackageCatalogs/{0}/accessPackageResourceRoles?`$filter=(originSystem eq 'AadApplication' and accessPackageResource/id eq '{1}' and displayname eq '{2}')" -f $catalogID,$accessPackageResourceId,$roleScope.resourceRole)).value.originId
 							}
+							"Sharepoint Online Site" {
+								$catalogID = Resolve-AccessPackageCatalog -InputReference $result.DesiredConfiguration.catalog
+								$roleOriginId = (Invoke-MgGraphRequest -Method GET -Uri ("$script:graphBaseUrl/identityGovernance/entitlementManagement/accessPackageCatalogs/{0}/accessPackageResourceRoles?`$filter=(originSystem eq 'SharePointOnline' and displayname eq '{1}')" -f $catalogID,$roleScope.resourceRole)).value.originId
+							}
+						}
+						if ($roleScope.resourceType -eq "Sharepoint Online Site") {
+							$accessPackageResourceScope = @{
+							"isRootScope" = $true
+							"originId" = $roleScope.originId()
+							"originSystem" = $roleScope.originSystem
+							}
+						}
+						else {
+							$accessPackageResourceScope = @{
+							"originId" = $roleScope.originId()
+							"originSystem" = $roleScope.originSystem
+							}
 						}
 						$requestBody = @{
 							"accessPackageResourceRole" = @{
@@ -76,10 +136,7 @@ function Invoke-TmfAccessPackage
 									"originSystem" = $roleScope.originSystem
 								}
 							}
-							"accessPackageResourceScope" = @{
-								"originId" = $roleScope.originId()
-								"originSystem" = $roleScope.originSystem
-							}
+							"accessPackageResourceScope" = $accessPackageResourceScope
 						}
 						try {
 							$requestBody = $requestBody | ConvertTo-Json -ErrorAction Stop -Depth 8
@@ -130,8 +187,26 @@ function Invoke-TmfAccessPackage
 														$roleScope = $result.DesiredConfiguration.accessPackageResourceRoleScopes | Where-Object {$_.displayName -eq $roleDisplayName}
 														$roleScopeOriginId = $roleOriginId
 													}
+													"Sharepoint Online Site" {
+														$roleScope = $result.DesiredConfiguration.accessPackageResourceRoleScopes | Where-Object {$_.resourceRole -eq $roleDisplayName}
+														$roleScopeOriginId = $roleOriginId
+													}
 												}
 												
+												if ($_.resourceType -eq "Sharepoint Online Site") {
+													$accessPackageResourceScope = @{
+													"isRootScope" = $true
+													"originId" = $roleScope.originId()
+													"originSystem" = $roleScope.originSystem
+													}
+												}
+												else {
+													$accessPackageResourceScope = @{
+													"originId" = $roleScope.originId()
+													"originSystem" = $roleScope.originSystem
+													}
+												}
+
 												$body = @{
 													"accessPackageResourceRole" = @{
 														"originId" = $roleScopeOriginId
@@ -144,10 +219,7 @@ function Invoke-TmfAccessPackage
 															"originSystem" = $roleScope.originSystem
 														}
 													}
-													"accessPackageResourceScope" = @{
-														"originId" = $roleScope.originId()
-														"originSystem" = $roleScope.originSystem
-													}
+													"accessPackageResourceScope" = $accessPackageResourceScope
 												} | ConvertTo-Json -ErrorAction Stop
 												Write-PSFMessage -Level Verbose -String "TMF.Invoke.SendingRequestWithBody" -StringValues $method, $url, $body
 												Invoke-MgGraphRequest -Method $method -Uri $url -Body $body | Out-Null

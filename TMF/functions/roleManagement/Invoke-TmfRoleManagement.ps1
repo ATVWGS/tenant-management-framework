@@ -8,9 +8,9 @@ function Invoke-TmfRoleManagement
 			roleAssignments, roleDefinitions, roleManagementPolicies
 	#>
 	Param (
-		[ValidateSet('AzureResources', 'AzureAD')]
+		[ValidateSet('AzureResources', 'AzureAD', 'AADGroup')]
         [string] $scope,
-		[switch] $DoNotRequireTenantConfirm
+		[switch] $Confirm = $false
 	)
 	
 	begin
@@ -21,8 +21,8 @@ function Invoke-TmfRoleManagement
 	}
 	process
 	{
-		Write-PSFMessage -Level Host -FunctionName "Invoke-TmfRoleManagement" -String "TMF.TenantInformation" -StringValues $tenant.displayName, $tenant.Id		
-		if (-Not $DoNotRequireTenantConfirm) {
+		Write-PSFMessage -Level Host -FunctionName "Invoke-TmfRoleManagement" -String "TMF.TenantInformation" -StringValues $tenant.displayName, $tenant.Id
+		if (-Not $Confirm) {
 			if ((Read-Host "Is this the correct tenant? [y/n]") -notin @("y","Y"))	{
 				Write-PSFMessage -Level Error -String "TMF.UserCanceled"
 				throw "Connected to the wrong tenant."
@@ -33,11 +33,11 @@ function Invoke-TmfRoleManagement
 			if ($script:desiredConfiguration[$resourceType.Name]) {
 				if ($scope) {
 					Write-PSFMessage -Level Host -FunctionName "Invoke-TmfRoleManagement" -String "TMF.StartingInvokeForScopedResource" -StringValues $resourceType.Name, $scope
-					& $resourceType.Value["invokeFunction"] -scope $scope -Cmdlet $PSCmdlet
+					& $resourceType.Value["invokeFunction"] -scope $scope -Cmdlet $PSCmdlet -Confirm
 				}
 				else {
 					Write-PSFMessage -Level Host -FunctionName "Invoke-TmfRoleManagement" -String "TMF.StartingInvokeForResource" -StringValues $resourceType.Name					
-					& $resourceType.Value["invokeFunction"] -Cmdlet $PSCmdlet
+					& $resourceType.Value["invokeFunction"] -Cmdlet $PSCmdlet -Confirm
 				}
 				Start-Sleep 5			
 			}						

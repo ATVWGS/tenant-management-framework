@@ -5,6 +5,8 @@
 		[Parameter(Mandatory = $true)]
 		[string] $InputReference,
 		[switch] $DontFailIfNotExisting,
+		[switch] $DisplayName,
+		[switch] $Expand, # Return object { id, displayName, roleTemplateId }
 		[switch] $SearchInDesiredConfiguration,
 		[System.Management.Automation.PSCmdlet]
 		$Cmdlet = $PSCmdlet
@@ -17,13 +19,36 @@
 	{			
 		try {
 			if ($InputReference -match $script:guidRegex) {
-				$role = (Invoke-MgGraphRequest -Method GET -Uri ("$script:graphBaseUrl/directoryRoles?`$filter=id eq '{0}'" -f $InputReference)).Id
+				$response = (Invoke-MgGraphRequest -Method GET -Uri ("$script:graphBaseUrl/directoryRoles?`$filter=id eq '{0}'" -f $InputReference)).Value
+				if ($DisplayName) {
+					$role = $response.displayName	
+				}
+				elseif ($Expand) {
+					$role = [pscustomObject]@{id = $response.id; displayName = $response.displayName; roleTemplateId = $response.roleTemplateId}
+				}
+				else {
+					$role = $response.Id
+				}
 			}
 			elseif ($InputReference -in @("All")) {
 				return $InputReference
 			}
 			else {
-				$role = (Invoke-MgGraphRequest -Method GET -Uri ("$script:graphBaseUrl/directoryRoles/?`$filter=displayName eq '{0}'" -f $InputReference)).Value.Id
+				$response = (Invoke-MgGraphRequest -Method GET -Uri ("$script:graphBaseUrl/directoryRoles/?`$filter=displayName eq '{0}'" -f $InputReference)).Value
+				if ($DisplayName) {
+					$role = $response.displayName
+				}
+				elseif ($Expand) {
+					if ($response) {
+						$role = [pscustomObject]@{id = $response.id; displayName = $response.displayName; roleTemplateId = $response.roleTemplateId}
+					}
+					else {
+						$role = $null
+					}
+				}
+				else {
+					$role = $response.Id
+				}
 			}
 
 			if (-Not $role -and $SearchInDesiredConfiguration) {

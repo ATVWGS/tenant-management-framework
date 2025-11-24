@@ -74,6 +74,7 @@ function Register-TmfDirectorySetting {
 		[Parameter(Mandatory = $true, ParameterSetName = "Consent Policy Settings")]
 		[bool] $EnableAdminConsentRequests,
 		[string] $sourceConfig = "<Custom>",
+		[string] $sourceFile = "<Custom>",
 		[bool] $present = $true,			
 		[System.Management.Automation.PSCmdlet]
 		$Cmdlet = $PSCmdlet
@@ -100,6 +101,8 @@ function Register-TmfDirectorySetting {
 		$object = [PSCustomObject] @{
 			present = $present
 			displayName = $displayName
+			sourceConfig = $sourceConfig
+			sourceFile = $sourceFile
 			templateId = $directorySettingsTemplate.id
         }
 

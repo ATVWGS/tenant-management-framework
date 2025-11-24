@@ -11,6 +11,9 @@ function Test-TmfRoleAssignment
 	Param (
         [ValidateSet('AzureResources', 'AzureAD', 'AADGroup')]
         [string] $scope,
+        [string[]] $SourceFile,
+		[string[]] $SourceConfig,
+        [switch] $RawOutput,
 		[System.Management.Automation.PSCmdlet]
 		$Cmdlet = $PSCmdlet
 	)
@@ -20,16 +23,40 @@ function Test-TmfRoleAssignment
         Test-GraphConnection -Cmdlet $Cmdlet
 		$resourceName = "roleAssignments"
         $tenant = (Invoke-MgGraphRequest -Method GET -Uri ("$script:graphBaseUrl/organization?`$select=displayname,id")).value
+
+        if (($scope -and $SourceFile -and $SourceConfig) -or ($scope -and $SourceFile) -or ($SourceFile -and $SourceConfig)) {
+			$exception = New-Object System.Data.DataException("Multiple filters are not supported. You can only filter by one type, sourceFile or sourceConfig or scope!")
+			$errorID = "MultipleFiltersNotSupported"
+			$category = [System.Management.Automation.ErrorCategory]::NotSpecified
+			$recordObject = New-Object System.Management.Automation.ErrorRecord($exception, $errorID, $category, $Cmdlet)
+			$cmdlet.ThrowTerminatingError($recordObject)
+		}
 	}
 	process
 	{
-        switch($scope) {
-            "AzureAD" {$definitions = $script:desiredConfiguration[$resourceName] | Where-Object {(($_ |get-member -MemberType noteproperty).Name -notcontains "subscriptionReference") -and (($_ |get-member -MemberType noteproperty).Name -notcontains "groupReference")}}
-            "AADGroup" {$definitions = $script:desiredConfiguration[$resourceName] | Where-Object {($_ |get-member -MemberType noteproperty).Name -contains "groupReference"}}
-            "AzureResources" {$definitions = $script:desiredConfiguration[$resourceName] | Where-Object {($_ |get-member -MemberType noteproperty).Name -contains "subscriptionReference"}}
-            default {$definitions = $script:desiredConfiguration[$resourceName]}
-        }
-    	
+        $definitions = @()
+
+        if ($scope) {
+            switch($scope) {
+                "AzureAD" {$definitions = $script:desiredConfiguration[$resourceName] | Where-Object {(($_ |get-member -MemberType noteproperty).Name -notcontains "subscriptionReference") -and (($_ |get-member -MemberType noteproperty).Name -notcontains "groupReference")}}
+                "AADGroup" {$definitions = $script:desiredConfiguration[$resourceName] | Where-Object {($_ |get-member -MemberType noteproperty).Name -contains "groupReference"}}
+                "AzureResources" {$definitions = $script:desiredConfiguration[$resourceName] | Where-Object {($_ |get-member -MemberType noteproperty).Name -contains "subscriptionReference"}}
+            }
+        }        
+    	elseif ($SourceFile) {
+			foreach ($file in $SourceFile) {
+				$definitions += $script:desiredConfiguration[$resourceName] | Where-Object {$_.sourceFile -eq $file}
+			}
+		}
+		elseif ($SourceConfig) {
+			foreach ($config in $SourceConfig) {
+				$definitions += $script:desiredConfiguration[$resourceName] | Where-Object {$_.sourceConfig -eq $config}
+			}					
+		}
+		else {
+			$definitions = $script:desiredConfiguration[$resourceName]
+		}
+
 		foreach ($definition in $definitions) {
 			foreach ($property in $definition.Properties()) {
 				if ($definition.$property.GetType().Name -eq "String") {
@@ -41,6 +68,10 @@ function Test-TmfRoleAssignment
                 $assignmentScope = "AzureResources"
                 Test-AzureConnection -Cmdlet $Cmdlet
                 $token = (Get-AzAccessToken -ResourceUrl $script:apiBaseUrl).Token
+                if ($token.GetType().Name -eq "SecureString") {
+                    $bstr = [System.Runtime.InteropServices.Marshal]::SecureStringToBSTR($token)
+                    $token = [System.Runtime.InteropServices.Marshal]::PtrToStringAuto($bstr)
+                }
             }
             else {
                 if ($definition.groupReference) {
@@ -122,7 +153,7 @@ function Test-TmfRoleAssignment
                             if ($definition.present) {
                                 $changes = @()
                                 if ($definition.type -eq "eligible") {
-                                    foreach ($property in ($definition.Properties() | Where-Object {$_ -notin "displayName", "present"})) {
+                                    foreach ($property in ($definition.Properties() | Where-Object {$_ -notin "displayName", "present", "sourceConfig", "sourceFile"})) {
                                         $change = [PSCustomObject] @{
                                             Property = $property										
                                             Actions = $null
@@ -173,7 +204,12 @@ function Test-TmfRoleAssignment
                         }
                     }
                     
-                    $result
+                    if ($RawOutput) {
+                        $result
+                    }
+                    else {
+                        $result | Beautify-TmfTestResult
+                    }
                 }
                 "AzureAD" {
                     $result = @{
@@ -195,7 +231,7 @@ function Test-TmfRoleAssignment
                         switch ($definition.directoryScopeType) {
                             "directory" {$directoryScopeId="/"}
                             "administrativeUnit" {$directoryScopeId="/administrativeUnits/"+$(Resolve-AdministrativeUnit -InputReference $definition.directoryScopeReference -SearchInDesiredConfiguration)}
-                            
+                            "application" {$directoryScopeId="/"+$((Resolve-Application -InputReference $definition.directoryScopeReference -SearchInDesiredConfiguration -Expand).servicePrincipalId)}
                         }
 
                         switch ($definition.type) {
@@ -203,6 +239,19 @@ function Test-TmfRoleAssignment
                                 try {
                                     $resource = @()
                                     $resource += (Invoke-MgGraphRequest -Method GET -Uri ("$($script:graphBaseUrl)/roleManagement/directory/roleEligibilitySchedules?`$filter=principalId eq '{0}' and roleDefinitionId eq '{1}' and directoryScopeId eq '{2}'" -f $principalId,$roleDefinitionId,$directoryScopeId)).value
+
+                                    #Check if an assignment for a custom role exists, based on the name (Graph bug)
+                                    if (-not $resource) {
+                                        $principalAssignments = @()
+                                        $principalAssignments += (Invoke-MgGraphRequest -Method GET -Uri ("$($script:graphBaseUrl)/roleManagement/directory/roleEligibilitySchedules?`$filter=principalId eq '{0}' and directoryScopeId eq '{1}'" -f $principalId,$directoryScopeId)).value
+                                        if ($principalAssignments) {
+                                            foreach ($assignment in $principalAssignments) {
+                                                if ((Invoke-MgGraphRequest -Method GET -Uri ("$($script:graphBaseUrl)/roleManagement/directory/roleDefinitions/{0}" -f $assignment.roleDefinitionId)).displayName -eq $definition.roleReference) {
+                                                    $resource += $assignment
+                                                }
+                                            }
+                                        }
+                                    }                                    
                                 }
                                 catch {
                                     $resource = @()
@@ -213,6 +262,19 @@ function Test-TmfRoleAssignment
                                 try {
                                     $resource = @()
                                     $resource += (Invoke-MgGraphRequest -Method GET -Uri ("$($script:graphBaseUrl)/roleManagement/directory/roleAssignmentSchedules?`$filter=principalId eq '{0}' and roleDefinitionId eq '{1}' and directoryScopeId eq '{2}'" -f $principalId,$roleDefinitionId,$directoryScopeId)).value
+
+                                    #Check if an assignment for a custom role exists, based on the name (Graph bug)
+                                    if (-not $resource) {
+                                        $principalAssignments = @()
+                                        $principalAssignments += (Invoke-MgGraphRequest -Method GET -Uri ("$($script:graphBaseUrl)/roleManagement/directory/roleAssignmentSchedules?`$filter=principalId eq '{0}' and directoryScopeId eq '{1}'" -f $principalId,$directoryScopeId)).value
+                                        if ($principalAssignments) {
+                                            foreach ($assignment in $principalAssignments) {
+                                                if ((Invoke-MgGraphRequest -Method GET -Uri ("$($script:graphBaseUrl)/roleManagement/directory/roleDefinitions/{0}" -f $assignment.roleDefinitionId)).displayName -eq $definition.roleReference) {
+                                                    $resource += $assignment
+                                                }
+                                            }
+                                        }
+                                    }   
                                 }
                                 catch {
                                     $resource = @()
@@ -243,7 +305,7 @@ function Test-TmfRoleAssignment
                             if ($definition.present) {
                                 $changes = @()
 
-                                foreach ($property in ($definition.Properties() | Where-Object {$_ -notin "displayName", "present", "startDateTime"})) {
+                                foreach ($property in ($definition.Properties() | Where-Object {$_ -notin "displayName", "present", "startDateTime", "sourceConfig", "sourceFile"})) {
                                     $change = [PSCustomObject] @{
                                         Property = $property										
                                         Actions = $null
@@ -287,7 +349,12 @@ function Test-TmfRoleAssignment
                         }
                     }
                     
-                    $result
+                    if ($RawOutput) {
+                        $result
+                    }
+                    else {
+                        $result | Beautify-TmfTestResult
+                    }
                 }
                 "AADGroup" {
                     $result = @{
@@ -352,7 +419,7 @@ function Test-TmfRoleAssignment
                             if ($definition.present) {
                                 $changes = @()
 
-                                foreach ($property in ($definition.Properties() | Where-Object {$_ -notin "displayName", "present", "startDateTime"})) {
+                                foreach ($property in ($definition.Properties() | Where-Object {$_ -notin "displayName", "present", "startDateTime", "sourceConfig", "sourceFile"})) {
                                     $change = [PSCustomObject] @{
                                         Property = $property										
                                         Actions = $null
@@ -396,7 +463,12 @@ function Test-TmfRoleAssignment
                         }
                     }
                     
-                    $result
+                    if ($RawOutput) {
+                        $result
+                    }
+                    else {
+                        $result | Beautify-TmfTestResult
+                    }
                 }
             }
 		}

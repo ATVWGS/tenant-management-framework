@@ -8,6 +8,7 @@ function Register-TmfAuthenticationStrengthPolicy {
         [string[]] $allowedCombinations,
 		[bool] $present = $true,
         [string] $sourceConfig = "<Custom>",
+		[string] $sourceFile = "<Custom>",
 		[System.Management.Automation.PSCmdlet]
 		$Cmdlet = $PSCmdlet
 	)
@@ -34,6 +35,7 @@ function Register-TmfAuthenticationStrengthPolicy {
 			policyType = "custom"
 			present = $present
             sourceConfig = $sourceConfig
+			sourceFile = $sourceFile
         }
 
 		#Verify that only allowed authentication combinations are used

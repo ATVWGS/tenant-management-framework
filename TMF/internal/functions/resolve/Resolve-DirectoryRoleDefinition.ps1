@@ -6,6 +6,8 @@
 		[string] $InputReference,
 		[switch] $DontFailIfNotExisting,
 		[switch] $SearchInDesiredConfiguration,
+		[switch] $Expand, # Return object { id, displayName }
+		[switch] $DisplayName,
 		[System.Management.Automation.PSCmdlet]
 		$Cmdlet = $PSCmdlet
 	)
@@ -16,11 +18,13 @@
 	process
 	{			
 		try {
+			$detail = $null; $roleDefinition = $null
 			if ($InputReference -match $script:guidRegex) {
-				$roleDefinition = (Invoke-MgGraphRequest -Method GET -Uri ("$script:graphBaseUrl/roleManagement/directory/roleDefinitions/{0}" -f $InputReference)).Id
-			}
-			else {
-				$roleDefinition = (Invoke-MgGraphRequest -Method GET -Uri ("$script:graphBaseUrl/roleManagement/directory/roleDefinitions/?`$filter=displayName eq '{0}'" -f $InputReference)).Value.Id
+				$detail = Invoke-MgGraphRequest -Method GET -Uri ("$script:graphBaseUrl/roleManagement/directory/roleDefinitions/{0}?`$select=id,displayName" -f $InputReference)
+				$roleDefinition = $detail.id
+			} else {
+				$detail = (Invoke-MgGraphRequest -Method GET -Uri ("$script:graphBaseUrl/roleManagement/directory/roleDefinitions/?`$filter=displayName eq '{0}'&`$select=id,displayName" -f $InputReference)).value | Select-Object -First 1
+				$roleDefinition = $detail.id
 			}
 
 			if (-Not $roleDefinition -and $SearchInDesiredConfiguration) {
@@ -33,10 +37,11 @@
 			elseif (-Not $roleDefinition -and $DontFailIfNotExisting) { return }
 
 			if ($roleDefinition.count -gt 1) { throw "Got multiple directory/roleDefinitions for $InputReference" }
-			return $roleDefinition
+			if (-not $Expand) { if ($DisplayName) { return ($detail.displayName) } return $roleDefinition }
+			return [pscustomobject]@{ id=$roleDefinition; displayName=$detail.displayName }
 		}
 		catch {
-			Write-PSFMessage -Level Warning -String 'TMF.CannotResolveResource' -StringValues "DirectoryRoleDefinition" -Tag 'failed' -ErrorRecord $_
+			Write-PSFMessage -Level Warning -Message ("Cannot resolve DirectoryRoleDefinition resource for input '{0}'. Searched tenant & desired configuration. Error: {1}" -f $InputReference,$_.Exception.Message) -Tag 'failed' -ErrorRecord $_
 			$Cmdlet.ThrowTerminatingError($_)				
 		}			
 	}

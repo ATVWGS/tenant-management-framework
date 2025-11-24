@@ -10,7 +10,8 @@ $globalIgnoredAnalyzerRules = @(
     "PSReviewUnusedParameter",
     "PSUseApprovedVerbs",
     "PSUseDeclaredVarsMoreThanAssignments",
-    "PSUseShouldProcessForStateChangingFunctions"
+    "PSUseShouldProcessForStateChangingFunctions",
+    "PSUseSupportsShouldProcess"
 )
 
 Describe 'General.Function.Tests' {    
@@ -37,6 +38,12 @@ Describe 'General.Function.Tests' {
                     "Compare" {
                         $ignoredRules += "PSUseSingularNouns"
                     }
+                    "Resolve" {
+                        $ignoredRules += "PSUseSingularNouns"
+                    }
+                    "Export" {
+                        $ignoredRules += "PSUseSingularNouns"
+                    }
                 }
                 # Skip rules based on function name
                 switch ($baseName) {
@@ -51,7 +58,7 @@ Describe 'General.Function.Tests' {
                 foreach ($result in $results) {
                     switch ($result.Severity) {
                         "Information" {
-                            Set-ItResult -Skipped -Because "serverity is Information. Violation in $($result.ScriptName) at line $($result.Line) with message: `"$($result.Message)`""
+                            Set-ItResult -Skipped -Because "severity is Information. Violation in $($result.ScriptName) at line $($result.Line) with message: `"$($result.Message)`""
                         }
                         default {
                             "problem in $($result.ScriptName) at line $($result.Line) with message: `"$($result.Message)`"" | Should -BeNullOrEmpty

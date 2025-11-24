@@ -7,6 +7,9 @@ function Invoke-TmfCustomSecurityAttributeAllowedValue
 	[CmdletBinding()]
 	Param (
 		[string[]] $SpecificResources,
+		[string[]] $SourceFile,
+		[string[]] $SourceConfig,
+		[switch] $Confirm = $false,
 		[System.Management.Automation.PSCmdlet]
 		$Cmdlet = $PSCmdlet
 	)
@@ -19,15 +22,55 @@ function Invoke-TmfCustomSecurityAttributeAllowedValue
 			return
 		}
 		Test-GraphConnection -Cmdlet $Cmdlet
+		$tenant = (Invoke-MgGraphRequest -Method GET -Uri ("$script:graphBaseUrl/organization?`$select=displayname,id")).value
+
+		if (($SpecificResources -and $SourceFile -and $SourceConfig) -or ($SpecificResources -and $SourceFile) -or ($SourceFile -and $SourceConfig)) {
+			$exception = New-Object System.Data.DataException("Multiple filters are not supported. You can only filter by one type, sourceFile or sourceConfig or specificResources!")
+			$errorID = "MultipleFiltersNotSupported"
+			$category = [System.Management.Automation.ErrorCategory]::NotSpecified
+			$recordObject = New-Object System.Management.Automation.ErrorRecord($exception, $errorID, $category, $Cmdlet)
+			$cmdlet.ThrowTerminatingError($recordObject)
+		}
 	}
 	process
 	{
 		if (Test-PSFFunctionInterrupt) { return }
-		if ($SpecificResources) {
-        	$testResults = Test-TmfCustomSecurityAttributeAlloweValue -SpecificResources $SpecificResources -Cmdlet $Cmdlet
+		if (-not $Confirm) {
+			Write-PSFMessage -Level Host -FunctionName "Invoke-TmfCustomSecurityAttributeAllowedValue" -String "TMF.TenantInformation" -StringValues $tenant.displayName, $tenant.Id
+			if ((Read-Host "Is this the correct tenant? [y/n]") -notin @("y","Y"))	{
+				Write-PSFMessage -Level Error -String "TMF.UserCanceled"
+				throw "Connected to the wrong tenant."
+			}
+			if ($SpecificResources) {
+				Write-PSFMessage -Level Host -FunctionName "Invoke-TmfCustomSecurityAttributeAllowedValue" -String "TMF.Invoke.Confirmed" -StringValues "customSecurityAttributeAllowedValue configuration for resources: $($SpecificResources -join ",")"
+				$testResults = Test-TmfCustomSecurityAttributeAllowedValue -SpecificResources $SpecificResources -RawOutput -Cmdlet $Cmdlet
+			}
+			elseif ($SourceFile) {
+				Write-PSFMessage -Level Host -FunctionName "Invoke-TmfCustomSecurityAttributeAllowedValue" -String "TMF.Invoke.Confirmed" -StringValues "customSecurityAttributeAllowedValue configuration for SourceFile(s): $($SourceFile -join ",")"
+				$testResults = Test-TmfCustomSecurityAttributeAllowedValue -SourceFile $SourceFile -RawOutput -Cmdlet $Cmdlet
+			}
+			elseif ($SourceConfig) {
+				Write-PSFMessage -Level Host -FunctionName "Invoke-TmfCustomSecurityAttributeAllowedValue" -String "TMF.Invoke.Confirmed" -StringValues "customSecurityAttributeAllowedValue configuration for SourceConfig(s): $($SourceConfig -join ",")"
+				$testResults = Test-TmfCustomSecurityAttributeAllowedValue -SourceConfig $SourceConfig -RawOutput -Cmdlet $Cmdlet
+			}
+			else {
+				Write-PSFMessage -Level Host -FunctionName "Invoke-TmfCustomSecurityAttributeAllowedValue" -String "TMF.Invoke.Confirmed" -StringValues "all customSecurityAttributeAllowedValue configurations"
+				$testResults = Test-TmfCustomSecurityAttributeAllowedValue -RawOutput -Cmdlet $Cmdlet
+			}
 		}
 		else {
-			$testResults = Test-TmfCustomSecurityAttributeAllowedValue -Cmdlet $Cmdlet
+			if ($SpecificResources) {
+				$testResults = Test-TmfCustomSecurityAttributeAllowedValue -SpecificResources $SpecificResources -RawOutput -Cmdlet $Cmdlet
+			}
+			elseif ($SourceFile) {
+				$testResults = Test-TmfCustomSecurityAttributeAllowedValue -SourceFile $SourceFile -RawOutput -Cmdlet $Cmdlet
+			}
+			elseif ($SourceConfig) {
+				$testResults = Test-TmfCustomSecurityAttributeAllowedValue -SourceConfig $SourceConfig -RawOutput -Cmdlet $Cmdlet
+			}
+			else {
+				$testResults = Test-TmfCustomSecurityAttributeAllowedValue -RawOutput -Cmdlet $Cmdlet
+			}
 		}
 
 		foreach ($result in $testResults) {

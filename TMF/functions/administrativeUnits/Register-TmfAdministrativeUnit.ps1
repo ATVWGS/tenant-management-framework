@@ -5,23 +5,23 @@ function Register-TmfAdministrativeUnit
 		[Parameter(Mandatory = $true)]
 		[string] $displayName,
 		[string[]] $oldNames,
-
 		[string] $description,
         [string] $visibility,
-        
 		[string] $membershipType = "assigned",
 		[Parameter(ParameterSetName="dynamic")]
 		[string] $membershipRule,
 		[Parameter(ParameterSetName="dynamic")]
 		[string] $membershipRuleProcessingState,
-
 		[Parameter(ParameterSetName="assigned")]
-        [string[]] $members,
+        [string[]] $users,
 		[Parameter(ParameterSetName="assigned")]
         [string[]] $groups,
-
+		[Parameter(ParameterSetName="assigned")]
+        [string[]] $devices,
         [object[]] $scopedRoleMembers,
 		[bool] $present = $true,
+		[string] $sourceConfig = "<Custom>",
+		[string] $sourceFile = "<Custom>",
 		[System.Management.Automation.PSCmdlet]
 		$Cmdlet = $PSCmdlet
 	)
@@ -50,6 +50,8 @@ function Register-TmfAdministrativeUnit
 			visibility = $visibility
 			membershipType = $membershipType
 			present = $present
+			sourceConfig = $sourceConfig
+			sourceFile = $sourceFile
 		}
 
 		if (($membershipType -eq "dynamic" -and (-not $PSBoundParameters.ContainsKey("membershipRule"))) -or ($membershipType -eq "assigned" -and ($PSBoundParameters.ContainsKey("membershipRule") -or $PSBoundParameters.ContainsKey("membershipRuleProcessingState")))) {
@@ -62,7 +64,7 @@ function Register-TmfAdministrativeUnit
 			Add-Member -InputObject $object -MemberType NoteProperty -Name "oldNames" -Value @($oldNames | ForEach-Object {Resolve-String $_})
 		}
 
-		"members", "groups", "scopedRoleMembers", "membershipRule", "membershipRuleProcessingState" | ForEach-Object {
+		"users", "groups", "devices", "scopedRoleMembers", "membershipRule", "membershipRuleProcessingState" | ForEach-Object {
 			if ($PSBoundParameters.ContainsKey($_)) {
 				Add-Member -InputObject $object -MemberType NoteProperty -Name $_ -Value $PSBoundParameters[$_];
 			}

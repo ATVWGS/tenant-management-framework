@@ -7,6 +7,9 @@ function Invoke-TmfAccessPackageCatalog
 	[CmdletBinding()]
 	Param (
 		[string[]] $SpecificResources,
+		[string[]] $SourceFile,
+		[string[]] $SourceConfig,
+		[switch] $Confirm = $false,
 		[System.Management.Automation.PSCmdlet]
 		$Cmdlet = $PSCmdlet
 	)
@@ -19,22 +22,62 @@ function Invoke-TmfAccessPackageCatalog
 			return
 		}
 		Test-GraphConnection -Cmdlet $Cmdlet
+		$tenant = (Invoke-MgGraphRequest -Method GET -Uri ("$script:graphBaseUrl/organization?`$select=displayname,id")).value
+
+		if (($SpecificResources -and $SourceFile -and $SourceConfig) -or ($SpecificResources -and $SourceFile) -or ($SourceFile -and $SourceConfig)) {
+			$exception = New-Object System.Data.DataException("Multiple filters are not supported. You can only filter by one type, sourceFile or sourceConfig or specificResources!")
+			$errorID = "MultipleFiltersNotSupported"
+			$category = [System.Management.Automation.ErrorCategory]::NotSpecified
+			$recordObject = New-Object System.Management.Automation.ErrorRecord($exception, $errorID, $category, $Cmdlet)
+			$cmdlet.ThrowTerminatingError($recordObject)
+		}
 	}
 	process
 	{
 		if (Test-PSFFunctionInterrupt) { return }
-		if ($SpecificResources) {
-        	$testResults = Test-TmfAccessPackageCatalog -SpecificResources $SpecificResources -Cmdlet $Cmdlet
+		if (-not $Confirm) {
+			Write-PSFMessage -Level Host -FunctionName "Invoke-TmfAccessPackageCatalog" -String "TMF.TenantInformation" -StringValues $tenant.displayName, $tenant.Id
+			if ((Read-Host "Is this the correct tenant? [y/n]") -notin @("y","Y"))	{
+				Write-PSFMessage -Level Error -String "TMF.UserCanceled"
+				throw "Connected to the wrong tenant."
+			}
+			if ($SpecificResources) {
+				Write-PSFMessage -Level Host -FunctionName "Invoke-TmfAccessPackageCatalog" -String "TMF.Invoke.Confirmed" -StringValues "accessPackageCatalog configuration for resources: $($SpecificResources -join ",")"
+				$testResults = Test-TmfAccessPackageCatalog -SpecificResources $SpecificResources -RawOutput -Cmdlet $Cmdlet
+			}
+			elseif ($SourceFile) {
+				Write-PSFMessage -Level Host -FunctionName "Invoke-TmfAccessPackageCatalog" -String "TMF.Invoke.Confirmed" -StringValues "accessPackageCatalog configuration for SourceFile(s): $($SourceFile -join ",")"
+				$testResults = Test-TmfAccessPackageCatalog -SourceFile $SourceFile -RawOutput -Cmdlet $Cmdlet
+			}
+			elseif ($SourceConfig) {
+				Write-PSFMessage -Level Host -FunctionName "Invoke-TmfAccessPackageCatalog" -String "TMF.Invoke.Confirmed" -StringValues "accessPackageCatalog configuration for SourceConfig(s): $($SourceConfig -join ",")"
+				$testResults = Test-TmfAccessPackageCatalog -SourceConfig $SourceConfig -RawOutput -Cmdlet $Cmdlet
+			}
+			else {
+				Write-PSFMessage -Level Host -FunctionName "Invoke-TmfAccessPackageCatalog" -String "TMF.Invoke.Confirmed" -StringValues "all accessPackageCatalog configurations"
+				$testResults = Test-TmfAccessPackageCatalog -RawOutput -Cmdlet $Cmdlet
+			}
 		}
 		else {
-			$testResults = Test-TmfAccessPackageCatalog -Cmdlet $Cmdlet
+			if ($SpecificResources) {
+				$testResults = Test-TmfAccessPackageCatalog -SpecificResources $SpecificResources -RawOutput -Cmdlet $Cmdlet
+			}
+			elseif ($SourceFile) {
+				$testResults = Test-TmfAccessPackageCatalog -SourceFile $SourceFile -RawOutput -Cmdlet $Cmdlet
+			}
+			elseif ($SourceConfig) {
+				$testResults = Test-TmfAccessPackageCatalog -SourceConfig $SourceConfig -RawOutput -Cmdlet $Cmdlet
+			}
+			else {
+				$testResults = Test-TmfAccessPackageCatalog -RawOutput -Cmdlet $Cmdlet
+			}
 		}
 
 		foreach ($result in $testResults) {
 			Beautify-TmfTestResult -TestResult $result -FunctionName $MyInvocation.MyCommand
 			switch ($result.ActionType) {
 				"Create" {
-					$requestUrl = "$script:graphBaseUrl/identityGovernance/entitlementManagement/accessPackageCatalogs"
+					$requestUrl = "$script:graphBaseUrl/identityGovernance/entitlementManagement/catalogs"
 					$requestMethod = "POST"
 					$requestBody = @{						
 						"displayName" = $result.DesiredConfiguration.displayName
@@ -52,7 +95,7 @@ function Invoke-TmfAccessPackageCatalog
 					}
 				}
 				"Delete" {
-					$requestUrl = "$script:graphBaseUrl/identityGovernance/entitlementManagement/accessPackageCatalogs/{0}" -f $result.GraphResource.Id
+					$requestUrl = "$script:graphBaseUrl/identityGovernance/entitlementManagement/catalogs/{0}" -f $result.GraphResource.Id
 					$requestMethod = "DELETE"
 					try {
 						Write-PSFMessage -Level Verbose -String "TMF.Invoke.SendingRequest" -StringValues $requestMethod, $requestUrl
@@ -64,7 +107,7 @@ function Invoke-TmfAccessPackageCatalog
 					}
 				}
 				"Update" {
-					$requestUrl = "$script:graphBaseUrl/identityGovernance/entitlementManagement/accessPackageCatalogs/{0}" -f $result.GraphResource.Id
+					$requestUrl = "$script:graphBaseUrl/identityGovernance/entitlementManagement/catalogs/{0}" -f $result.GraphResource.Id
 					$requestMethod = "PATCH"
 					$requestBody = @{}
 					foreach ($change in $result.Changes) {						

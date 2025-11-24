@@ -10,6 +10,9 @@ function Test-TmfRoleManagementPolicy {
 	Param (
         [ValidateSet('AzureResources', 'AzureAD', 'AADGroup')]
         [string] $scope,
+        [string[]] $SourceFile,
+		[string[]] $SourceConfig,
+        [switch] $RawOutput,
 		[System.Management.Automation.PSCmdlet]
 		$Cmdlet = $PSCmdlet
 	)
@@ -18,16 +21,39 @@ function Test-TmfRoleManagementPolicy {
         Test-GraphConnection -Cmdlet $Cmdlet
 		$resourceName = "roleManagementPolicies"
         $tenant = (Invoke-MgGraphRequest -Method GET -Uri ("$script:graphBaseUrl/organization?`$select=displayname,id")).value
+
+        if (($scope -and $SourceFile -and $SourceConfig) -or ($scope -and $SourceFile) -or ($SourceFile -and $SourceConfig)) {
+			$exception = New-Object System.Data.DataException("Multiple filters are not supported. You can only filter by one type, sourceFile or sourceConfig or scope!")
+			$errorID = "MultipleFiltersNotSupported"
+			$category = [System.Management.Automation.ErrorCategory]::NotSpecified
+			$recordObject = New-Object System.Management.Automation.ErrorRecord($exception, $errorID, $category, $Cmdlet)
+			$cmdlet.ThrowTerminatingError($recordObject)
+		}
     }
 
     process {
 
-        switch ($scope) {
-            "AADGroup" {$definitions = $script:desiredConfiguration[$resourceName] | Where-Object {$_.scopeType -eq "group"}}
-            "AzureAD" {$definitions = $script:desiredConfiguration[$resourceName] | Where-Object {($_ |get-member -MemberType noteproperty).Name -notcontains "subscriptionReference" -and $_.scopeType -ne "group"}}
-            "AzureResources" {$definitions = $script:desiredConfiguration[$resourceName] | Where-Object {($_ |get-member -MemberType noteproperty).Name -contains "subscriptionReference"}}
-            default {$definitions = $script:desiredConfiguration[$resourceName]}
-        }
+        $definitions = @()
+        if ($scope) {
+            switch($scope) {
+                "AADGroup" {$definitions = $script:desiredConfiguration[$resourceName] | Where-Object {$_.scopeType -eq "group"}}
+                "AzureAD" {$definitions = $script:desiredConfiguration[$resourceName] | Where-Object {($_ |get-member -MemberType noteproperty).Name -notcontains "subscriptionReference" -and $_.scopeType -ne "group"}}
+                "AzureResources" {$definitions = $script:desiredConfiguration[$resourceName] | Where-Object {($_ |get-member -MemberType noteproperty).Name -contains "subscriptionReference"}}
+            }
+        }        
+    	elseif ($SourceFile) {
+			foreach ($file in $SourceFile) {
+				$definitions += $script:desiredConfiguration[$resourceName] | Where-Object {$_.sourceFile -eq $file}
+			}
+		}
+		elseif ($SourceConfig) {
+			foreach ($config in $SourceConfig) {
+				$definitions += $script:desiredConfiguration[$resourceName] | Where-Object {$_.sourceConfig -eq $config}
+			}					
+		}
+		else {
+			$definitions = $script:desiredConfiguration[$resourceName]
+		}
 
         foreach ($definition in $definitions) {
 			foreach ($property in $definition.Properties()) {
@@ -40,6 +66,10 @@ function Test-TmfRoleManagementPolicy {
                 $assignmentScope = "AzureResources"
                 Test-AzureConnection -Cmdlet $Cmdlet
                 $token = (Get-AzAccessToken -ResourceUrl $script:apiBaseUrl).Token
+                if ($token.GetType().Name -eq "SecureString") {
+                    $bstr = [System.Runtime.InteropServices.Marshal]::SecureStringToBSTR($token)
+                    $token = [System.Runtime.InteropServices.Marshal]::PtrToStringAuto($bstr)
+                }
             }
             else {
                 if ($definition.scopeType -eq "group") {
@@ -448,7 +478,12 @@ function Test-TmfRoleManagementPolicy {
                 }
             }
 
-            $result
+            if ($RawOutput) {
+				$result
+			}
+			else {
+				$result | Beautify-TmfTestResult
+			}
         }        
     }
     end{}
