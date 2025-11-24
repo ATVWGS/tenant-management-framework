@@ -180,11 +180,7 @@
 		'Export-TmfDirectorySetting',
 		'Register-TmfDirectorySetting',
 		'Test-TmfDirectorySetting',
-		'Invoke-TmfDirectorySetting',
-		'Export-TmfUser',
-		'Register-TmfUser',
-		'Test-TmfUser',
-		'Invoke-TmfUser'
+		'Invoke-TmfDirectorySetting'
 	)
 
 	# Cmdlets to export from this module
