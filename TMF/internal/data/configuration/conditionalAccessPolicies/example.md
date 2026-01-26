@@ -12,6 +12,7 @@ Additional properties will be added in the future.
     "includeRoles": [],
     "includeUsers": ["All"],
     "includeApplications": ["All"],
+    "includeAuthenticationContextClassReferences": ["c1"],
     "excludeLocations": [],
     "includeLocations": ["All"],
     "clientAppTypes": ["browser", "mobileAppsAndDesktopClients"],

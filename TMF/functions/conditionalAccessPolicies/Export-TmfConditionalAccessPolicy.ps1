@@ -115,6 +115,9 @@ function Export-TmfConditionalAccessPolicy {
                     if ($policy.conditions.applications.applicationFilter) {
                         $obj.applicationFilter = $policy.conditions.applications.applicationFilter
                     }
+                    if ($policy.conditions.applications.includeAuthenticationContextClassReferences) {
+                        $obj.includeAuthenticationContextClassReferences = $policy.conditions.applications.includeAuthenticationContextClassReferences
+                    }
                 }
                 if ($policy.conditions.locations) {
                     if ($policy.conditions.locations.includeLocations) {

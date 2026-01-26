@@ -4,6 +4,7 @@ function Validate-ConditionalAccessApplications
 	Param (
 		[string[]] $includeApplications,
 		[string[]] $excludeApplications,
+		[string[]] $includeAuthenticationContextClassReferences,
 		[string[]] $includeUserActions,
 		[object] $applicationFilter,
 		[System.Management.Automation.PSCmdlet]
@@ -35,6 +36,9 @@ function Validate-ConditionalAccessApplications
 				}
 				{$_ -in @("includeApplications","excludeApplications")} {
 					$validated = @($property.Value | Foreach-Object {Resolve-Application -InputReference $_ -SearchInDesiredConfiguration -Cmdlet $Cmdlet})
+				}
+				"includeAuthenticationContextClassReferences" {
+					$validated = @($property.Value)
 				}
 			}
 			$hashtable[$property.Key] = $validated
