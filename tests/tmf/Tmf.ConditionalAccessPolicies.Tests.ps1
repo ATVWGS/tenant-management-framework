@@ -109,7 +109,7 @@ Describe 'Tmf.ConditionalAccessPolicies.Invoke.Deletion' {
 Describe 'Tmf.ConditionalAccessPolicies.Validate.Deletion' {
 
     BeforeAll {
-        Start-Sleep 10
+        Start-Sleep 25
     }
 
     $testCases = $global:definitions["conditionalAccessPolicies"] | Foreach-Object {
