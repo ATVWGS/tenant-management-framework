@@ -153,6 +153,11 @@ function Test-TmfAuthenticationMethodsPolicy {
 														}
 													}
 												}
+												elseif ($method.$methodProperty.$item.GetType().Name -eq "PSCustomObject") {
+													if (Compare-HashTable ($method.$methodProperty.$item | Convertto-PSFHashtable) $resourceMethod.$methodProperty.$item) {
+														$methodChange = $true
+													}
+												}
 												else {
 													if ($method.$methodProperty.$item -ne $resourceMethod.$methodProperty.$item) {
 														Write-Verbose $item

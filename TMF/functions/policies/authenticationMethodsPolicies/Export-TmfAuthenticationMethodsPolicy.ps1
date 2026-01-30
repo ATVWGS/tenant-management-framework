@@ -20,7 +20,7 @@ Export-TmfAuthenticationMethodsPolicy | ConvertTo-Json -Depth 15
 #>
 function Export-TmfAuthenticationMethodsPolicy {
 
-    [Diagnostics.CodeAnalysis.SuppressMessageAttribute("PSAvoidDefaultValueSwitchParameter")]
+    [Diagnostics.CodeAnalysis.SuppressMessageAttribute("PSAvoidDefaultValueSwitchParameter","")]
 
     [CmdletBinding()] param(
         [string[]] $SpecificResources,
@@ -59,6 +59,22 @@ function Export-TmfAuthenticationMethodsPolicy {
                         continue
                     }
                     $entry = [ordered]@{}
+
+                    # Copy properties (excluding @odata.type)
+                    $Props = $cfg.keys
+                    foreach ($m in $Props) {
+                        if ($m -in '@odata.type','includeTargets@odata.context','@odata.context') {
+                            continue
+                        }
+                        if (-not $entry.Contains($m) -and $null -ne $cfg.$m) {
+                            $entry[$m] = $cfg.$m
+                        }
+                    }
+
+                    if ($entry.Count -gt 0) {
+                        $converted += [pscustomobject]$entry
+                    }
+                    <#
                     # Always keep id
                     if ($cfg.PSObject.Members.Match('id') -and $null -ne $cfg.id) {
                         $entry.id = $cfg.id
@@ -84,7 +100,7 @@ function Export-TmfAuthenticationMethodsPolicy {
 
                     if ($entry.Count -gt 0) {
                         $converted += [pscustomobject]$entry
-                    }
+                    }#>
                 }
                 if ($converted.Count -gt 0) {
                     $obj.authenticationMethodConfigurations = $converted
@@ -102,7 +118,7 @@ function Export-TmfAuthenticationMethodsPolicy {
             $script:graphBaseUrl1
         }
         try {
-            $policy = Invoke-MgGraphRequest -Method GET -Uri ("$graphBase/policies/authenticationMethodsPolicy?`$expand=authenticationMethodConfigurations")
+            $policy = Invoke-MgGraphRequest -Method GET -Uri ("$graphBase/policies/authenticationMethodsPolicy")
         } catch {
             throw $_
         }
