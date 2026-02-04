@@ -74,33 +74,6 @@ function Export-TmfAuthenticationMethodsPolicy {
                     if ($entry.Count -gt 0) {
                         $converted += [pscustomobject]$entry
                     }
-                    <#
-                    # Always keep id
-                    if ($cfg.PSObject.Members.Match('id') -and $null -ne $cfg.id) {
-                        $entry.id = $cfg.id
-                    }
-
-                    # Known common properties across methods
-                    foreach ($p in @('state', 'isSelfServiceRegistrationAllowed', 'isAttestationEnforced', 'defaultLifetimeInMinutes', 'defaultLength', 'minimumLifetimeInMinutes', 'maximumLifetimeInMinutes', 'isUsableOnce', 'allowExternalIdToUseEmailOtp', 'certificateUserBindings', 'authenticationModeConfiguration')) {
-                        if ($cfg.PSObject.Members.Match($p) -and $null -ne $cfg.$p) {
-                            $entry[$p] = $cfg.$p
-                        }
-                    }
-
-                    # Copy any remaining note properties (excluding @odata.type and id) not already set
-                    $noteProps = ($cfg | Get-Member -MemberType NoteProperty).Name
-                    foreach ($m in $noteProps) {
-                        if ($m -in '@odata.type', 'id') {
-                            continue
-                        }
-                        if (-not $entry.Contains($m)) {
-                            $entry[$m] = $cfg.$m
-                        }
-                    }
-
-                    if ($entry.Count -gt 0) {
-                        $converted += [pscustomobject]$entry
-                    }#>
                 }
                 if ($converted.Count -gt 0) {
                     $obj.authenticationMethodConfigurations = $converted
@@ -222,10 +195,6 @@ function Export-TmfAuthenticationMethodsPolicy {
             } else {
                 return
             }
-        }
-
-        if (-not $OutPath) {
-            return @($exportObject)
         }
     }
     end {
