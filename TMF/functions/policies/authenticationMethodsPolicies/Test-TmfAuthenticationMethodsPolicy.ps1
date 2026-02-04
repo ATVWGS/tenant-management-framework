@@ -128,14 +128,19 @@ function Test-TmfAuthenticationMethodsPolicy {
                                         "Object[]" {
 											Write-Verbose "$methodProperty is Object[]"
                                             $objectcount = $method.$methodProperty.count
-                                            for ($i=0; $i -lt $objectcount; $i++) {
-                                                foreach ($key in ($method.$methodProperty[$i] | Get-Member -MemberType NoteProperty).Name) {
-                                                    if ($method.$methodProperty[$i].$key -ne $resourceMethod.$methodProperty[$i].$key) {
-														Write-Verbose $method.$methodProperty[$i].$key
-                                                        $methodChange = $true
-                                                    }
-                                                }
-                                            }
+											if ($objectcount -ne $resourceMethod.$methodProperty.count) {
+												$methodChange = $true
+											}
+											else {
+												for ($i=0; $i -lt $objectcount; $i++) {
+													foreach ($key in ($method.$methodProperty[$i] | Get-Member -MemberType NoteProperty).Name) {
+														if ($method.$methodProperty[$i].$key -ne $resourceMethod.$methodProperty[$i].$key) {
+															Write-Verbose $method.$methodProperty[$i].$key
+															$methodChange = $true
+														}
+													}
+												}
+											}                                            
                                         }
                                         "Hashtable" {
 											Write-Verbose "$methodProperty is Hashtable"
@@ -150,23 +155,28 @@ function Test-TmfAuthenticationMethodsPolicy {
 												if ($method.$methodProperty.$item.GetType().Name -eq "Object[]") {
 													Write-Verbose "151: $item"
 													$objectcount = $method.$methodProperty.$item.count
-													for ($i=0; $i -lt $objectcount; $i++) {
-														if ($method.$methodProperty.$item[$i] | Get-Member -MemberType NoteProperty) {
-															foreach ($key in ($method.$methodProperty.$item[$i] | Get-Member -MemberType NoteProperty).Name) {
-																if ($method.$methodProperty.$item[$i].$key -ne $resourceMethod.$methodProperty.$item[$i].$key) {
-																	Write-Verbose $item
+													if ($objectcount -ne $resourceMethod.$methodProperty.$item.count) {
+														$methodChange = $true
+													}
+													else {
+														for ($i=0; $i -lt $objectcount; $i++) {
+															if ($method.$methodProperty.$item[$i] | Get-Member -MemberType NoteProperty) {
+																foreach ($key in ($method.$methodProperty.$item[$i] | Get-Member -MemberType NoteProperty).Name) {
+																	if ($method.$methodProperty.$item[$i].$key -ne $resourceMethod.$methodProperty.$item[$i].$key) {
+																		Write-Verbose $item
+																		$methodChange = $true
+																	}
+																}
+															}
+															else {
+																$ref = [string[]]($method.$methodProperty.$item)
+																$dif = [string[]]($resourceMethod.$methodProperty.$item)
+																if (($ref | Where-Object {$dif -notcontains $_}) -or ($dif | Where-Object {$ref -notcontains $_})) {
 																	$methodChange = $true
 																}
 															}
 														}
-														else {
-															$ref = [string[]]($method.$methodProperty.$item)
-															$dif = [string[]]($resourceMethod.$methodProperty.$item)
-															if (($ref | Where-Object {$dif -notcontains $_}) -or ($dif | Where-Object {$ref -notcontains $_})) {
-																$methodChange = $true
-															}
-														}
-													}
+													}													
 												}
 												elseif ($method.$methodProperty.$item.GetType().Name -eq "PSCustomObject") {
 													Write-Verbose "173: $item"
@@ -186,24 +196,29 @@ function Test-TmfAuthenticationMethodsPolicy {
 															}
 															"Object[]" {
 																$objectcount = $method.$methodProperty.$item.$subitem.count
-																for ($i=0; $i -lt $objectcount; $i++) {
-																	if ($method.$methodProperty.$item.$subitem[$i] | Get-Member -MemberType NoteProperty) {
-																		foreach ($key in ($method.$methodProperty.$item.$subitem[$i] | Get-Member -MemberType NoteProperty).Name) {
-																			if ($method.$methodProperty.$item.$subitem[$i].$key -ne $resourceMethod.$methodProperty.$item.$subitem[$i].$key) {
-																				Write-Verbose "Subitem 193 $($subitem)"
+																if ($objectcount -ne $resourceMethod.$methodProperty.$item.$subitem.count) {
+																	$methodChange = $true
+																}
+																else {
+																	for ($i=0; $i -lt $objectcount; $i++) {
+																		if ($method.$methodProperty.$item.$subitem[$i] | Get-Member -MemberType NoteProperty) {
+																			foreach ($key in ($method.$methodProperty.$item.$subitem[$i] | Get-Member -MemberType NoteProperty).Name) {
+																				if ($method.$methodProperty.$item.$subitem[$i].$key -ne $resourceMethod.$methodProperty.$item.$subitem[$i].$key) {
+																					Write-Verbose "Subitem 193 $($subitem)"
+																					$methodChange = $true
+																				}
+																			}
+																		}
+																		else {
+																			$ref = [string[]]($method.$methodProperty.$item.$subitem)
+																			$dif = [string[]]($resourceMethod.$methodProperty.$item.$subitem)
+																			if (($ref | Where-Object {$dif -notcontains $_}) -or ($dif | Where-Object {$ref -notcontains $_})) {
+																				Write-Verbose "Subitem 202 $($subitem)"
 																				$methodChange = $true
 																			}
 																		}
 																	}
-																	else {
-																		$ref = [string[]]($method.$methodProperty.$item.$subitem)
-																		$dif = [string[]]($resourceMethod.$methodProperty.$item.$subitem)
-																		if (($ref | Where-Object {$dif -notcontains $_}) -or ($dif | Where-Object {$ref -notcontains $_})) {
-																			Write-Verbose "Subitem 202 $($subitem)"
-																			$methodChange = $true
-																		}
-																	}
-																}
+																}																
 															}
 															default {
 																if ($method.$methodProperty.$item.$subitem -ne $resourceMethod.$methodProperty.$item.$subitem) {
