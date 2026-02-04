@@ -44,6 +44,7 @@
 		'Get-TmfRequiredScope',
 		'Get-TmfActiveConfiguration',
 		'Get-TmfDesiredConfiguration',
+		'Get-TmfSupportedResources',
 		'Activate-TmfConfiguration',
 		'Deactivate-TmfConfiguration',
 		'Load-TmfConfiguration',
