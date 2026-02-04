@@ -121,39 +121,120 @@ function Test-TmfAuthenticationMethodsPolicy {
                             $methodChange = $false
                             $methodProperties = ($method | Get-Member -MemberType NoteProperty).Name
                             $resourceMethod = $resource.$property | Where-Object {$_.id -eq $method.id}
+							Write-Verbose "Working on $($method.id)"
                             foreach ($methodProperty in $methodProperties) {
                                 if ($method.$methodProperty.GetType().Name -in "Object[]", "Hashtable", "PSCustomObject") {
                                     switch ($method.$methodProperty.GetType().Name) {
                                         "Object[]" {
+											Write-Verbose "$methodProperty is Object[]"
                                             $objectcount = $method.$methodProperty.count
-                                            for ($i=0; $i -lt $objectcount; $i++) {
-                                                foreach ($key in ($method.$methodProperty[$i] | Get-Member -MemberType NoteProperty).Name) {
-                                                    if ($method.$methodProperty[$i].$key -ne $resourceMethod.$methodProperty[$i].$key) {
-														Write-Verbose $method.$methodProperty[$i].$key
-                                                        $methodChange = $true
-                                                    }
-                                                }
-                                            }
+											if ($objectcount -ne $resourceMethod.$methodProperty.count) {
+												$methodChange = $true
+											}
+											else {
+												for ($i=0; $i -lt $objectcount; $i++) {
+													foreach ($key in ($method.$methodProperty[$i] | Get-Member -MemberType NoteProperty).Name) {
+														if ($method.$methodProperty[$i].$key -ne $resourceMethod.$methodProperty[$i].$key) {
+															Write-Verbose $method.$methodProperty[$i].$key
+															$methodChange = $true
+														}
+													}
+												}
+											}                                            
                                         }
                                         "Hashtable" {
-                                            if (Compare-Hashtable ($method.$methodProperty | ConvertTo-PSFHashtable) $resourceMethod.$methodProperty) {
+											Write-Verbose "$methodProperty is Hashtable"
+                                            if (-not (Compare-Hashtable ($method.$methodProperty | ConvertTo-PSFHashtable) $resourceMethod.$methodProperty)) {
 												Write-Verbose $method.$methodProperty
                                                 $methodChange = $true
                                             }
                                         }
                                         "PSCustomObject" {
+											Write-Verbose "$methodProperty is PSCustomObject"
                                             foreach ($item in ($method.$methodProperty | Get-Member -MemberType NoteProperty).Name) {
 												if ($method.$methodProperty.$item.GetType().Name -eq "Object[]") {
+													Write-Verbose "151: $item"
 													$objectcount = $method.$methodProperty.$item.count
-													for ($i=0; $i -lt $objectcount; $i++) {
-														foreach ($key in ($method.$methodProperty.$item[$i] | Get-Member -MemberType NoteProperty).Name) {
-															if ($method.$methodProperty.$item[$i].$key -ne $resourceMethod.$methodProperty.$item[$i].$key) {
-																$methodChange = $true
+													if ($objectcount -ne $resourceMethod.$methodProperty.$item.count) {
+														$methodChange = $true
+													}
+													else {
+														for ($i=0; $i -lt $objectcount; $i++) {
+															if ($method.$methodProperty.$item[$i] | Get-Member -MemberType NoteProperty) {
+																foreach ($key in ($method.$methodProperty.$item[$i] | Get-Member -MemberType NoteProperty).Name) {
+																	if ($method.$methodProperty.$item[$i].$key -ne $resourceMethod.$methodProperty.$item[$i].$key) {
+																		Write-Verbose $item
+																		$methodChange = $true
+																	}
+																}
+															}
+															else {
+																$ref = [string[]]($method.$methodProperty.$item)
+																$dif = [string[]]($resourceMethod.$methodProperty.$item)
+																if (($ref | Where-Object {$dif -notcontains $_}) -or ($dif | Where-Object {$ref -notcontains $_})) {
+																	$methodChange = $true
+																}
+															}
+														}
+													}													
+												}
+												elseif ($method.$methodProperty.$item.GetType().Name -eq "PSCustomObject") {
+													Write-Verbose "173: $item"
+													foreach ($subitem in ($method.$methodProperty.$item | Get-Member -MemberType NoteProperty).Name) {
+														switch (($method.$methodProperty.$item.$subitem.gettype()).Name) {
+															"PSCustomObject" {
+																if (-not(Compare-Hashtable ($method.$methodProperty.$item.$subitem | ConvertTo-PSFHashtable) $resourceMethod.$methodProperty.$item.$subitem)) {
+																	Write-Verbose "Subitem 177 $($subitem)"
+																	$methodChange = $true
+																}
+															}
+															"HashTable" {
+																if (-not(Compare-Hashtable $method.$methodProperty.$item.$subitem $resourceMethod.$methodProperty.$item.$subitem)) {
+																	Write-Verbose "Subitem 183 $($subitem)"
+																	$methodChange = $true
+																}
+															}
+															"Object[]" {
+																$objectcount = $method.$methodProperty.$item.$subitem.count
+																if ($objectcount -ne $resourceMethod.$methodProperty.$item.$subitem.count) {
+																	$methodChange = $true
+																}
+																else {
+																	for ($i=0; $i -lt $objectcount; $i++) {
+																		if ($method.$methodProperty.$item.$subitem[$i] | Get-Member -MemberType NoteProperty) {
+																			foreach ($key in ($method.$methodProperty.$item.$subitem[$i] | Get-Member -MemberType NoteProperty).Name) {
+																				if ($method.$methodProperty.$item.$subitem[$i].$key -ne $resourceMethod.$methodProperty.$item.$subitem[$i].$key) {
+																					Write-Verbose "Subitem 193 $($subitem)"
+																					$methodChange = $true
+																				}
+																			}
+																		}
+																		else {
+																			$ref = [string[]]($method.$methodProperty.$item.$subitem)
+																			$dif = [string[]]($resourceMethod.$methodProperty.$item.$subitem)
+																			if (($ref | Where-Object {$dif -notcontains $_}) -or ($dif | Where-Object {$ref -notcontains $_})) {
+																				Write-Verbose "Subitem 202 $($subitem)"
+																				$methodChange = $true
+																			}
+																		}
+																	}
+																}																
+															}
+															default {
+																if ($method.$methodProperty.$item.$subitem -ne $resourceMethod.$methodProperty.$item.$subitem) {
+																	Write-Verbose "Subitem 210 $($subitem)"
+																	$methodChange = $true
+																}
 															}
 														}
 													}
+													if (-not (Compare-HashTable ($method.$methodProperty.$item | Convertto-PSFHashtable) $resourceMethod.$methodProperty.$item)) {
+														Write-Verbose $item
+														$methodChange = $true
+													}
 												}
 												else {
+													Write-Verbose "180: $item"
 													if ($method.$methodProperty.$item -ne $resourceMethod.$methodProperty.$item) {
 														Write-Verbose $item
 														$methodChange = $true
@@ -164,6 +245,7 @@ function Test-TmfAuthenticationMethodsPolicy {
                                     }
                                 }
                                 else {
+									Write-Verbose "$methodProperty is simple NoteProperty"
                                     if ($method.$methodProperty -ne $resourceMethod.$methodProperty) {
                                         $methodChange = $true
                                     }

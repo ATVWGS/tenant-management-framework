@@ -20,7 +20,7 @@ Export-TmfAuthenticationMethodsPolicy | ConvertTo-Json -Depth 15
 #>
 function Export-TmfAuthenticationMethodsPolicy {
 
-    [Diagnostics.CodeAnalysis.SuppressMessageAttribute("PSAvoidDefaultValueSwitchParameter")]
+    [Diagnostics.CodeAnalysis.SuppressMessageAttribute("PSAvoidDefaultValueSwitchParameter","")]
 
     [CmdletBinding()] param(
         [string[]] $SpecificResources,
@@ -59,25 +59,14 @@ function Export-TmfAuthenticationMethodsPolicy {
                         continue
                     }
                     $entry = [ordered]@{}
-                    # Always keep id
-                    if ($cfg.PSObject.Members.Match('id') -and $null -ne $cfg.id) {
-                        $entry.id = $cfg.id
-                    }
 
-                    # Known common properties across methods
-                    foreach ($p in @('state', 'isSelfServiceRegistrationAllowed', 'isAttestationEnforced', 'defaultLifetimeInMinutes', 'defaultLength', 'minimumLifetimeInMinutes', 'maximumLifetimeInMinutes', 'isUsableOnce', 'allowExternalIdToUseEmailOtp', 'certificateUserBindings', 'authenticationModeConfiguration')) {
-                        if ($cfg.PSObject.Members.Match($p) -and $null -ne $cfg.$p) {
-                            $entry[$p] = $cfg.$p
-                        }
-                    }
-
-                    # Copy any remaining note properties (excluding @odata.type and id) not already set
-                    $noteProps = ($cfg | Get-Member -MemberType NoteProperty).Name
-                    foreach ($m in $noteProps) {
-                        if ($m -in '@odata.type', 'id') {
+                    # Copy properties (excluding @odata.type)
+                    $Props = $cfg.keys
+                    foreach ($m in $Props) {
+                        if ($m -in '@odata.type','includeTargets@odata.context','@odata.context') {
                             continue
                         }
-                        if (-not $entry.Contains($m)) {
+                        if (-not $entry.Contains($m) -and $null -ne $cfg.$m) {
                             $entry[$m] = $cfg.$m
                         }
                     }
@@ -102,7 +91,7 @@ function Export-TmfAuthenticationMethodsPolicy {
             $script:graphBaseUrl1
         }
         try {
-            $policy = Invoke-MgGraphRequest -Method GET -Uri ("$graphBase/policies/authenticationMethodsPolicy?`$expand=authenticationMethodConfigurations")
+            $policy = Invoke-MgGraphRequest -Method GET -Uri ("$graphBase/policies/authenticationMethodsPolicy")
         } catch {
             throw $_
         }
@@ -206,10 +195,6 @@ function Export-TmfAuthenticationMethodsPolicy {
             } else {
                 return
             }
-        }
-
-        if (-not $OutPath) {
-            return @($exportObject)
         }
     }
     end {
