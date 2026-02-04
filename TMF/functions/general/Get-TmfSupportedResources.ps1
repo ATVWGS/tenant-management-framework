@@ -4,8 +4,10 @@ function Get-TmfSupportedResources
 		.SYNOPSIS
 			Returns supported resources including weight.
 	#>
-	[CmdletBinding()]
-	Param ()
+
+    [Diagnostics.CodeAnalysis.SuppressMessageAttribute("PSUseSingularNouns","")]
+
+	[CmdletBinding()]param ()
 	
 	process
 	{
