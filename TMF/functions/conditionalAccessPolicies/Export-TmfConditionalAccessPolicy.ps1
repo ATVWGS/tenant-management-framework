@@ -83,10 +83,12 @@ function Export-TmfConditionalAccessPolicy {
 
                 if ($policy.conditions.users) {
                     if ($policy.conditions.users.includeUsers) {
-                        $obj.includeUsers = _ResolveWithSentinels -Values $policy.conditions.users.includeUsers -Sentinels $userSentinels -Resolver { param($vals) (Resolve-User -InputReference $vals -DontFailIfNotExisting -UserPrincipalName -Cmdlet $Cmdlet) }
+                        $obj.includeUsers = @()
+                        $obj.includeUsers += _ResolveWithSentinels -Values $policy.conditions.users.includeUsers -Sentinels $userSentinels -Resolver { param($vals) (Resolve-User -InputReference $vals -DontFailIfNotExisting -UserPrincipalName -Cmdlet $Cmdlet) }
                     }
                     if ($policy.conditions.users.excludeUsers) {
-                        $obj.excludeUsers = _ResolveWithSentinels -Values $policy.conditions.users.excludeUsers -Sentinels $userSentinels -Resolver { param($vals) (Resolve-User -InputReference $vals -DontFailIfNotExisting -UserPrincipalName -Cmdlet $Cmdlet) }
+                        $obj.excludeUsers = @()
+                        $obj.excludeUsers += _ResolveWithSentinels -Values $policy.conditions.users.excludeUsers -Sentinels $userSentinels -Resolver { param($vals) (Resolve-User -InputReference $vals -DontFailIfNotExisting -UserPrincipalName -Cmdlet $Cmdlet) }
                     }
                     if ($policy.conditions.users.includeGroups) {
                         $obj.includeGroups = @()
@@ -107,16 +109,31 @@ function Export-TmfConditionalAccessPolicy {
                 }
                 if ($policy.conditions.applications) {
                     if ($policy.conditions.applications.includeApplications) {
-                        $obj.includeApplications = _ResolveWithSentinels -Values $policy.conditions.applications.includeApplications -Sentinels $appSentinels -Resolver { param($vals) (Resolve-Application -InputReference $vals -DontFailIfNotExisting -DisplayName -Cmdlet $Cmdlet) }
+                        $obj.includeApplications = @()
+                        $obj.includeApplications += _ResolveWithSentinels -Values $policy.conditions.applications.includeApplications -Sentinels $appSentinels -Resolver { param($vals) (Resolve-Application -InputReference $vals -DontFailIfNotExisting -DisplayName -Cmdlet $Cmdlet) }
                     }
                     if ($policy.conditions.applications.excludeApplications) {
-                        $obj.excludeApplications = _ResolveWithSentinels -Values $policy.conditions.applications.excludeApplications -Sentinels $appSentinels -Resolver { param($vals) (Resolve-Application -InputReference $vals -DontFailIfNotExisting -DisplayName -Cmdlet $Cmdlet) }
+                        $obj.excludeApplications = @()
+                        $obj.excludeApplications += _ResolveWithSentinels -Values $policy.conditions.applications.excludeApplications -Sentinels $appSentinels -Resolver { param($vals) (Resolve-Application -InputReference $vals -DontFailIfNotExisting -DisplayName -Cmdlet $Cmdlet) }
                     }
                     if ($policy.conditions.applications.applicationFilter) {
                         $obj.applicationFilter = $policy.conditions.applications.applicationFilter
                     }
                     if ($policy.conditions.applications.includeAuthenticationContextClassReferences) {
                         $obj.includeAuthenticationContextClassReferences = $policy.conditions.applications.includeAuthenticationContextClassReferences
+                    }
+                }
+                if ($policy.conditions.clientApplications) {
+                    if ($policy.conditions.clientApplications.includeServicePrincipals) {
+                        $obj.includeServicePrincipals = @()
+                        $obj.includeServicePrincipals += _ResolveWithSentinels -Values $policy.conditions.clientApplications.includeServicePrincipals -Sentinels $appSentinels -Resolver { param($vals) (Resolve-Application -InputReference $vals -DontFailIfNotExisting -DisplayName -Cmdlet $Cmdlet) }
+                    }
+                    if ($policy.conditions.clientApplications.excludeServicePrincipals) {
+                        $obj.excludeServicePrincipals = @()
+                        $obj.excludeServicePrincipals += _ResolveWithSentinels -Values $policy.conditions.clientApplications.excludeServicePrincipals -Sentinels $appSentinels -Resolver { param($vals) (Resolve-Application -InputReference $vals -DontFailIfNotExisting -DisplayName -Cmdlet $Cmdlet) }
+                    }
+                    if ($policy.conditions.clientApplications.servicePrincipalFilter) {
+                        $obj.servicePrincipalFilter = $policy.conditions.clientApplications.servicePrincipalFilter
                     }
                 }
                 if ($policy.conditions.locations) {
