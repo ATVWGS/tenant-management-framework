@@ -89,7 +89,7 @@ function Test-TmfAuthenticationContextClassReference {
 			$result = @{
 				Tenant = $tenant.displayName
 				TenantId = $tenant.Id
-				ResourceType = 'authenticationContextClassReferences'
+				ResourceType = 'authenticationContextClassReference'
 				ResourceName = (Resolve-String -Text $definition.displayName)
 				DesiredConfiguration = $definition
 			}

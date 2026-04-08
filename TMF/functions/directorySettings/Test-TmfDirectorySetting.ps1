@@ -91,7 +91,7 @@ function Test-TmfDirectorySetting {
             $result = @{
 				Tenant = $tenant.displayName
 				TenantId = $tenant.Id
-				ResourceType = 'directorySetting'
+				ResourceType = 'DirectorySetting'
 				ResourceName = (Resolve-String -Text $definition.displayName)
 				DesiredConfiguration = $definition
 			}

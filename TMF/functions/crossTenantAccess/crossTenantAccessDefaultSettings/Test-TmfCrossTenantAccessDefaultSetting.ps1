@@ -34,7 +34,7 @@ function Test-TmfCrossTenantAccessDefaultSetting
 			$result = @{
 				Tenant = $tenant.displayName
 				TenantId = $tenant.Id
-				ResourceType = 'CrossTenantAccessDefaultSettings'
+				ResourceType = 'CrossTenantAccessDefaultSetting'
 				ResourceName = (Resolve-String -Text $definition.displayName)
 				DesiredConfiguration = $definition
 			}

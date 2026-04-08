@@ -92,7 +92,7 @@ function Test-TmfCrossTenantAccessPartnerSetting
 			$result = @{
 				Tenant = $tenant.displayName
 				TenantId = $tenant.Id
-				ResourceType = 'CrossTenantAccessPartnerSettings'
+				ResourceType = 'CrossTenantAccessPartnerSetting'
 				ResourceName = (Resolve-String -Text $definition.displayName)
 				DesiredConfiguration = $definition
 			}
