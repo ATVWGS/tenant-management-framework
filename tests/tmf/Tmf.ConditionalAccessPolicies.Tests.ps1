@@ -82,6 +82,7 @@ Describe 'Tmf.ConditionalAccessPolicies.Validate.Creation' {
 
 Describe 'Tmf.ConditionalAccessPolicies.Invoke.Deletion' {
     BeforeAll {
+        Start-Sleep 60
         #region Set present to false for each definition
         $global:definitions["conditionalAccessPolicies"] | Foreach-Object {
             $_["present"] = $false
