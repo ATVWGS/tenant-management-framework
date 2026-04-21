@@ -63,7 +63,7 @@ Describe 'Tmf.AdministrativeUnit.Invoke.Creation' {
 
 Describe 'Tmf.AdministrativeUnit.Validate.Creation' {
     BeforeAll {
-        Start-Sleep 20
+        Start-Sleep 30 
     }
     
     $testCases = $global:definitions["administrativeUnits"] | Foreach-Object {
@@ -106,7 +106,7 @@ Describe 'Tmf.General.Invoke.Deletion' {
 }
 Describe 'Tmf.General.Validate.Deletion' {
     BeforeAll {
-        Start-Sleep 20
+        Start-Sleep 30 
     }
 
     $testCases = $global:definitions["administrativeUnits"] | Foreach-Object {
