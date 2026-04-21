@@ -24,6 +24,13 @@
         "instanceDurationInDays": 14,
         "autoApplyDecisionsEnabled": false,
         "recommendationsEnabled": true,
+        "recommendationInsightSettings": [
+            {
+                "signInScope": "tenant",
+                "recommendationLookBackDuration": "P30D",
+                "@odata.type": "#microsoft.graph.userLastSignInRecommendationInsightSetting"
+            }
+        ],
         "recurrence": {
             "pattern": {
                 "type": "absoluteMonthly",
@@ -74,6 +81,13 @@
         "instanceDurationInDays": 21,
         "autoApplyDecisionsEnabled": false,
         "recommendationsEnabled": true,
+        "recommendationInsightSettings": [
+            {
+                "signInScope": "tenant",
+                "recommendationLookBackDuration": "P30D",
+                "@odata.type": "#microsoft.graph.userLastSignInRecommendationInsightSetting"
+            }
+        ],
         "recurrence": {
             "pattern": {
                 "type": "absoluteMonthly",
@@ -120,6 +134,13 @@
         "instanceDurationInDays": 21,
         "autoApplyDecisionsEnabled": false,
         "recommendationsEnabled": true,
+        "recommendationInsightSettings": [
+            {
+                "signInScope": "tenant",
+                "recommendationLookBackDuration": "P30D",
+                "@odata.type": "#microsoft.graph.userLastSignInRecommendationInsightSetting"
+            }
+        ],
         "recurrence": {
             "pattern": {
                 "type": "absoluteMonthly",
