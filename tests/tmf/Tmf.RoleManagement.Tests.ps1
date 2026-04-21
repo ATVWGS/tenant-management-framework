@@ -209,7 +209,12 @@ Describe 'Tmf.RoleManagement.Groups.Invoke.Deletion' {
 
     It "should successfully invoke the TMF configuration" {
         { Invoke-TmfGroup -Confirm -Verbose } | Should -Not -Throw
-        Start-Sleep -Seconds 10
+    }
+}
+
+Describe 'Tmf.RoleManagement.Groups.Validate.Deletion' {
+    BeforeAll {
+        Start-Sleep 10
     }
 
     $testCases = $global:definitions["groups"] | Foreach-Object {
