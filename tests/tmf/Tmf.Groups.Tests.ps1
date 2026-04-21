@@ -60,6 +60,8 @@ Describe 'Tmf.Groups.Invoke.Creation' {
 
     It "should successfully invoke the TMF configuration" {
         { Invoke-TmfGroup -Confirm -Verbose } | Should -Not -Throw
+        #Let's wait before querying group after creation
+        Start-Sleep 10
     }
 
     
@@ -98,6 +100,8 @@ Describe 'Tmf.General.Invoke.Deletion' {
 
     It "should successfully invoke the TMF configuration" {
         { Invoke-TmfGroup -Confirm -Verbose } | Should -Not -Throw
+        #Let's wait before querying group after deletion
+        Start-Sleep 10
     }
 
     $testCases = $global:definitions["groups"] | Where-Object { -Not $_["assignedLicenses"] -and -Not $_["privilegedAccess"] } | Foreach-Object {
@@ -106,6 +110,7 @@ Describe 'Tmf.General.Invoke.Deletion' {
             "uri" = $global:graphUri
         }
     }
+    
     It "should have deleted <displayName> (uri: <uri>)" -TestCases $testCases {
         Param ($displayName, $uri)
         $uri = "$uri/?`$filter=displayName eq '$displayName'"

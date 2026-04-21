@@ -39,10 +39,11 @@ Describe 'Tmf.AccessReview.Groups.Invoke.Creation' {
     }
 }
 
-#Let's wait until groups can be queried after creation
-Start-Sleep 10
-
 Describe 'Tmf.AccessReview.Register' {
+    BeforeAll {
+        #Let's wait until groups can be queried after creation
+        Start-Sleep 10
+    }
     It "should successfully register access review definitions" {
         foreach ($accessReview in $global:definitions["accessReviews"]) {
             Write-Host ($accessReview | ConvertTo-Json -Depth 10)
@@ -59,6 +60,8 @@ Describe 'Tmf.AccessReview.Invoke.Creation' {
 
     It "should successfully invoke the TMF configuration" {
         { Invoke-TmfAccessReview -Confirm -Verbose } | Should -Not -Throw
+        #Let's wait until access review can be queried after creation
+        Start-Sleep 10
     }
 
     
@@ -68,6 +71,7 @@ Describe 'Tmf.AccessReview.Invoke.Creation' {
             "uri" = $global:graphUri
         }
     }
+    
     It "should have created <displayName> (uri: <uri>)" -TestCases $testCases {
         Param ($displayName, $uri)
         $uri = "$uri/?`$filter=displayName eq '$displayName'"
@@ -97,6 +101,8 @@ Describe 'Tmf.AccessReview.Invoke.Deletion' {
 
     It "should successfully invoke the TMF configuration" {
         { Invoke-TmfAccessReview -Confirm -Verbose } | Should -Not -Throw
+        #Let's wait before querying access review after deletion
+        Start-Sleep 10
     }
 
     $testCases = $global:definitions["accessReviews"] | Foreach-Object {
@@ -105,6 +111,7 @@ Describe 'Tmf.AccessReview.Invoke.Deletion' {
             "uri" = $global:graphUri
         }
     }
+
     It "should have deleted <displayName> (uri: <uri>)" -TestCases $testCases {
         Param ($displayName, $uri)
         $uri = "$uri/?`$filter=displayName eq '$displayName'"
@@ -134,6 +141,8 @@ Describe 'Tmf.AccessReview.Groups.Invoke.Deletion' {
 
     It "should successfully invoke the TMF configuration" {
         { Invoke-TmfGroup -Confirm -Verbose } | Should -Not -Throw
+        #Let's wait before querying group after deletion
+        Start-Sleep 10
     }
 
     $testCases = $global:definitions["groups"] | Foreach-Object {
@@ -142,6 +151,7 @@ Describe 'Tmf.AccessReview.Groups.Invoke.Deletion' {
             "uri" = "https://graph.microsoft.com/beta/groups"
         }
     }
+
     It "should have deleted <displayName> (uri: <uri>)" -TestCases $testCases {
         Param ($displayName, $uri)
         $uri = "$uri/?`$filter=displayName eq '$displayName'"

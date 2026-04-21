@@ -40,6 +40,10 @@ Describe 'Tmf.ConditionalAccessPolicies.Groups.Invoke.Creation' {
 }
 
 Describe 'Tmf.ConditionalAccessPolicies.Register' {
+    BeforeAll{
+        #Let's wait for groups before creating conditionalAccessPolicy
+        Start-Sleep 10
+    }
     It "should successfully register conditionalAccessPolicy definitions" {
         foreach ($conditionalAccessPolicy in $global:definitions["conditionalAccessPolicies"]) {
             Write-Host ($conditionalAccessPolicy | ConvertTo-Json -Depth 10)
@@ -50,7 +54,7 @@ Describe 'Tmf.ConditionalAccessPolicies.Register' {
 }
 
 Describe 'Tmf.ConditionalAccessPolicies.Invoke.Creation' {
-
+   
     It "should successfully test the TMF configuration" {
         { Test-TmfConditionalAccessPolicy -Verbose } | Should -Not -Throw
     }
@@ -64,7 +68,7 @@ Describe 'Tmf.ConditionalAccessPolicies.Validate.Creation' {
 
     BeforeAll {
         #Let's wait until resources can be queried after creation
-        Start-Sleep 10
+        Start-Sleep 20
     }
         
     $testCases = $global:definitions["conditionalAccessPolicies"] | Foreach-Object {
@@ -82,7 +86,6 @@ Describe 'Tmf.ConditionalAccessPolicies.Validate.Creation' {
 
 Describe 'Tmf.ConditionalAccessPolicies.Invoke.Deletion' {
     BeforeAll {
-        Start-Sleep 60
         #region Set present to false for each definition
         $global:definitions["conditionalAccessPolicies"] | Foreach-Object {
             $_["present"] = $false
@@ -148,6 +151,7 @@ Describe 'Tmf.RoleManagement.Groups.Invoke.Deletion' {
 
     It "should successfully invoke the TMF configuration" {
         { Invoke-TmfGroup -Confirm -Verbose } | Should -Not -Throw
+        Start-Sleep 10
     }
 
     $testCases = $global:definitions["groups"] | Foreach-Object {
