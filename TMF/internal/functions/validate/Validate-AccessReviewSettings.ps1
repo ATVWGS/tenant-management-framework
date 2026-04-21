@@ -10,6 +10,7 @@ function Validate-AccessReviewSettings
         [int] $instanceDurationInDays,
 		[bool] $autoApplyDecisionsEnabled = $false,
         [bool] $recommendationsEnabled = $true,
+		[object] $recommendationInsightSettings,
         [object] $recurrence,
 		[System.Management.Automation.PSCmdlet]
 		$Cmdlet = $PSCmdlet
