@@ -69,6 +69,7 @@ Describe 'Tmf.General.Invoke.Creation' {
 
     It "should successfully invoke the TMF configuration" {
         { Invoke-TmfTenant -Confirm } | Should -Not -Throw
+        Start-Sleep -Seconds 10
     }
 
     foreach ($type in $global:definitions.GetEnumerator()) {
@@ -109,6 +110,7 @@ Describe 'Tmf.General.Invoke.Deletion' {
 
     It "should successfully invoke the TMF configuration" {
         { Invoke-TmfTenant -Confirm } | Should -Not -Throw
+        Start-Sleep -Seconds 10
     }
 
     foreach ($type in $global:definitions.GetEnumerator()) {
