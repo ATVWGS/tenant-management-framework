@@ -151,6 +151,11 @@ Describe 'Tmf.RoleManagement.Groups.Invoke.Deletion' {
 
     It "should successfully invoke the TMF configuration" {
         { Invoke-TmfGroup -Confirm -Verbose } | Should -Not -Throw
+    }
+}
+
+Describe 'Tmf.RoleManagement.Groups.Validate.Deletion' {
+    BeforeAll {
         Start-Sleep 10
     }
 

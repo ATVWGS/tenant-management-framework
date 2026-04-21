@@ -60,10 +60,13 @@ Describe 'Tmf.Groups.Invoke.Creation' {
 
     It "should successfully invoke the TMF configuration" {
         { Invoke-TmfGroup -Confirm -Verbose } | Should -Not -Throw
-        #Let's wait before querying group after creation
+    }
+}
+
+Describe 'Tmf.Groups.Validate.Creation' {
+    BeforeAll {
         Start-Sleep 10
     }
-
     
     $testCases = $global:definitions["groups"] | Foreach-Object {
         return @{
@@ -78,7 +81,7 @@ Describe 'Tmf.Groups.Invoke.Creation' {
     }
 }
 
-Describe 'Tmf.General.Invoke.Deletion' {
+Describe 'Tmf.Groups.Invoke.Deletion' {
     BeforeAll {
         #region Set present to false for each definition
         $global:definitions["groups"] | Where-Object { -Not $_["assignedLicenses"] -and -Not $_["privilegedAccess"] } | Foreach-Object {
@@ -100,7 +103,11 @@ Describe 'Tmf.General.Invoke.Deletion' {
 
     It "should successfully invoke the TMF configuration" {
         { Invoke-TmfGroup -Confirm -Verbose } | Should -Not -Throw
-        #Let's wait before querying group after deletion
+    }
+}
+
+Describe 'Tmf.Groups.Validate.Deletion' {
+    BeforeAll {
         Start-Sleep 10
     }
 

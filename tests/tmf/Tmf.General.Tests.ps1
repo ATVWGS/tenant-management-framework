@@ -69,7 +69,12 @@ Describe 'Tmf.General.Invoke.Creation' {
 
     It "should successfully invoke the TMF configuration" {
         { Invoke-TmfTenant -Confirm } | Should -Not -Throw
-        Start-Sleep -Seconds 10
+    }
+}
+
+Describe 'Tmf.General.Validate.Creation' {
+    BeforeEach {
+        Start-Sleep -Seconds 10 # Ensure Graph has enough time to process our requests
     }
 
     foreach ($type in $global:definitions.GetEnumerator()) {
@@ -110,7 +115,12 @@ Describe 'Tmf.General.Invoke.Deletion' {
 
     It "should successfully invoke the TMF configuration" {
         { Invoke-TmfTenant -Confirm } | Should -Not -Throw
-        Start-Sleep -Seconds 10
+    }
+}
+
+Describe 'Tmf.General.Validate.Deletion' {
+    BeforeAll {
+        Start-Sleep -Seconds 10 # Give Microsoft Graph some time to process our requests
     }
 
     foreach ($type in $global:definitions.GetEnumerator()) {

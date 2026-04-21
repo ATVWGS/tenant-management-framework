@@ -60,10 +60,13 @@ Describe 'Tmf.AccessReview.Invoke.Creation' {
 
     It "should successfully invoke the TMF configuration" {
         { Invoke-TmfAccessReview -Confirm -Verbose } | Should -Not -Throw
-        #Let's wait until access review can be queried after creation
+    }
+}
+
+Describe 'Tmf.AccessReview.Validate.Creation' {
+    BeforeAll {
         Start-Sleep 10
     }
-
     
     $testCases = $global:definitions["accessReviews"] | Foreach-Object {
         return @{
@@ -101,7 +104,11 @@ Describe 'Tmf.AccessReview.Invoke.Deletion' {
 
     It "should successfully invoke the TMF configuration" {
         { Invoke-TmfAccessReview -Confirm -Verbose } | Should -Not -Throw
-        #Let's wait before querying access review after deletion
+    }
+}
+
+Describe 'Tmf.AccessReview.Validate.Deletion' {
+    BeforeAll {
         Start-Sleep 10
     }
 
@@ -141,7 +148,11 @@ Describe 'Tmf.AccessReview.Groups.Invoke.Deletion' {
 
     It "should successfully invoke the TMF configuration" {
         { Invoke-TmfGroup -Confirm -Verbose } | Should -Not -Throw
-        #Let's wait before querying group after deletion
+    }
+ }
+
+Describe 'Tmf.AccessReview.Groups.Validate.Deletion' {
+    BeforeAll {
         Start-Sleep 10
     }
 
