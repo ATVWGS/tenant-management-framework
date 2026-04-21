@@ -42,7 +42,7 @@ Describe 'Tmf.AccessReview.Groups.Invoke.Creation' {
 Describe 'Tmf.AccessReview.Register' {
     BeforeAll {
         #Let's wait until groups can be queried after creation
-        Start-Sleep 10
+        Start-Sleep 20
     }
     It "should successfully register access review definitions" {
         foreach ($accessReview in $global:definitions["accessReviews"]) {
@@ -65,7 +65,7 @@ Describe 'Tmf.AccessReview.Invoke.Creation' {
 
 Describe 'Tmf.AccessReview.Validate.Creation' {
     BeforeAll {
-        Start-Sleep 10
+        Start-Sleep 20
     }
     
     $testCases = $global:definitions["accessReviews"] | Foreach-Object {
@@ -109,7 +109,7 @@ Describe 'Tmf.AccessReview.Invoke.Deletion' {
 
 Describe 'Tmf.AccessReview.Validate.Deletion' {
     BeforeAll {
-        Start-Sleep 10
+        Start-Sleep 20
     }
 
     $testCases = $global:definitions["accessReviews"] | Foreach-Object {
@@ -153,7 +153,7 @@ Describe 'Tmf.AccessReview.Groups.Invoke.Deletion' {
 
 Describe 'Tmf.AccessReview.Groups.Validate.Deletion' {
     BeforeAll {
-        Start-Sleep 10
+        Start-Sleep 20
     }
 
     $testCases = $global:definitions["groups"] | Foreach-Object {

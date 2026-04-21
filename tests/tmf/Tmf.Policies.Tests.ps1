@@ -44,7 +44,7 @@ Describe 'Tmf.Policies.AuthenticationStrengthPolicies.Invoke.Creation' {
 Describe 'Tmf.Policies.AuthenticationStrengthPolicies.Validate.Creation' {
 
     BeforeAll {
-        Start-Sleep 5
+        Start-Sleep 20
     }
     
     $testCases = $global:definitions["authenticationStrengthPolicies"] | Foreach-Object {
@@ -88,7 +88,7 @@ Describe 'Tmf.Policies.Invoke.Deletion' {
 
 Describe 'Tmf.Policies.AuthenticationStrengthPolicies.Validate.Deletion' {
     BeforeAll {
-        Start-Sleep 5
+        Start-Sleep 20
     }
     $testCases = $global:definitions["authenticationStrengthPolicies"] | Foreach-Object {
         return @{

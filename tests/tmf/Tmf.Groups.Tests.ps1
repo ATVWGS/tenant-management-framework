@@ -65,7 +65,7 @@ Describe 'Tmf.Groups.Invoke.Creation' {
 
 Describe 'Tmf.Groups.Validate.Creation' {
     BeforeAll {
-        Start-Sleep 10
+        Start-Sleep 20
     }
     
     $testCases = $global:definitions["groups"] | Foreach-Object {
@@ -108,7 +108,7 @@ Describe 'Tmf.Groups.Invoke.Deletion' {
 
 Describe 'Tmf.Groups.Validate.Deletion' {
     BeforeAll {
-        Start-Sleep 10
+        Start-Sleep 20
     }
 
     $testCases = $global:definitions["groups"] | Where-Object { -Not $_["assignedLicenses"] -and -Not $_["privilegedAccess"] } | Foreach-Object {
