@@ -141,9 +141,11 @@ function Test-TmfAccessReview
 											$change.Actions = @{"Set" = $definition.$property.$item}
 										}
 									}
-									if ($definition.$property.recommendationInsightSettings.recommendationLookBackDuration -ne $resource.$property.recommendationInsightSettings.recommendationLookBackDuration) {
-										$change.Actions = @{"Set" = $definition.$property.recommendationInsightSettings}
-									}
+									if ($definition.$property.recommendationInsightSettings.recommendationLookBackDuration -and $resource.$property.recommendationInsightSettings.recommendationLookBackDuration) {
+										if ($definition.$property.recommendationInsightSettings.recommendationLookBackDuration -ne $resource.$property.recommendationInsightSettings.recommendationLookBackDuration) {
+											$change.Actions = @{"Set" = $definition.$property.recommendationInsightSettings}
+										}
+									}									
 									if ($definition.$property.recurrence.pattern -and $resource.$property.recurrence.pattern) {
 										foreach ($item in $definition.$property.recurrence.pattern.GetEnumerator().Name) {
 											if ($definition.$property.recurrence.pattern.$item -ne $resource.$property.recurrence.pattern.$item){
