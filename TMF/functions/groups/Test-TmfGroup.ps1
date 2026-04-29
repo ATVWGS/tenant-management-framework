@@ -103,7 +103,7 @@
 				$filter = "(displayName eq '{0}')" -f [System.Web.HttpUtility]::UrlEncode($definition.displayName)
 			}
 	
-			$select = ($definition.Properties() | Where-Object {$_ -notin "hideFromOutlookClients", "hideFromAddressLists","privilegedAccess", "members", "oldNames", "present", "sourceConfig", "sourceFile"})
+			$select = ($definition.Properties() | Where-Object {$_ -notin "hideFromOutlookClients", "hideFromAddressLists", "members", "oldNames", "present", "sourceConfig", "sourceFile"})
 			$select += "id"
 
 			try {
@@ -176,13 +176,6 @@
 									$tempResource = Invoke-MgGraphRequest -Method GET -Uri ("$script:graphBaseUrl/groups/{0}?`$select={1}" -f $resource.id,$_)
 									if ($definition.$property -ne $tempResource.$property) {
 										$change.Actions = @{"Set" = $definition.$property}
-									}
-								}
-								"privilegedAccess" {
-									if ($definition.$property) {
-										if (-Not (Invoke-MgGraphRequest -Method GET -Uri "$($script:graphBaseUrl)/privilegedAccess/aadGroups/resources?`$filter=id eq '$($resource.Id)'").value) {
-											$change.Actions = @{"Set" = "Activate"}
-										}
 									}
 								}
 								"assignedLicenses" {

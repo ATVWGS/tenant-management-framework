@@ -48,9 +48,6 @@ function Export-TmfGroup {
             if ($g.assignedLicenses) {
                 $groupDetails["assignedLicenses"] = $g.assignedLicenses
             }            
-            if ($g.id -in $PAGs.externalId) {
-                $groupDetails["privilegedAccess"] = $true
-            }
             $groupDetails["present"] = $true
             return $groupDetails
         }
@@ -119,7 +116,6 @@ function Export-TmfGroup {
         }
     }
     process {
-        $PAGs=(Invoke-MgGraphRequest -Method GET -Uri "$script:graphBaseUrl/privilegedAccess/aadGroups/resources?`$select=externalId&`$top=999").value
         if ($SpecificResources) {
 
             $SpecificResourceIDs = @()
