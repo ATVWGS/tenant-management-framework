@@ -23,7 +23,7 @@
 		}
 		Test-GraphConnection -Cmdlet $Cmdlet
 
-		$tenant = (Invoke-MgGraphRequest -Method GET -Uri ("$script:graphBaseUrl/organization?`$select=displayname,id")).value
+		$tenant = (Invoke-MgGraphRequest -Method GET -Uri ("$script:graphBaseUrl1/organization?`$select=displayname,id")).value
 
 		if (($SpecificResources -and $SourceFile -and $SourceConfig) -or ($SpecificResources -and $SourceFile) -or ($SourceFile -and $SourceConfig)) {
 			$exception = New-Object System.Data.DataException("Multiple filters are not supported. You can only filter by one type, sourceFile or sourceConfig or specificResources!")
@@ -79,7 +79,7 @@
 			Beautify-TmfTestResult -TestResult $result -FunctionName $MyInvocation.MyCommand
 			switch ($result.ActionType) {
 				"Create" {
-					$requestUrl = "$script:graphBaseUrl/identityGovernance/termsOfUse/agreements"
+					$requestUrl = "$script:graphBaseUrl1/identityGovernance/termsOfUse/agreements"
 					$requestMethod = "POST"
 					$requestBody = @{						
 						"displayName" = $result.DesiredConfiguration.displayName
@@ -88,13 +88,15 @@
 						"isViewingBeforeAcceptanceRequired", "isPerDeviceAcceptanceRequired", "userReacceptRequiredFrequency", "termsExpiration", "files" | ForEach-Object {
 							if ($result.DesiredConfiguration.Properties() -contains "$_") {
 								switch ($_) {
-									"files" {										
+									"files" {
+										#Add default file									
 										$configPath = (Get-TmfActiveConfiguration | Where-Object {$_.Name -eq $result.DesiredConfiguration.sourceConfig}).Path
-										$requestBody["files"] = @($result.DesiredConfiguration.files | ForEach-Object {
+										$requestBody["files"] = @($result.DesiredConfiguration.files | Where-Object {$_.isDefault -eq $true} | ForEach-Object {
 											$file = $_ | Select-Object fileName, language, isDefault
 											$filePath = "{0}/agreements/{1}" -f $configPath, $_.filePath
 											$data = [Convert]::ToBase64String([System.IO.File]::ReadAllBytes($filePath))
 											Add-Member -InputObject $file -MemberType NoteProperty -Name "fileData" -Value @{ data = $data }
+											Add-Member -InputObject $file -MemberType NoteProperty -Name "displayName" -Value $result.DesiredConfiguration.displayName
 											return $file
 										})
 									}
@@ -106,6 +108,35 @@
 						$requestBody = $requestBody | ConvertTo-Json -ErrorAction Stop -Depth 8
 						Write-PSFMessage -Level Verbose -String "TMF.Invoke.SendingRequestWithBody" -StringValues $requestMethod, $requestUrl, $requestBody
 						Invoke-MgGraphRequest -Method $requestMethod -Uri $requestUrl -Body $requestBody | Out-Null
+
+						#Add additional localization files
+						if ($result.DesiredConfiguration.files.count -gt 1) {
+							
+							#Get agreementId
+							for ($i=0; $i -lt 5; $i++) {
+								$agreementId = (Invoke-MgGraphRequest -Method GET -Uri "$($requestUrl)?`$filter=displayName eq '$($result.DesiredConfiguration.displayName)'").value.id
+								if ($agreementId) {
+									Start-Sleep 5
+									break
+								}
+								else {
+									Start-Sleep 5
+								}
+							}
+
+							foreach ($additionalFile in ($result.DesiredConfiguration.files | Where-Object {$_.isDefault -eq $false})) {
+								$fileRequestBody = @($result.DesiredConfiguration.files | Where-Object {$_.fileName -eq $additionalFile.fileName} | ForEach-Object {
+								$file = $_ | Select-Object fileName, language, isDefault
+								$filePath = "{0}/agreements/{1}" -f $configPath, $_.filePath
+								$data = [Convert]::ToBase64String([System.IO.File]::ReadAllBytes($filePath))
+								Add-Member -InputObject $file -MemberType NoteProperty -Name "fileData" -Value @{ data = $data }
+								Add-Member -InputObject $file -MemberType NoteProperty -Name "displayName" -Value $result.DesiredConfiguration.displayName
+								return $file
+								}) | ConvertTo-Json -Depth 5
+								Write-PSFMessage -Level Verbose -String "TMF.Invoke.SendingRequestWithBody" -StringValues "POST", "$($requestUrl)/$($agreementId)/files", $fileRequestBody
+								Invoke-MgGraphRequest -Method POST -Uri "$($requestUrl)/$($agreementId)/files" -Body $fileRequestBody -ContentType "application/json" | Out-Null
+							}
+						}
 					}
 					catch {
 						Write-PSFMessage -Level Error -String "TMF.Invoke.ActionFailed" -StringValues $result.Tenant, $result.ResourceType, $result.ResourceName, $result.ActionType
@@ -113,7 +144,7 @@
 					}
 				}
 				"Delete" {
-					$requestUrl = "$script:graphBaseUrl/identityGovernance/termsOfUse/agreements/{0}" -f $result.GraphResource.Id
+					$requestUrl = "$script:graphBaseUrl1/identityGovernance/termsOfUse/agreements/{0}" -f $result.GraphResource.Id
 					$requestMethod = "DELETE"
 					try {
 						Write-PSFMessage -Level Verbose -String "TMF.Invoke.SendingRequest" -StringValues $requestMethod, $requestUrl
@@ -125,12 +156,29 @@
 					}
 				}
 				"Update" {					
-					$requestUrl = "$script:graphBaseUrl/identityGovernance/termsOfUse/agreements/{0}" -f $result.GraphResource.Id
+					$requestUrl = "$script:graphBaseUrl1/identityGovernance/termsOfUse/agreements/{0}" -f $result.GraphResource.Id
 					$requestMethod = "PATCH"
 					$requestBody = @{}
 					try {
 						foreach ($change in $result.Changes) {						
-							switch ($change.Property) {								
+							switch ($change.Property) {		
+								"files" {
+									$configPath = (Get-TmfActiveConfiguration | Where-Object {$_.Name -eq $result.DesiredConfiguration.sourceConfig}).Path
+									$changedFiles = @()
+									$changedFiles += for ($i=0; $i -lt $change.Actions.count;$i++) {$change.Actions[$i]["Set"]}
+									foreach ($changedFile in $changedFiles) {
+										$fileRequestBody = @($result.DesiredConfiguration.files | Where-Object {$_.fileName -eq $changedFile} | ForEach-Object {
+										$file = $_ | Select-Object fileName, language, isDefault
+										$filePath = "{0}/agreements/{1}" -f $configPath, $_.filePath
+										$data = [Convert]::ToBase64String([System.IO.File]::ReadAllBytes($filePath))
+										Add-Member -InputObject $file -MemberType NoteProperty -Name "fileData" -Value @{ data = $data }
+										Add-Member -InputObject $file -MemberType NoteProperty -Name "displayName" -Value $result.DesiredConfiguration.displayName
+										return $file
+										}) | ConvertTo-Json -Depth 5
+										Write-PSFMessage -Level Verbose -String "TMF.Invoke.SendingRequestWithBody" -StringValues "POST", "$requestUrl/files", $fileRequestBody
+										Invoke-MgGraphRequest -Method POST -Uri "$requestUrl/files" -Body $fileRequestBody -ContentType "application/json" | Out-Null
+									}
+								}
 								default {
 									foreach ($action in $change.Actions.Keys) {
 										switch ($action) {

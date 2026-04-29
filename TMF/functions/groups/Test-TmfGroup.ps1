@@ -170,6 +170,7 @@
 										}
 									}									
 								}
+								"isAssignableToRole" {<# Can only be set during creation of a group. #>}
 								"resourceBehaviorOptions" {<# Is only used while creation of a group. #>}
 								{$_ -in @("hideFromAddressLists", "hideFromOutlookClients")} {
 									$tempResource = Invoke-MgGraphRequest -Method GET -Uri ("$script:graphBaseUrl/groups/{0}?`$select={1}" -f $resource.id,$_)

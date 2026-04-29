@@ -96,7 +96,7 @@ function Test-TmfAccessPackageAssignmentPolicy
 			}
 
 			$accessPackageId = $definition.accessPackageId()
-			if (-Not $accessPackageId) {
+			if ((-Not $accessPackageId) -or ($accessPackageId -notmatch $script:guidRegex)) {
 				Write-PSFMessage -Level Host -String 'TMF.RelatedResourceDoesNotExist' -StringValues "Access Package", $accessPackage, $result.ResourceType, $result.ResourceName
 				New-TestResult @result -ActionType "Create"				
 				continue
