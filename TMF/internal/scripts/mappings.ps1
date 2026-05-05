@@ -205,6 +205,17 @@ $script:supportedResources = @{
         "parentType" = "policies"
         "weight" = 5
     }
+    "adminConsentRequestPolicy" = @{
+        "registerFunction" = (Get-Command Register-TmfAdminConsentRequestPolicy)
+        "testFunction" = (Get-Command Test-TmfAdminConsentRequestPolicy)
+        "invokeFunction" = (Get-Command Invoke-TmfAdminConsentRequestPolicy)
+        "exportFunction" = (Get-Command Export-TmfAdminConsentRequestPolicy)
+        "validateFunctions" = @{
+            "reviewers" = (Get-Command Validate-AdminConsentRequestReviewers)
+        }
+        "parentType" = "policies"
+        "weight" = 20
+    }
     "attributeSets" = @{
         "registerFunction" = (Get-Command Register-TmfAttributeSet)
         "testFunction" = (Get-Command Test-TmfAttributeSet)
