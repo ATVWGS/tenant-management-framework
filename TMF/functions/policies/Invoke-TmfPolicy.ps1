@@ -15,7 +15,6 @@ function Invoke-TmfPolicy
 	{
 		Test-GraphConnection -Cmdlet $PSCmdlet
 		$tenant = (Invoke-MgGraphRequest -Method GET -Uri ("$script:graphBaseUrl/organization?`$select=displayname,id")).value
-		$policyResources = @("authenticationFlowsPolicies", "authenticationMethodsPolicies", "authorizationPolicies")
 	}
 	process
 	{
@@ -27,7 +26,7 @@ function Invoke-TmfPolicy
 			}
 		}		
 		
-		foreach ($resourceType in ($script:supportedResources.GetEnumerator() | Where-Object {$_.Value.invokeFunction -and $_.Name -in $policyResources} | Sort-Object {$_.Value.weight})) {			
+		foreach ($resourceType in ($script:supportedResources.GetEnumerator() | Where-Object {$_.Value.invokeFunction -and $_.Value.parentType -eq "policies"} | Sort-Object {$_.Value.weight})) {			
 			if ($script:desiredConfiguration[$resourceType.Name]) {
 				Write-PSFMessage -Level Host -FunctionName "Invoke-TmfPolicies" -String "TMF.StartingInvokeForResource" -StringValues $resourceType.Name					
 				& $resourceType.Value["invokeFunction"] -Cmdlet $PSCmdlet -Confirm

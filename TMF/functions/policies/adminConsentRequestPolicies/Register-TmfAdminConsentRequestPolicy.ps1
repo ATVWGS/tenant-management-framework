@@ -14,8 +14,7 @@ function Register-TmfAdminConsentRequestPolicy {
         [bool] $remindersEnabled,
         [Parameter(Mandatory)]
         [int] $requestDurationInDays,
-        [Parameter(Mandatory)]
-        [object[]] $reviewers,        
+        [object[]] $reviewers = @(),        
         [bool] $present = $true,
         [string] $sourceConfig = "<Custom>",
         [string] $sourceFile = "<Custom>",

@@ -27,22 +27,15 @@ function Export-TmfPolicy {
     }
     process {
         if ($Append) {
-            Export-TmfAuthenticationFlowsPolicy -OutPath $OutPath -Append -Cmdlet $Cmdlet
-            Export-TmfAuthenticationMethodsPolicy -OutPath $OutPath -Append -Cmdlet $Cmdlet
-            Export-TmfAuthorizationPolicy -OutPath $OutPath -Cmdlet $Cmdlet
-            Export-TmfAppManagementPolicy -OutPath $OutPath -Append -Cmdlet $Cmdlet
-            Export-TmfTenantAppManagementPolicy -OutPath $OutPath -Cmdlet $Cmdlet
-            Export-TmfAuthenticationStrengthPolicy -OutPath $OutPath -Append -Cmdlet $Cmdlet
-        }
+            foreach ($resourceType in ($script:supportedResources.GetEnumerator() | Where-Object {$_.Value.ExportFunction -and $_.Value.parentType -eq "policies" } | Sort-Object {$_.Value.weight})) {
+				& $resourceType.Value["ExportFunction"] -OutPath $OutPath -Append -Cmdlet $PSCmdlet
+			}			
+		}
         else {
-            Export-TmfAuthenticationFlowsPolicy -OutPath $OutPath -Cmdlet $Cmdlet
-            Export-TmfAuthenticationMethodsPolicy -OutPath $OutPath -Cmdlet $Cmdlet
-            Export-TmfAuthorizationPolicy -OutPath $OutPath -Cmdlet $Cmdlet
-            Export-TmfAppManagementPolicy -OutPath $OutPath -Cmdlet $Cmdlet
-            Export-TmfTenantAppManagementPolicy -OutPath $OutPath -Cmdlet $Cmdlet
-            Export-TmfAuthenticationStrengthPolicy -OutPath $OutPath -Cmdlet $Cmdlet
+            foreach ($resourceType in ($script:supportedResources.GetEnumerator() | Where-Object {$_.Value.ExportFunction -and $_.Value.parentType -eq "policies" } | Sort-Object {$_.Value.weight})) {
+				& $resourceType.Value["ExportFunction"] -OutPath $OutPath -Cmdlet $PSCmdlet
+			}
         }
     }
-    end {
-    }
+    end {}
 }
