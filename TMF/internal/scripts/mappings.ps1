@@ -232,6 +232,14 @@ $script:supportedResources = @{
         "parentType" = "policies"
         "weight" = 20
     }
+    "activityBasedTimeoutPolicies" = @{
+        "registerFunction" = (Get-Command Register-TmfActivityBasedTimeoutPolicy)
+        "testFunction" = (Get-Command Test-TmfActivityBasedTimeoutPolicy)
+        "invokeFunction" = (Get-Command Invoke-TmfActivityBasedTimeoutPolicy)
+        "exportFunction" = (Get-Command Export-TmfActivityBasedTimeoutPolicy)
+        "parentType" = "policies"
+        "weight" = 20
+    }
     "attributeSets" = @{
         "registerFunction" = (Get-Command Register-TmfAttributeSet)
         "testFunction" = (Get-Command Test-TmfAttributeSet)
