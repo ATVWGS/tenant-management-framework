@@ -15,7 +15,7 @@ function Export-TmfAuthorizationPolicy {
     .EXAMPLE
     Export-TmfAuthorizationPolicy | ConvertTo-Json -Depth 15
     #>
-    [Diagnostics.CodeAnalysis.SuppressMessageAttribute("PSAvoidDefaultValueSwitchParameter")]
+    [Diagnostics.CodeAnalysis.SuppressMessageAttribute("PSAvoidDefaultValueSwitchParameter","")]
     [CmdletBinding()] param(
         [string[]] $SpecificResources,
         [Alias('OutPutPath')] [string] $OutPath,

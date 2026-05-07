@@ -216,6 +216,30 @@ $script:supportedResources = @{
         "parentType" = "policies"
         "weight" = 20
     }
+    "deviceRegistrationPolicy" = @{
+        "registerFunction" = (Get-Command Register-TmfDeviceRegistrationPolicy)
+        "testFunction" = (Get-Command Test-TmfDeviceRegistrationPolicy)
+        "invokeFunction" = (Get-Command Invoke-TmfDeviceRegistrationPolicy)
+        "exportFunction" = (Get-Command Export-TmfDeviceRegistrationPolicy)
+        "parentType" = "policies"
+        "weight" = 20
+    }
+    "claimsMappingPolicies" = @{
+        "registerFunction" = (Get-Command Register-TmfClaimsMappingPolicy)
+        "testFunction" = (Get-Command Test-TmfClaimsMappingPolicy)
+        "invokeFunction" = (Get-Command Invoke-TmfClaimsMappingPolicy)
+        "exportFunction" = (Get-Command Export-TmfClaimsMappingPolicy)
+        "parentType" = "policies"
+        "weight" = 20
+    }
+    "activityBasedTimeoutPolicies" = @{
+        "registerFunction" = (Get-Command Register-TmfActivityBasedTimeoutPolicy)
+        "testFunction" = (Get-Command Test-TmfActivityBasedTimeoutPolicy)
+        "invokeFunction" = (Get-Command Invoke-TmfActivityBasedTimeoutPolicy)
+        "exportFunction" = (Get-Command Export-TmfActivityBasedTimeoutPolicy)
+        "parentType" = "policies"
+        "weight" = 20
+    }
     "attributeSets" = @{
         "registerFunction" = (Get-Command Register-TmfAttributeSet)
         "testFunction" = (Get-Command Test-TmfAttributeSet)

@@ -123,7 +123,7 @@
 			$scopes += "OrganizationalBranding.ReadWrite.All"
 		}
 		if ($Policies -or $All) {
-			$scopes += "Policy.ReadWrite.AuthenticationMethod", "Policy.ReadWrite.Authorization", "Policy.ReadWrite.AuthenticationFlows"
+			$scopes += "Policy.ReadWrite.AuthenticationMethod", "Policy.ReadWrite.Authorization", "Policy.ReadWrite.AuthenticationFlows", "Policy.ReadWrite.DeviceConfiguration"
 		}
 		if($RoleManagement -or $All) {
 			$scopes += "RoleManagement.ReadWrite.Directory", "Directory.AccessAsUser.All", "RoleEligibilitySchedule.ReadWrite.Directory", "RoleAssignmentSchedule.ReadWrite.Directory", "RoleManagementPolicy.ReadWrite.Directory","RoleManagementPolicy.ReadWrite.AzureADGroup"
