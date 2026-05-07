@@ -1,6 +1,7 @@
 function Register-TmfDeviceRegistrationPolicy {
     [System.Diagnostics.CodeAnalysis.SuppressMessageAttribute("PSAvoidDefaultValueForMandatoryParameter", "")]
     [System.Diagnostics.CodeAnalysis.SuppressMessageAttribute("PSAvoidUsingPlainTextForPassword", "localAdminPassword")]
+    [System.Diagnostics.CodeAnalysis.SuppressMessageAttribute("PSAvoidUsingUsernameAndPasswordParams", "")]
     [CmdletBinding()]
 	Param (
         [Parameter(Mandatory)]
