@@ -224,6 +224,14 @@ $script:supportedResources = @{
         "parentType" = "policies"
         "weight" = 20
     }
+    "claimsMappingPolicies" = @{
+        "registerFunction" = (Get-Command Register-TmfClaimsMappingPolicy)
+        "testFunction" = (Get-Command Test-TmfClaimsMappingPolicy)
+        "invokeFunction" = (Get-Command Invoke-TmfClaimsMappingPolicy)
+        "exportFunction" = (Get-Command Export-TmfClaimsMappingPolicy)
+        "parentType" = "policies"
+        "weight" = 20
+    }
     "attributeSets" = @{
         "registerFunction" = (Get-Command Register-TmfAttributeSet)
         "testFunction" = (Get-Command Test-TmfAttributeSet)
