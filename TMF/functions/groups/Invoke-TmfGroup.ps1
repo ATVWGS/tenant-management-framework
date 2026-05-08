@@ -128,7 +128,7 @@
 								}
 							}
 							$requestBody = $requestBody | ConvertTo-Json -ErrorAction Stop
-							Start-Sleep -Seconds 10 # Wait for group creation
+							Start-Sleep -Seconds 20 # Wait for group creation
 							Write-PSFMessage -Level Verbose -String "TMF.Invoke.SendingRequestWithBody" -StringValues $requestMethod, $requestUrl, $requestBody
 							Invoke-MgGraphRequest -Method $requestMethod -Uri $requestUrl -Body $requestBody | Out-Null
 						}						
@@ -141,6 +141,7 @@
 								"removeLicenses" = @()
 							}
 							$requestBody = $requestBody | ConvertTo-Json -ErrorAction Stop -Depth 3
+							Start-Sleep -Seconds 20 # Wait for group creation
 							Write-PSFMessage -Level Verbose -String "TMF.Invoke.SendingRequestWithBody" -StringValues $requestMethod, $requestUrl, $requestBody
 							Invoke-MgGraphRequest -Method $requestMethod -Uri $requestUrl -Body $requestBody | Out-Null
 						}
