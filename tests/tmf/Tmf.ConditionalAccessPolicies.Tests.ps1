@@ -42,7 +42,7 @@ Describe 'Tmf.ConditionalAccessPolicies.Groups.Invoke.Creation' {
 Describe 'Tmf.ConditionalAccessPolicies.Register' {
     BeforeAll{
         #Let's wait for groups before creating conditionalAccessPolicy
-        Start-Sleep 20
+        Start-Sleep 30
     }
     It "should successfully register conditionalAccessPolicy definitions" {
         foreach ($conditionalAccessPolicy in $global:definitions["conditionalAccessPolicies"]) {
@@ -68,7 +68,7 @@ Describe 'Tmf.ConditionalAccessPolicies.Validate.Creation' {
 
     BeforeAll {
         #Let's wait until resources can be queried after creation
-        Start-Sleep 20
+        Start-Sleep 30
     }
         
     $testCases = $global:definitions["conditionalAccessPolicies"] | Foreach-Object {
@@ -156,7 +156,7 @@ Describe 'Tmf.RoleManagement.Groups.Invoke.Deletion' {
 
 Describe 'Tmf.RoleManagement.Groups.Validate.Deletion' {
     BeforeAll {
-        Start-Sleep 20
+        Start-Sleep 30
     }
 
     $testCases = $global:definitions["groups"] | Foreach-Object {

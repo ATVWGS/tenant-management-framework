@@ -97,8 +97,6 @@ Describe 'Tmf.General.Invoke.Deletion' {
             $_.Value | ConvertTo-Json -Depth 10 | Out-File -FilePath $targetFilePath -Encoding utf8 -Force
         }
         #endregion
-
-        Start-Sleep 30  # Give Microsoft Graph some time to process our requests
     }
 
     It "should successfully reload the TMF configuration" {

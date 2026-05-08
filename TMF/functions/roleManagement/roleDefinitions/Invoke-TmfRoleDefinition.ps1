@@ -55,6 +55,7 @@ function Invoke-TmfRoleDefinition
             }
 
             if ($testResults.DesiredConfiguration.subscriptionReference) {
+                Test-AzureConnection -Cmdlet $Cmdlet
                 $subscriptionInfo = (Get-AzContext).Subscription
                 Write-PSFMessage -Level Host -FunctionName "Invoke-TmfRoleDefinition" -String "TMF.SubscriptionInformation" -StringValues $subscriptionInfo.Name, $subscriptionInfo.Id
                 if ((Read-Host "Is this the correct subscription? [y/n]") -notin @("y","Y"))	{
@@ -83,7 +84,7 @@ function Invoke-TmfRoleDefinition
 
             if ($result.DesiredConfiguration.subscriptionReference) {
                 $roleDefinitionScope = "AzureResources"
-                Test-AzureConnection
+                Test-AzureConnection -Cmdlet $Cmdlet
                 $token = (Get-AzAccessToken -ResourceUrl $script:apiBaseUrl).Token
                 if ($token.GetType().Name -eq "SecureString") {
                     $bstr = [System.Runtime.InteropServices.Marshal]::SecureStringToBSTR($token)

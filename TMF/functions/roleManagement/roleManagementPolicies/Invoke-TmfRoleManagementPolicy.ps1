@@ -53,6 +53,7 @@ function Invoke-TmfRoleManagementPolicy {
                 $testResults = Test-TmfRoleManagementPolicy -RawOutput -Cmdlet $Cmdlet
             }
             if ($testResults.DesiredConfiguration.subscriptionReference) {
+                Test-AzureConnection -Cmdlet $Cmdlet
                 $subscriptionInfo = Get-AzContext
                 Write-PSFMessage -Level Host -FunctionName "Invoke-TmfRoleManagementPolicy" -String "TMF.SubscriptionInformation" -StringValues $subscriptionInfo.Subscription.Name, $subscriptionInfo.Subscription.Id
                 if ((Read-Host "Is this the correct subscription? [y/n]") -notin @("y","Y"))	{
