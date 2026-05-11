@@ -96,7 +96,7 @@ function Test-TmfRoleAssignment
         
                         $subscriptionId = Resolve-Subscription -InputReference $definition.subscriptionReference
                         $roleDefinitionId = Resolve-AzureRoleDefinition -InputReference $definition.roleReference -SubscriptionId $subscriptionId.trimStart("/") -SearchInDesiredConfiguration
-                        if ($roleDefinitionId -notmatch $script:guidRegex) {
+                        if ($roleDefinitionId.split("/")[-1] -notmatch $script:guidRegex) {
                             $resource = @()
                         }
                         else {

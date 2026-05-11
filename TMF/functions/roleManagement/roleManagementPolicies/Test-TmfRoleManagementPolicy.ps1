@@ -92,7 +92,7 @@ function Test-TmfRoleManagementPolicy {
 
                     $subscriptionId = Resolve-Subscription -InputReference $definition.subscriptionReference
                     $roleId = Resolve-AzureRoleDefinition -InputReference $definition.roleReference -SubscriptionId $subscriptionId -SearchInDesiredConfiguration
-                    if ($roleId -notmatch $script:guidRegex) {
+                    if ($roleId.split("/")[-1] -notmatch $script:guidRegex) {
                         $resource = @()
                     }
                     else {
