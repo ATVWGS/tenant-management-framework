@@ -10,7 +10,7 @@
 		"appManagementPolicies","attributeSets","authenticationContextClassReferences","authenticationFlowsPolicies","authenticationMethodsPolicies","authenticationStrengthPolicies",
 		"authorizationPolicies","conditionalAccessPolicies","crossTenantAccessDefaultSettings","crossTenantAccessPartnerSettings","crossTenantAccessPolicy","customSecurityAttributeAllowedValues",
 		"customSecurityAttributeDefinitions","directoryRoles","directorySettings","groups","namedLocations","organizationalBrandings","roleAssignments","roleDefinitions","roleManagementPolicies",
-		"roleManagementPolicyRuleTemplates","stringMappings","tenantAppManagementPolicy","adminConsentRequestPolicy","deviceRegistrationPolicy","claimsMappingPolicies","activityBasedTimeoutPolicies")]
+		"roleManagementPolicyRuleTemplates","stringMappings","tenantAppManagementPolicy","adminConsentRequestPolicy","deviceRegistrationPolicy","claimsMappingPolicies","activityBasedTimeoutPolicies","customAuthenticationExtensions")]
 		$resourceTypes
 	)
 	

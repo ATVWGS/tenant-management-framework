@@ -264,6 +264,13 @@ $script:supportedResources = @{
         "parentType" = "customSecurityAttributes"
         "weight" = 42
     }
+    "customAuthenticationExtensions" = @{
+        "registerFunction" = (Get-Command Register-TmfCustomAuthenticationExtension)
+        "testFunction" = (Get-Command Test-TmfCustomAuthenticationExtension)
+        "invokeFunction" = (Get-Command Invoke-TmfCustomAuthenticationExtension)
+        "exportFunction" = (Get-Command Export-TmfCustomAuthenticationExtension)
+        "weight" = 50
+    }
     "authenticationContextClassReferences" = @{
         "registerFunction" = (Get-Command Register-TmfAuthenticationContextClassReference)
         "testFunction" = (Get-Command Test-TmfAuthenticationContextClassReference)
