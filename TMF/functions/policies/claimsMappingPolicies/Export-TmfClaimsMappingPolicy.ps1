@@ -39,7 +39,8 @@ function Export-TmfClaimsMappingPolicy {
                 [Parameter(Mandatory)] [object] $policy
             )
             $obj = [ordered]@{ present = $true }
-            foreach ($p in @('displayName', 'definition', 'isOrganizationDefault')) {
+            $obj["isOrganizationDefault"] = $policy.isOrganizationDefault
+            foreach ($p in @('displayName', 'definition')) {
                 if ($policy.$p -and $null -ne $policy.$p -and $policy.$p -ne '') {
                     $obj[$p] = $policy.$p
                 }
