@@ -153,7 +153,7 @@
 											$change.Actions += @{"Set" = $file.fileName}
 										}
 										else {
-											$targetFileData = (Invoke-MgGraphRequest -Method GET -Uri "$($script:graphBaseUrl1)/identityGovernance/termsOfUse/agreements/$($resource.id)/file/localizations/$(($resource.files | Where-Object {$_.fileName -eq $file.fileName}).id)/filedata/data").value
+											$targetFileData = (Invoke-MgGraphRequest -Method GET -Uri "$($script:graphBaseUrl1)/identityGovernance/termsOfUse/agreements/$($resource.id)/file/localizations/$(($resource.files | Where-Object {$_.fileName -eq $file.fileName -and $_.language -eq $file.language}).id)/filedata/data").value
 											$sourceFileData =  [Convert]::ToBase64String([System.IO.File]::ReadAllBytes($filePath))
 
 											if ($sourceFileData -ne $targetFileData) {
