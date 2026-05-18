@@ -129,6 +129,11 @@ function Test-TmfDeviceRegistrationPolicy {
                                         $change.Actions = @{"Set" = $definition.$property}
                                     }
                                 }
+                                "localAdminPassword" {
+                                    if ($definition.$property.isEnabled -ne $resource.$property.isEnabled) {
+                                        $change.Actions = @{"Set" = $definition.$property}
+                                    }
+                                }
                                 default {
                                     if ($definition.$property -ne $resource.$property) {
                                         $change.Actions = @{"Set" = $definition.$property}
