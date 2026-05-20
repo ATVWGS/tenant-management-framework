@@ -143,7 +143,7 @@ function Test-TmfAccessReview
 									}
 									if ($definition.$property.recommendationInsightSettings.recommendationLookBackDuration -and $resource.$property.recommendationInsightSettings.recommendationLookBackDuration) {
 										if ($definition.$property.recommendationInsightSettings.recommendationLookBackDuration -ne $resource.$property.recommendationInsightSettings.recommendationLookBackDuration) {
-											$change.Actions = @{"Set" = $definition.$property.recommendationInsightSettings}
+											Write-PSFMessage -Level Warning -String 'TMF.Test.UpdateNotPossibleForParameter' -StringValues "recommendationLookBackDuration",$resourceName
 										}
 									}									
 									if ($definition.$property.recurrence.pattern -and $resource.$property.recurrence.pattern) {
