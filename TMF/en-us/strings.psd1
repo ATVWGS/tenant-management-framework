@@ -36,6 +36,7 @@
     'TMF.Test.MissingPolicyRuleTemplate' = 'Referenced policy rule template {1} for {0} not found.'
     'TMF.Test.DeleteNotPossible' = 'Not possible to delete resources of type {0}. Please change parameter present of {1} from false to true.'
     'TMF.Test.UpdateNotPossibleForBuiltInResources' = 'It is not possible to update built-in resources of type ''{0}''. Please remove ''{1}'' from configuration.'
+    'TMF.Test.UpdateNotPossibleForParameter' = 'It is not possible to update the parameter ''{0}'' for resourceType ''{1}'' after creation.'
 
     'TMF.Export.NotFound' = 'Resource {0} of type {1} not found in tenant {2}.'
     'TMF.Export.FileWriteFailed' = 'Failed to write export file {0}. Error: {1}'
