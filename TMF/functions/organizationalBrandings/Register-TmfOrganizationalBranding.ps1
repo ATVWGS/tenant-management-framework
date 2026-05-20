@@ -27,7 +27,7 @@ function Register-TmfOrganizationalBranding
 		$Cmdlet = $PSCmdlet
     )
     begin {
-        $resourceName = "organizationalBranding"
+        $resourceName = "organizationalBrandings"
 		if (!$script:desiredConfiguration[$resourceName]) {
 			$script:desiredConfiguration[$resourceName] = @()
 		}

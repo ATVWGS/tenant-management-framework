@@ -12,7 +12,7 @@ function Invoke-TmfOrganizationalBranding
 	
 	begin
 	{
-		$resourceName = "organizationalBranding"
+		$resourceName = "organizationalBrandings"
 		if (!$script:desiredConfiguration[$resourceName]) {
 			Stop-PSFFunction -String "TMF.NoDefinitions" -StringValues "organizationalBrandings"
 			return
