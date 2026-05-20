@@ -19,7 +19,7 @@ function Test-TmfOrganizationalBranding {
 	begin
 	{
 		Test-GraphConnection -Cmdlet $Cmdlet
-		$resourceName = "OrganizationalBranding"
+		$resourceName = "OrganizationalBrandings"
 		$tenant = (Invoke-MgGraphRequest -Method GET -Uri ("$script:graphBaseUrl1/organization?`$select=displayname,id")).value
 
 		if (($SpecificResources -and $SourceFile -and $SourceConfig) -or ($SpecificResources -and $SourceFile) -or ($SourceFile -and $SourceConfig)) {
