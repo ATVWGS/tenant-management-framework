@@ -38,10 +38,10 @@
       "filePath": "files/Example Terms of Use.pdf"
     },
     {
-      "fileName": "Example Terms of Use.pdf",
+      "fileName": "Example Terms of Use2.pdf",
       "language": "de",
       "isDefault": false,
-      "filePath": "files/Example Terms of Use.pdf"
+      "filePath": "files/Example Terms of Use2.pdf"
     }
   ],
   "present": true
