@@ -6,7 +6,7 @@ function Invoke-TmfAccessPackageAssignmentPolicy
 	#>
 	[CmdletBinding()]
 	Param (
-		[string[]] $SpecificResources,
+		[object[]] $SpecificResources,
 		[string[]] $SourceFile,
 		[string[]] $SourceConfig,
 		[switch] $Confirm = $false,
@@ -113,7 +113,8 @@ function Invoke-TmfAccessPackageAssignmentPolicy
 				throw "Connected to the wrong tenant."
 			}
 			if ($SpecificResources) {
-				Write-PSFMessage -Level Host -FunctionName "Invoke-TmfAccessPackageAssignmentPolicy" -String "TMF.Invoke.Confirmed" -StringValues "accessPackageAssignmentPolicy configuration for resources: $($SpecificResources -join ",")"
+				$SpecificResourcesOutput = foreach ($SpecificResource in $SpecificResources) {"$($SpecificResource.displayName) (AP:$($SpecificResource.accessPackage))"}
+				Write-PSFMessage -Level Host -FunctionName "Invoke-TmfAccessPackageAssignmentPolicy" -String "TMF.Invoke.Confirmed" -StringValues "accessPackageAssignmentPolicy configuration for resources: $($SpecificResourcesOutput -join ",")"
 				$testResults = Test-TmfAccessPackageAssignmentPolicy -SpecificResources $SpecificResources -RawOutput -Cmdlet $Cmdlet
 			}
 			elseif ($SourceFile) {

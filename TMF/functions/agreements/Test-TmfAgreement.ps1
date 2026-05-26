@@ -21,7 +21,7 @@
 	{
 		Test-GraphConnection -Cmdlet $Cmdlet
 		$resourceName = "agreements"
-		$tenant = (Invoke-MgGraphRequest -Method GET -Uri ("$script:graphBaseUrl/organization?`$select=displayname,id")).value
+		$tenant = (Invoke-MgGraphRequest -Method GET -Uri ("$script:graphBaseUrl1/organization?`$select=displayname,id")).value
 		
 		if (($SpecificResources -and $SourceFile -and $SourceConfig) -or ($SpecificResources -and $SourceFile) -or ($SourceFile -and $SourceConfig)) {
 			$exception = New-Object System.Data.DataException("Multiple filters are not supported. You can only filter by one type, sourceFile or sourceConfig or specificResources!")
@@ -104,7 +104,7 @@
 				$filter = "(displayName eq '{0}')" -f [System.Web.HttpUtility]::UrlEncode($definition.displayName)
 			}
 			try {
-				$resource = (Invoke-MgGraphRequest -Method GET -Uri ("$script:graphBaseUrl/identityGovernance/termsOfUse/agreements/?`$filter={0}" -f $filter)).Value			
+				$resource = (Invoke-MgGraphRequest -Method GET -Uri ("$script:graphBaseUrl1/identityGovernance/termsOfUse/agreements/?`$filter={0}&`$expand=files" -f $filter)).Value			
 			}
 			catch {
 				Write-PSFMessage -Level Warning -String 'TMF.Error.QueryWithFilterFailed' -StringValues $filter -Tag 'failed'
@@ -143,7 +143,30 @@
 										$change.Actions = @{"Set" = $definition.$property}
 									}#>
 								}
-								"files" { <# Currently not supported! #> }
+								"files" {
+									$change.Actions = @()
+									foreach ($file in $definition.files) {
+										$configPath = (Get-TmfActiveConfiguration | Where-Object {$_.Name -eq $definition.sourceConfig}).Path
+										$filePath = "{0}/agreements/{1}" -f $configPath, $file.filePath
+										
+										if ($resource.files.filename -notcontains $file.fileName) {
+											$change.Actions += @{"Set" = $file.fileName}
+										}
+										else {
+											if (-not ($resource.files | Where-Object {$_.fileName -eq $file.fileName -and $_.language -eq $file.language})) {
+												$change.Actions += @{"Set" = $file.fileName}
+											}
+											else {
+												$targetFileData = (Invoke-MgGraphRequest -Method GET -Uri "$($script:graphBaseUrl1)/identityGovernance/termsOfUse/agreements/$($resource.id)/file/localizations/$(($resource.files | Where-Object {$_.fileName -eq $file.fileName -and $_.language -eq $file.language}).id)/filedata/data").value
+												$sourceFileData =  [Convert]::ToBase64String([System.IO.File]::ReadAllBytes($filePath))
+
+												if ($sourceFileData -ne $targetFileData) {
+													$change.Actions += @{"Set" = $file.fileName}
+												}
+											}											
+										}
+									}
+								}
 								default {
 									if ($definition.$property -ne $resource.$property) {
 										$change.Actions = @{"Set" = $definition.$property}

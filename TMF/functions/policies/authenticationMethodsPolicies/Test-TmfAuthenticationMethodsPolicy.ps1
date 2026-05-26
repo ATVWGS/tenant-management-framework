@@ -134,10 +134,26 @@ function Test-TmfAuthenticationMethodsPolicy {
 											else {
 												for ($i=0; $i -lt $objectcount; $i++) {
 													foreach ($key in ($method.$methodProperty[$i] | Get-Member -MemberType NoteProperty).Name) {
-														if ($method.$methodProperty[$i].$key -ne $resourceMethod.$methodProperty[$i].$key) {
-															Write-Verbose $method.$methodProperty[$i].$key
-															$methodChange = $true
+														if (($method.$methodProperty[$i].$key.GetType()).Name -eq "PSCustomObject") {
+															foreach ($subkey in ($method.$methodProperty[$i].$key | Get-Member -MemberType NoteProperty).Name) {
+																if (($method.$methodProperty[$i].$key.$subkey.GetType()).Name -eq "Object[]") {
+																	if (Compare-Object $method.$methodProperty[$i].$key.$subkey $resourceMethod.$methodProperty[$i].$key.$subkey) {
+																		$methodChange = $true
+																	}
+																}
+																else {
+																	if ($method.$methodProperty[$i].$key.$subkey -ne $resourceMethod.$methodProperty[$i].$key.$subkey) {
+																		$methodChange = $true
+																	}
+																}
+															}
 														}
+														else {
+															if ($method.$methodProperty[$i].$key -ne $resourceMethod.$methodProperty[$i].$key) {
+																Write-Verbose $method.$methodProperty[$i].$key
+																$methodChange = $true
+															}
+														}														
 													}
 												}
 											}                                            

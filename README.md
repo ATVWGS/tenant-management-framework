@@ -37,6 +37,12 @@ configurations
 - Export functions for all supported resource types
 - Filtering on sourceFile
 
+## 1.4. Changes in v2.1
+- added functionality to change files in agreements
+- added new resource types activityBasedTimeoutPolicies, adminConsentRequestPolicy, claimsMappingPolicies, deviceRegistrationPolicy, customAuthenticationExtensions
+- removed 'privilegedAccess' as property for groups, because the endpoint for activating privileged access for groups was deprecated. Activation is implicit now by adding roleAssignments or changing roleManagementPolicy of a group
+- added recommendationInsightSettings to accessReviews (can only be set through creation, not updateable!)
+
 # 2. Getting started
 ## 2.1. Installation
 Checkout the [Powershell Gallery](https://www.powershellgallery.com/packages/TMF/)!
@@ -64,6 +70,7 @@ The required scopes depend on what components (resources) you want to configure.
 | AuthenticationContextClassReferences                             | AuthenticationContext.ReadWrite.All, Policy.ReadWrite.ConditionalAccess													  |
 | ConditionalAccessPolicies                                      | Policy.ReadWrite.ConditionalAccess, Policy.Read.All, RoleManagement.Read.Directory, Application.Read.All, Agreement.Read.All |
 | CrossTenantAccess (policy, defaultSettings, partnerSettings)     | Policy.ReadWrite.CrossTenantAccess   																						  |
+| CustomAuthenticationExtensions                                 | CustomAuthenticationExtensions.ReadWrite.All
 | CustomSecurityAttributes                                       | CustomSecAttributeDefinition.ReadWrite.All                                                                                   |
 | DirectoryRoles												   | RoleManagement.ReadWrite.Directory                                                                                           |
 | DirectorySettings											   | Directory.ReadWrite.All																									  |
@@ -71,7 +78,7 @@ The required scopes depend on what components (resources) you want to configure.
 | Groups                                                           | Group.ReadWrite.All, GroupMember.ReadWrite.All                                                                               |
 | NamedLocations                                                  | Policy.ReadWrite.ConditionalAccess                                                                                           |
 | OrganizationalBrandings										   | OrganizationalBranding.ReadWrite.All, Organization.ReadWrite.All															  |
-| Policies (authentication/authorization policies)                 | Policy.ReadWrite.AuthenticationMethod, Policy.ReadWrite.Authorization, Policy.ReadWrite.AuthenticationFlows                  |
+| Policies (authentication/authorization policies)                 | Policy.ReadWrite.AuthenticationMethod, Policy.ReadWrite.Authorization, Policy.ReadWrite.AuthenticationFlows, Policy.ReadWrite.DeviceConfiguration                  |
 | RoleManagement (assignments, definitions, management policies)  | RoleManagement.ReadWrite.Directory, Directory.AccessAsUser.All, RoleEligibilitySchedule.ReadWrite.Directory,                 |
 |                                                                  | RoleAssignmentSchedule.ReadWrite.Directory, RoleManagementPolicy.ReadWrite.Directory                                      |
 | Users                                                            | User.ReadWrite.All                                                                                                           |
@@ -172,6 +179,10 @@ The *example.md* file contains example resource instances and further informatio
 │           crossTenantAccessPolicy.json
 │           example.md
 │
+├───customAuthenticationExtensions
+│       customAuthenticationExtensions.json
+│       example.md
+│
 ├───customSecurityAttributes
 │   ├───attributeSets
 │   │       attributeSets.json
@@ -211,6 +222,14 @@ The *example.md* file contains example resource instances and further informatio
 │       organizationalBrandings.json
 │
 ├───policies
+│   ├───activityBasedTimeoutPolicies
+│   │       activityBasedTimeoutPolicies.json
+│   │       example.md
+│   │
+│   ├───adminConsentRequestPolicy
+│   │       adminConsentRequestPolicy.json
+│   │       example.md
+│   │
 │   ├───appManagementPolicies
 │   │       appManagementPolicies.json
 │   │       example.md
@@ -229,6 +248,14 @@ The *example.md* file contains example resource instances and further informatio
 │   │
 │   ├───authorizationPolicies
 │   │       authorizationPolicies.json
+│   │       example.md
+│   │
+│   ├───claimsMappingPolicies
+│   │       claimsMappingPolicies.json
+│   │       example.md
+│   │
+│   ├───deviceRegistrationPolicy
+│   │       deviceRegistrationPolicy.json
 │   │       example.md
 │   │
 │   └───tenantAppManagementPolicy
@@ -527,7 +554,7 @@ PS> Export-TmfGroup -SpecificResources "searchPattern*" -OutPath "C:\TmfConfig"
 ```
 
 ### policies
-Exports all policy types (except Conditional Access Policies) 
+Exports all supported policy types (except Conditional Access Policies) 
 ```powershell
 PS> Export-TmfPolicy
 ```
@@ -1205,7 +1232,102 @@ Please check the [.... example.md](./TMF/internal/data/configuration/policies/ap
     }
 ]
 
+```
+#### 2.6.10.7. activityBasedTimeoutPolicies
 
+```json
+{
+    "present": true,
+    "displayName": "TestPolicy",
+    "isOrganizationDefault": false,
+    "definition": [
+        "{\"ActivityBasedTimeoutPolicy\":{\"Version\":1,\"ApplicationPolicies\":[{\"ApplicationId\":\"default\",\"WebSessionIdleTimeout\":\"00:05:00\"}]}}"
+    ],
+}
+```
+#### 2.6.10.8. adminConsentRequestPolicy
+
+```json
+{
+  "present": true,
+  "displayName": "adminConsentRequestPolicy",
+  "notifyReviewers": true,
+  "remindersEnabled": true,
+  "isEnabled": true,
+  "requestDurationInDays": 30,
+  "reviewers": [
+    {
+        "reference": "someUser@domain.com",
+        "type": "singleUser"
+    },
+    {
+      "reference": "Global Administrator",
+      "type": "roleMembers"
+    },
+    {
+      "reference": "Some group",
+      "type": "groupMembers"
+    }
+  ]
+}
+```
+#### 2.6.10.9. claimsMappingPolicies
+
+```json
+{
+    "present": true,
+    "displayName": "AddOnPremisesSamAccountNameToToken",
+    "isOrganizationDefault": false,
+    "definition": [
+      "{\n    \"ClaimsMappingPolicy\": {\n        \"Version\": 1,\n        \"IncludeBasicClaimSet\": \"true\",\n        \"ClaimsSchema\": [\n            {\n                \"Source\": \"user\",\n                \"ID\": \"onpremisessamaccountname\",\n                \"JwtClaimType\": \"samAccountName\"\n            }\n        ]\n    }\n}"
+    ],
+    "appliesTo": [
+        "TestApp1"
+    ]
+}
+```
+#### 2.6.10.10. deviceRegistrationPolicy
+
+```json
+{
+  "present": true,
+  "displayName": "deviceRegistrationPolicy",
+  "multiFactorAuthConfiguration": "notRequired",
+  "userDeviceQuota": 50,
+  "azureADRegistration": {
+    "allowedToRegister": {
+      "@odata.type": "#microsoft.graph.allDeviceRegistrationMembership"
+    },
+    "isAdminConfigurable": false
+  },
+  "localAdminPassword": {
+    "isEnabled": false
+  },
+  "azureADJoin": {
+    "allowedToJoin": {
+      "users": [
+        "someUserUPN"
+      ],
+      "@odata.type": "#microsoft.graph.enumeratedDeviceRegistrationMembership",
+      "groups": [
+        "someGroupDisplayName"
+      ]
+    },
+    "localAdmins": {
+      "registeringUsers": {
+        "users": [
+            "someUserUPN"
+        ],
+        "@odata.type": "#microsoft.graph.enumeratedDeviceRegistrationMembership",
+        "groups": [
+            "someGroupDisplayName"
+        ]
+      },
+      "enableGlobalAdmins": true
+    },
+    "isAdminConfigurable": true
+  }
+}
 ```
 
 ### 2.6.11. roleManagement

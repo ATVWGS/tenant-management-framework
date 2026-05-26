@@ -40,7 +40,9 @@ $script:supportedResources = @{
             "deviceFilter" = (Get-Command Validate-ConditionalAccessFilter)
             "conditions" = (Get-Command Validate-ConditionalAccessConditionSet)
             "applications" = (Get-Command Validate-ConditionalAccessApplications)
+            "clientApplications" = (Get-Command Validate-ConditionalAccessClientApplications)
             "applicationFilter" = (Get-Command Validate-ConditionalAccessApplicationFilter)
+            "servicePrincipalFilter" = (Get-Command Validate-ConditionalAccessServicePrincipalFilter)
             "authenticationStrength" = (Get-Command Validate-ConditionalAccessAuthenticationStrength)
             "users" = (Get-Command Validate-ConditionalAccessUsers)
             "devices" = (Get-Command Validate-ConditionalAccessDevices)
@@ -203,6 +205,41 @@ $script:supportedResources = @{
         "parentType" = "policies"
         "weight" = 5
     }
+    "adminConsentRequestPolicy" = @{
+        "registerFunction" = (Get-Command Register-TmfAdminConsentRequestPolicy)
+        "testFunction" = (Get-Command Test-TmfAdminConsentRequestPolicy)
+        "invokeFunction" = (Get-Command Invoke-TmfAdminConsentRequestPolicy)
+        "exportFunction" = (Get-Command Export-TmfAdminConsentRequestPolicy)
+        "validateFunctions" = @{
+            "reviewers" = (Get-Command Validate-AdminConsentRequestReviewers)
+        }
+        "parentType" = "policies"
+        "weight" = 20
+    }
+    "deviceRegistrationPolicy" = @{
+        "registerFunction" = (Get-Command Register-TmfDeviceRegistrationPolicy)
+        "testFunction" = (Get-Command Test-TmfDeviceRegistrationPolicy)
+        "invokeFunction" = (Get-Command Invoke-TmfDeviceRegistrationPolicy)
+        "exportFunction" = (Get-Command Export-TmfDeviceRegistrationPolicy)
+        "parentType" = "policies"
+        "weight" = 20
+    }
+    "claimsMappingPolicies" = @{
+        "registerFunction" = (Get-Command Register-TmfClaimsMappingPolicy)
+        "testFunction" = (Get-Command Test-TmfClaimsMappingPolicy)
+        "invokeFunction" = (Get-Command Invoke-TmfClaimsMappingPolicy)
+        "exportFunction" = (Get-Command Export-TmfClaimsMappingPolicy)
+        "parentType" = "policies"
+        "weight" = 20
+    }
+    "activityBasedTimeoutPolicies" = @{
+        "registerFunction" = (Get-Command Register-TmfActivityBasedTimeoutPolicy)
+        "testFunction" = (Get-Command Test-TmfActivityBasedTimeoutPolicy)
+        "invokeFunction" = (Get-Command Invoke-TmfActivityBasedTimeoutPolicy)
+        "exportFunction" = (Get-Command Export-TmfActivityBasedTimeoutPolicy)
+        "parentType" = "policies"
+        "weight" = 20
+    }
     "attributeSets" = @{
         "registerFunction" = (Get-Command Register-TmfAttributeSet)
         "testFunction" = (Get-Command Test-TmfAttributeSet)
@@ -226,6 +263,13 @@ $script:supportedResources = @{
         "exportFunction" = (Get-Command Export-TmfCustomSecurityAttributeAllowedValue)
         "parentType" = "customSecurityAttributes"
         "weight" = 42
+    }
+    "customAuthenticationExtensions" = @{
+        "registerFunction" = (Get-Command Register-TmfCustomAuthenticationExtension)
+        "testFunction" = (Get-Command Test-TmfCustomAuthenticationExtension)
+        "invokeFunction" = (Get-Command Invoke-TmfCustomAuthenticationExtension)
+        "exportFunction" = (Get-Command Export-TmfCustomAuthenticationExtension)
+        "weight" = 50
     }
     "authenticationContextClassReferences" = @{
         "registerFunction" = (Get-Command Register-TmfAuthenticationContextClassReference)

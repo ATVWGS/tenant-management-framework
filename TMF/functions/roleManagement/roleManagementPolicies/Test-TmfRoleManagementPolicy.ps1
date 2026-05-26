@@ -91,25 +91,29 @@ function Test-TmfRoleManagementPolicy {
                     }
 
                     $subscriptionId = Resolve-Subscription -InputReference $definition.subscriptionReference
-                    $roleId = Resolve-AzureRoleDefinition -InputReference $definition.roleReference -SubscriptionId $subscriptionId
-                    switch ($definition.scopeType) {
-                        "subscription" {
-                            $policyId = (Invoke-RestMethod -Method "GET" -Uri "$($script:apiBaseUrl)$($subscriptionId)/providers/Microsoft.Authorization/roleManagementPolicyAssignments?`$filter=roleDefinitionId eq '$($roleId)'&api-version=2020-10-01-preview" -Headers @{"Authorization" = "Bearer $($token)"}).value.properties.policyId
-                            $resource = @()
-                            $resource += Invoke-RestMethod -Method "GET" -Uri "$($script:apiBaseUrl)$($policyId)?api-version=2020-10-01-preview" -Headers @{"Authorization" = "Bearer $($token)"}
-                        }
-                        "resourceGroup" {
-                            $policyId = ((Invoke-RestMethod -Method "GET" -Uri "$($script:apiBaseUrl)$($subscriptionId)/ResourceGroups/$($definition.scopeReference)/providers/Microsoft.Authorization/roleManagementPolicyAssignments?`$filter=roleDefinitionId eq '$($roleId)'&api-version=2020-10-01-preview" -Headers @{"Authorization" = "Bearer $($token)"}).value | Where-Object {$_.properties.roleDefinitionId -eq $roleId}).properties.policyId
-                            $resource = @()
-                            $resource += Invoke-RestMethod -Method "GET" -Uri "$($script:apiBaseUrl)$($policyId)?api-version=2020-10-01-preview" -Headers @{"Authorization" = "Bearer $($token)"}
-                        }
-                        "resource" {
-                            $policyId = ((Invoke-RestMethod -Method "GET" -Uri "$($script:apiBaseUrl)$($subscriptionId)$($definition.scopeReference)/providers/Microsoft.Authorization/roleManagementPolicyAssignments?api-version=2020-10-01-preview" -Headers @{"Authorization" = "Bearer $($token)"}).value | Where-Object {$_.properties.roleDefinitionId -eq $roleId}).properties.policyId
-                            $resource = @()
-                            $resource += Invoke-RestMethod -Method "GET" -Uri "$($script:apiBaseUrl)$($policyId)?api-version=2020-10-01-preview" -Headers @{"Authorization" = "Bearer $($token)"}
+                    $roleId = Resolve-AzureRoleDefinition -InputReference $definition.roleReference -SubscriptionId $subscriptionId -SearchInDesiredConfiguration
+                    if ($roleId.split("/")[-1] -notmatch $script:guidRegex) {
+                        $resource = @()
+                    }
+                    else {
+                        switch ($definition.scopeType) {
+                            "subscription" {
+                                $policyId = (Invoke-RestMethod -Method "GET" -Uri "$($script:apiBaseUrl)$($subscriptionId)/providers/Microsoft.Authorization/roleManagementPolicyAssignments?`$filter=roleDefinitionId eq '$($roleId)'&api-version=2020-10-01-preview" -Headers @{"Authorization" = "Bearer $($token)"}).value.properties.policyId
+                                $resource = @()
+                                $resource += Invoke-RestMethod -Method "GET" -Uri "$($script:apiBaseUrl)$($policyId)?api-version=2020-10-01-preview" -Headers @{"Authorization" = "Bearer $($token)"}
+                            }
+                            "resourceGroup" {
+                                $policyId = ((Invoke-RestMethod -Method "GET" -Uri "$($script:apiBaseUrl)$($subscriptionId)/ResourceGroups/$($definition.scopeReference)/providers/Microsoft.Authorization/roleManagementPolicyAssignments?`$filter=roleDefinitionId eq '$($roleId)'&api-version=2020-10-01-preview" -Headers @{"Authorization" = "Bearer $($token)"}).value | Where-Object {$_.properties.roleDefinitionId -eq $roleId}).properties.policyId
+                                $resource = @()
+                                $resource += Invoke-RestMethod -Method "GET" -Uri "$($script:apiBaseUrl)$($policyId)?api-version=2020-10-01-preview" -Headers @{"Authorization" = "Bearer $($token)"}
+                            }
+                            "resource" {
+                                $policyId = ((Invoke-RestMethod -Method "GET" -Uri "$($script:apiBaseUrl)$($subscriptionId)$($definition.scopeReference)/providers/Microsoft.Authorization/roleManagementPolicyAssignments?api-version=2020-10-01-preview" -Headers @{"Authorization" = "Bearer $($token)"}).value | Where-Object {$_.properties.roleDefinitionId -eq $roleId}).properties.policyId
+                                $resource = @()
+                                $resource += Invoke-RestMethod -Method "GET" -Uri "$($script:apiBaseUrl)$($policyId)?api-version=2020-10-01-preview" -Headers @{"Authorization" = "Bearer $($token)"}
+                            }
                         }
                     }
-
                     $result["GraphResource"] = $resource
                 }
 
@@ -121,11 +125,15 @@ function Test-TmfRoleManagementPolicy {
                         ResourceName = "Policy for $($definition.roleReference) role"
                         DesiredConfiguration = $definition
                     }
-                    $roleId = Resolve-DirectoryRoleDefinition -InputReference $definition.roleReference
-                    $policyId = (Invoke-MgGraphRequest -Method "GET" -Uri "$($script:graphBaseUrl)/policies/roleManagementPolicyAssignments?`$filter=scopeId eq '/' and scopeType eq 'Directory' and roleDefinitionId eq '$($roleId)'").value.policyId
-                    $resource = @()
-                    $resource += Invoke-MgGraphRequest -Method "GET" -Uri "$($script:graphBaseUrl)/policies/roleManagementPolicies/$($policyId)/rules"
-
+                    $roleId = Resolve-DirectoryRoleDefinition -InputReference $definition.roleReference -SearchInDesiredConfiguration
+                    if ($roleId -notmatch $script:guidRegex) {
+                        $resource = @()
+                    }
+                    else {
+                        $policyId = (Invoke-MgGraphRequest -Method "GET" -Uri "$($script:graphBaseUrl)/policies/roleManagementPolicyAssignments?`$filter=scopeId eq '/' and scopeType eq 'Directory' and roleDefinitionId eq '$($roleId)'").value.policyId
+                        $resource = @()
+                        $resource += Invoke-MgGraphRequest -Method "GET" -Uri "$($script:graphBaseUrl)/policies/roleManagementPolicies/$($policyId)/rules"
+                    }
                     $result["GraphResource"] = $resource
                 }
 
@@ -139,10 +147,14 @@ function Test-TmfRoleManagementPolicy {
                     }
 
                     $groupId = Resolve-Group -InputReference $definition.scopeReference -SearchInDesiredConfiguration
-                    $policyId = (Invoke-MgGraphRequest -Method "GET" -Uri "$($script:graphBaseUrl)/policies/roleManagementPolicyAssignments?`$filter=scopeId eq '$($groupId)' and scopeType eq 'Group' and roleDefinitionId eq '$($definition.roleReference)'").value.policyId
-                    $resource = @()
-                    $resource += Invoke-MgGraphRequest -Method "GET" -Uri "$($script:graphBaseUrl)/policies/roleManagementPolicies/$($policyId)/rules"
-
+                    if ($groupId -notmatch $script:guidRegex) {
+                        $resource = @()
+                    }
+                    else {
+                        $policyId = (Invoke-MgGraphRequest -Method "GET" -Uri "$($script:graphBaseUrl)/policies/roleManagementPolicyAssignments?`$filter=scopeId eq '$($groupId)' and scopeType eq 'Group' and roleDefinitionId eq '$($definition.roleReference)'").value.policyId
+                        $resource = @()
+                        $resource += Invoke-MgGraphRequest -Method "GET" -Uri "$($script:graphBaseUrl)/policies/roleManagementPolicies/$($policyId)/rules"
+                    }
                     $result["GraphResource"] = $resource
                 }
             }
@@ -418,7 +430,15 @@ function Test-TmfRoleManagementPolicy {
             Add-Member -InputObject $result.DesiredConfiguration -MemberType NoteProperty -Name rules -Value $rules -Force
 
             switch ($resource.count) {
-                0	{}
+                0	{
+                    $changes = @()
+                    $change = [PSCustomObject] @{
+                        Property = "rules"
+                        Actions = @{"Set" = "Invoke all rules after group/role creation"}
+                    }
+                    $changes += $change
+                    $result = New-TestResult @result -Changes $changes -ActionType "Update"
+                }
                 1	{
                     $changes = @()
 

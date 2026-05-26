@@ -2,8 +2,9 @@ function Validate-ConditionalAccessConditionSet
 {
 	[CmdletBinding()]
 	Param (
-		[object] $applications,		
-		[object] $users,		
+		[object] $applications,
+		[object] $clientApplications,
+		[object] $users,
 		[object] $locations,
 		[object] $devices,
 		[object] $platforms,

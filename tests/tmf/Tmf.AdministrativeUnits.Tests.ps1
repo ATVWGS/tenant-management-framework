@@ -59,7 +59,12 @@ Describe 'Tmf.AdministrativeUnit.Invoke.Creation' {
     It "should successfully invoke the TMF configuration" {
         { Invoke-TmfAdministrativeUnit -Confirm -Verbose } | Should -Not -Throw
     }
+}
 
+Describe 'Tmf.AdministrativeUnit.Validate.Creation' {
+    BeforeAll {
+        Start-Sleep 30 
+    }
     
     $testCases = $global:definitions["administrativeUnits"] | Foreach-Object {
         return @{
@@ -67,6 +72,7 @@ Describe 'Tmf.AdministrativeUnit.Invoke.Creation' {
             "uri" = $global:graphUri
         }
     }
+    
     It "should have created <displayName> (uri: <uri>)" -TestCases $testCases {
         Param ($displayName, $uri)
         $uri = "$uri/?`$filter=displayName eq '$displayName'"
@@ -97,6 +103,11 @@ Describe 'Tmf.General.Invoke.Deletion' {
     It "should successfully invoke the TMF configuration" {
         { Invoke-TmfAdministrativeUnit -Confirm -Verbose } | Should -Not -Throw
     }
+}
+Describe 'Tmf.General.Validate.Deletion' {
+    BeforeAll {
+        Start-Sleep 30 
+    }
 
     $testCases = $global:definitions["administrativeUnits"] | Foreach-Object {
         return @{
@@ -104,6 +115,7 @@ Describe 'Tmf.General.Invoke.Deletion' {
             "uri" = $global:graphUri
         }
     }
+    
     It "should have deleted <displayName> (uri: <uri>)" -TestCases $testCases {
         Param ($displayName, $uri)
         $uri = "$uri/?`$filter=displayName eq '$displayName'"

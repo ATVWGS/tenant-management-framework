@@ -91,7 +91,7 @@ function Test-TmfDirectoryRole {
             $result = @{
 				Tenant = $tenant.displayName
 				TenantId = $tenant.Id
-				ResourceType = 'directoryRole'
+				ResourceType = 'DirectoryRole'
 				ResourceName = (Resolve-String -Text $definition.displayName)
 				DesiredConfiguration = $definition
 			}

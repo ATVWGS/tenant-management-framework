@@ -1,5 +1,7 @@
 ﻿function Register-TmfNamedLocation
 {
+	[System.Diagnostics.CodeAnalysis.SuppressMessageAttribute("PSAvoidDefaultValueForMandatoryParameter", "")]
+
 	[CmdletBinding(DefaultParameterSetName = 'IPRanges')]
 	Param (
 		[Parameter(Mandatory = $true)]

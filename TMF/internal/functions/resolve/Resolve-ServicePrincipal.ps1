@@ -112,15 +112,17 @@
 				try {
 					$detail = Invoke-MgGraphRequest -Method GET -Uri ("$script:graphBaseUrl/servicePrincipals/{0}?`$select=id,displayName,appId" -f $InputReference)
 				} catch {
-					$detail = $null
+					try {
+						$detail = (Invoke-MgGraphRequest -Method GET -Uri ("$script:graphBaseUrl/servicePrincipals/?`$filter=appId eq '{0}'&`$select=id,displayName,appId" -f $InputReference)).value | Select-Object -First 1
+					}
+					catch {
+						$detail = $null
+					}					
 				}; if ($detail) {
 					$spId = $detail.id
 				}
 			} else {
 				$detail = (Invoke-MgGraphRequest -Method GET -Uri ("$script:graphBaseUrl/servicePrincipals/?`$filter=displayName eq '{0}'&`$select=id,displayName,appId" -f $InputReference)).value | Select-Object -First 1
-				if (-not $detail) {
-					$detail = (Invoke-MgGraphRequest -Method GET -Uri ("$script:graphBaseUrl/servicePrincipals/?`$filter=appId eq '{0}'&`$select=id,displayName,appId" -f $InputReference)).value | Select-Object -First 1
-				}
 				if ($detail) {
 					$spId = $detail.id
 				}

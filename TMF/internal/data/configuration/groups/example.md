@@ -33,7 +33,7 @@ Additional properties will be added in the future.
 ```
 
 
-### A privileged access group which is assignableToRole
+### A group which is assignableToRole
 ```json
 {   
     "displayName": "Some group",
@@ -41,7 +41,6 @@ Additional properties will be added in the future.
     "groupTypes": [],        
     "securityEnabled": true,
     "mailEnabled": false,
-    "privilegedAccess": true,
     "isAssignableToRole": true,
     "mailNickname": "someGroupForMembers",
     "present": true

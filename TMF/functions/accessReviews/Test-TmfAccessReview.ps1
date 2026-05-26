@@ -136,11 +136,16 @@ function Test-TmfAccessReview
 							
 							switch ($property) {
 								"settings" {
-									foreach ($item in ($definition.$property.GetEnumerator().Name | Where-Object {$_ -notin "applyActions","recurrence"})) {
+									foreach ($item in ($definition.$property.GetEnumerator().Name | Where-Object {$_ -notin "applyActions","recurrence","recommendationInsightSettings"})) {
 										if (($definition.$property.$item -ne $resource.$property.$item) -and $definition.$property.$item.gettype()) {
 											$change.Actions = @{"Set" = $definition.$property.$item}
 										}
 									}
+									if ($definition.$property.recommendationInsightSettings.recommendationLookBackDuration -and $resource.$property.recommendationInsightSettings.recommendationLookBackDuration) {
+										if ($definition.$property.recommendationInsightSettings.recommendationLookBackDuration -ne $resource.$property.recommendationInsightSettings.recommendationLookBackDuration) {
+											Write-PSFMessage -Level Warning -String 'TMF.Test.UpdateNotPossibleForParameter' -StringValues "recommendationLookBackDuration",$resourceName
+										}
+									}									
 									if ($definition.$property.recurrence.pattern -and $resource.$property.recurrence.pattern) {
 										foreach ($item in $definition.$property.recurrence.pattern.GetEnumerator().Name) {
 											if ($definition.$property.recurrence.pattern.$item -ne $resource.$property.recurrence.pattern.$item){

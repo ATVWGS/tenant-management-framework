@@ -95,40 +95,46 @@ function Test-TmfRoleAssignment
                     try {
         
                         $subscriptionId = Resolve-Subscription -InputReference $definition.subscriptionReference
-                        $roleDefinitionId = Resolve-AzureRoleDefinition -InputReference $definition.roleReference -SubscriptionId $subscriptionId.trimStart("/")
-                        switch ($definition.principalType) {
-                            "group" {$principalId=Resolve-Group -InputReference $definition.principalReference -SearchInDesiredConfiguration}
-                            "user"  {$principalId=Resolve-User -InputReference $definition.principalReference}
-                            "servicePrincipal"  {$principalId=Resolve-ServicePrincipal -InputReference $definition.principalReference}
+                        $roleDefinitionId = Resolve-AzureRoleDefinition -InputReference $definition.roleReference -SubscriptionId $subscriptionId.trimStart("/") -SearchInDesiredConfiguration
+                        if ($roleDefinitionId.split("/")[-1] -notmatch $script:guidRegex) {
+                            $resource = @()
                         }
-        
-                        switch ($definition.scopeType) {
-                            "subscription" {$scopeId = $subscriptionId}
-                            "resourceGroup" {$scopeId = Resolve-ResourceGroup -InputReference $definition.scopeReference -SubscriptionId $subscriptionId}
-                            "resource" {$scopeId = $subscriptionId + $definition.scopeReference}
-                        }
-        
-                        switch ($definition.type) {
-                            "eligible" {
-                                try {
-                                    $resource = @()
-                                    $resource += (Invoke-RestMethod -Method GET -Uri ("$($script:apiBaseUrl)providers/Microsoft.Subscription$($scopeId)/providers/Microsoft.Authorization/roleEligibilitySchedules?`$filter=principalId eq '{0}'&api-version=2020-10-01-preview" -f $principalId) -Headers @{"Authorization"="Bearer $($token)"}).value | Where-Object {$_.properties.roleDefinitionId -eq $roleDefinitionId -and $_.properties.scope -eq $scopeId}
+                        else {
+                            switch ($definition.principalType) {
+                                "group" {$principalId=Resolve-Group -InputReference $definition.principalReference -SearchInDesiredConfiguration}
+                                "user"  {$principalId=Resolve-User -InputReference $definition.principalReference}
+                                "servicePrincipal"  {$principalId=Resolve-ServicePrincipal -InputReference $definition.principalReference}
+                            }
+            
+                            switch ($definition.scopeType) {
+                                "subscription" {$scopeId = $subscriptionId}
+                                "resourceGroup" {$scopeId = Resolve-ResourceGroup -InputReference $definition.scopeReference -SubscriptionId $subscriptionId}
+                                "resource" {$scopeId = $subscriptionId + $definition.scopeReference}
+                            }
+            
+                            switch ($definition.type) {
+                                "eligible" {
+                                    try {
+                                        $resource = @()
+                                        $resource += (Invoke-RestMethod -Method GET -Uri ("$($script:apiBaseUrl)providers/Microsoft.Subscription$($scopeId)/providers/Microsoft.Authorization/roleEligibilitySchedules?`$filter=principalId eq '{0}'&api-version=2020-10-01-preview" -f $principalId) -Headers @{"Authorization"="Bearer $($token)"}).value | Where-Object {$_.properties.roleDefinitionId -eq $roleDefinitionId -and $_.properties.scope -eq $scopeId}
+                                    }
+                                    catch {
+                                        $resource = @()
+                                    }
                                 }
-                                catch {
-                                    $resource = @()
+                                
+                                "active" {
+                                    try {
+                                        $resource = @()
+                                        $resource += (Invoke-RestMethod -Method GET -Uri ("$($script:apiBaseUrl)$($scopeId.TrimStart("/"))/providers/Microsoft.Authorization/roleAssignments?`$filter=principalId eq '{0}'&api-version=2020-10-01-preview" -f $principalId) -Headers @{"Authorization"="Bearer $($token)"}).value | Where-Object {$_.properties.roleDefinitionId -eq $roleDefinitionId -and $_.properties.scope -eq $scopeId}
+                                    }
+                                    catch {
+                                        $resource = @()
+                                    }
                                 }
                             }
-                            
-                            "active" {
-                                try {
-                                    $resource = @()
-                                    $resource += (Invoke-RestMethod -Method GET -Uri ("$($script:apiBaseUrl)$($scopeId.TrimStart("/"))/providers/Microsoft.Authorization/roleAssignments?`$filter=principalId eq '{0}'&api-version=2020-10-01-preview" -f $principalId) -Headers @{"Authorization"="Bearer $($token)"}).value | Where-Object {$_.properties.roleDefinitionId -eq $roleDefinitionId -and $_.properties.scope -eq $scopeId}
-                                }
-                                catch {
-                                    $resource = @()
-                                }
-                            }
                         }
+                        
                     }
                     catch {
                         Write-PSFMessage -Level Warning -String 'Tmf.Error.QueryWithFilterFailed' -StringValues $filter -Tag 'failed'
@@ -222,62 +228,67 @@ function Test-TmfRoleAssignment
                     
                     try {
         
-                        $roleDefinitionId = Resolve-DirectoryRoleDefinition -InputReference $definition.roleReference
-                        switch ($definition.principalType) {
+                        $roleDefinitionId = Resolve-DirectoryRoleDefinition -InputReference $definition.roleReference -SearchInDesiredConfiguration
+                        if ($roleDefinitionId -notmatch $script:guidRegex) {
+                            $resource = @()
+                        }
+                        else {
+                            switch ($definition.principalType) {
                             "group" {$principalId=Resolve-Group -InputReference $definition.principalReference -SearchInDesiredConfiguration}
                             "user"  {$principalId=Resolve-User -InputReference $definition.principalReference}
                             "servicePrincipal"  {$principalId=Resolve-ServicePrincipal -InputReference $definition.principalReference}
-                        }
-                        switch ($definition.directoryScopeType) {
-                            "directory" {$directoryScopeId="/"}
-                            "administrativeUnit" {$directoryScopeId="/administrativeUnits/"+$(Resolve-AdministrativeUnit -InputReference $definition.directoryScopeReference -SearchInDesiredConfiguration)}
-                            "application" {$directoryScopeId="/"+$((Resolve-Application -InputReference $definition.directoryScopeReference -SearchInDesiredConfiguration -Expand).servicePrincipalId)}
-                        }
-
-                        switch ($definition.type) {
-                            "eligible" {
-                                try {
-                                    $resource = @()
-                                    $resource += (Invoke-MgGraphRequest -Method GET -Uri ("$($script:graphBaseUrl)/roleManagement/directory/roleEligibilitySchedules?`$filter=principalId eq '{0}' and roleDefinitionId eq '{1}' and directoryScopeId eq '{2}'" -f $principalId,$roleDefinitionId,$directoryScopeId)).value
-
-                                    #Check if an assignment for a custom role exists, based on the name (Graph bug)
-                                    if (-not $resource) {
-                                        $principalAssignments = @()
-                                        $principalAssignments += (Invoke-MgGraphRequest -Method GET -Uri ("$($script:graphBaseUrl)/roleManagement/directory/roleEligibilitySchedules?`$filter=principalId eq '{0}' and directoryScopeId eq '{1}'" -f $principalId,$directoryScopeId)).value
-                                        if ($principalAssignments) {
-                                            foreach ($assignment in $principalAssignments) {
-                                                if ((Invoke-MgGraphRequest -Method GET -Uri ("$($script:graphBaseUrl)/roleManagement/directory/roleDefinitions/{0}" -f $assignment.roleDefinitionId)).displayName -eq $definition.roleReference) {
-                                                    $resource += $assignment
-                                                }
-                                            }
-                                        }
-                                    }                                    
-                                }
-                                catch {
-                                    $resource = @()
-                                }
                             }
-                            
-                            "active" {
-                                try {
-                                    $resource = @()
-                                    $resource += (Invoke-MgGraphRequest -Method GET -Uri ("$($script:graphBaseUrl)/roleManagement/directory/roleAssignmentSchedules?`$filter=principalId eq '{0}' and roleDefinitionId eq '{1}' and directoryScopeId eq '{2}'" -f $principalId,$roleDefinitionId,$directoryScopeId)).value
+                            switch ($definition.directoryScopeType) {
+                                "directory" {$directoryScopeId="/"}
+                                "administrativeUnit" {$directoryScopeId="/administrativeUnits/"+$(Resolve-AdministrativeUnit -InputReference $definition.directoryScopeReference -SearchInDesiredConfiguration)}
+                                "application" {$directoryScopeId="/"+$((Resolve-Application -InputReference $definition.directoryScopeReference -SearchInDesiredConfiguration -Expand).servicePrincipalId)}
+                            }
 
-                                    #Check if an assignment for a custom role exists, based on the name (Graph bug)
-                                    if (-not $resource) {
-                                        $principalAssignments = @()
-                                        $principalAssignments += (Invoke-MgGraphRequest -Method GET -Uri ("$($script:graphBaseUrl)/roleManagement/directory/roleAssignmentSchedules?`$filter=principalId eq '{0}' and directoryScopeId eq '{1}'" -f $principalId,$directoryScopeId)).value
-                                        if ($principalAssignments) {
-                                            foreach ($assignment in $principalAssignments) {
-                                                if ((Invoke-MgGraphRequest -Method GET -Uri ("$($script:graphBaseUrl)/roleManagement/directory/roleDefinitions/{0}" -f $assignment.roleDefinitionId)).displayName -eq $definition.roleReference) {
-                                                    $resource += $assignment
+                            switch ($definition.type) {
+                                "eligible" {
+                                    try {
+                                        $resource = @()
+                                        $resource += (Invoke-MgGraphRequest -Method GET -Uri ("$($script:graphBaseUrl)/roleManagement/directory/roleEligibilitySchedules?`$filter=principalId eq '{0}' and roleDefinitionId eq '{1}' and directoryScopeId eq '{2}'" -f $principalId,$roleDefinitionId,$directoryScopeId)).value
+
+                                        #Check if an assignment for a custom role exists, based on the name (Graph bug)
+                                        if (-not $resource) {
+                                            $principalAssignments = @()
+                                            $principalAssignments += (Invoke-MgGraphRequest -Method GET -Uri ("$($script:graphBaseUrl)/roleManagement/directory/roleEligibilitySchedules?`$filter=principalId eq '{0}' and directoryScopeId eq '{1}'" -f $principalId,$directoryScopeId)).value
+                                            if ($principalAssignments) {
+                                                foreach ($assignment in $principalAssignments) {
+                                                    if ((Invoke-MgGraphRequest -Method GET -Uri ("$($script:graphBaseUrl)/roleManagement/directory/roleDefinitions/{0}" -f $assignment.roleDefinitionId)).displayName -eq $definition.roleReference) {
+                                                        $resource += $assignment
+                                                    }
                                                 }
                                             }
-                                        }
-                                    }   
+                                        }                                    
+                                    }
+                                    catch {
+                                        $resource = @()
+                                    }
                                 }
-                                catch {
-                                    $resource = @()
+                                
+                                "active" {
+                                    try {
+                                        $resource = @()
+                                        $resource += (Invoke-MgGraphRequest -Method GET -Uri ("$($script:graphBaseUrl)/roleManagement/directory/roleAssignmentSchedules?`$filter=principalId eq '{0}' and roleDefinitionId eq '{1}' and directoryScopeId eq '{2}'" -f $principalId,$roleDefinitionId,$directoryScopeId)).value
+
+                                        #Check if an assignment for a custom role exists, based on the name (Graph bug)
+                                        if (-not $resource) {
+                                            $principalAssignments = @()
+                                            $principalAssignments += (Invoke-MgGraphRequest -Method GET -Uri ("$($script:graphBaseUrl)/roleManagement/directory/roleAssignmentSchedules?`$filter=principalId eq '{0}' and directoryScopeId eq '{1}'" -f $principalId,$directoryScopeId)).value
+                                            if ($principalAssignments) {
+                                                foreach ($assignment in $principalAssignments) {
+                                                    if ((Invoke-MgGraphRequest -Method GET -Uri ("$($script:graphBaseUrl)/roleManagement/directory/roleDefinitions/{0}" -f $assignment.roleDefinitionId)).displayName -eq $definition.roleReference) {
+                                                        $resource += $assignment
+                                                    }
+                                                }
+                                            }
+                                        }   
+                                    }
+                                    catch {
+                                        $resource = @()
+                                    }
                                 }
                             }
                         }
@@ -366,32 +377,37 @@ function Test-TmfRoleAssignment
                     }
                     
                     try {
-                        $groupId = Resolve-Group -InputReference $definition.groupReference
-                        $accessId = $definition.roleReference
-                        switch ($definition.principalType) {
-                            "group" {$principalId=Resolve-Group -InputReference $definition.principalReference -SearchInDesiredConfiguration}
-                            "user"  {$principalId=Resolve-User -InputReference $definition.principalReference}
-                            "servicePrincipal"  {$principalId=Resolve-ServicePrincipal -InputReference $definition.principalReference}
+                        $groupId = Resolve-Group -InputReference $definition.groupReference -SearchInDesiredConfiguration
+                        if ($groupId -notmatch $script:guidRegex) {
+                            $resource = @()
                         }
-
-                        switch ($definition.type) {
-                            "eligible" {
-                                try {
-                                    $resource = @()
-                                    $resource += (Invoke-MgGraphRequest -Method GET -Uri ("$($script:graphBaseUrl)/identityGovernance/privilegedAccess/group/eligibilitySchedules?`$filter=principalId eq '{0}' and accessId eq '{1}' and groupId eq '{2}'" -f $principalId,$accessId,$groupId)).value
-                                }
-                                catch {
-                                    $resource = @()
-                                }
+                        else {
+                            $accessId = $definition.roleReference
+                            switch ($definition.principalType) {
+                                "group" {$principalId=Resolve-Group -InputReference $definition.principalReference -SearchInDesiredConfiguration}
+                                "user"  {$principalId=Resolve-User -InputReference $definition.principalReference}
+                                "servicePrincipal"  {$principalId=Resolve-ServicePrincipal -InputReference $definition.principalReference}
                             }
-                            
-                            "active" {
-                                try {
-                                    $resource = @()
-                                    $resource += (Invoke-MgGraphRequest -Method GET -Uri ("$($script:graphBaseUrl)/identityGovernance/privilegedAccess/group/assignmentSchedules?`$filter=principalId eq '{0}' and accessId eq '{1}' and groupId eq '{2}'" -f $principalId,$accessId,$groupId)).value
+
+                            switch ($definition.type) {
+                                "eligible" {
+                                    try {
+                                        $resource = @()
+                                        $resource += (Invoke-MgGraphRequest -Method GET -Uri ("$($script:graphBaseUrl)/identityGovernance/privilegedAccess/group/eligibilitySchedules?`$filter=principalId eq '{0}' and accessId eq '{1}' and groupId eq '{2}'" -f $principalId,$accessId,$groupId)).value
+                                    }
+                                    catch {
+                                        $resource = @()
+                                    }
                                 }
-                                catch {
-                                    $resource = @()
+                                
+                                "active" {
+                                    try {
+                                        $resource = @()
+                                        $resource += (Invoke-MgGraphRequest -Method GET -Uri ("$($script:graphBaseUrl)/identityGovernance/privilegedAccess/group/assignmentSchedules?`$filter=principalId eq '{0}' and accessId eq '{1}' and groupId eq '{2}'" -f $principalId,$accessId,$groupId)).value
+                                    }
+                                    catch {
+                                        $resource = @()
+                                    }
                                 }
                             }
                         }

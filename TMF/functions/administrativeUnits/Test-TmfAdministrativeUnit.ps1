@@ -82,7 +82,7 @@ function Test-TmfAdministrativeUnit
 			$result = @{
 				Tenant = $tenant.displayName
 				TenantId = $tenant.Id
-				ResourceType = 'administrativeUnits'
+				ResourceType = 'AdministrativeUnit'
 				ResourceName = (Resolve-String -Text $definition.displayName)
 				DesiredConfiguration = $definition
 			}

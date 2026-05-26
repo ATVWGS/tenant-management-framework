@@ -94,7 +94,7 @@ Describe 'Tmf.RoleManagement.RoleAssignments.Register' {
 Describe 'Tmf.RoleManagement.Invoke.Creation' {
 
     BeforeAll {
-        Start-Sleep 10
+        Start-Sleep 30 
     }
 
     It "should successfully test the TMF configuration" {
@@ -109,7 +109,7 @@ Describe 'Tmf.RoleManagement.Invoke.Creation' {
 Describe 'Tmf.RoleManagement.Validate.Creation' {
      BeforeAll {
         #Let's wait until resources can be queried after creation
-        Start-Sleep 10
+        Start-Sleep 30 
      }
     
      $testCases = $global:definitions["roleDefinitions"] | Foreach-Object {
@@ -172,7 +172,7 @@ Describe 'Tmf.RoleManagement.Invoke.Deletion' {
 
 Describe 'Tmf.RoleManagement.Validate.Deletion' {
     BeforeAll {
-        Start-Sleep 5
+        Start-Sleep 30 
     }
     $testCases = $global:definitions["roleDefinitions"] | Foreach-Object {
         return @{
@@ -209,6 +209,12 @@ Describe 'Tmf.RoleManagement.Groups.Invoke.Deletion' {
 
     It "should successfully invoke the TMF configuration" {
         { Invoke-TmfGroup -Confirm -Verbose } | Should -Not -Throw
+    }
+}
+
+Describe 'Tmf.RoleManagement.Groups.Validate.Deletion' {
+    BeforeAll {
+        Start-Sleep 30 
     }
 
     $testCases = $global:definitions["groups"] | Foreach-Object {

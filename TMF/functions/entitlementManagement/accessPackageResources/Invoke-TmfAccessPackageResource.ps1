@@ -128,6 +128,6 @@ function Invoke-TmfAccessPackageResource {
 		}
 	}
 	end {
-		Import-TmfConfiguration -Cmdlet $Cmdlet
+		Load-TmfConfiguration -Cmdlet $Cmdlet
 	}
 }

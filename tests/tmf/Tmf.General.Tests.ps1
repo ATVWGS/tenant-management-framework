@@ -59,16 +59,18 @@ Describe 'Tmf.General.Config.Processing' {
 }
 
 Describe 'Tmf.General.Invoke.Creation' {
-    BeforeEach {
-        Start-Sleep -Seconds 10 # Ensure Graph has enough time to process our requests
-    }
-
     It "should successfully test the TMF configuration" {
         { Test-TmfTenant } | Should -Not -Throw
     }
 
     It "should successfully invoke the TMF configuration" {
         { Invoke-TmfTenant -Confirm } | Should -Not -Throw
+    }
+}
+
+Describe 'Tmf.General.Validate.Creation' {
+    BeforeEach {
+        Start-Sleep 30  # Ensure Graph has enough time to process our requests
     }
 
     foreach ($type in $global:definitions.GetEnumerator()) {
@@ -95,8 +97,6 @@ Describe 'Tmf.General.Invoke.Deletion' {
             $_.Value | ConvertTo-Json -Depth 10 | Out-File -FilePath $targetFilePath -Encoding utf8 -Force
         }
         #endregion
-
-        Start-Sleep -Seconds 10 # Give Microsoft Graph some time to process our requests
     }
 
     It "should successfully reload the TMF configuration" {
@@ -109,6 +109,12 @@ Describe 'Tmf.General.Invoke.Deletion' {
 
     It "should successfully invoke the TMF configuration" {
         { Invoke-TmfTenant -Confirm } | Should -Not -Throw
+    }
+}
+
+Describe 'Tmf.General.Validate.Deletion' {
+    BeforeAll {
+        Start-Sleep 30  # Give Microsoft Graph some time to process our requests
     }
 
     foreach ($type in $global:definitions.GetEnumerator()) {

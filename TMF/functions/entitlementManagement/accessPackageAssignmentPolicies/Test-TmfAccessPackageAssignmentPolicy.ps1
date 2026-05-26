@@ -9,7 +9,7 @@ function Test-TmfAccessPackageAssignmentPolicy
 	#>
 	[CmdletBinding()]
 	Param (
-		[string[]] $SpecificResources,
+		[object[]] $SpecificResources,
 		[string[]] $SourceFile,
 		[string[]] $SourceConfig,
 		[switch] $RawOutput,
@@ -37,31 +37,16 @@ function Test-TmfAccessPackageAssignmentPolicy
 		if ($SpecificResources) {
 			foreach ($specificResource in $SpecificResources) {
 
-				if ($specificResource -match "\*") {
-					if ($script:desiredConfiguration[$resourceName] | Where-Object {$_.displayName -like $specificResource}) {
-						$definitions += $script:desiredConfiguration[$resourceName] | Where-Object {$_.displayName -like $specificResource}
-					}
-					else {
-						Write-PSFMessage -Level Warning -String 'TMF.Error.SpecificResourceNotExists' -StringValues $filter -Tag 'failed'
-						$exception = New-Object System.Data.DataException("$($specificResource) not exists in Desired Configuration for $($resourceName)!")
-						$errorID = "SpecificResourceNotExists"
-						$category = [System.Management.Automation.ErrorCategory]::NotSpecified
-						$recordObject = New-Object System.Management.Automation.ErrorRecord($exception, $errorID, $category, $Cmdlet)
-						$cmdlet.ThrowTerminatingError($recordObject)
-					}
+				if ($script:desiredConfiguration[$resourceName] | Where-Object {$_.displayName -eq $specificResource.displayName -and $_.accessPackage -eq $specificResource.accessPackage}) {
+					$definitions += $script:desiredConfiguration[$resourceName] | Where-Object {$_.displayName -eq $specificResource.displayName -and $_.accessPackage -eq $specificResource.accessPackage}
 				}
 				else {
-					if ($script:desiredConfiguration[$resourceName] | Where-Object {$_.displayName -eq $specificResource}) {
-						$definitions += $script:desiredConfiguration[$resourceName] | Where-Object {$_.displayName -eq $specificResource}
-					}
-					else {
-						Write-PSFMessage -Level Warning -String 'TMF.Error.SpecificResourceNotExists' -StringValues $filter -Tag 'failed'
-						$exception = New-Object System.Data.DataException("$($specificResource) not exists in Desired Configuration for $($resourceName)!")
-						$errorID = "SpecificResourceNotExists"
-						$category = [System.Management.Automation.ErrorCategory]::NotSpecified
-						$recordObject = New-Object System.Management.Automation.ErrorRecord($exception, $errorID, $category, $Cmdlet)
-						$cmdlet.ThrowTerminatingError($recordObject)
-					}
+					Write-PSFMessage -Level Warning -String 'TMF.Error.SpecificResourceNotExists' -StringValues $filter -Tag 'failed'
+					$exception = New-Object System.Data.DataException("$($specificResource) not exists in Desired Configuration for $($resourceName)!")
+					$errorID = "SpecificResourceNotExists"
+					$category = [System.Management.Automation.ErrorCategory]::NotSpecified
+					$recordObject = New-Object System.Management.Automation.ErrorRecord($exception, $errorID, $category, $Cmdlet)
+					$cmdlet.ThrowTerminatingError($recordObject)
 				}
 			}
 			$definitions = $definitions | Sort-Object -Property displayName -Unique
@@ -96,7 +81,7 @@ function Test-TmfAccessPackageAssignmentPolicy
 			}
 
 			$accessPackageId = $definition.accessPackageId()
-			if (-Not $accessPackageId) {
+			if ((-Not $accessPackageId) -or ($accessPackageId -notmatch $script:guidRegex)) {
 				Write-PSFMessage -Level Host -String 'TMF.RelatedResourceDoesNotExist' -StringValues "Access Package", $accessPackage, $result.ResourceType, $result.ResourceName
 				New-TestResult @result -ActionType "Create"				
 				continue

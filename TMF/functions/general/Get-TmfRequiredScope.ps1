@@ -95,6 +95,9 @@
 		if ($AuthenticationContextClassReferences -or $All) {
 			$scopes += "AuthenticationContext.ReadWrite.All"
 		}
+		if ($CustomAuthenticationExtensions -or $All) {
+			$scopes += "CustomAuthenticationExtension.ReadWrite.All"
+		}
 		if ($ConditionalAccessPolicies -or $All) {
 			$scopes += "Policy.ReadWrite.ConditionalAccess", "Policy.Read.All", "RoleManagement.Read.Directory", "Application.Read.All", "Agreement.Read.All", "Group.Read.All"
 		}
@@ -123,7 +126,7 @@
 			$scopes += "OrganizationalBranding.ReadWrite.All"
 		}
 		if ($Policies -or $All) {
-			$scopes += "Policy.ReadWrite.AuthenticationMethod", "Policy.ReadWrite.Authorization", "Policy.ReadWrite.AuthenticationFlows"
+			$scopes += "Policy.ReadWrite.AuthenticationMethod", "Policy.ReadWrite.Authorization", "Policy.ReadWrite.AuthenticationFlows", "Policy.ReadWrite.DeviceConfiguration"
 		}
 		if($RoleManagement -or $All) {
 			$scopes += "RoleManagement.ReadWrite.Directory", "Directory.AccessAsUser.All", "RoleEligibilitySchedule.ReadWrite.Directory", "RoleAssignmentSchedule.ReadWrite.Directory", "RoleManagementPolicy.ReadWrite.Directory","RoleManagementPolicy.ReadWrite.AzureADGroup"
