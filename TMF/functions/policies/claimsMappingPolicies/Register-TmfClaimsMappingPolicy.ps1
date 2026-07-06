@@ -1,6 +1,7 @@
 function Register-TmfClaimsMappingPolicy {
     [CmdletBinding()]
 	Param (
+        [Parameter(Mandatory = $true)]
 		[string] $displayName,
         [Parameter(Mandatory = $true)]
         [string[]] $definition,
@@ -46,10 +47,7 @@ function Register-TmfClaimsMappingPolicy {
             }
             Add-Member -InputObject $object -MemberType NoteProperty -Name appliesTo -Value $appliesToIds
         }
-        else {
-            Add-Member -InputObject $object -MemberType NoteProperty -Name appliesTo -Value @()
-        }
-
+        
         Add-Member -InputObject $object -MemberType ScriptMethod -Name Properties -Value { ($this | Get-Member -MemberType NoteProperty).Name }
 
 		if ($alreadyLoaded) {

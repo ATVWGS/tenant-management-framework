@@ -9,7 +9,7 @@ trigger:
 
 variables:
   major: 2
-  minor: 1
+  minor: 2
   patch: $(Build.BuildID)
   moduleName: 'TMF'
   buildVer: $(major).$(minor).$(Build.BuildID)
